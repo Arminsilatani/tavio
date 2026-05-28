@@ -10,7 +10,7 @@ document.addEventListener('DOMContentLoaded', () => {
   console.log('Tavio: DOM loaded');
 
   const STORAGE_KEY = 'tavio_prompts';
-  const CURRENT_VERSION = 80;
+  const CURRENT_VERSION = 1;
   const MASTER_PASSWORD = '1320';
 
   // ======================== لیست کامل مدل‌های هوش مصنوعی ========================
@@ -145,20 +145,18 @@ document.addEventListener('DOMContentLoaded', () => {
     },
 
     {
-  id: '1',
-  name: 'Persian Human Content Editor',
+  id: '2',
+  name: 'Persian AI Humanizer',
   categories: ['Content'],
+  description: 'The second step in a six-stage content pipeline. Takes a raw Persian article and edits it to read like it was written by a real person. Removes AI patterns, rewrites the intro summary, varies sentence structure, bolds important phrases, and never alters any statistic that comes with a cited German source.',
   ais: [
-  'gpt-5.5',
-  'gpt-5.4-pro',
-  'o3-pro',
   'claude-4.7-opus',
-  'gemini-3.1-pro',
+  'gpt-5.4-pro',
   'gpt-5.4',
-  'qwen-3-max',
   'claude-4.6-sonnet',
+  'gemini-3.1-pro',
+  'grok-4',
   'deepseek-v4-pro',
-  'grok-4'
 ],
   pinned: false,
   locked: false,
@@ -182,20 +180,18 @@ document.addEventListener('DOMContentLoaded', () => {
 },
 
 {
-  id: '2',
-  name: 'Persian Onpage SEO Optimizer',
+  id: '3',
+  name: 'Persian On-Page SEO',
   categories: ['SEO'],
+  description: 'The third step in a six-stage content pipeline. Takes a human-edited Persian article and applies on-page SEO rules: keyword density and placement, H1/H2 structure, natural LSI usage, internal link embedding and FAQ optimisation for Featured Snippets. Outputs only the final optimised text.',
   ais: [
-  'gpt-5.5',
   'gpt-5.4-pro',
-  'o3-pro',
+  'gpt-5.4',
   'claude-4.7-opus',
   'gemini-3.1-pro',
-  'gpt-5.4',
-  'qwen-3-max',
   'claude-4.6-sonnet',
+  'grok-4',
   'deepseek-v4-pro',
-  'grok-4'
 ],
   pinned: false,
   locked: false,
@@ -221,20 +217,18 @@ document.addEventListener('DOMContentLoaded', () => {
 },
 
 {
-  id: '3',
-  name: 'Article Localization Translator',
-  categories: ['Translation'],
+  id: '4',
+  name: 'Persian Article Translator',
+  categories: ['Content'],
+  description: 'The fourth step in a six-stage content pipeline. Translates a finalised Persian article into any target language with full cultural localisation — not word-for-word, but the way a native speaker would actually write it. Heading structure, German source references, and all statistics are preserved exactly as they appear in the original.',
   ais: [
-  'gpt-5.5',
   'gpt-5.4-pro',
-  'o3-pro',
-  'claude-4.7-opus',
-  'gemini-3.1-pro',
   'gpt-5.4',
-  'qwen-3-max',
+  'gemini-3.1-pro',
+  'claude-4.7-opus',
   'claude-4.6-sonnet',
   'deepseek-v4-pro',
-  'grok-4'
+  'grok-4',
 ],
   pinned: false,
   locked: false,
@@ -257,10 +251,18 @@ document.addEventListener('DOMContentLoaded', () => {
 },
 
 {
-  id: '4',
-  name: 'Native Article Humanizer',
+  id: '5',
+  name: 'Translated Content Humanizer',
   categories: ['Content'],
-  ais: ['claude'],
+  description: 'The fifth step in a six-stage content pipeline. Takes a localised translation and strips every trace of AI-generated patterns — rewriting stiff phrasing, fixing unnatural rhythm, and replacing generic openers with the kind of language a native professional would actually use. German source references remain completely untouched.',
+  ais: [
+    'claude-4.7-opus',
+    'gpt-5.4-pro',
+    'claude-4.6-sonnet',
+    'gemini-3.1-pro',
+    'gpt-5.4',
+    'grok-4',
+  ],
   pinned: false,
   locked: false,
   template: `تو یک Senior Human Editor و متخصص تشخیص محتوای AI برای زبان مقصد هستی.
@@ -284,10 +286,18 @@ document.addEventListener('DOMContentLoaded', () => {
 },
 
 {
-  id: '5',
-  name: 'Multilingual Onpage SEO Optimizer',
+  id: '6',
+  name: 'Multilingual On-Page SEO',
   categories: ['SEO'],
-  ais: ['deepseek'],
+  description: 'The sixth and final stage of a six-step content pipeline. Takes a humanised, translated article and performs full on-page SEO for the target language market — including keyword research from scratch, since the user isn’t fluent in that language. Optimises H1, heading structure, keyword density, FAQ answers, and suggests internal links without keyword stuffing. German data sources are preserved as untouchable anchors.',
+  ais: [
+    'gpt-5.4-pro',
+    'gpt-5.4',
+    'gemini-3.1-pro',
+    'claude-4.7-opus',
+    'claude-4.6-sonnet',
+    'grok-4',
+  ],
   pinned: false,
   locked: false,
   template: `تو یک متخصص سئوی داخلی (On-Page SEO) و استراتژیست محتوا برای بازار زبان مقصد هستی.
@@ -333,10 +343,22 @@ document.addEventListener('DOMContentLoaded', () => {
 },
 
 {
-  id: '6',
-  name: 'Multilingual Image Alt Text Generator',
-  categories: ['Image'],
-  ais: ['gpt-4o'],
+  id: '7',
+  name: 'Alt Text Generator',
+  categories: [
+    'Image',
+    'SEO',
+  ],
+  description: 'Analyses an uploaded image and generates three optimised alt text suggestions per language across six languages — Persian, Arabic, English, German, Turkish, and Italian. Each suggestion follows SEO best practices, avoids keyword stuffing, and reads naturally for native speakers of that language.',
+  ais: [
+    'claude-4.7-opus',
+    'gpt-5.4-pro',
+    'pt-5.4',
+    'gemini-3.1-pro',
+    'grok-4',
+    'claude-4.6-sonnet',
+    'deepseek-vision',
+  ],
   pinned: true,
   locked: false,
   template: `تو یک متخصص سئو و بازاریابی محتوا هستی که در نوشتن متن جایگزین (Alt Text) برای تصاویر وب‌سایت‌ها به چندین زبان تسلط داری.
@@ -368,10 +390,22 @@ document.addEventListener('DOMContentLoaded', () => {
 },
 
 {
-  id: '7',
-  name: 'HTML Head SEO Auditor',
-  categories: ['Code'],
-  ais: ['Claude 4.6 Sonnet'],
+  id: '8',
+  name: 'Head Code Fixer',
+  categories: [
+    'SEO',
+    'Code',
+  ],
+  description: 'Takes your current DOCTYPE and <head> code and returns a corrected version with zero guesswork. Text inside titles, descriptions, and Schema strings stays untouched; only syntax errors, missing technical tags, broken paths, and markup gaps are fixed. Length and language issues are flagged inline with single-word comments.',
+  ais: [
+    'gpt-5.4-pro',
+    'claude-4.7-opus',
+    'claude-4.6-sonnet',
+    'gpt-5.4',
+    'gemini-3.1-pro',
+    'grok-4',
+    'deepseek-v4-pro',
+  ],
   pinned: true,
   locked: false,
   template: `تو یک متخصص حرفه‌ای در HTML، سئو تکنیکال و داده‌های ساخت‌یافته (Schema) هستی.
@@ -462,10 +496,19 @@ ________________________________________
 },
 
 {
-  id: '8',
-  name: 'Science-Based Workout Planner',
+  id: '9',
+  name: 'Personal Training Planner',
   categories: ['Health & Fitness'],
-  ais: ['gpt-4o'],
+  description: 'Designs a periodised training block tailored to your recovery capacity, age, and experience. Rather than generic templates, it calculates optimal weekly sets per muscle group, assigns rest intervals based on the dominant energy system, and flags exercise substitutions for common injury sites. Every recommendation traces back to a named study.',
+  ais: [
+    'gpt-5.4-pro',
+    'gemini-3.1-pro',
+    'claude-4.7-opus',
+    'gpt-5.4',
+    'claude-4.6-sonnet',
+    'grok-4',
+    'deepseek-v4-pro',
+  ],
   pinned: false,
   locked: false,
   template: `**دستورالعمل به هوش مصنوعی:**  
@@ -586,10 +629,18 @@ ________________________________________
 },
 
 {
-  id: '9',
-  name: 'Cinematic Hero Image Prompt',
+  id: '10',
+  name: 'Armin Hero Image',
   categories: ['Image'],
-  ais: ['Nano Banana 2'],
+  description: 'Produces a consistent branded hero image where a real man and his small fluffy dog always wear perfectly matching outfits — same color, fabric, and pattern — while the cap is always a deliberate contrast. The character is engaged in a topic-specific task with natural body language, never staged. Outfit colors and patterns randomize across generations for visual variety.',
+  ais: [
+    'nano-banana-pro',
+    'gpt-image-2',
+    'gpt-image-1.5',
+    'dalle-3',
+    'nano-banana-2',
+    'imagen-4',
+  ],
   pinned: false,
   locked: false,
   template: `hyper realistic cinematic hero image, 1:1 aspect ratio
@@ -644,10 +695,20 @@ cap always different color and material from the outfit ::2`
 },
 
 {
-  id: '10',
+  id: '11',
   name: 'Metadata Generator',
   categories: ['SEO'],
-  ais: ['Gemini 3.1 Pro'],
+  description: 'Takes a screenshot of any webpage and a target keyword, then produces five variations each of the page description, SEO title, meta description, Open Graph description, and Open Graph title. Output language matches the page language, with a full Persian translation provided for non-Persian pages.',
+  ais: [
+    'gpt-5.4-pro',
+    'gpt-5.4',
+    'claude-4.7-opus',
+    'gemini-3.1-pro',
+    'claude-4.6-sonnet',
+    'grok-4',
+    'gemini-2.5-pro',
+    'deepseek-visiondeepseek-vision',
+  ],
   pinned: true,
   locked: false,
   template: `شما یک متخصص سئو و کپی‌رایتینگ حرفه‌ای هستید. اسکرین‌شات یک صفحه وب (هر نوع صفحه) را می‌بینید. کار شما:
@@ -779,10 +840,22 @@ cap always different color and material from the outfit ::2`
 },
 
 {
-  id: '11',
-  name: 'SaaS Tool Generator',
+  id: '12',
+  name: 'Web Tool Maker',
   categories: ['Code'],
-  ais: ['gpt-4o'],
+  description: 'Reads a Persian tool description and generates a complete three-file SaaS web tool in vanilla HTML, CSS, and JavaScript. It derives all English UI text from the Persian input, applies a consistent dark design system with a custom font and accent colour, and includes a fixed-format branded footer and glass-effect header.Handles',
+  ais: [
+    'gpt-5.4-pro',
+    'gpt-5.4',
+    'claude-4.7-opus',
+    'gpt-5.3-codex',
+    'claude-4.6-sonnet',
+    'gemini-3.1-pro',
+    'o3-pro',
+    'qwen-3-coder',
+    'deepseek-v4-pro',
+    'grok-4',
+  ],
   pinned: false,
   locked: false,
   template: `Generate a modular, minimal, and modern SaaS-style web tool. The tool must be entirely in English. Output **only** three separate files: \`index.html\`, \`assets/{{TOOL_NAME}}.css\`, and \`assets/{{TOOL_NAME}}.js\`. No external libraries or CDNs are allowed – everything must be vanilla HTML, CSS, and JavaScript. **Do not include any extra text, commentary, or explanations. Only output the three code blocks.**
@@ -988,10 +1061,22 @@ Example format:
 },
 
 {
-  id: '12',
-  name: 'Code Refactoring Cleaner',
+  id: '13',
+  name: 'Code Refactor Pro',
   categories: ['Code'],
-  ais: ['DeepSeek'],
+  description: 'Takes any HTML, CSS, JavaScript, or PHP file and refactors it — fixing indentation, reordering misplaced blocks, removing redundant code, and adding minimap-friendly structural comments. The website’s appearance, text content, and behaviour remain completely unchanged. A standardised author signature is inserted at the top of the output.',
+  ais: [
+    'claude-4.7-opus',
+    'gpt-5.4-pro',
+    'claude-4.6-sonnet',
+    'gpt-5.4',
+    'gpt-5.3-codex',
+    'gemini-3.1-pro',
+    'qwen-3-coder',
+    'deepseek-v4-pro',
+    'o3-pro',
+    'grok-4',
+  ],
   pinned: true,
   locked: false,
   template: `You are a senior software engineer and code refactoring expert.
@@ -1121,9 +1206,24 @@ Provided code:
 
 {
   id: "14",
-  name: "Schema JSON-LD Generator",
-  categories: ["SEO"],
-  ais: ["Gemini"],
+  name: "JSON-LD Builder",
+  categories: [
+    "SEO",
+    "Code",
+  ],
+  description: 'Takes a screenshot of any page on the site, identifies the page type and language from the URL, selects the right Schema.org types from a fixed master list, asks clarifying questions in Persian before writing anything, then outputs a single production-ready JSON-LD block with all entities properly linked and Google’s required fields filled in.',
+  ais: [
+    "claude-4.7-opus",
+    "gpt-5.4-pro",
+    "gpt-5.5",
+    "gpt-5.4",
+    "gemini-3.1-pro",
+    "claude-4.6-sonnet",
+    "grok-4",
+    "gemini-2.5-pro",
+    "o3-pro",
+    "deepseek-vision",
+  ],
   pinned: true,
   locked: false,
   template: `You are a senior technical SEO and Schema.org expert. I will provide you with an image of a specific page from a large multilingual website. The website is a personal brand site that showcases the owner’s portfolio, resume, services for purchase, and a blog. The site has pages in these 6 languages: Persian (fa), English (en), Arabic (ar), Turkish (tr), German (de), Italian (it). All pages follow the URL pattern described below.
@@ -1378,9 +1478,23 @@ Now, please examine the image I attach and follow the instructions exactly. Star
 
 {
   id: "15",
-  name: "Tool Naming Generator",
-  categories: ["Branding"],
-  ais: ["gpt-4o"],
+  name: "Brand Identity Builder",
+  categories: [
+    "Project Management"
+  ],
+  description: 'Give it a one-line description of your tool and it handles the naming side of things: a unique Italian-flavoured word, a dark-background-safe HEX colour, and five ready-to-use English titles. It finishes by pointing out which title is most popular among developers and which ranks highest for search.',
+  ais: [
+    "gpt-5.4-pro",
+    "gpt-5.4",
+    "claude-4.7-opus",
+    "gpt-5.5",
+    "claude-4.6-sonnet",
+    "gemini-3.1-pro",
+    "grok-4",
+    "qwen-3-max",
+    "deepseek-v4-pro",
+    "gemini-2.5-pro",
+  ],
   pinned: false,
   locked: false,
   template: `تو یک مشاور نام‌گذاری و برندینگ حرفه‌ای هستی. کاربر توضیح می‌دهد که ابزار جدیدش چه کاری انجام می‌دهد. وظیفهٔ تو انجام هم‌زمان دو کار است:
@@ -1413,9 +1527,23 @@ text
 
 {
   id: "16",
-  name: "Service Pricing Generator",
-  categories: ["Business"],
-  ais: ["gpt-5.2"],
+  name: "Package Price Planner",
+  categories: [
+    "Project Management",
+  ],
+  description: 'Structures a pricing system for digital services aimed at SMBs and startups. It splits everything into two tabs — standard and advanced — with three packages in each. Each package lists its included services with individual prices that add up to the package total, plus a separate add-on section.',
+  ais: [
+    "gpt-5.4-pro",
+    "claude-4.7-opus",
+    "gpt-5.4",
+    "gpt-5.5",
+    "claude-4.6-sonnet",
+    "gemini-3.1-pro",
+    "o3-pro",
+    "deepseek-v4-pro",
+    "grok-4",
+    "gemini-2.5-pro",
+  ],
   pinned: false,
   locked: false,
   template: `نقش: کارشناس قیمت‌گذاری خدمات دیجیتال و بسته‌بندی خدمات بین‌المللی
@@ -1556,9 +1684,21 @@ ________________________________________
 
 {
   id: "17",
-  name: "Sticky Note Task Converter",
+  name: "Dev Sticky Generator",
   categories: ["Project Management"],
-  ais: ["gpt-4o"],
+  description: 'Takes a web task — a bug report, SEO note, UI issue, or feature idea — and compresses it into a short standardised code for a sticky note. It picks the right colour for the note and pen automatically, adds a priority marker if needed, and formats everything into a consistent four-line output ready to stick on a board.',
+  ais: [
+    "gpt-5.4-pro",
+    "claude-4.7-opus",
+    "gpt-5.4",
+    "claude-4.6-sonnet",
+    "gpt-5.5",
+    "gemini-3.1-pro",
+    "deepseek-expert-dt",
+    "deepseek-v4-pro",
+    "grok-4",
+    "qwen-3-max",
+  ],
   pinned: false,
   locked: false,
   template: `نقش: سیستم تبدیل تسک‌های وب به یادداشت‌های استیکی نوت فشرده
