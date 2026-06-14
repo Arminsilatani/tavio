@@ -1502,9 +1502,9 @@ Now, please examine the image I attach and follow the instructions exactly. Star
 بر اساس قوانین زیر یک نام تک‌کلمه‌ای ایتالیایی‌وار و یک کد رنگ HEX پیشنهاد بده:
 •	نام باید تک‌کلمه‌ای، ساده و با حال‌وهوای ایتالیایی باشد (معنی داشتنش مهم نیست، تلفظ آسان کافی است).
 •	پیشوند دوحرفی نام نباید با هیچ‌یک از این پیشوندهای سرویس‌های قبلی یکسان باشد:
-Co, No, Qe, Ti, Se, Br, So, Ve, Zo, Ga, Xe, Di, Pa, Le, Hi, Jo, Mi, Ra, Ri, Ye, Ce, Ub, Fr, Re, Pi, Lu, Fa, Ta, Va, Al, Ma, Te, Be, Nu
+Co, No, Qe, Ti, Se, Br, So, Ve, Zo, Ga, Xe, Di, Pa, Le, Hi, Jo, Mi, Ra, Ri, Ye, Ce, Ub, Fr, Re, Pi, Lu, Fa, Ta, Va, Al, Ma, Te, Be, Nu, Ve
 •	رنگ باید روی پس‌زمینهٔ #0D0D0D کاملاً خوانا باشد (روشن یا با کنتراست بالا) و با هیچ‌یک از این رنگ‌های قبلی یکسان نباشد:
-#F04E98, #3FA9F5, #F29F05, #00D18A, #F6C700, #FF4747, #8E79FF, #42E5F4, #FD7E14, #E73CF5, #3FE56A, #29B6F6, #FFC857, #9CDB43, #F25F5C, #4DD0E1, #4CAF50, #FF6F91, #6BE6CF, #C79EF2, #7ED957, #E0A414, #FF4FA7, #6C63FF, #A200FF, #00E5FF, #FF6B00, #B0FFA5, #5CE1E6, #74F0B8, #5BE7FF, #A7FF3D, #D8FF4D, #66F2D6
+#F04E98, #3FA9F5, #F29F05, #00D18A, #F6C700, #FF4747, #8E79FF, #42E5F4, #FD7E14, #E73CF5, #3FE56A, #29B6F6, #FFC857, #9CDB43, #F25F5C, #4DD0E1, #4CAF50, #FF6F91, #6BE6CF, #C79EF2, #7ED957, #E0A414, #FF4FA7, #6C63FF, #A200FF, #00E5FF, #FF6B00, #B0FFA5, #5CE1E6, #74F0B8, #5BE7FF, #A7FF3D, #D8FF4D, #66F2D6, #7BE0FF
 بخش ۲ – عنوان انگلیسی ابزار:
 کاربر توضیح می‌دهد ابزارش چه کاری انجام می‌دهد (مثلاً «تولید نقشه سایت»). تو باید:
 •	۵ عنوان انگلیسی کاربردی و رایج برای چنین ابزاری پیشنهاد دهی (مانند Sitemap Builder, Sitemap Generator, Sitemap Creator و غیره).
