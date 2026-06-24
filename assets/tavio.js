@@ -185,14 +185,12 @@ document.addEventListener('DOMContentLoaded', () => {
   const aiModelsFull = document.getElementById('aiModelsFull');
   const promptDescription = document.getElementById('promptDescription');
 
-  // المان‌های مربوط به کاربر
 const sidebarLoginBtn   = document.getElementById('sidebar-login');
 const sidebarLogoutBtn  = document.getElementById('sidebar-logout');
 const sidebarDashboard  = document.getElementById('sidebar-dashboard');
 const avatarContent     = document.querySelector('.avatar-content');
 const notifDot          = document.getElementById('avatar-notif-dot');
 
-// حالت اولیه: فرض می‌کنیم کاربر لاگین نکرده
 function setLoggedOutUI() {
   sidebarLoginBtn.classList.remove('hidden');
   sidebarLogoutBtn.classList.add('hidden');
@@ -204,15 +202,12 @@ function setLoggedInUI(user) {
   sidebarLogoutBtn.classList.remove('hidden');
   sidebarDashboard.classList.remove('hidden');
 
-  // نمایش حرف اول ایمیل به‌عنوان آواتار
   const initial = user.email ? user.email.charAt(0).toUpperCase() : '?';
   avatarContent.textContent = initial;
 
-  // می‌تونی notification dot رو هم مدیریت کنی (فعلاً خالی)
   notifDot.style.display = 'none';
 }
 
-// گرفتن نشست فعلی
 async function checkUser() {
   const { data: { session } } = await supabase.auth.getSession();
   if (session?.user) {
@@ -222,7 +217,6 @@ async function checkUser() {
   }
 }
 
-// وقتی وضعیت احراز تغییر کنه (ورود / خروج)
 supabase.auth.onAuthStateChange((event, session) => {
   if (session?.user) {
     setLoggedInUI(session.user);
@@ -231,7 +225,6 @@ supabase.auth.onAuthStateChange((event, session) => {
   }
 });
 
-// بار اول بررسی کن
 checkUser();
   /* ------------------------- UTILS ------------------------- */
   const escapeHtml = (text) => {
