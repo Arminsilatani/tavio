@@ -189,38 +189,6 @@ document.addEventListener('DOMContentLoaded', () => {
   const avatarContent     = document.querySelector('.avatar-content');
   const notifDot          = document.getElementById('avatar-notif-dot');
 
-  /* ------------------------- AUTH OVERLAY ELEMENTS ------------------------- */
-  const authOverlay = document.getElementById('auth-overlay');
-  const step1 = document.getElementById('step-1');
-  const step2Login = document.getElementById('step-2-login');
-  const step2Register = document.getElementById('step-2-register');
-  const stepForgot = document.getElementById('step-forgot');
-
-  const authEmailInput = document.getElementById('auth-email');
-  const authContinueBtn = document.getElementById('auth-continue-btn');
-  const authEmailError = document.getElementById('auth-email-error');
-
-  const userEmailDisplay = document.getElementById('auth-user-email-display');
-  const authPasswordLogin = document.getElementById('auth-password-login');
-  const authSigninBtn = document.getElementById('auth-signin-btn');
-  const authForgotLink = document.getElementById('auth-forgot-link');
-  const authLoginError = document.getElementById('auth-login-error');
-
-  const userEmailDisplayReg = document.getElementById('auth-user-email-display-reg');
-  const authFirstname = document.getElementById('auth-firstname');
-  const authLastname = document.getElementById('auth-lastname');
-  const authPasswordReg = document.getElementById('auth-password-reg');
-  const authConfirmPassword = document.getElementById('auth-confirm-password');
-  const authRegisterBtn = document.getElementById('auth-register-btn');
-  const authRegisterError = document.getElementById('auth-register-error');
-  const regSuccess = document.getElementById('reg-success');
-  const regToLoginBtn = document.getElementById('reg-to-login-btn');
-
-  const forgotEmail = document.getElementById('forgot-email');
-  const authSendResetBtn = document.getElementById('auth-send-reset-btn');
-  const forgotSuccess = document.getElementById('forgot-success');
-  const authBackToLogin = document.getElementById('auth-back-to-login');
-
   /* ------------------------- UTILS ------------------------- */
   const escapeHtml = (text) => {
     const div = document.createElement('div');
@@ -627,7 +595,6 @@ document.addEventListener('DOMContentLoaded', () => {
       { label: 'Fiora Period Tracker',        minRole: 'general',  link: '', iconURL: 'assets/logos/Fi.svg' }
   ];
 
-  // سطوح دسترسی عددی
   const ROLE_LEVELS = {
     'recruit': 0,
     'sergeant': 1,
@@ -639,32 +606,26 @@ document.addEventListener('DOMContentLoaded', () => {
     return ROLE_LEVELS[role] ?? -1;
   }
 
-  // سطح دسترسی فعلی کاربر ( -1 = مهمان )
   let currentUserRoleLevel = -1;
 
-  // تابع رندر ابزارهای سایدبار با توجه به سطح دسترسی
   function renderSidebarTools(roleLevel) {
     const container = document.getElementById('sidebar-menu-items');
     if (!container) return;
 
     let html = '';
     MENU_TOOLS.forEach(tool => {
-      const isComingSoon = !tool.link;
       const requiredLevel = getRoleLevel(tool.minRole);
       const hasAccess = roleLevel >= requiredLevel;
-
-      // غیرفعال اگر لینک نداشته باشد یا دسترسی کافی نباشد
       const isDisabled = !tool.link || !hasAccess;
       const isSelf = tool.isSelf === true;
 
       let classes = 'sidebar-item';
       if (isDisabled) classes += ' disabled';
-      if (isComingSoon && !isDisabled) classes += ' coming-soon';
       if (isSelf) classes += ' active';
 
       const tag = tool.link ? 'a' : 'span';
       const hrefAttr = tool.link ? `href="${tool.link}" target="_blank" rel="noopener noreferrer"` : '';
-      const tooltipHtml = isComingSoon && !isDisabled ? '<span class="coming-soon-tooltip">Soon</span>' : '';
+      const tooltipHtml = !tool.link ? '<span class="coming-soon-tooltip">Soon</span>' : '';
 
       html += `
         <${tag} class="${classes}" ${hrefAttr}>
@@ -679,7 +640,6 @@ document.addEventListener('DOMContentLoaded', () => {
     container.innerHTML = html;
   }
 
-  // IIFE مدیریت باز/بسته شدن سایدبار
   (function() {
     const toggleBtn = document.getElementById('menu-toggle-btn');
     const sidebar   = document.getElementById('sidebar');
@@ -718,8 +678,240 @@ document.addEventListener('DOMContentLoaded', () => {
     });
   })();
 
-  /* =========================== AUTH MODULE (FINAL FIX) =========================== */
+  /* =========================== AUTH MODULE (RAVLO FLOW – NO RPC) =========================== */
 
+  // DOM refs مطابق با ساختار Ravlo
+  const authOverlay       = document.getElementById('auth-overlay');
+  const authStep1         = document.getElementById('step-1');
+  const authStep2Login    = document.getElementById('step-2-login');
+  const authStep2Reg      = document.getElementById('step-2-register');
+  const authStepForgot    = document.getElementById('step-forgot');
+
+  const authEmail         = document.getElementById('auth-email');
+  const authContinue      = document.getElementById('auth-continue-btn');
+  const authErrorEl       = document.getElementById('auth-error');
+
+  const authUserEmail     = document.getElementById('auth-user-email');
+  const authPassword      = document.getElementById('auth-password');
+  const authSignin        = document.getElementById('auth-signin-btn');
+  const authForgotLink    = document.getElementById('auth-forgot-link');
+  const authErrorLogin    = document.getElementById('auth-error-login');
+
+  const regFirstname      = document.getElementById('reg-firstname');
+  const regLastname       = document.getElementById('reg-lastname');
+  const regPassword       = document.getElementById('reg-password');
+  const regConfirm        = document.getElementById('reg-confirm');
+  const authRegister      = document.getElementById('auth-register-btn');
+  const authErrorReg      = document.getElementById('auth-error-register');
+  const regSuccessEl      = document.getElementById('reg-success');
+  const regToLoginBtn     = document.getElementById('reg-to-login-btn');
+
+  const forgotEmailInput  = document.getElementById('forgot-email');
+  const authSendReset     = document.getElementById('auth-send-reset-btn');
+  const authBackToLogin   = document.getElementById('auth-back-to-login');
+  const authSuccessMsg    = document.getElementById('auth-success-msg');
+
+  // لینک ثبت‌نام در پایین صفحه ورود (در HTML اضافه می‌کنیم)
+  // یک المان جدید ایجاد می‌کنیم تا کاربران جدید بتوانند ثبت‌نام کنند
+  const registerLink = document.createElement('a');
+  registerLink.id = 'auth-to-register-link';
+  registerLink.href = '#';
+  registerLink.textContent = "Don't have an account? Register";
+  registerLink.style.cssText = 'display:block; text-align:center; margin-top:10px; font-size:13px; color:var(--accent);';
+  if (authStep2Login) {
+    authStep2Login.appendChild(registerLink);
+  }
+
+  function showStep(stepId) {
+    [authStep1, authStep2Login, authStep2Reg, authStepForgot].forEach(s => {
+      if (s) s.classList.add('hidden');
+    });
+    const stepEl = document.getElementById(stepId);
+    if (stepEl) stepEl.classList.remove('hidden');
+  }
+
+  // Continue -> always go to login
+  if (authContinue) {
+    authContinue.addEventListener('click', () => {
+      const email = authEmail.value.trim();
+      if (!email) {
+        authErrorEl.textContent = 'Please enter an email address.';
+        return;
+      }
+      authErrorEl.textContent = '';
+      authUserEmail.textContent = email;
+      showStep('step-2-login');
+    });
+  }
+
+  // Sign In
+  if (authSignin) {
+    authSignin.addEventListener('click', async () => {
+      const email = authEmail.value.trim();
+      const password = authPassword.value;
+      if (!password) {
+        authErrorLogin.textContent = 'Password is required.';
+        return;
+      }
+      authErrorLogin.textContent = '';
+
+      const { error } = await sb.auth.signInWithPassword({ email, password });
+      if (error) {
+        authErrorLogin.textContent = error.message;
+        return;
+      }
+      closeAuthOverlay();
+    });
+  }
+
+  // Register
+  if (authRegister) {
+    authRegister.addEventListener('click', async () => {
+      const email    = authEmail.value.trim();
+      const password = regPassword.value;
+      const confirm  = regConfirm.value;
+      const first    = regFirstname.value.trim();
+      const last     = regLastname.value.trim();
+
+      if (!first || !last) {
+        authErrorReg.textContent = 'Please fill in all fields.';
+        return;
+      }
+      if (password.length < 6) {
+        authErrorReg.textContent = 'Password must be at least 6 characters.';
+        return;
+      }
+      if (password !== confirm) {
+        authErrorReg.textContent = 'Passwords do not match.';
+        return;
+      }
+      authErrorReg.textContent = '';
+
+      const { error } = await sb.auth.signUp({
+        email,
+        password,
+        options: {
+          data: { first_name: first, last_name: last }
+        }
+      });
+
+      if (error) {
+        authErrorReg.textContent = error.message;
+        return;
+      }
+
+      document.getElementById('reg-form-fields').style.display = 'none';
+      regSuccessEl.style.display = 'block';
+    });
+  }
+
+  // Go to Sign In (after registration success)
+  if (regToLoginBtn) {
+    regToLoginBtn.addEventListener('click', () => {
+      regSuccessEl.style.display = 'none';
+      document.getElementById('reg-form-fields').style.display = '';
+      showStep('step-1');
+      authEmail.value = '';
+      regFirstname.value = '';
+      regLastname.value = '';
+      regPassword.value = '';
+      regConfirm.value = '';
+    });
+  }
+
+  // Forgot password
+  if (authForgotLink) {
+    authForgotLink.addEventListener('click', (e) => {
+      e.preventDefault();
+      forgotEmailInput.value = authEmail.value.trim();
+      showStep('step-forgot');
+    });
+  }
+
+  if (authSendReset) {
+    authSendReset.addEventListener('click', async () => {
+      const email = forgotEmailInput.value.trim();
+      if (!email) {
+        authSuccessMsg.textContent = 'Please enter your email.';
+        return;
+      }
+      const { error } = await sb.auth.resetPasswordForEmail(email);
+      authSuccessMsg.textContent = error
+        ? 'Error: ' + error.message
+        : 'If an account exists, a reset link has been sent.';
+    });
+  }
+
+  if (authBackToLogin) {
+    authBackToLogin.addEventListener('click', (e) => {
+      e.preventDefault();
+      showStep('step-2-login');
+    });
+  }
+
+  // Register link from login step
+  if (registerLink) {
+    registerLink.addEventListener('click', (e) => {
+      e.preventDefault();
+      const email = authEmail.value.trim();
+      if (!email) {
+        alert('Please go back and enter your email first.');
+        return;
+      }
+      // user email is already set in authUserEmail from step 1
+      showStep('step-2-register');
+    });
+  }
+
+  // Toggle password visibility
+  document.querySelectorAll('.toggle-password-btn').forEach(btn => {
+    btn.addEventListener('click', () => {
+      const targetId = btn.getAttribute('data-target');
+      const input = document.getElementById(targetId);
+      if (!input) return;
+      const isPassword = input.type === 'password';
+      input.type = isPassword ? 'text' : 'password';
+      // simple icon swap
+      const svg = btn.querySelector('svg');
+      if (svg) {
+        svg.innerHTML = isPassword
+          ? '<path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19m-6.72-1.07a3 3 0 1 1-4.24-4.24"/><line x1="1" y1="1" x2="23" y2="23"/>'
+          : '<path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/>';
+      }
+    });
+  });
+
+  // Overlay open/close
+  function openAuthOverlay() {
+    if (authOverlay) {
+      authOverlay.style.display = 'flex';
+      showStep('step-1');
+      authEmail.value = '';
+      if (authErrorEl) authErrorEl.textContent = '';
+    }
+  }
+
+  function closeAuthOverlay() {
+    if (authOverlay) authOverlay.style.display = 'none';
+  }
+
+  if (authOverlay) {
+    authOverlay.addEventListener('click', (e) => {
+      if (e.target === authOverlay) closeAuthOverlay();
+    });
+  }
+
+  // Sidebar login/logout buttons
+  if (sidebarLoginBtn) {
+    sidebarLoginBtn.addEventListener('click', () => openAuthOverlay());
+  }
+  if (sidebarLogoutBtn) {
+    sidebarLogoutBtn.addEventListener('click', async () => {
+      await sb.auth.signOut();
+    });
+  }
+
+  // Profile & role management (same as before, using fetchProfile)
   let currentUserProfile = null;
 
   async function fetchProfile(userId) {
@@ -785,207 +977,14 @@ document.addEventListener('DOMContentLoaded', () => {
     await applyUserProfile(session?.user ?? null);
   });
 
-  // ---------- Overlay controls (unchanged) ----------
-  function openAuthOverlay() {
-    if (authOverlay) {
-      authOverlay.style.display = 'flex';
-      showStep('step-1');
-      authEmailInput.value = '';
-      authEmailError.textContent = '';
-    }
-  }
-
-  function closeAuthOverlay() {
-    if (authOverlay) authOverlay.style.display = 'none';
-  }
-
-  if (authOverlay) {
-    authOverlay.addEventListener('click', (e) => {
-      if (e.target === authOverlay) closeAuthOverlay();
-    });
-  }
-
-  function showStep(stepId) {
-    [step1, step2Login, step2Register, stepForgot].forEach(s => {
-      if (s) s.style.display = 'none';
-    });
-    const stepEl = document.getElementById(stepId);
-    if (stepEl) stepEl.style.display = 'flex';
-  }
-
-  // ---------- مرحله ۱: ادامه با ایمیل (بررسی واقعی با RPC) ----------
-  if (authContinueBtn) {
-    authContinueBtn.addEventListener('click', async () => {
-      const email = authEmailInput.value.trim();
-      if (!email) {
-        authEmailError.textContent = 'Please enter an email address.';
-        return;
-      }
-      authEmailError.textContent = '';
-
-      try {
-        const { data: userExists, error: rpcError } = await sb.rpc('user_exists', { email_input: email });
-        if (rpcError) {
-          console.error('RPC error:', rpcError);
-          authEmailError.textContent = 'Could not verify email. Try again.';
-          return;
-        }
-
-        if (userExists === true) {
-          if (userEmailDisplay) userEmailDisplay.textContent = email;
-          showStep('step-2-login');
-        } else {
-          if (userEmailDisplayReg) userEmailDisplayReg.textContent = email;
-          showStep('step-2-register');
-        }
-      } catch (err) {
-        console.error(err);
-        authEmailError.textContent = 'Network error. Please try later.';
-      }
-    });
-  }
-
-  // ---------- ورود ----------
-  if (authSigninBtn) {
-    authSigninBtn.addEventListener('click', async () => {
-      const email = authEmailInput.value.trim();
-      const password = authPasswordLogin.value;
-      if (!password) {
-        authLoginError.textContent = 'Password is required.';
-        return;
-      }
-      authLoginError.textContent = '';
-
-      const { error } = await sb.auth.signInWithPassword({ email, password });
-      if (error) {
-        authLoginError.textContent = error.message;
-        return;
-      }
-      closeAuthOverlay();
-    });
-  }
-
-  // ---------- ثبت‌نام ----------
-  if (authRegisterBtn) {
-    authRegisterBtn.addEventListener('click', async () => {
-      const email = authEmailInput.value.trim();
-      const password = authPasswordReg.value;
-      const confirm = authConfirmPassword.value;
-      const firstname = authFirstname.value.trim();
-      const lastname = authLastname.value.trim();
-
-      if (!firstname || !lastname) {
-        authRegisterError.textContent = 'Please fill in all fields.';
-        return;
-      }
-      if (password !== confirm) {
-        authRegisterError.textContent = 'Passwords do not match.';
-        return;
-      }
-      authRegisterError.textContent = '';
-
-      const { error } = await sb.auth.signUp({
-        email,
-        password,
-        options: {
-          data: { first_name: firstname, last_name: lastname }
-        }
-      });
-
-      if (error) {
-        authRegisterError.textContent = error.message;
-        return;
-      }
-
-      // نمایش موفقیت
-      document.querySelectorAll('#step-2-register > :not(#reg-success)').forEach(el => el.style.display = 'none');
-      if (regSuccess) regSuccess.style.display = 'block';
-    });
-  }
-
-  // ---------- بازگشت از ثبت‌نام به مرحله اول ----------
-  if (regToLoginBtn) {
-    regToLoginBtn.addEventListener('click', () => {
-      if (regSuccess) regSuccess.style.display = 'none';
-      document.querySelectorAll('#step-2-register > *').forEach(el => el.style.display = '');
-      showStep('step-1');
-      authEmailInput.value = '';
-      authFirstname.value = '';
-      authLastname.value = '';
-      authPasswordReg.value = '';
-      authConfirmPassword.value = '';
-    });
-  }
-
-  // ---------- فراموشی رمز عبور ----------
-  if (authForgotLink) {
-    authForgotLink.addEventListener('click', () => {
-      if (forgotEmail) forgotEmail.value = authEmailInput.value.trim();
-      showStep('step-forgot');
-    });
-  }
-
-  if (authSendResetBtn) {
-    authSendResetBtn.addEventListener('click', async () => {
-      const email = forgotEmail.value.trim();
-      if (!email) {
-        if (forgotSuccess) {
-          forgotSuccess.textContent = 'Please enter your email.';
-          forgotSuccess.style.display = 'block';
-        }
-        return;
-      }
-      const { error } = await sb.auth.resetPasswordForEmail(email);
-      if (forgotSuccess) {
-        forgotSuccess.textContent = error ? 'Error: ' + error.message : 'If an account exists, a reset link has been sent.';
-        forgotSuccess.style.display = 'block';
-      }
-    });
-  }
-
-  if (authBackToLogin) {
-    authBackToLogin.addEventListener('click', () => showStep('step-2-login'));
-  }
-
-  // ---------- دکمه نمایش/مخفی رمز ----------
-  document.querySelectorAll('.toggle-password-btn').forEach(btn => {
-    btn.addEventListener('click', () => {
-      const targetId = btn.dataset.target;
-      const input = document.getElementById(targetId);
-      if (!input) return;
-      const eyeOpen = btn.querySelector('.eye-open');
-      const eyeClosed = btn.querySelector('.eye-closed');
-
-      if (input.type === 'password') {
-        input.type = 'text';
-        if (eyeOpen) eyeOpen.style.display = 'none';
-        if (eyeClosed) eyeClosed.style.display = 'block';
-      } else {
-        input.type = 'password';
-        if (eyeOpen) eyeOpen.style.display = 'block';
-        if (eyeClosed) eyeClosed.style.display = 'none';
-      }
-    });
-  });
-
-  // ---------- دکمه‌های سایدبار ----------
-  if (sidebarLoginBtn) {
-    sidebarLoginBtn.addEventListener('click', () => openAuthOverlay());
-  }
-  if (sidebarLogoutBtn) {
-    sidebarLogoutBtn.addEventListener('click', async () => {
-      await sb.auth.signOut();
-    });
-  }
   /* ------------------------- INIT & LOADER ------------------------- */
   loadPrompts();
   renderAll();
-  checkUser(); // بررسی اولیه وضعیت کاربر
+  checkUser();
   console.log('Tavio: Initialization complete.');
 
   const loader = document.getElementById('initial-loader');
   if (loader) {
     loader.classList.add('hidden');
   }
-
 });
