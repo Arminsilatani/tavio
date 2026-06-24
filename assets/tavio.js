@@ -7,92 +7,16 @@
 
 /* =========================== TAVIO APP ============================ */
 
-const MENU_TOOLS = [
-    { label: 'Codara Service Generator',    minRole: 'general',  link: 'https://arminsilatani.github.io/codara/', iconURL: 'assets/logos/Co.svg' },
-    { label: 'Nolvo Sitemap Builder',       minRole: 'general',  link: '', iconURL: 'assets/logos/No.svg' },
-    { label: 'Qerlo Shortener',             minRole: 'general',  link: '', iconURL: 'assets/logos/Qe.svg' },
-    { label: 'Tivra Minify',                minRole: 'general',  link: '', iconURL: 'assets/logos/Ti.svg' },
-    { label: 'Semora Schema Generator',     minRole: 'general',  link: '', iconURL: 'assets/logos/Se.svg' },
-    { label: 'Brilo Speed Check',           minRole: 'general',  link: '', iconURL: 'assets/logos/Br.svg' },
-    { label: 'Sorbi Robots Builder',        minRole: 'general',  link: '', iconURL: 'assets/logos/So.svg' },
-    { label: 'Velto Meta Inspector',        minRole: 'general',  link: '', iconURL: 'assets/logos/Ve.svg' },
-    { label: 'Zorio Image Converter',       minRole: 'recruit',  link: 'https://arminsilatani.github.io/zorio/', iconURL: 'assets/logos/Zo.svg' },
-    { label: 'Galvo Video Converter',       minRole: 'general',  link: '', iconURL: 'assets/logos/Ga.svg' },
-    { label: 'Xelpo Pass Generator',        minRole: 'general',  link: '', iconURL: 'assets/logos/Xe.svg' },
-    { label: 'Dirmo DNS Checker',           minRole: 'general',  link: '', iconURL: 'assets/logos/Di.svg' },
-    { label: 'Lemro Keyword Research',      minRole: 'general',  link: '', iconURL: 'assets/logos/Le.svg' },
-    { label: 'Hirvo Density',               minRole: 'general',  link: '', iconURL: 'assets/logos/Hi.svg' },
-    { label: 'Jorvi Redirect',              minRole: 'general',  link: '', iconURL: 'assets/logos/Jo.svg' },
-    { label: 'Mirto CRM',                   minRole: 'general',  link: '', iconURL: 'assets/logos/Mi.svg' },
-    { label: 'Ravlo Calendar',              minRole: 'sergeant', link: '', iconURL: 'assets/logos/Ra.svg', isSelf: true },
-    { label: 'Rinvo Accounting',            minRole: 'general',  link: '', iconURL: 'assets/logos/Ri.svg' },
-    { label: 'Yelmo Brand Namer',           minRole: 'general',  link: '', iconURL: 'assets/logos/Ye.svg' },
-    { label: 'Cedro Flashcards',            minRole: 'general',  link: '', iconURL: 'assets/logos/Ce.svg' },
-    { label: 'Fresca Colors Tool',          minRole: 'general',  link: '', iconURL: 'assets/logos/Fr.svg' },
-    { label: 'Ubiro Beer Cost',             minRole: 'general',  link: '', iconURL: 'assets/logos/Ub.svg' },
-    { label: 'Refacto Code Beautifier',     minRole: 'general',  link: '', iconURL: 'assets/logos/Re.svg' },
-    { label: 'Pilvo Text Editor',           minRole: 'recruit',  link: 'https://arminsilatani.github.io/pilvo/', iconURL: 'assets/logos/Pi.svg' },
-    { label: 'Tavio Prompt Library',        minRole: 'recruit',  link: 'https://arminsilatani.github.io/tavio/', iconURL: 'assets/logos/Ta.svg' },
-    { label: 'Falco Favicon Generator',     minRole: 'recruit',  link: 'https://arminsilatani.github.io/falco/', iconURL: 'assets/logos/Fa.svg' },
-    { label: 'Lume Epoch Converter',        minRole: 'recruit',  link: 'https://arminsilatani.github.io/lume/', iconURL: 'assets/logos/Lu.svg' },
-    { label: 'Valeno Expiry Date Reminder', minRole: 'general',  link: '', iconURL: 'assets/logos/Va.svg' },
-    { label: 'Alviano Recipe Manager',      minRole: 'general',  link: '', iconURL: 'assets/logos/Al.svg' },
-    { label: 'Mavero Workout Tracker',      minRole: 'general',  link: '', iconURL: 'assets/logos/Ma.svg' },
-    { label: 'Tempozio Time Tracker',       minRole: 'general',  link: '', iconURL: 'assets/logos/Te.svg' },
-    { label: 'Belluno Wishlist',            minRole: 'general',  link: '', iconURL: 'assets/logos/Be.svg' },
-    { label: 'Nuvello Wallpaper App',       minRole: 'general',  link: '', iconURL: 'assets/logos/Nu.svg' },
-    { label: 'Fiora Period Tracker',        minRole: 'general',  link: '', iconURL: 'assets/logos/Fi.svg' }
-];
-function renderSidebarTools() {
-    const container = document.getElementById('sidebar-menu-items');
-    if (!container) return;
-
-    // در اینجا می‌تونی بر اساس نقش کاربر فیلتر کنی (فعلاً همه نمایش داده می‌شوند)
-    const tools = MENU_TOOLS;
-
-    let html = '';
-    tools.forEach(tool => {
-        const isDisabled = !tool.link;                    // بدون لینک = disabled
-        const isComingSoon = !tool.link;                  // می‌تونی شرط متفاوتی بذاری
-        const isSelf = tool.isSelf === true;              // ابزار جاری
-
-        let classes = 'sidebar-item';
-        if (isDisabled) classes += ' disabled';
-        if (isComingSoon && !isDisabled) classes += ' coming-soon';  // اگر coming-soon جدا از disabled باشه
-        if (isSelf) classes += ' active';                // کلاس اکتیو برای ابزار جاری
-
-        // اگر لینک نداره، تگ <span> در غیر این صورت <a>
-        const tag = tool.link ? 'a' : 'span';
-        const hrefAttr = tool.link ? `href="${tool.link}" target="_blank" rel="noopener noreferrer"` : '';
-        const roleHint = isComingSoon && !isDisabled ? '<span class="coming-soon-tooltip">Soon</span>' : '';
-
-        html += `
-            <${tag} class="${classes}" ${hrefAttr}>
-                <span class="sidebar-icon">
-                    <img src="${tool.iconURL}" alt="${tool.label}" width="20" height="20" onerror="this.style.display='none'" />
-                </span>
-                <span>${tool.label}</span>
-                ${roleHint}
-            </${tag}>
-        `;
-    });
-
-    container.innerHTML = html;
-}
-
-// صدا زدن تابع بعد از لود صفحه
-renderSidebarTools();
 document.addEventListener('DOMContentLoaded', () => {
   console.log('Tavio: DOM loaded');
 
-  
   /* :::::::::::::::::::::::::: CONSTANTS :::::::::::::::::::::::::: */
 
   const STORAGE_KEY      = 'tavio_prompts';
   const CURRENT_VERSION  = 1;
   const MASTER_PASSWORD  = '1320';
 
-  // آرایه پیش‌فرض خالی برای پرامپت‌های اولیه (در صورت نیاز می‌توانید پرامپت‌های پیش‌فرض را اینجا اضافه کنید)
+  // آرایه پیش‌فرض خالی برای پرامپت‌های اولیه
   const defaultPrompts = [];
 
   /* ------------------------- AI MODELS ------------------------- */
@@ -619,39 +543,71 @@ document.addEventListener('DOMContentLoaded', () => {
   btnCopyPrompt.addEventListener('click', copyToClipboard);
   btnClearBuilder.addEventListener('click', clearBuilder);
 
-  /* ------------------------- SIDEBAR LOGIC (GSAP) ------------------------- */
+  /* =========================== SIDEBAR MODULE =========================== */
+
+  // لیست کامل ابزارها (دقیقاً همان که قبلاً فرستاده بودی)
+  const MENU_TOOLS = [
+      { label: 'Codara Service Generator',    minRole: 'general',  link: 'https://arminsilatani.github.io/codara/', iconURL: 'assets/logos/Co.svg' },
+      { label: 'Nolvo Sitemap Builder',       minRole: 'general',  link: '', iconURL: 'assets/logos/No.svg' },
+      { label: 'Qerlo Shortener',             minRole: 'general',  link: '', iconURL: 'assets/logos/Qe.svg' },
+      { label: 'Tivra Minify',                minRole: 'general',  link: '', iconURL: 'assets/logos/Ti.svg' },
+      { label: 'Semora Schema Generator',     minRole: 'general',  link: '', iconURL: 'assets/logos/Se.svg' },
+      { label: 'Brilo Speed Check',           minRole: 'general',  link: '', iconURL: 'assets/logos/Br.svg' },
+      { label: 'Sorbi Robots Builder',        minRole: 'general',  link: '', iconURL: 'assets/logos/So.svg' },
+      { label: 'Velto Meta Inspector',        minRole: 'general',  link: '', iconURL: 'assets/logos/Ve.svg' },
+      { label: 'Zorio Image Converter',       minRole: 'recruit',  link: 'https://arminsilatani.github.io/zorio/', iconURL: 'assets/logos/Zo.svg' },
+      { label: 'Galvo Video Converter',       minRole: 'general',  link: '', iconURL: 'assets/logos/Ga.svg' },
+      { label: 'Xelpo Pass Generator',        minRole: 'general',  link: '', iconURL: 'assets/logos/Xe.svg' },
+      { label: 'Dirmo DNS Checker',           minRole: 'general',  link: '', iconURL: 'assets/logos/Di.svg' },
+      { label: 'Lemro Keyword Research',      minRole: 'general',  link: '', iconURL: 'assets/logos/Le.svg' },
+      { label: 'Hirvo Density',               minRole: 'general',  link: '', iconURL: 'assets/logos/Hi.svg' },
+      { label: 'Jorvi Redirect',              minRole: 'general',  link: '', iconURL: 'assets/logos/Jo.svg' },
+      { label: 'Mirto CRM',                   minRole: 'general',  link: '', iconURL: 'assets/logos/Mi.svg' },
+      { label: 'Ravlo Calendar',              minRole: 'sergeant', link: '', iconURL: 'assets/logos/Ra.svg', isSelf: true },
+      { label: 'Rinvo Accounting',            minRole: 'general',  link: '', iconURL: 'assets/logos/Ri.svg' },
+      { label: 'Yelmo Brand Namer',           minRole: 'general',  link: '', iconURL: 'assets/logos/Ye.svg' },
+      { label: 'Cedro Flashcards',            minRole: 'general',  link: '', iconURL: 'assets/logos/Ce.svg' },
+      { label: 'Fresca Colors Tool',          minRole: 'general',  link: '', iconURL: 'assets/logos/Fr.svg' },
+      { label: 'Ubiro Beer Cost',             minRole: 'general',  link: '', iconURL: 'assets/logos/Ub.svg' },
+      { label: 'Refacto Code Beautifier',     minRole: 'general',  link: '', iconURL: 'assets/logos/Re.svg' },
+      { label: 'Pilvo Text Editor',           minRole: 'recruit',  link: 'https://arminsilatani.github.io/pilvo/', iconURL: 'assets/logos/Pi.svg' },
+      { label: 'Tavio Prompt Library',        minRole: 'recruit',  link: 'https://arminsilatani.github.io/tavio/', iconURL: 'assets/logos/Ta.svg' },
+      { label: 'Falco Favicon Generator',     minRole: 'recruit',  link: 'https://arminsilatani.github.io/falco/', iconURL: 'assets/logos/Fa.svg' },
+      { label: 'Lume Epoch Converter',        minRole: 'recruit',  link: 'https://arminsilatani.github.io/lume/', iconURL: 'assets/logos/Lu.svg' },
+      { label: 'Valeno Expiry Date Reminder', minRole: 'general',  link: '', iconURL: 'assets/logos/Va.svg' },
+      { label: 'Alviano Recipe Manager',      minRole: 'general',  link: '', iconURL: 'assets/logos/Al.svg' },
+      { label: 'Mavero Workout Tracker',      minRole: 'general',  link: '', iconURL: 'assets/logos/Ma.svg' },
+      { label: 'Tempozio Time Tracker',       minRole: 'general',  link: '', iconURL: 'assets/logos/Te.svg' },
+      { label: 'Belluno Wishlist',            minRole: 'general',  link: '', iconURL: 'assets/logos/Be.svg' },
+      { label: 'Nuvello Wallpaper App',       minRole: 'general',  link: '', iconURL: 'assets/logos/Nu.svg' },
+      { label: 'Fiora Period Tracker',        minRole: 'general',  link: '', iconURL: 'assets/logos/Fi.svg' }
+  ];
+
   (function() {
     const toggleBtn = document.getElementById('menu-toggle-btn');
     const sidebar   = document.getElementById('sidebar');
     const overlay   = document.getElementById('sidebar-overlay');
     const closeRow  = document.getElementById('sidebar-close-row');
+    const menuContainer = document.getElementById('sidebar-menu-items');
 
-    if (!toggleBtn || !sidebar || !overlay || !closeRow) return;
+    if (!toggleBtn || !sidebar || !overlay || !closeRow || !menuContainer) return;
 
     let isOpen = false;
 
     function openSidebar() {
       if (isOpen) return;
       isOpen = true;
-      overlay.classList.add('active');
-      toggleBtn.classList.add('active');
-      gsap.to(sidebar, {
-        x: 0,
-        duration: 0.5,
-        ease: 'power3.out'
-      });
+      overlay.classList.add('open');
+      toggleBtn.classList.add('open');
+      gsap.to(sidebar, { x: 0, duration: 0.5, ease: 'power3.out' });
     }
 
     function closeSidebar() {
       if (!isOpen) return;
       isOpen = false;
-      overlay.classList.remove('active');
-      toggleBtn.classList.remove('active');
-      gsap.to(sidebar, {
-        x: '-100%',
-        duration: 0.4,
-        ease: 'power3.in'
-      });
+      overlay.classList.remove('open');
+      toggleBtn.classList.remove('open');
+      gsap.to(sidebar, { x: '-100%', duration: 0.4, ease: 'power3.in' });
     }
 
     toggleBtn.addEventListener('click', () => {
@@ -662,10 +618,41 @@ document.addEventListener('DOMContentLoaded', () => {
     overlay.addEventListener('click', closeSidebar);
 
     document.addEventListener('keydown', (e) => {
-      if (e.key === 'Escape' && isOpen) {
-        closeSidebar();
-      }
+      if (e.key === 'Escape' && isOpen) closeSidebar();
     });
+
+    // رندر ابزارهای منو
+    function renderSidebarTools() {
+      const tools = MENU_TOOLS;
+      let html = '';
+      tools.forEach(tool => {
+        const isDisabled = !tool.link;
+        const isComingSoon = !tool.link;
+        const isSelf = tool.isSelf === true;
+
+        let classes = 'sidebar-item';
+        if (isDisabled) classes += ' disabled';
+        if (isComingSoon && !isDisabled) classes += ' coming-soon';
+        if (isSelf) classes += ' active';
+
+        const tag = tool.link ? 'a' : 'span';
+        const hrefAttr = tool.link ? `href="${tool.link}" target="_blank" rel="noopener noreferrer"` : '';
+        const tooltipHtml = isComingSoon && !isDisabled ? '<span class="coming-soon-tooltip">Soon</span>' : '';
+
+        html += `
+          <${tag} class="${classes}" ${hrefAttr}>
+            <span class="sidebar-icon">
+              <img src="${tool.iconURL}" alt="${tool.label}" onerror="this.style.display='none'" />
+            </span>
+            <span>${tool.label}</span>
+            ${tooltipHtml}
+          </${tag}>
+        `;
+      });
+      menuContainer.innerHTML = html;
+    }
+
+    renderSidebarTools();
   })();
 
   /* ------------------------- INIT & LOADER ------------------------- */
