@@ -857,51 +857,49 @@ body {
   display: none !important;
 }
 
-/* =========================== HAMBURGER BUTTON =========================== */
-
+/* =========================== HAMBURGER BUTTON ============================ */
 .hamburger-btn {
-    position: fixed;
-    top: 18px;
-    left: 18px;
-    z-index: 100000;
-    background: rgba(255, 255, 255, 0.06);
-    border: 1px solid rgba(255, 255, 255, 0.1);
-    border-radius: 10px;
-    width: 42px;
-    height: 42px;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    justify-content: center;
-    gap: 5px;
-    cursor: pointer;
-    backdrop-filter: blur(8px);
-    transition: background 0.2s;
-}
-
-.hamburger-btn:hover {
-    background: rgba(255, 255, 255, 0.12);
+  position: fixed;
+  top: 41px;
+  left: 44px;
+  z-index: 10;
+  width: 18px;
+  height: 24px;
+  background: transparent;
+  border: none;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 4px;
+  cursor: pointer;
+  padding: 0;
+  color: var(--text);
+  transition: color 0.2s ease;
 }
 
 .hamburger-line {
-    display: block;
-    width: 20px;
-    height: 2px;
-    background: var(--text);
-    border-radius: 2px;
-    transition: transform 0.3s, opacity 0.3s;
+  width: 18px;
+  height: 2px;
+  background: currentColor;
+  border-radius: 2px;
+  transform-origin: center;
+  transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1),
+              opacity 0.2s ease;
 }
 
-/* انیمیشن تبدیل به ضربدر (اختیاری، در صورت نیاز) */
-.hamburger-btn.active .hamburger-line:nth-child(1) {
-    transform: rotate(45deg) translate(5px, 5px);
+.hamburger-btn.open .hamburger-line:nth-child(1) {
+  transform: translateY(6px) rotate(45deg);
 }
-.hamburger-btn.active .hamburger-line:nth-child(2) {
-    opacity: 0;
+
+.hamburger-btn.open .hamburger-line:nth-child(2) {
+  opacity: 0;
 }
-.hamburger-btn.active .hamburger-line:nth-child(3) {
-    transform: rotate(-45deg) translate(5px, -5px);
+
+.hamburger-btn.open .hamburger-line:nth-child(3) {
+  transform: translateY(-6px) rotate(-45deg);
 }
+
 
 /* =========================== SIDEBAR OVERLAY =========================== */
 
@@ -1313,7 +1311,6 @@ body {
   transform: translateY(0px);
 }
 
-/* انیمیشن blink (اگه نداری) */
 @keyframes blink {
   0%, 100% { opacity: 1; }
   50% { opacity: 0.2; }
