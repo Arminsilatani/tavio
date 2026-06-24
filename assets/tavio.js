@@ -718,50 +718,85 @@ document.addEventListener('DOMContentLoaded', () => {
     });
   })();
 
-  /* =========================== AUTH MODULE =========================== */
+  /* =========================== AUTH MODULE (ECOSYSTEM – reads from profiles) =========================== */
 
-  // به‌روزرسانی UI سایدبار بر اساس وضعیت احراز هویت
+  // کش پروفایل برای جلوگیری از fetch اضافی
+  let currentUserProfile = null;
+
+  // دریافت پروفایل از جدول public.profiles
+  async function fetchProfile(userId) {
+    const { data, error } = await sb
+      .from('profiles')
+      .select('*')
+      .eq('id', userId)
+      .single();
+
+    if (error || !data) {
+      console.warn('Profile not found, fallback to recruit');
+      return { role: 'recruit', first_name: '', last_name: '' };
+    }
+    return data;
+  }
+
+  // به‌روزرسانی UI بر اساس پروفایل
+  async function applyUserProfile(user) {
+    if (!user) {
+      setLoggedOutUI();
+      return;
+    }
+
+    // فقط در صورت تغییر کاربر دوباره fetch کن
+    if (!currentUserProfile || currentUserProfile.id !== user.id) {
+      currentUserProfile = await fetchProfile(user.id);
+    }
+
+    const profile = currentUserProfile;
+    const role = profile.role || 'recruit';
+
+    // نمایش المان‌های کاربر لاگین‌شده
+    sidebarLoginBtn.classList.add('hidden');
+    sidebarLogoutBtn.classList.remove('hidden');
+    sidebarDashboard.classList.remove('hidden');
+
+    // آواتار: حرف اول نام کوچک (در صورت وجود)، در غیر این صورت حرف اول ایمیل
+    let avatarChar = '?';
+    if (profile.first_name) {
+      avatarChar = profile.first_name.charAt(0).toUpperCase();
+    } else if (user.email) {
+      avatarChar = user.email.charAt(0).toUpperCase();
+    }
+    if (avatarContent) avatarContent.textContent = avatarChar;
+    if (notifDot) notifDot.style.display = 'none';
+
+    // تنظیم سطح دسترسی از نقش پروفایل
+    const roleLevel = getRoleLevel(role);
+    currentUserRoleLevel = roleLevel;
+    renderSidebarTools(roleLevel);
+  }
+
+  // رابط کاربری حالت مهمان
   function setLoggedOutUI() {
     sidebarLoginBtn.classList.remove('hidden');
     sidebarLogoutBtn.classList.add('hidden');
     sidebarDashboard.classList.add('hidden');
     if (avatarContent) avatarContent.textContent = '';
-
+    currentUserProfile = null;
     currentUserRoleLevel = -1;
-    renderSidebarTools(currentUserRoleLevel);
+    renderSidebarTools(-1);
   }
 
-  function setLoggedInUI(user) {
-    sidebarLoginBtn.classList.add('hidden');
-    sidebarLogoutBtn.classList.remove('hidden');
-    sidebarDashboard.classList.remove('hidden');
-    const initial = user.email ? user.email.charAt(0).toUpperCase() : '?';
-    if (avatarContent) avatarContent.textContent = initial;
-    if (notifDot) notifDot.style.display = 'none';
-
-    // دریافت نقش از metadata کاربر (پیش‌فرض recruit)
-    const role = user.user_metadata?.role || 'recruit';
-    currentUserRoleLevel = getRoleLevel(role);
-    renderSidebarTools(currentUserRoleLevel);
-  }
-
+  // بررسی نشست هنگام بارگذاری صفحه
   async function checkUser() {
     const { data: { session } } = await sb.auth.getSession();
-    if (session?.user) {
-      setLoggedInUI(session.user);
-    } else {
-      setLoggedOutUI();
-    }
+    await applyUserProfile(session?.user ?? null);
   }
 
-  sb.auth.onAuthStateChange((event, session) => {
-    if (session?.user) {
-      setLoggedInUI(session.user);
-    } else {
-      setLoggedOutUI();
-    }
+  // گوش دادن به تغییرات ورود/خروج
+  sb.auth.onAuthStateChange(async (event, session) => {
+    await applyUserProfile(session?.user ?? null);
   });
 
+  // ---------- بخش‌های بدون تغییر (overlay، گام‌ها، event listenerها) ----------
   // باز کردن overlay احراز هویت
   function openAuthOverlay() {
     if (authOverlay) {
@@ -802,7 +837,7 @@ document.addEventListener('DOMContentLoaded', () => {
       }
       authEmailError.textContent = '';
 
-      // TODO: در نسخه واقعی یک RPC یا signInWithOtp برای بررسی وجود کاربر استفاده کنید
+      // TODO: جایگزینی با بررسی واقعی (مثلاً یک RPC)
       const userExists = email.includes('exist'); // موقت
       if (userExists) {
         if (userEmailDisplay) userEmailDisplay.textContent = email;
@@ -831,6 +866,7 @@ document.addEventListener('DOMContentLoaded', () => {
         return;
       }
       closeAuthOverlay();
+      // UI توسط onAuthStateChange به‌روز می‌شود
     });
   }
 
@@ -859,8 +895,8 @@ document.addEventListener('DOMContentLoaded', () => {
         options: {
           data: {
             first_name: firstname,
-            last_name: lastname,
-            role: 'recruit'   // نقش پیش‌فرض
+            last_name: lastname
+            // role دیگر اینجا ذخیره نمی‌شود؛ توسط تریگر دیتابیس مدیریت می‌شود
           }
         }
       });
@@ -957,9 +993,9 @@ document.addEventListener('DOMContentLoaded', () => {
   if (sidebarLogoutBtn) {
     sidebarLogoutBtn.addEventListener('click', async () => {
       await sb.auth.signOut();
+      // UI توسط onAuthStateChange به‌طور خودکار به حالت مهمان برمی‌گردد
     });
   }
-
   /* ------------------------- INIT & LOADER ------------------------- */
   loadPrompts();
   renderAll();
