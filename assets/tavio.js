@@ -22,7 +22,6 @@ document.addEventListener('DOMContentLoaded', () => {
   const CURRENT_VERSION  = 1;
   const MASTER_PASSWORD  = '1320';
 
-  // آرایه پیش‌فرض خالی برای پرامپت‌های اولیه
   const defaultPrompts = [];
 
   /* ------------------------- AI MODELS ------------------------- */
