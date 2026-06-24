@@ -1319,6 +1319,9 @@ body {
   50% { opacity: 0.2; }
 }
 
+#sidebar-menu-items {
+  transform: translateX(-10px);
+}
 /* =========================== RESPONSIVE =========================== */
 
 @media (max-width: 640px) {
