@@ -1079,7 +1079,22 @@ body {
 .hidden {
     display: none !important;
 }
+/* ابزار جاری */
+.sidebar-item.active {
+    background: rgba(176, 255, 165, 0.1);
+    color: var(--accent);
+    pointer-events: none;
+}
 
+/* استایل coming-soon (نوشته Soon) */
+.coming-soon-tooltip {
+    font-size: 10px;
+    background: var(--accent);
+    color: #0d0d0d;
+    padding: 2px 6px;
+    border-radius: 4px;
+    margin-left: auto;
+}
 /* =========================== RESPONSIVE =========================== */
 
 @media (max-width: 640px) {
