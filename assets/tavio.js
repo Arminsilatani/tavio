@@ -17,15 +17,12 @@ document.addEventListener('DOMContentLoaded', () => {
   console.log('Tavio: DOM loaded');
 
   /* :::::::::::::::::::::::::: CONSTANTS :::::::::::::::::::::::::: */
-
   const STORAGE_KEY      = 'tavio_prompts';
   const CURRENT_VERSION  = 1;
   const MASTER_PASSWORD  = '1320';
-
   const defaultPrompts = [];
 
   /* ------------------------- AI MODELS ------------------------- */
-
   const ALL_AI_MODELS = [
     // Active
     { id: 'gpt-5.4',                    name: 'Chat GPT 5.4',                              active: true  },
@@ -106,10 +103,8 @@ document.addEventListener('DOMContentLoaded', () => {
         saveToStorage();
         return;
       }
-
       const data = JSON.parse(raw);
       let needsSave = false;
-
       if (!data.version || data.version < CURRENT_VERSION) {
         if (Array.isArray(data.prompts)) {
           data.prompts = data.prompts.map(p => {
@@ -127,7 +122,6 @@ document.addEventListener('DOMContentLoaded', () => {
             if (typeof newP.locked === 'undefined') newP.locked = false;
             return newP;
           });
-
           const defaultIds = new Set(defaultPrompts.map(p => p.id));
           data.prompts = data.prompts.filter(p => !defaultIds.has(p.id));
           defaultPrompts.forEach(dp => data.prompts.push({ ...dp }));
@@ -135,7 +129,6 @@ document.addEventListener('DOMContentLoaded', () => {
         data.version = CURRENT_VERSION;
         needsSave = true;
       }
-
       prompts = Array.isArray(data.prompts) ? data.prompts : defaultPrompts.map(p => ({ ...p }));
       if (needsSave) saveToStorage();
     } catch (e) {
@@ -145,10 +138,7 @@ document.addEventListener('DOMContentLoaded', () => {
   }
 
   function saveToStorage() {
-    localStorage.setItem(STORAGE_KEY, JSON.stringify({
-      version: CURRENT_VERSION,
-      prompts
-    }));
+    localStorage.setItem(STORAGE_KEY, JSON.stringify({ version: CURRENT_VERSION, prompts }));
   }
 
   let currentFilter = 'all';
@@ -222,7 +212,6 @@ document.addEventListener('DOMContentLoaded', () => {
       html += `<button class="filter-chip" data-category="${escapeHtml(cat)}">${escapeHtml(cat)}</button>`;
     });
     categoryFilters.innerHTML = html;
-
     document.querySelectorAll('.filter-chip').forEach(chip => {
       chip.classList.toggle('active', chip.dataset.category === currentFilter);
     });
@@ -235,17 +224,14 @@ document.addEventListener('DOMContentLoaded', () => {
       return true;
     });
     filtered = sortPrompts(filtered);
-
     if (filtered.length === 0) {
       promptList.innerHTML = '<p style="text-align:center; opacity:0.5; padding:40px;">No prompts found.</p>';
       return;
     }
-
     promptList.innerHTML = filtered.map(p => {
       const catBadges = (p.categories || []).map(c =>
         `<span class="card-category">${escapeHtml(c)}</span>`
       ).join('');
-
       const maxShow = 3;
       const aiList = p.ais || [];
       let aiBadgesHtml = '';
@@ -260,7 +246,6 @@ document.addEventListener('DOMContentLoaded', () => {
           visible.map(ai => `<span class="ai-badge">${escapeHtml(getAiName(ai))}</span>`).join('') +
           `<span class="ai-badge">+${hiddenCount} more</span>`;
       }
-
       const lockIcon = p.locked ? `
         <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="card-lock-icon">
           <rect x="5" y="11" width="14" height="11" rx="2" />
@@ -268,7 +253,6 @@ document.addEventListener('DOMContentLoaded', () => {
           <circle cx="12" cy="15" r="1" fill="currentColor" stroke="none" />
         </svg>
       ` : '';
-
       return `
         <div class="prompt-card ${p.pinned ? 'pinned' : ''}" data-id="${p.id}">
           <div class="card-main-content">
@@ -305,7 +289,6 @@ document.addEventListener('DOMContentLoaded', () => {
       card.addEventListener('click', (e) => {
         if (card.classList.contains('password-active')) return;
         if (e.target.closest('[data-action="pin"]')) return;
-
         const id = card.dataset.id;
         const prompt = prompts.find(p => p.id === id);
         if (prompt && prompt.locked) {
@@ -338,17 +321,13 @@ document.addEventListener('DOMContentLoaded', () => {
   /* ------------------------- IN-CARD PASSWORD ------------------------- */
   function convertCardToPasswordInput(cardElement, promptId) {
     if (cardElement.classList.contains('password-active')) return;
-
     cardElement.classList.add('password-active');
-
     const passwordForm = cardElement.querySelector('.card-password-form');
     const input = passwordForm.querySelector('.card-password-input');
     const submitBtn = passwordForm.querySelector('.card-password-submit');
     const cancelBtn = passwordForm.querySelector('.card-password-cancel');
     const errorDiv = passwordForm.querySelector('.card-password-error');
-
     input.focus();
-
     const handleSubmit = () => {
       const entered = input.value;
       if (entered === MASTER_PASSWORD) {
@@ -358,19 +337,16 @@ document.addEventListener('DOMContentLoaded', () => {
         input.select();
       }
     };
-
     const handleCancel = () => {
       cardElement.classList.remove('password-active');
       input.value = '';
       errorDiv.textContent = '';
     };
-
     submitBtn.addEventListener('click', handleSubmit);
     cancelBtn.addEventListener('click', handleCancel);
     input.addEventListener('keypress', (e) => {
       if (e.key === 'Enter') handleSubmit();
     });
-
     submitBtn.addEventListener('click', (e) => e.stopPropagation());
     cancelBtn.addEventListener('click', (e) => e.stopPropagation());
   }
@@ -395,7 +371,6 @@ document.addEventListener('DOMContentLoaded', () => {
     } else {
       promptDescription.textContent = '';
     }
-
     let aiHtml = '<div class="ai-status-section"><h4>AI Models</h4><div class="ai-status-list">';
     (prompt.ais || []).forEach(aiId => {
       const model = ALL_AI_MODELS.find(m => m.id === aiId);
@@ -425,9 +400,7 @@ document.addEventListener('DOMContentLoaded', () => {
       }).join('');
     }
     placeholderInputs.innerHTML = fieldsHtml;
-
     document.querySelector('.container').classList.add('builder-mode');
-
     generatedPrompt.value = '';
     libraryView.classList.add('hidden');
     builderView.classList.remove('hidden');
@@ -438,7 +411,6 @@ document.addEventListener('DOMContentLoaded', () => {
     if (!prompt) return;
     const placeholders = extractPlaceholders(prompt.template);
     let filled = prompt.template;
-
     placeholders.forEach(ph => {
       const el = document.getElementById(`input_${ph}`);
       const val = el ? el.value : '';
@@ -446,17 +418,13 @@ document.addEventListener('DOMContentLoaded', () => {
       const regex = new RegExp(`{{${escapedPh}}}`, 'gi');
       filled = filled.replace(regex, val || `{{${ph}}}`);
     });
-
     if (typingTimer) clearInterval(typingTimer);
-
     generatedPrompt.value = '';
     generatedPrompt.classList.add('typing');
     generatedPrompt.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
-
     let i = 0;
     const chars = filled.split('');
     const speed = 5;
-
     typingTimer = setInterval(() => {
       if (i < chars.length) {
         generatedPrompt.value += chars[i];
@@ -479,7 +447,6 @@ document.addEventListener('DOMContentLoaded', () => {
   function clearBuilder() {
     const inputs = document.querySelectorAll('#placeholderInputs input, #placeholderInputs textarea');
     inputs.forEach(input => { input.value = ''; });
-
     generatedPrompt.value = '';
     if (typingTimer) {
       clearInterval(typingTimer);
@@ -492,30 +459,25 @@ document.addEventListener('DOMContentLoaded', () => {
     currentSearch = e.target.value;
     renderLibrary();
   });
-
   categoryFilters.addEventListener('click', (e) => {
     const chip = e.target.closest('.filter-chip');
     if (!chip) return;
     currentFilter = chip.dataset.category;
     renderAll();
   });
-
   cancelPromptBtn.addEventListener('click', () => {
     promptFormContainer.classList.add('hidden');
   });
-
   savePromptBtn.addEventListener('click', () => {
     const name = promptNameInput.value.trim();
     const catRaw = promptCategoryInput.value.trim();
     const template = promptTemplateInput.value.trim();
     const selected = Array.from(promptAiSelect.selectedOptions).map(opt => opt.value);
     const locked = promptLockedCheckbox ? promptLockedCheckbox.checked : false;
-
     if (!name || !catRaw || !template) {
       alert('Please fill in all fields.');
       return;
     }
-
     const categories = catRaw.split(',').map(c => c.trim()).filter(Boolean);
     const newPrompt = {
       id: Date.now().toString(),
@@ -536,7 +498,6 @@ document.addEventListener('DOMContentLoaded', () => {
     if (promptLockedCheckbox) promptLockedCheckbox.checked = false;
     renderAll();
   });
-
   btnBackToLibrary.addEventListener('click', () => {
     builderView.classList.add('hidden');
     libraryView.classList.remove('hidden');
@@ -550,49 +511,46 @@ document.addEventListener('DOMContentLoaded', () => {
       generatedPrompt.classList.remove('typing');
     }
   });
-
   btnGeneratePrompt.addEventListener('click', generatePrompt);
   btnCopyPrompt.addEventListener('click', copyToClipboard);
   btnClearBuilder.addEventListener('click', clearBuilder);
 
   /* =========================== SIDEBAR MODULE =========================== */
-
-  // لیست کامل ابزارها
   const MENU_TOOLS = [
-      { label: 'Codara Service Generator',    minRole: 'general',  link: 'https://arminsilatani.github.io/codara/', iconURL: 'assets/logos/Co.svg' },
-      { label: 'Nolvo Sitemap Builder',       minRole: 'general',  link: '', iconURL: 'assets/logos/No.svg' },
-      { label: 'Qerlo Shortener',             minRole: 'general',  link: '', iconURL: 'assets/logos/Qe.svg' },
-      { label: 'Tivra Minify',                minRole: 'general',  link: '', iconURL: 'assets/logos/Ti.svg' },
-      { label: 'Semora Schema Generator',     minRole: 'general',  link: '', iconURL: 'assets/logos/Se.svg' },
-      { label: 'Brilo Speed Check',           minRole: 'general',  link: '', iconURL: 'assets/logos/Br.svg' },
-      { label: 'Sorbi Robots Builder',        minRole: 'general',  link: '', iconURL: 'assets/logos/So.svg' },
-      { label: 'Velto Meta Inspector',        minRole: 'general',  link: '', iconURL: 'assets/logos/Ve.svg' },
-      { label: 'Zorio Image Converter',       minRole: 'recruit',  link: 'https://arminsilatani.github.io/zorio/', iconURL: 'assets/logos/Zo.svg' },
-      { label: 'Galvo Video Converter',       minRole: 'general',  link: '', iconURL: 'assets/logos/Ga.svg' },
-      { label: 'Xelpo Pass Generator',        minRole: 'general',  link: '', iconURL: 'assets/logos/Xe.svg' },
-      { label: 'Dirmo DNS Checker',           minRole: 'general',  link: '', iconURL: 'assets/logos/Di.svg' },
-      { label: 'Lemro Keyword Research',      minRole: 'general',  link: '', iconURL: 'assets/logos/Le.svg' },
-      { label: 'Hirvo Density',               minRole: 'general',  link: '', iconURL: 'assets/logos/Hi.svg' },
-      { label: 'Jorvi Redirect',              minRole: 'general',  link: '', iconURL: 'assets/logos/Jo.svg' },
-      { label: 'Mirto CRM',                   minRole: 'general',  link: '', iconURL: 'assets/logos/Mi.svg' },
-      { label: 'Ravlo Calendar',              minRole: 'sergeant', link: 'https://arminsilatani.github.io/ravlo/', iconURL: 'assets/logos/Ra.svg' },
-      { label: 'Rinvo Accounting',            minRole: 'general',  link: '', iconURL: 'assets/logos/Ri.svg' },
-      { label: 'Yelmo Brand Namer',           minRole: 'general',  link: '', iconURL: 'assets/logos/Ye.svg' },
-      { label: 'Cedro Flashcards',            minRole: 'general',  link: '', iconURL: 'assets/logos/Ce.svg' },
-      { label: 'Fresca Colors Tool',          minRole: 'general',  link: '', iconURL: 'assets/logos/Fr.svg' },
-      { label: 'Ubiro Beer Cost',             minRole: 'general',  link: '', iconURL: 'assets/logos/Ub.svg' },
-      { label: 'Refacto Code Beautifier',     minRole: 'general',  link: '', iconURL: 'assets/logos/Re.svg' },
-      { label: 'Pilvo Text Editor',           minRole: 'recruit',  link: 'https://arminsilatani.github.io/pilvo/', iconURL: 'assets/logos/Pi.svg' },
-      { label: 'Tavio Prompt Library',        minRole: 'recruit',  link: 'https://arminsilatani.github.io/tavio/', iconURL: 'assets/logos/Ta.svg' , isSelf: true },
-      { label: 'Falco Favicon Generator',     minRole: 'recruit',  link: 'https://arminsilatani.github.io/falco/', iconURL: 'assets/logos/Fa.svg' },
-      { label: 'Lume Epoch Converter',        minRole: 'recruit',  link: 'https://arminsilatani.github.io/lume/', iconURL: 'assets/logos/Lu.svg' },
-      { label: 'Valeno Expiry Date Reminder', minRole: 'general',  link: '', iconURL: 'assets/logos/Va.svg' },
-      { label: 'Alviano Recipe Manager',      minRole: 'general',  link: '', iconURL: 'assets/logos/Al.svg' },
-      { label: 'Mavero Workout Tracker',      minRole: 'general',  link: '', iconURL: 'assets/logos/Ma.svg' },
-      { label: 'Tempozio Time Tracker',       minRole: 'general',  link: '', iconURL: 'assets/logos/Te.svg' },
-      { label: 'Belluno Wishlist',            minRole: 'general',  link: '', iconURL: 'assets/logos/Be.svg' },
-      { label: 'Nuvello Wallpaper App',       minRole: 'general',  link: '', iconURL: 'assets/logos/Nu.svg' },
-      { label: 'Fiora Period Tracker',        minRole: 'general',  link: '', iconURL: 'assets/logos/Fi.svg' }
+    { label: 'Codara Service Generator',    minRole: 'general',  link: 'https://arminsilatani.github.io/codara/', iconURL: 'assets/logos/Co.svg' },
+    { label: 'Nolvo Sitemap Builder',       minRole: 'general',  link: '', iconURL: 'assets/logos/No.svg' },
+    { label: 'Qerlo Shortener',             minRole: 'general',  link: '', iconURL: 'assets/logos/Qe.svg' },
+    { label: 'Tivra Minify',                minRole: 'general',  link: '', iconURL: 'assets/logos/Ti.svg' },
+    { label: 'Semora Schema Generator',     minRole: 'general',  link: '', iconURL: 'assets/logos/Se.svg' },
+    { label: 'Brilo Speed Check',           minRole: 'general',  link: '', iconURL: 'assets/logos/Br.svg' },
+    { label: 'Sorbi Robots Builder',        minRole: 'general',  link: '', iconURL: 'assets/logos/So.svg' },
+    { label: 'Velto Meta Inspector',        minRole: 'general',  link: '', iconURL: 'assets/logos/Ve.svg' },
+    { label: 'Zorio Image Converter',       minRole: 'recruit',  link: 'https://arminsilatani.github.io/zorio/', iconURL: 'assets/logos/Zo.svg' },
+    { label: 'Galvo Video Converter',       minRole: 'general',  link: '', iconURL: 'assets/logos/Ga.svg' },
+    { label: 'Xelpo Pass Generator',        minRole: 'general',  link: '', iconURL: 'assets/logos/Xe.svg' },
+    { label: 'Dirmo DNS Checker',           minRole: 'general',  link: '', iconURL: 'assets/logos/Di.svg' },
+    { label: 'Lemro Keyword Research',      minRole: 'general',  link: '', iconURL: 'assets/logos/Le.svg' },
+    { label: 'Hirvo Density',               minRole: 'general',  link: '', iconURL: 'assets/logos/Hi.svg' },
+    { label: 'Jorvi Redirect',              minRole: 'general',  link: '', iconURL: 'assets/logos/Jo.svg' },
+    { label: 'Mirto CRM',                   minRole: 'general',  link: '', iconURL: 'assets/logos/Mi.svg' },
+    { label: 'Ravlo Calendar',              minRole: 'sergeant', link: 'https://arminsilatani.github.io/ravlo/', iconURL: 'assets/logos/Ra.svg' },
+    { label: 'Rinvo Accounting',            minRole: 'general',  link: '', iconURL: 'assets/logos/Ri.svg' },
+    { label: 'Yelmo Brand Namer',           minRole: 'general',  link: '', iconURL: 'assets/logos/Ye.svg' },
+    { label: 'Cedro Flashcards',            minRole: 'general',  link: '', iconURL: 'assets/logos/Ce.svg' },
+    { label: 'Fresca Colors Tool',          minRole: 'general',  link: '', iconURL: 'assets/logos/Fr.svg' },
+    { label: 'Ubiro Beer Cost',             minRole: 'general',  link: '', iconURL: 'assets/logos/Ub.svg' },
+    { label: 'Refacto Code Beautifier',     minRole: 'general',  link: '', iconURL: 'assets/logos/Re.svg' },
+    { label: 'Pilvo Text Editor',           minRole: 'recruit',  link: 'https://arminsilatani.github.io/pilvo/', iconURL: 'assets/logos/Pi.svg' },
+    { label: 'Tavio Prompt Library',        minRole: 'recruit',  link: 'https://arminsilatani.github.io/tavio/', iconURL: 'assets/logos/Ta.svg' , isSelf: true },
+    { label: 'Falco Favicon Generator',     minRole: 'recruit',  link: 'https://arminsilatani.github.io/falco/', iconURL: 'assets/logos/Fa.svg' },
+    { label: 'Lume Epoch Converter',        minRole: 'recruit',  link: 'https://arminsilatani.github.io/lume/', iconURL: 'assets/logos/Lu.svg' },
+    { label: 'Valeno Expiry Date Reminder', minRole: 'general',  link: '', iconURL: 'assets/logos/Va.svg' },
+    { label: 'Alviano Recipe Manager',      minRole: 'general',  link: '', iconURL: 'assets/logos/Al.svg' },
+    { label: 'Mavero Workout Tracker',      minRole: 'general',  link: '', iconURL: 'assets/logos/Ma.svg' },
+    { label: 'Tempozio Time Tracker',       minRole: 'general',  link: '', iconURL: 'assets/logos/Te.svg' },
+    { label: 'Belluno Wishlist',            minRole: 'general',  link: '', iconURL: 'assets/logos/Be.svg' },
+    { label: 'Nuvello Wallpaper App',       minRole: 'general',  link: '', iconURL: 'assets/logos/Nu.svg' },
+    { label: 'Fiora Period Tracker',        minRole: 'general',  link: '', iconURL: 'assets/logos/Fi.svg' }
   ];
 
   const ROLE_LEVELS = {
@@ -611,22 +569,18 @@ document.addEventListener('DOMContentLoaded', () => {
   function renderSidebarTools(roleLevel) {
     const container = document.getElementById('sidebar-menu-items');
     if (!container) return;
-
     let html = '';
     MENU_TOOLS.forEach(tool => {
       const requiredLevel = getRoleLevel(tool.minRole);
       const hasAccess = roleLevel >= requiredLevel;
       const isDisabled = !tool.link || !hasAccess;
       const isSelf = tool.isSelf === true;
-
       let classes = 'sidebar-item';
       if (isDisabled) classes += ' disabled';
       if (isSelf) classes += ' active';
-
       const tag = tool.link ? 'a' : 'span';
       const hrefAttr = tool.link ? `href="${tool.link}" target="_blank" rel="noopener noreferrer"` : '';
       const tooltipHtml = !tool.link ? '<span class="coming-soon-tooltip">Soon</span>' : '';
-
       html += `
         <${tag} class="${classes}" ${hrefAttr}>
           <span class="sidebar-icon">
@@ -645,11 +599,8 @@ document.addEventListener('DOMContentLoaded', () => {
     const sidebar   = document.getElementById('sidebar');
     const overlay   = document.getElementById('sidebar-overlay');
     const closeRow  = document.getElementById('sidebar-close-row');
-
     if (!toggleBtn || !sidebar || !overlay || !closeRow) return;
-
     let isOpen = false;
-
     function openSidebar() {
       if (isOpen) return;
       isOpen = true;
@@ -657,7 +608,6 @@ document.addEventListener('DOMContentLoaded', () => {
       toggleBtn.classList.add('open');
       gsap.to(sidebar, { x: 0, duration: 0.5, ease: 'power3.out' });
     }
-
     function closeSidebar() {
       if (!isOpen) return;
       isOpen = false;
@@ -665,21 +615,13 @@ document.addEventListener('DOMContentLoaded', () => {
       toggleBtn.classList.remove('open');
       gsap.to(sidebar, { x: '-100%', duration: 0.4, ease: 'power3.in' });
     }
-
-    toggleBtn.addEventListener('click', () => {
-      isOpen ? closeSidebar() : openSidebar();
-    });
-
+    toggleBtn.addEventListener('click', () => { isOpen ? closeSidebar() : openSidebar(); });
     closeRow.addEventListener('click', closeSidebar);
     overlay.addEventListener('click', closeSidebar);
-
-    document.addEventListener('keydown', (e) => {
-      if (e.key === 'Escape' && isOpen) closeSidebar();
-    });
+    document.addEventListener('keydown', (e) => { if (e.key === 'Escape' && isOpen) closeSidebar(); });
   })();
 
-  /* =========================== AUTH MODULE (RAVLO FLOW + user_exists RPC) =========================== */
-
+  /* =========================== AUTH MODULE (NO RPC – uses profiles table) =========================== */
   const authOverlay       = document.getElementById('auth-overlay');
   const authStep1         = document.getElementById('step-1');
   const authStep2Login    = document.getElementById('step-2-login');
@@ -718,7 +660,7 @@ document.addEventListener('DOMContentLoaded', () => {
     if (stepEl) stepEl.classList.remove('hidden');
   }
 
-  // Continue – با RPC چک می‌کند کاربر وجود دارد یا خیر
+  // Continue – بررسی وجود ایمیل در جدول profiles
   if (authContinue) {
     authContinue.addEventListener('click', async () => {
       const email = authEmail.value.trim();
@@ -729,18 +671,25 @@ document.addEventListener('DOMContentLoaded', () => {
       authErrorEl.textContent = '';
 
       try {
-        const { data: userExists, error: rpcError } = await sb.rpc('user_exists', { email_input: email });
-        if (rpcError) {
-          console.error('RPC error:', rpcError);
-          authErrorEl.textContent = 'Service unavailable. Please try again.';
+        // جستجوی ایمیل در profiles
+        const { data, error } = await sb
+          .from('profiles')
+          .select('id')
+          .eq('email', email)
+          .limit(1);
+
+        if (error) {
+          console.error('Profile query error:', error);
+          authErrorEl.textContent = 'Something went wrong. Please try again.';
           return;
         }
 
-        if (userExists === true) {
+        if (data && data.length > 0) {
+          // کاربر وجود دارد – ورود
           authUserEmail.textContent = email;
           showStep('step-2-login');
         } else {
-          // کاربر جدید → ثبت‌نام
+          // کاربر جدید – ثبت‌نام
           showStep('step-2-register');
         }
       } catch (err) {
@@ -760,7 +709,6 @@ document.addEventListener('DOMContentLoaded', () => {
         return;
       }
       authErrorLogin.textContent = '';
-
       const { error } = await sb.auth.signInWithPassword({ email, password });
       if (error) {
         authErrorLogin.textContent = error.message;
@@ -778,7 +726,6 @@ document.addEventListener('DOMContentLoaded', () => {
       const confirm  = regConfirm.value;
       const first    = regFirstname.value.trim();
       const last     = regLastname.value.trim();
-
       if (!first || !last) {
         authErrorReg.textContent = 'Please fill in all fields.';
         return;
@@ -792,7 +739,6 @@ document.addEventListener('DOMContentLoaded', () => {
         return;
       }
       authErrorReg.textContent = '';
-
       const { error } = await sb.auth.signUp({
         email,
         password,
@@ -800,18 +746,15 @@ document.addEventListener('DOMContentLoaded', () => {
           data: { first_name: first, last_name: last }
         }
       });
-
       if (error) {
         authErrorReg.textContent = error.message;
         return;
       }
-
       document.getElementById('reg-form-fields').style.display = 'none';
       regSuccessEl.style.display = 'block';
     });
   }
 
-  // Go to Sign In (after registration success)
   if (regToLoginBtn) {
     regToLoginBtn.addEventListener('click', () => {
       regSuccessEl.style.display = 'none';
@@ -825,7 +768,6 @@ document.addEventListener('DOMContentLoaded', () => {
     });
   }
 
-  // Forgot password
   if (authForgotLink) {
     authForgotLink.addEventListener('click', (e) => {
       e.preventDefault();
@@ -842,9 +784,7 @@ document.addEventListener('DOMContentLoaded', () => {
         return;
       }
       const { error } = await sb.auth.resetPasswordForEmail(email);
-      authSuccessMsg.textContent = error
-        ? 'Error: ' + error.message
-        : 'If an account exists, a reset link has been sent.';
+      authSuccessMsg.textContent = error ? 'Error: ' + error.message : 'If an account exists, a reset link has been sent.';
     });
   }
 
@@ -872,7 +812,6 @@ document.addEventListener('DOMContentLoaded', () => {
     });
   });
 
-  // Overlay open/close
   function openAuthOverlay() {
     if (authOverlay) {
       authOverlay.style.display = 'flex';
@@ -892,7 +831,6 @@ document.addEventListener('DOMContentLoaded', () => {
     });
   }
 
-  // Sidebar login/logout buttons
   if (sidebarLoginBtn) {
     sidebarLoginBtn.addEventListener('click', () => openAuthOverlay());
   }
@@ -902,7 +840,7 @@ document.addEventListener('DOMContentLoaded', () => {
     });
   }
 
-  // Profile & role management
+  /* =========================== PROFILE & ROLE =========================== */
   let currentUserProfile = null;
 
   async function fetchProfile(userId) {
@@ -911,7 +849,6 @@ document.addEventListener('DOMContentLoaded', () => {
       .select('*')
       .eq('id', userId)
       .single();
-
     if (error || !data) {
       console.warn('Profile not found, using recruit fallback');
       return { role: 'recruit', first_name: '', last_name: '', email: '' };
@@ -924,27 +861,19 @@ document.addEventListener('DOMContentLoaded', () => {
       setLoggedOutUI();
       return;
     }
-
     if (!currentUserProfile || currentUserProfile.id !== user.id) {
       currentUserProfile = await fetchProfile(user.id);
     }
-
     const profile = currentUserProfile;
     const role = profile.role || 'recruit';
-
     sidebarLoginBtn.classList.add('hidden');
     sidebarLogoutBtn.classList.remove('hidden');
     sidebarDashboard.classList.remove('hidden');
-
     let avatarChar = '?';
-    if (profile.first_name) {
-      avatarChar = profile.first_name.charAt(0).toUpperCase();
-    } else if (user.email) {
-      avatarChar = user.email.charAt(0).toUpperCase();
-    }
+    if (profile.first_name) avatarChar = profile.first_name.charAt(0).toUpperCase();
+    else if (user.email) avatarChar = user.email.charAt(0).toUpperCase();
     if (avatarContent) avatarContent.textContent = avatarChar;
     if (notifDot) notifDot.style.display = 'none';
-
     currentUserRoleLevel = getRoleLevel(role);
     renderSidebarTools(currentUserRoleLevel);
   }
