@@ -1117,7 +1117,7 @@ body {
   display: flex;
   align-items: center;
   justify-content: flex-start;  /* چپ‌چین */
-  padding: 17px 16px 2px 64px; /* فاصلهٔ یکسان از چپ و راست */
+  padding: 19px 16px 2px 64px; /* فاصلهٔ یکسان از چپ و راست */
   margin-bottom: 12px;
   border-radius: 12px;
   background: transparent;
