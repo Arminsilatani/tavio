@@ -43,7 +43,45 @@ const MENU_TOOLS = [
     { label: 'Nuvello Wallpaper App',       minRole: 'general',  link: '', iconURL: 'assets/logos/Nu.svg' },
     { label: 'Fiora Period Tracker',        minRole: 'general',  link: '', iconURL: 'assets/logos/Fi.svg' }
 ];
+function renderSidebarTools() {
+    const container = document.getElementById('sidebar-menu-items');
+    if (!container) return;
 
+    // در اینجا می‌تونی بر اساس نقش کاربر فیلتر کنی (فعلاً همه نمایش داده می‌شوند)
+    const tools = MENU_TOOLS;
+
+    let html = '';
+    tools.forEach(tool => {
+        const isDisabled = !tool.link;                    // بدون لینک = disabled
+        const isComingSoon = !tool.link;                  // می‌تونی شرط متفاوتی بذاری
+        const isSelf = tool.isSelf === true;              // ابزار جاری
+
+        let classes = 'sidebar-item';
+        if (isDisabled) classes += ' disabled';
+        if (isComingSoon && !isDisabled) classes += ' coming-soon';  // اگر coming-soon جدا از disabled باشه
+        if (isSelf) classes += ' active';                // کلاس اکتیو برای ابزار جاری
+
+        // اگر لینک نداره، تگ <span> در غیر این صورت <a>
+        const tag = tool.link ? 'a' : 'span';
+        const hrefAttr = tool.link ? `href="${tool.link}" target="_blank" rel="noopener noreferrer"` : '';
+        const roleHint = isComingSoon && !isDisabled ? '<span class="coming-soon-tooltip">Soon</span>' : '';
+
+        html += `
+            <${tag} class="${classes}" ${hrefAttr}>
+                <span class="sidebar-icon">
+                    <img src="${tool.iconURL}" alt="${tool.label}" width="20" height="20" onerror="this.style.display='none'" />
+                </span>
+                <span>${tool.label}</span>
+                ${roleHint}
+            </${tag}>
+        `;
+    });
+
+    container.innerHTML = html;
+}
+
+// صدا زدن تابع بعد از لود صفحه
+renderSidebarTools();
 document.addEventListener('DOMContentLoaded', () => {
   console.log('Tavio: DOM loaded');
 
