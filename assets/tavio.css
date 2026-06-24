@@ -1281,6 +1281,177 @@ body {
 .sidebar-nav {
   overflow-x: hidden;
 }
+/* =========================== AUTH OVERLAY =========================== */
+#auth-overlay {
+  display: none;                /* در ابتدا مخفی است */
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.7);
+  backdrop-filter: blur(6px);
+  z-index: 20;                 /* بالاتر از سایدبار */
+  justify-content: center;
+  align-items: center;
+}
+
+#auth-overlay.open {
+  display: flex;
+}
+
+.auth-box {
+  background: rgba(255, 255, 255, 0.03);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 20px;
+  padding: 40px 32px;
+  width: 100%;
+  max-width: 380px;
+  text-align: center;
+  backdrop-filter: blur(10px);
+}
+
+.auth-box img {
+  height: 44px;
+  margin-bottom: 16px;
+}
+
+.auth-box h2 {
+  font-size: 22px;
+  font-weight: 900;
+  margin-bottom: 4px;
+  color: var(--text);
+}
+
+.auth-box .sub {
+  font-size: 13px;
+  color: #888;
+  margin-bottom: 24px;
+}
+
+/* ----- STEP & FORM ----- */
+.auth-step {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.auth-user-email {
+  font-size: 14px;
+  color: #aaa;
+  text-align: left;
+  margin-bottom: 4px;
+}
+
+.auth-field {
+  width: 100%;
+  padding: 12px 16px;
+  background: #1a1a1a;
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 10px;
+  color: var(--text);
+  font-size: 14px;
+  font-family: inherit;
+  margin-bottom: 0;
+  outline: none;
+  transition: border-color 0.2s;
+}
+
+.auth-field:focus {
+  border-color: var(--accent);
+}
+
+/* ----- BUTTONS ----- */
+.accent-btn {
+  background: var(--accent);
+  border: none;
+  border-radius: 10px;
+  color: #fff;
+  font-family: inherit;
+  font-size: 16px;
+  font-weight: 400;
+  padding: 12px 20px;
+  cursor: pointer;
+  transition: opacity 0.2s, transform 0.1s, box-shadow 0.2s;
+  box-shadow: 0 4px 12px rgba(255, 111, 145, 0.25); /* fallback */
+  width: 100%;
+}
+
+.accent-btn:hover {
+  opacity: 0.9;
+  box-shadow: 0 6px 16px rgba(255, 111, 145, 0.4);
+}
+
+.accent-btn:active {
+  transform: scale(0.98);
+}
+
+/* ----- PASSWORD TOGGLE ----- */
+.password-field-wrapper {
+  position: relative;
+  display: flex;
+  align-items: center;
+}
+
+.password-field-wrapper .auth-field {
+  padding-right: 44px;
+  margin-bottom: 0;
+}
+
+.toggle-password-btn {
+  position: absolute;
+  right: 8px;
+  top: 50%;
+  transform: translateY(-50%);
+  background: none;
+  border: none;
+  color: #888;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: color 0.2s;
+  padding: 4px;
+}
+
+.toggle-password-btn:hover {
+  color: #fff;
+}
+
+.toggle-password-btn .eye-open,
+.toggle-password-btn .eye-closed {
+  width: 20px;
+  height: 20px;
+}
+
+/* ----- LINKS ----- */
+.auth-forgot-link {
+  font-size: 12px;
+  color: var(--accent);
+  text-decoration: none;
+  cursor: pointer;
+  align-self: flex-end;
+}
+
+.auth-back-link {
+  font-size: 12px;
+  color: var(--accent);
+  text-decoration: none;
+  cursor: pointer;
+  margin-top: 8px;
+  display: inline-block;
+}
+
+/* ----- ERROR & SUCCESS ----- */
+.auth-error {
+  color: #ff6b6b;
+  font-size: 12px;
+  min-height: 18px;
+  margin-top: 8px;
+}
+
+.auth-success {
+  color: #4ecdc4;
+  font-size: 13px;
+  margin-top: 8px;
+}
 /* =========================== RESPONSIVE =========================== */
 
 @media (max-width: 640px) {
