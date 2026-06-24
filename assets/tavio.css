@@ -1471,7 +1471,12 @@ body {
         min-height: 50vh;
     }
 }
-
+#sidebar-login,
+#sidebar-logout,
+#sidebar-coffee {
+  margin-left: -10px;
+  /* فضای از دست رفته را به پدینگ راست کانتینر اضافه می‌کنیم */
+}
 /* =========================== FOOTER =========================== */
 
 .footer {
