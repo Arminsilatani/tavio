@@ -548,8 +548,12 @@ if (prompt.description) {
   btnCopyPrompt.addEventListener('click', copyToClipboard);
   btnClearBuilder.addEventListener('click', clearBuilder);
 
-  /* ------------------------- INIT ------------------------- */
-  loadPrompts();
-  renderAll();
-  console.log('Tavio: Initialization complete.');
-});
+/* ------------------------- INIT ------------------------- */
+loadPrompts();
+renderAll();
+console.log('Tavio: Initialization complete.');
+
+const loader = document.getElementById('initial-loader');
+if (loader) {
+  loader.classList.add('hidden');
+}
