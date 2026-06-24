@@ -1,8 +1,8 @@
 /*****************************************************
-  *  Author: Armin Silatani
-  *  Date: 2026-05-28
-  *  Version: 1.0.0
-  ****************************************************
+ *  Author: Armin Silatani
+ *  Date: 2026-05-28
+ *  Version: 1.0.0
+ ****************************************************
 */
 
 /* =========================== TAVIO APP ============================ */
@@ -94,6 +94,8 @@ document.addEventListener('DOMContentLoaded', () => {
     try {
       const raw = localStorage.getItem(STORAGE_KEY);
       if (!raw) {
+        // اگر defaultPrompts تعریف نشده، این خط خطا می‌ده.
+        // آن را در جایی قبل از این تابع تعریف کنید یا با آرایه خالی جایگزین کنید.
         prompts = defaultPrompts.map(p => ({ ...p }));
         saveToStorage();
         return;
@@ -371,96 +373,93 @@ document.addEventListener('DOMContentLoaded', () => {
   }
 
   function openBuilder(id) {
-  const prompt = prompts.find(p => p.id === id);
-  if (!prompt) return;
-  currentPromptId = id;
-  builderTitle.textContent = prompt.name;
-  // نمایش توضیحات
-if (prompt.description) {
-  promptDescription.textContent = prompt.description;
-} else {
-  promptDescription.textContent = '';
-}
+    const prompt = prompts.find(p => p.id === id);
+    if (!prompt) return;
+    currentPromptId = id;
+    builderTitle.textContent = prompt.name;
+    // نمایش توضیحات
+    if (prompt.description) {
+      promptDescription.textContent = prompt.description;
+    } else {
+      promptDescription.textContent = '';
+    }
 
-  // ----- AI Models (تمام عرض) -----
-  let aiHtml = '<div class="ai-status-section"><h4>AI Models</h4><div class="ai-status-list">';
-  (prompt.ais || []).forEach(aiId => {
-    const model = ALL_AI_MODELS.find(m => m.id === aiId);
-    const name = model ? model.name : aiId;
-    const isActive = model ? model.active : true;
-    const statusClass = isActive ? 'ai-active' : 'ai-inactive';
-    aiHtml += `<span class="ai-status-chip ${statusClass}">${escapeHtml(name)}</span>`;
-  });
-  aiHtml += '</div></div>';
-  aiModelsFull.innerHTML = aiHtml;
+    // ----- AI Models (تمام عرض) -----
+    let aiHtml = '<div class="ai-status-section"><h4>AI Models</h4><div class="ai-status-list">';
+    (prompt.ais || []).forEach(aiId => {
+      const model = ALL_AI_MODELS.find(m => m.id === aiId);
+      const name = model ? model.name : aiId;
+      const isActive = model ? model.active : true;
+      const statusClass = isActive ? 'ai-active' : 'ai-inactive';
+      aiHtml += `<span class="ai-status-chip ${statusClass}">${escapeHtml(name)}</span>`;
+    });
+    aiHtml += '</div></div>';
+    aiModelsFull.innerHTML = aiHtml;
 
-  // ----- ورودی‌های placeholder (بدون بخش AI) -----
-  const placeholders = extractPlaceholders(prompt.template);
-  let fieldsHtml = '';
-  if (placeholders.length === 0) {
-    fieldsHtml = '<p style="opacity:0.7;">This prompt has no placeholders. You can use it as is.</p>';
-  } else {
-    fieldsHtml = placeholders.map(ph => {
-      const isLong = /faq|anchor|full article|full persian article|full translated text|image description/i.test(ph);
-      const tag = isLong ? 'textarea' : 'input';
-      const extra = isLong ? ' rows="4"' : ' type="text"';
-      return `
-        <div class="placeholder-field">
-          <label for="input_${escapeHtml(ph)}">${escapeHtml(ph)}</label>
-          <${tag}${extra} id="input_${escapeHtml(ph)}" placeholder="Enter ${escapeHtml(ph)}" autocomplete="off"></${tag}>
-        </div>
-      `;
-    }).join('');
+    // ----- ورودی‌های placeholder -----
+    const placeholders = extractPlaceholders(prompt.template);
+    let fieldsHtml = '';
+    if (placeholders.length === 0) {
+      fieldsHtml = '<p style="opacity:0.7;">This prompt has no placeholders. You can use it as is.</p>';
+    } else {
+      fieldsHtml = placeholders.map(ph => {
+        const isLong = /faq|anchor|full article|full persian article|full translated text|image description/i.test(ph);
+        const tag = isLong ? 'textarea' : 'input';
+        const extra = isLong ? ' rows="4"' : ' type="text"';
+        return `
+          <div class="placeholder-field">
+            <label for="input_${escapeHtml(ph)}">${escapeHtml(ph)}</label>
+            <${tag}${extra} id="input_${escapeHtml(ph)}" placeholder="Enter ${escapeHtml(ph)}" autocomplete="off"></${tag}>
+          </div>
+        `;
+      }).join('');
+    }
+    placeholderInputs.innerHTML = fieldsHtml;
+
+    // فعال‌سازی حالت builder (افزایش عرض)
+    document.querySelector('.container').classList.add('builder-mode');
+
+    generatedPrompt.value = '';
+    libraryView.classList.add('hidden');
+    builderView.classList.remove('hidden');
   }
-  placeholderInputs.innerHTML = fieldsHtml;
-
-  // ----- فعال‌سازی حالت builder (افزایش عرض) -----
-  document.querySelector('.container').classList.add('builder-mode');
-
-  generatedPrompt.value = '';
-  libraryView.classList.add('hidden');
-  builderView.classList.remove('hidden');
-}
 
   function generatePrompt() {
-  const prompt = prompts.find(p => p.id === currentPromptId);
-  if (!prompt) return;
-  const placeholders = extractPlaceholders(prompt.template);
-  let filled = prompt.template;
+    const prompt = prompts.find(p => p.id === currentPromptId);
+    if (!prompt) return;
+    const placeholders = extractPlaceholders(prompt.template);
+    let filled = prompt.template;
 
-  placeholders.forEach(ph => {
-    const el = document.getElementById(`input_${ph}`);
-    const val = el ? el.value : '';
-    const escapedPh = ph.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
-    const regex = new RegExp(`{{${escapedPh}}}`, 'gi');
-    filled = filled.replace(regex, val || `{{${ph}}}`);
-  });
+    placeholders.forEach(ph => {
+      const el = document.getElementById(`input_${ph}`);
+      const val = el ? el.value : '';
+      const escapedPh = ph.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+      const regex = new RegExp(`{{${escapedPh}}}`, 'gi');
+      filled = filled.replace(regex, val || `{{${ph}}}`);
+    });
 
-  // لغو تایپ قبلی
-  if (typingTimer) clearInterval(typingTimer);
+    // لغو تایپ قبلی
+    if (typingTimer) clearInterval(typingTimer);
 
-  // نمایش و اسکرول به خروجی
-  generatedPrompt.value = '';
-  generatedPrompt.classList.add('typing');
-  
-  // اسکرول نرم به باکس خروجی
-  generatedPrompt.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+    generatedPrompt.value = '';
+    generatedPrompt.classList.add('typing');
+    generatedPrompt.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
 
-  let i = 0;
-  const chars = filled.split('');
-  const speed = 5; // میلی‌ثانیه
+    let i = 0;
+    const chars = filled.split('');
+    const speed = 5;
 
-  typingTimer = setInterval(() => {
-    if (i < chars.length) {
-      generatedPrompt.value += chars[i];
-      generatedPrompt.scrollTop = generatedPrompt.scrollHeight;
-      i++;
-    } else {
-      clearInterval(typingTimer);
-      generatedPrompt.classList.remove('typing');
-    }
-  }, speed);
-}
+    typingTimer = setInterval(() => {
+      if (i < chars.length) {
+        generatedPrompt.value += chars[i];
+        generatedPrompt.scrollTop = generatedPrompt.scrollHeight;
+        i++;
+      } else {
+        clearInterval(typingTimer);
+        generatedPrompt.classList.remove('typing');
+      }
+    }, speed);
+  }
 
   function copyToClipboard() {
     generatedPrompt.select();
@@ -531,29 +530,31 @@ if (prompt.description) {
   });
 
   btnBackToLibrary.addEventListener('click', () => {
-  builderView.classList.add('hidden');
-  libraryView.classList.remove('hidden');
-  currentPromptId = null;
-  placeholderInputs.innerHTML = '';
-  aiModelsFull.innerHTML = '';   // پاک‌سازی بخش AI
-  generatedPrompt.value = '';
-  document.querySelector('.container').classList.remove('builder-mode'); // بازگشت عرض
-  if (typingTimer) {
-    clearInterval(typingTimer);
-    generatedPrompt.classList.remove('typing');
-  }
-});
+    builderView.classList.add('hidden');
+    libraryView.classList.remove('hidden');
+    currentPromptId = null;
+    placeholderInputs.innerHTML = '';
+    aiModelsFull.innerHTML = '';
+    generatedPrompt.value = '';
+    document.querySelector('.container').classList.remove('builder-mode');
+    if (typingTimer) {
+      clearInterval(typingTimer);
+      generatedPrompt.classList.remove('typing');
+    }
+  });
 
   btnGeneratePrompt.addEventListener('click', generatePrompt);
   btnCopyPrompt.addEventListener('click', copyToClipboard);
   btnClearBuilder.addEventListener('click', clearBuilder);
 
-/* ------------------------- INIT ------------------------- */
-loadPrompts();
-renderAll();
-console.log('Tavio: Initialization complete.');
+  /* ------------------------- INIT ------------------------- */
+  loadPrompts();
+  renderAll();
+  console.log('Tavio: Initialization complete.');
 
-const loader = document.getElementById('initial-loader');
-if (loader) {
-  loader.classList.add('hidden');
-}
+  const loader = document.getElementById('initial-loader');
+  if (loader) {
+    loader.classList.add('hidden');
+  }
+
+});
