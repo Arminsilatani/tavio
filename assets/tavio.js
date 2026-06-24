@@ -718,12 +718,10 @@ document.addEventListener('DOMContentLoaded', () => {
     });
   })();
 
-  /* =========================== AUTH MODULE (ECOSYSTEM – reads from profiles) =========================== */
+  /* =========================== AUTH MODULE (FINAL FIX) =========================== */
 
-  // کش پروفایل برای جلوگیری از fetch اضافی
   let currentUserProfile = null;
 
-  // دریافت پروفایل از جدول public.profiles
   async function fetchProfile(userId) {
     const { data, error } = await sb
       .from('profiles')
@@ -732,20 +730,18 @@ document.addEventListener('DOMContentLoaded', () => {
       .single();
 
     if (error || !data) {
-      console.warn('Profile not found, fallback to recruit');
-      return { role: 'recruit', first_name: '', last_name: '' };
+      console.warn('Profile not found, using recruit fallback');
+      return { role: 'recruit', first_name: '', last_name: '', email: '' };
     }
     return data;
   }
 
-  // به‌روزرسانی UI بر اساس پروفایل
   async function applyUserProfile(user) {
     if (!user) {
       setLoggedOutUI();
       return;
     }
 
-    // فقط در صورت تغییر کاربر دوباره fetch کن
     if (!currentUserProfile || currentUserProfile.id !== user.id) {
       currentUserProfile = await fetchProfile(user.id);
     }
@@ -753,12 +749,10 @@ document.addEventListener('DOMContentLoaded', () => {
     const profile = currentUserProfile;
     const role = profile.role || 'recruit';
 
-    // نمایش المان‌های کاربر لاگین‌شده
     sidebarLoginBtn.classList.add('hidden');
     sidebarLogoutBtn.classList.remove('hidden');
     sidebarDashboard.classList.remove('hidden');
 
-    // آواتار: حرف اول نام کوچک (در صورت وجود)، در غیر این صورت حرف اول ایمیل
     let avatarChar = '?';
     if (profile.first_name) {
       avatarChar = profile.first_name.charAt(0).toUpperCase();
@@ -768,13 +762,10 @@ document.addEventListener('DOMContentLoaded', () => {
     if (avatarContent) avatarContent.textContent = avatarChar;
     if (notifDot) notifDot.style.display = 'none';
 
-    // تنظیم سطح دسترسی از نقش پروفایل
-    const roleLevel = getRoleLevel(role);
-    currentUserRoleLevel = roleLevel;
-    renderSidebarTools(roleLevel);
+    currentUserRoleLevel = getRoleLevel(role);
+    renderSidebarTools(currentUserRoleLevel);
   }
 
-  // رابط کاربری حالت مهمان
   function setLoggedOutUI() {
     sidebarLoginBtn.classList.remove('hidden');
     sidebarLogoutBtn.classList.add('hidden');
@@ -785,19 +776,16 @@ document.addEventListener('DOMContentLoaded', () => {
     renderSidebarTools(-1);
   }
 
-  // بررسی نشست هنگام بارگذاری صفحه
   async function checkUser() {
     const { data: { session } } = await sb.auth.getSession();
     await applyUserProfile(session?.user ?? null);
   }
 
-  // گوش دادن به تغییرات ورود/خروج
   sb.auth.onAuthStateChange(async (event, session) => {
     await applyUserProfile(session?.user ?? null);
   });
 
-  // ---------- بخش‌های بدون تغییر (overlay، گام‌ها، event listenerها) ----------
-  // باز کردن overlay احراز هویت
+  // ---------- Overlay controls (unchanged) ----------
   function openAuthOverlay() {
     if (authOverlay) {
       authOverlay.style.display = 'flex';
@@ -808,9 +796,7 @@ document.addEventListener('DOMContentLoaded', () => {
   }
 
   function closeAuthOverlay() {
-    if (authOverlay) {
-      authOverlay.style.display = 'none';
-    }
+    if (authOverlay) authOverlay.style.display = 'none';
   }
 
   if (authOverlay) {
@@ -827,7 +813,7 @@ document.addEventListener('DOMContentLoaded', () => {
     if (stepEl) stepEl.style.display = 'flex';
   }
 
-  // مرحله ۱: ادامه با ایمیل
+  // ---------- مرحله ۱: ادامه با ایمیل (بررسی واقعی با RPC) ----------
   if (authContinueBtn) {
     authContinueBtn.addEventListener('click', async () => {
       const email = authEmailInput.value.trim();
@@ -837,19 +823,29 @@ document.addEventListener('DOMContentLoaded', () => {
       }
       authEmailError.textContent = '';
 
-      // TODO: جایگزینی با بررسی واقعی (مثلاً یک RPC)
-      const userExists = email.includes('exist'); // موقت
-      if (userExists) {
-        if (userEmailDisplay) userEmailDisplay.textContent = email;
-        showStep('step-2-login');
-      } else {
-        if (userEmailDisplayReg) userEmailDisplayReg.textContent = email;
-        showStep('step-2-register');
+      try {
+        const { data: userExists, error: rpcError } = await sb.rpc('user_exists', { email_input: email });
+        if (rpcError) {
+          console.error('RPC error:', rpcError);
+          authEmailError.textContent = 'Could not verify email. Try again.';
+          return;
+        }
+
+        if (userExists === true) {
+          if (userEmailDisplay) userEmailDisplay.textContent = email;
+          showStep('step-2-login');
+        } else {
+          if (userEmailDisplayReg) userEmailDisplayReg.textContent = email;
+          showStep('step-2-register');
+        }
+      } catch (err) {
+        console.error(err);
+        authEmailError.textContent = 'Network error. Please try later.';
       }
     });
   }
 
-  // ورود
+  // ---------- ورود ----------
   if (authSigninBtn) {
     authSigninBtn.addEventListener('click', async () => {
       const email = authEmailInput.value.trim();
@@ -866,11 +862,10 @@ document.addEventListener('DOMContentLoaded', () => {
         return;
       }
       closeAuthOverlay();
-      // UI توسط onAuthStateChange به‌روز می‌شود
     });
   }
 
-  // ثبت‌نام
+  // ---------- ثبت‌نام ----------
   if (authRegisterBtn) {
     authRegisterBtn.addEventListener('click', async () => {
       const email = authEmailInput.value.trim();
@@ -893,11 +888,7 @@ document.addEventListener('DOMContentLoaded', () => {
         email,
         password,
         options: {
-          data: {
-            first_name: firstname,
-            last_name: lastname
-            // role دیگر اینجا ذخیره نمی‌شود؛ توسط تریگر دیتابیس مدیریت می‌شود
-          }
+          data: { first_name: firstname, last_name: lastname }
         }
       });
 
@@ -912,7 +903,7 @@ document.addEventListener('DOMContentLoaded', () => {
     });
   }
 
-  // بازگشت از ثبت‌نام موفق به مرحله اول
+  // ---------- بازگشت از ثبت‌نام به مرحله اول ----------
   if (regToLoginBtn) {
     regToLoginBtn.addEventListener('click', () => {
       if (regSuccess) regSuccess.style.display = 'none';
@@ -926,7 +917,7 @@ document.addEventListener('DOMContentLoaded', () => {
     });
   }
 
-  // فراموشی رمز عبور
+  // ---------- فراموشی رمز عبور ----------
   if (authForgotLink) {
     authForgotLink.addEventListener('click', () => {
       if (forgotEmail) forgotEmail.value = authEmailInput.value.trim();
@@ -944,24 +935,19 @@ document.addEventListener('DOMContentLoaded', () => {
         }
         return;
       }
-
       const { error } = await sb.auth.resetPasswordForEmail(email);
       if (forgotSuccess) {
-        forgotSuccess.textContent = error
-          ? 'Error: ' + error.message
-          : 'If an account exists, a reset link has been sent.';
+        forgotSuccess.textContent = error ? 'Error: ' + error.message : 'If an account exists, a reset link has been sent.';
         forgotSuccess.style.display = 'block';
       }
     });
   }
 
   if (authBackToLogin) {
-    authBackToLogin.addEventListener('click', () => {
-      showStep('step-2-login');
-    });
+    authBackToLogin.addEventListener('click', () => showStep('step-2-login'));
   }
 
-  // دکمه نمایش/مخفی رمز عبور
+  // ---------- دکمه نمایش/مخفی رمز ----------
   document.querySelectorAll('.toggle-password-btn').forEach(btn => {
     btn.addEventListener('click', () => {
       const targetId = btn.dataset.target;
@@ -982,18 +968,13 @@ document.addEventListener('DOMContentLoaded', () => {
     });
   });
 
-  // اتصال دکمه Sign In سایدبار به overlay
+  // ---------- دکمه‌های سایدبار ----------
   if (sidebarLoginBtn) {
-    sidebarLoginBtn.addEventListener('click', () => {
-      openAuthOverlay();
-    });
+    sidebarLoginBtn.addEventListener('click', () => openAuthOverlay());
   }
-
-  // دکمه Logout سایدبار
   if (sidebarLogoutBtn) {
     sidebarLogoutBtn.addEventListener('click', async () => {
       await sb.auth.signOut();
-      // UI توسط onAuthStateChange به‌طور خودکار به حالت مهمان برمی‌گردد
     });
   }
   /* ------------------------- INIT & LOADER ------------------------- */
