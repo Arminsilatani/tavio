@@ -1358,10 +1358,6 @@ body {
   border-color: var(--accent);
 }
 
-.auth-box img {
-  height: 44px;       /* ارتفاع ثابت، مثل Ravlo */
-  width: auto;        /* نسبت تصویر حفظ شود */
-}
 
 /* لوگوی ورود */
 .auth-logo {
