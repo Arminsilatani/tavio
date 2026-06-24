@@ -138,10 +138,10 @@
 
 <!-- =========================== BODY ============================ -->
 <body>
-<!-- =========================== AUTH OVERLAY (TAVIO – SAME AS RAVLO) ============================ -->
+<!-- =========================== AUTH OVERLAY (EXACT RAVLO) ============================ -->
 <div id="auth-overlay">
     <div class="auth-box">
-        <img src="assets/Ta.svg" alt="Tavio" onerror="this.style.display='none'">
+        <img src="assets/Ta.svg" alt="Tavio" class="auth-logo" onerror="this.style.display='none'">
         <h2>Tavio</h2>
         <p class="sub">Sign in to manage your prompts</p>
 
@@ -190,7 +190,6 @@
                 <button id="auth-register-btn" class="accent-btn">Create Account</button>
             </div>
 
-            <!-- Success message (hidden) -->
             <div id="reg-success" style="display:none; text-align:center;">
                 <p class="reg-success-text">We've sent a confirmation link to your email.<br>Check your inbox and click the link to activate your account.</p>
                 <button id="reg-to-login-btn" class="accent-btn" style="width:auto; margin-top:16px;">Go to Sign In</button>
@@ -199,7 +198,7 @@
             <div class="auth-error" id="auth-error-register"></div>
         </div>
 
-        <!-- Forgot password form (swapped in step 2) -->
+        <!-- Forgot password -->
         <div id="step-forgot" class="auth-step hidden">
             <p class="auth-hint">Enter your email to receive a reset link.</p>
             <input type="email" id="forgot-email" class="auth-field" placeholder="Email" required>
