@@ -9,10 +9,8 @@
 
 /* :::::::::::::::::::::::::: SUPABASE CLIENT :::::::::::::::::::::::::: */
 const SUPABASE_URL = 'https://vzqicidepdmraygulrey.supabase.co';
-const SUPABASE_ANON_KEY = 'sb_publishable_kqRWgOmLISOE2EuLL1s8fw_WN6FJRTI';
-const {
-    createClient
-} = supabase;
+const SUPABASE_ANON_KEY = 'sb_publishable_kqRWgOmLISOE2EuLL1s8fw_NW6FJRTI';
+const { createClient } = supabase;
 const sb = createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
 document.addEventListener('DOMContentLoaded', () => {
@@ -185,47 +183,45 @@ document.addEventListener('DOMContentLoaded', () => {
   const aiModelsFull = document.getElementById('aiModelsFull');
   const promptDescription = document.getElementById('promptDescription');
 
-const sidebarLoginBtn   = document.getElementById('sidebar-login');
-const sidebarLogoutBtn  = document.getElementById('sidebar-logout');
-const sidebarDashboard  = document.getElementById('sidebar-dashboard');
-const avatarContent     = document.querySelector('.avatar-content');
-const notifDot          = document.getElementById('avatar-notif-dot');
+  /* ------------------------- AUTH UI ELEMENTS ------------------------- */
+  const sidebarLoginBtn   = document.getElementById('sidebar-login');
+  const sidebarLogoutBtn  = document.getElementById('sidebar-logout');
+  const sidebarDashboard  = document.getElementById('sidebar-dashboard');
+  const avatarContent     = document.querySelector('.avatar-content');
+  const notifDot          = document.getElementById('avatar-notif-dot');
 
-function setLoggedOutUI() {
-  sidebarLoginBtn.classList.remove('hidden');
-  sidebarLogoutBtn.classList.add('hidden');
-  sidebarDashboard.classList.add('hidden');
-}
+  /* ------------------------- AUTH OVERLAY ELEMENTS ------------------------- */
+  const authOverlay = document.getElementById('auth-overlay');
+  const step1 = document.getElementById('step-1');
+  const step2Login = document.getElementById('step-2-login');
+  const step2Register = document.getElementById('step-2-register');
+  const stepForgot = document.getElementById('step-forgot');
 
-function setLoggedInUI(user) {
-  sidebarLoginBtn.classList.add('hidden');
-  sidebarLogoutBtn.classList.remove('hidden');
-  sidebarDashboard.classList.remove('hidden');
+  const authEmailInput = document.getElementById('auth-email');
+  const authContinueBtn = document.getElementById('auth-continue-btn');
+  const authEmailError = document.getElementById('auth-email-error');
 
-  const initial = user.email ? user.email.charAt(0).toUpperCase() : '?';
-  avatarContent.textContent = initial;
+  const userEmailDisplay = document.getElementById('auth-user-email-display');
+  const authPasswordLogin = document.getElementById('auth-password-login');
+  const authSigninBtn = document.getElementById('auth-signin-btn');
+  const authForgotLink = document.getElementById('auth-forgot-link');
+  const authLoginError = document.getElementById('auth-login-error');
 
-  notifDot.style.display = 'none';
-}
+  const userEmailDisplayReg = document.getElementById('auth-user-email-display-reg');
+  const authFirstname = document.getElementById('auth-firstname');
+  const authLastname = document.getElementById('auth-lastname');
+  const authPasswordReg = document.getElementById('auth-password-reg');
+  const authConfirmPassword = document.getElementById('auth-confirm-password');
+  const authRegisterBtn = document.getElementById('auth-register-btn');
+  const authRegisterError = document.getElementById('auth-register-error');
+  const regSuccess = document.getElementById('reg-success');
+  const regToLoginBtn = document.getElementById('reg-to-login-btn');
 
-async function checkUser() {
-  const { data: { session } } = await supabase.auth.getSession();
-  if (session?.user) {
-    setLoggedInUI(session.user);
-  } else {
-    setLoggedOutUI();
-  }
-}
+  const forgotEmail = document.getElementById('forgot-email');
+  const authSendResetBtn = document.getElementById('auth-send-reset-btn');
+  const forgotSuccess = document.getElementById('forgot-success');
+  const authBackToLogin = document.getElementById('auth-back-to-login');
 
-supabase.auth.onAuthStateChange((event, session) => {
-  if (session?.user) {
-    setLoggedInUI(session.user);
-  } else {
-    setLoggedOutUI();
-  }
-});
-
-checkUser();
   /* ------------------------- UTILS ------------------------- */
   const escapeHtml = (text) => {
     const div = document.createElement('div');
@@ -594,7 +590,7 @@ checkUser();
 
   /* =========================== SIDEBAR MODULE =========================== */
 
-  // لیست کامل ابزارها (دقیقاً همان که قبلاً فرستاده بودی)
+  // لیست کامل ابزارها
   const MENU_TOOLS = [
       { label: 'Codara Service Generator',    minRole: 'general',  link: 'https://arminsilatani.github.io/codara/', iconURL: 'assets/logos/Co.svg' },
       { label: 'Nolvo Sitemap Builder',       minRole: 'general',  link: '', iconURL: 'assets/logos/No.svg' },
@@ -670,7 +666,6 @@ checkUser();
       if (e.key === 'Escape' && isOpen) closeSidebar();
     });
 
-    // رندر ابزارهای منو
     function renderSidebarTools() {
       const tools = MENU_TOOLS;
       let html = '';
@@ -704,9 +699,233 @@ checkUser();
     renderSidebarTools();
   })();
 
+  /* =========================== AUTH MODULE =========================== */
+
+  // وضعیت اولیه رابط کاربری سایدبار
+  function setLoggedOutUI() {
+    sidebarLoginBtn.classList.remove('hidden');
+    sidebarLogoutBtn.classList.add('hidden');
+    sidebarDashboard.classList.add('hidden');
+    if (avatarContent) avatarContent.textContent = '';
+  }
+
+  function setLoggedInUI(user) {
+    sidebarLoginBtn.classList.add('hidden');
+    sidebarLogoutBtn.classList.remove('hidden');
+    sidebarDashboard.classList.remove('hidden');
+    const initial = user.email ? user.email.charAt(0).toUpperCase() : '?';
+    if (avatarContent) avatarContent.textContent = initial;
+    if (notifDot) notifDot.style.display = 'none';
+  }
+
+  async function checkUser() {
+    const { data: { session } } = await sb.auth.getSession();
+    if (session?.user) {
+      setLoggedInUI(session.user);
+    } else {
+      setLoggedOutUI();
+    }
+  }
+
+  sb.auth.onAuthStateChange((event, session) => {
+    if (session?.user) {
+      setLoggedInUI(session.user);
+    } else {
+      setLoggedOutUI();
+    }
+  });
+
+  // باز کردن overlay احراز هویت
+  function openAuthOverlay() {
+    if (authOverlay) {
+      authOverlay.style.display = 'flex';
+      // بازنشانی به مرحله اول
+      showStep('step-1');
+      authEmailInput.value = '';
+      authEmailError.textContent = '';
+    }
+  }
+
+  function closeAuthOverlay() {
+    if (authOverlay) {
+      authOverlay.style.display = 'none';
+    }
+  }
+
+  // بستن با کلیک روی پس‌زمینه
+  if (authOverlay) {
+    authOverlay.addEventListener('click', (e) => {
+      if (e.target === authOverlay) closeAuthOverlay();
+    });
+  }
+
+  // تغییر گام‌ها
+  function showStep(stepId) {
+    [step1, step2Login, step2Register, stepForgot].forEach(s => {
+      if (s) s.style.display = 'none';
+    });
+    const stepEl = document.getElementById(stepId);
+    if (stepEl) stepEl.style.display = 'flex';
+  }
+
+  // مرحله ۱: ادامه با ایمیل
+  if (authContinueBtn) {
+    authContinueBtn.addEventListener('click', async () => {
+      const email = authEmailInput.value.trim();
+      if (!email) {
+        authEmailError.textContent = 'Please enter an email address.';
+        return;
+      }
+      authEmailError.textContent = '';
+
+      // بررسی وجود ایمیل در Supabase (شبیه‌سازی شده)
+      // در نسخه واقعی باید یک RPC یا signInWithOtp بررسی کنید
+      // اینجا برای تست: اگر ایمیل شامل "exist" باشد لاگین، وگرنه ثبت‌نام
+      const userExists = email.includes('exist'); // TODO: جایگزین با بررسی واقعی
+
+      if (userExists) {
+        if (userEmailDisplay) userEmailDisplay.textContent = email;
+        showStep('step-2-login');
+      } else {
+        if (userEmailDisplayReg) userEmailDisplayReg.textContent = email;
+        showStep('step-2-register');
+      }
+    });
+  }
+
+  // ورود
+  if (authSigninBtn) {
+    authSigninBtn.addEventListener('click', async () => {
+      const email = authEmailInput.value.trim();
+      const password = authPasswordLogin.value;
+      if (!password) {
+        authLoginError.textContent = 'Password is required.';
+        return;
+      }
+      authLoginError.textContent = '';
+
+      // await sb.auth.signInWithPassword({ email, password });
+      // if (error) { authLoginError.textContent = error.message; return; }
+      // closeAuthOverlay();
+      // شبیه‌سازی خطا برای تست
+      authLoginError.textContent = 'Sign in not implemented yet.';
+    });
+  }
+
+  // ثبت‌نام
+  if (authRegisterBtn) {
+    authRegisterBtn.addEventListener('click', async () => {
+      const email = authEmailInput.value.trim();
+      const password = authPasswordReg.value;
+      const confirm = authConfirmPassword.value;
+      const firstname = authFirstname.value.trim();
+      const lastname = authLastname.value.trim();
+
+      if (!firstname || !lastname) {
+        authRegisterError.textContent = 'Please fill in all fields.';
+        return;
+      }
+      if (password !== confirm) {
+        authRegisterError.textContent = 'Passwords do not match.';
+        return;
+      }
+      authRegisterError.textContent = '';
+
+      // await sb.auth.signUp({ email, password, options: { data: { first_name: firstname, last_name: lastname } } });
+      // if (error) { authRegisterError.textContent = error.message; return; }
+
+      // نمایش موفقیت
+      document.querySelectorAll('#step-2-register > :not(#reg-success)').forEach(el => el.style.display = 'none');
+      if (regSuccess) regSuccess.style.display = 'block';
+    });
+  }
+
+  // بازگشت از ثبت‌نام موفق به مرحله اول
+  if (regToLoginBtn) {
+    regToLoginBtn.addEventListener('click', () => {
+      if (regSuccess) regSuccess.style.display = 'none';
+      document.querySelectorAll('#step-2-register > *').forEach(el => el.style.display = '');
+      showStep('step-1');
+      authEmailInput.value = '';
+      authFirstname.value = '';
+      authLastname.value = '';
+      authPasswordReg.value = '';
+      authConfirmPassword.value = '';
+    });
+  }
+
+  // فراموشی رمز عبور
+  if (authForgotLink) {
+    authForgotLink.addEventListener('click', () => {
+      if (forgotEmail) forgotEmail.value = authEmailInput.value.trim();
+      showStep('step-forgot');
+    });
+  }
+
+  if (authSendResetBtn) {
+    authSendResetBtn.addEventListener('click', async () => {
+      const email = forgotEmail.value.trim();
+      if (!email) {
+        if (forgotSuccess) {
+          forgotSuccess.textContent = 'Please enter your email.';
+          forgotSuccess.style.display = 'block';
+        }
+        return;
+      }
+      // await sb.auth.resetPasswordForEmail(email);
+      if (forgotSuccess) {
+        forgotSuccess.textContent = 'If an account exists, a reset link has been sent.';
+        forgotSuccess.style.display = 'block';
+      }
+    });
+  }
+
+  if (authBackToLogin) {
+    authBackToLogin.addEventListener('click', () => {
+      showStep('step-2-login');
+    });
+  }
+
+  // دکمه نمایش/مخفی رمز عبور
+  document.querySelectorAll('.toggle-password-btn').forEach(btn => {
+    btn.addEventListener('click', () => {
+      const targetId = btn.dataset.target;
+      const input = document.getElementById(targetId);
+      if (!input) return;
+      const eyeOpen = btn.querySelector('.eye-open');
+      const eyeClosed = btn.querySelector('.eye-closed');
+
+      if (input.type === 'password') {
+        input.type = 'text';
+        if (eyeOpen) eyeOpen.style.display = 'none';
+        if (eyeClosed) eyeClosed.style.display = 'block';
+      } else {
+        input.type = 'password';
+        if (eyeOpen) eyeOpen.style.display = 'block';
+        if (eyeClosed) eyeClosed.style.display = 'none';
+      }
+    });
+  });
+
+  // اتصال دکمه Sign In سایدبار به overlay
+  if (sidebarLoginBtn) {
+    sidebarLoginBtn.addEventListener('click', () => {
+      openAuthOverlay();
+    });
+  }
+
+  // دکمه Logout سایدبار
+  if (sidebarLogoutBtn) {
+    sidebarLogoutBtn.addEventListener('click', async () => {
+      await sb.auth.signOut();
+      // وضعیت توسط onAuthStateChange به‌روز می‌شود
+    });
+  }
+
   /* ------------------------- INIT & LOADER ------------------------- */
   loadPrompts();
   renderAll();
+  checkUser(); // بررسی اولیه وضعیت کاربر
   console.log('Tavio: Initialization complete.');
 
   const loader = document.getElementById('initial-loader');
