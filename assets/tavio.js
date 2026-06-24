@@ -718,156 +718,87 @@ document.addEventListener('DOMContentLoaded', () => {
     });
   })();
 
-  /* =========================== AUTH MODULE (EXACT RAVLO FLOW) =========================== */
 
-  // DOM refs – مطابق با ساختار Ravlo
-  const authStep1       = document.getElementById('step-1');
-  const authStep2Login  = document.getElementById('step-2-login');
-  const authStep2Reg    = document.getElementById('step-2-register');
-  const authStepForgot  = document.getElementById('step-forgot');
-  const authEmail       = document.getElementById('auth-email');
-  const authContinue    = document.getElementById('auth-continue-btn');
-  const authErrorEl     = document.getElementById('auth-error');
-  const authUserEmail   = document.getElementById('auth-user-email');
-  const authPassword    = document.getElementById('auth-password');
-  const authSignin      = document.getElementById('auth-signin-btn');
-  const authForgotLink  = document.getElementById('auth-forgot-link');
-  const authErrorLogin  = document.getElementById('auth-error-login');
-  const regFirstname    = document.getElementById('reg-firstname');
-  const regLastname     = document.getElementById('reg-lastname');
-  const regPassword     = document.getElementById('reg-password');
-  const regConfirm      = document.getElementById('reg-confirm');
-  const authRegister    = document.getElementById('auth-register-btn');
-  const authErrorReg    = document.getElementById('auth-error-register');
-  const regSuccessEl    = document.getElementById('reg-success');
-  const regToLoginBtn   = document.getElementById('reg-to-login-btn');
-  const forgotEmailInput= document.getElementById('forgot-email');
-  const authSendReset   = document.getElementById('auth-send-reset-btn');
-  const authBackToLogin = document.getElementById('auth-back-to-login');
-  const authSuccessMsg  = document.getElementById('auth-success-msg');
-
-  // نمایش/مخفی کردن گام‌ها
-  function showStep(stepId) {
-    [authStep1, authStep2Login, authStep2Reg, authStepForgot].forEach(s => {
-      if (s) s.classList.add('hidden');
-    });
-    const stepEl = document.getElementById(stepId);
-    if (stepEl) stepEl.classList.remove('hidden');
-  }
-
-  // ----- Continue (مرحله ۱) -----
-  if (authContinue) {
-    authContinue.addEventListener('click', async () => {
-      const email = authEmail.value.trim();
-      if (!email) {
-        authErrorEl.textContent = 'Please enter an email address.';
-        return;
-      }
-      authErrorEl.textContent = '';
-
-      // در Ravlo از یک RPC اختصاصی استفاده شده، اما ما مستقیماً به ورود می‌رویم
-      // کاربران جدید می‌توانند از لینک "Don't have an account?" استفاده کنند
-      if (authUserEmail) authUserEmail.textContent = email;
-      showStep('step-2-login');
-    });
-  }
-
-  // ----- Sign In -----
-  if (authSignin) {
-    authSignin.addEventListener('click', async () => {
-      const email = authEmail.value.trim();
-      const password = authPassword.value;
-      if (!password) {
-        authErrorLogin.textContent = 'Password is required.';
-        return;
-      }
-      authErrorLogin.textContent = '';
-
-      const { error } = await sb.auth.signInWithPassword({ email, password });
-      if (error) {
-        authErrorLogin.textContent = error.message;
-        return;
       }
       closeAuthOverlay();
     });
   }
 
-  // ----- Register -----
-  if (authRegister) {
-    authRegister.addEventListener('click', async () => {
-      const email    = authEmail.value.trim();
-      const password = regPassword.value;
-      const confirm  = regConfirm.value;
-      const first    = regFirstname.value.trim();
-      const last     = regLastname.value.trim();
+  // ---------- ثبت‌نام ----------
+  if (authRegisterBtn) {
+    authRegisterBtn.addEventListener('click', async () => {
+      const email = authEmailInput.value.trim();
+      const password = authPasswordReg.value;
+      const confirm = authConfirmPassword.value;
+      const firstname = authFirstname.value.trim();
+      const lastname = authLastname.value.trim();
 
-      if (!first || !last) {
-        authErrorReg.textContent = 'Please fill in all fields.';
-        return;
-      }
-      if (password.length < 6) {
-        authErrorReg.textContent = 'Password must be at least 6 characters.';
+      if (!firstname || !lastname) {
+        authRegisterError.textContent = 'Please fill in all fields.';
         return;
       }
       if (password !== confirm) {
-        authErrorReg.textContent = 'Passwords do not match.';
+        authRegisterError.textContent = 'Passwords do not match.';
         return;
       }
-      authErrorReg.textContent = '';
+      authRegisterError.textContent = '';
 
       const { error } = await sb.auth.signUp({
         email,
         password,
         options: {
-          data: { first_name: first, last_name: last }
+          data: { first_name: firstname, last_name: lastname }
         }
       });
 
       if (error) {
-        authErrorReg.textContent = error.message;
+        authRegisterError.textContent = error.message;
         return;
       }
 
-      // نمایش پیام موفقیت
-      document.getElementById('reg-form-fields').style.display = 'none';
-      if (regSuccessEl) regSuccessEl.style.display = 'block';
+      // نمایش موفقیت
+      document.querySelectorAll('#step-2-register > :not(#reg-success)').forEach(el => el.style.display = 'none');
+      if (regSuccess) regSuccess.style.display = 'block';
     });
   }
 
-  // ----- Go to Sign In (بازگشت از پیام موفقیت) -----
+  // ---------- بازگشت از ثبت‌نام به مرحله اول ----------
   if (regToLoginBtn) {
     regToLoginBtn.addEventListener('click', () => {
-      if (regSuccessEl) regSuccessEl.style.display = 'none';
-      const regForm = document.getElementById('reg-form-fields');
-      if (regForm) regForm.style.display = '';
+      if (regSuccess) regSuccess.style.display = 'none';
+      document.querySelectorAll('#step-2-register > *').forEach(el => el.style.display = '');
       showStep('step-1');
-      authEmail.value = '';
-      regFirstname.value = '';
-      regLastname.value = '';
-      regPassword.value = '';
-      regConfirm.value = '';
+      authEmailInput.value = '';
+      authFirstname.value = '';
+      authLastname.value = '';
+      authPasswordReg.value = '';
+      authConfirmPassword.value = '';
     });
   }
 
-  // ----- Forgot password -----
+  // ---------- فراموشی رمز عبور ----------
   if (authForgotLink) {
     authForgotLink.addEventListener('click', () => {
-      forgotEmailInput.value = authEmail.value.trim();
+      if (forgotEmail) forgotEmail.value = authEmailInput.value.trim();
       showStep('step-forgot');
     });
   }
 
-  if (authSendReset) {
-    authSendReset.addEventListener('click', async () => {
-      const email = forgotEmailInput.value.trim();
+  if (authSendResetBtn) {
+    authSendResetBtn.addEventListener('click', async () => {
+      const email = forgotEmail.value.trim();
       if (!email) {
-        authSuccessMsg.textContent = 'Please enter your email.';
+        if (forgotSuccess) {
+          forgotSuccess.textContent = 'Please enter your email.';
+          forgotSuccess.style.display = 'block';
+        }
         return;
       }
       const { error } = await sb.auth.resetPasswordForEmail(email);
-      authSuccessMsg.textContent = error
-        ? 'Error: ' + error.message
-        : 'If an account exists, a reset link has been sent.';
+      if (forgotSuccess) {
+        forgotSuccess.textContent = error ? 'Error: ' + error.message : 'If an account exists, a reset link has been sent.';
+        forgotSuccess.style.display = 'block';
+      }
     });
   }
 
@@ -875,63 +806,28 @@ document.addEventListener('DOMContentLoaded', () => {
     authBackToLogin.addEventListener('click', () => showStep('step-2-login'));
   }
 
-  // ----- لینک ثبت‌نام در صفحه ورود (اختیاری) -----
-  // اگر خواستید می‌توانید یک لینک "Register" در step-2-login اضافه کنید
-  // در غیر این صورت کاربر جدید پس از Continue در step-2-login روی "Forgot password?" کلیک می‌کند و سپس "Back to login"
-  // ما یک لینک مستقیم هم اضافه می‌کنیم (در HTML قرار دهید):
-  // <a href="#" id="auth-to-register-link">Don't have an account? Register</a>
-  const toRegLink = document.getElementById('auth-to-register-link');
-  if (toRegLink) {
-    toRegLink.addEventListener('click', (e) => {
-      e.preventDefault();
-      const email = authEmail.value.trim();
-      if (authUserEmail) authUserEmail.textContent = email;
-      showStep('step-2-register');
-    });
-  }
-
-  // ----- دکمه‌های نمایش/مخفی رمز -----
+  // ---------- دکمه نمایش/مخفی رمز ----------
   document.querySelectorAll('.toggle-password-btn').forEach(btn => {
     btn.addEventListener('click', () => {
-      const targetId = btn.getAttribute('data-target');
+      const targetId = btn.dataset.target;
       const input = document.getElementById(targetId);
       if (!input) return;
-      const isPassword = input.type === 'password';
-      input.type = isPassword ? 'text' : 'password';
-      // به‌روزرسانی آیکون چشم (اختیاری)
-      const eyeOpen = btn.querySelector('svg');
-      if (eyeOpen) {
-        eyeOpen.innerHTML = isPassword
-          ? '<path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19m-6.72-1.07a3 3 0 1 1-4.24-4.24"/><line x1="1" y1="1" x2="23" y2="23"/>'
-          : '<path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/>';
+      const eyeOpen = btn.querySelector('.eye-open');
+      const eyeClosed = btn.querySelector('.eye-closed');
+
+      if (input.type === 'password') {
+        input.type = 'text';
+        if (eyeOpen) eyeOpen.style.display = 'none';
+        if (eyeClosed) eyeClosed.style.display = 'block';
+      } else {
+        input.type = 'password';
+        if (eyeOpen) eyeOpen.style.display = 'block';
+        if (eyeClosed) eyeClosed.style.display = 'none';
       }
     });
   });
 
-  // ----- overlay controls -----
-  function openAuthOverlay() {
-    const overlay = document.getElementById('auth-overlay');
-    if (overlay) {
-      overlay.style.display = 'flex';
-      showStep('step-1');
-      authEmail.value = '';
-      if (authErrorEl) authErrorEl.textContent = '';
-    }
-  }
-
-  function closeAuthOverlay() {
-    const overlay = document.getElementById('auth-overlay');
-    if (overlay) overlay.style.display = 'none';
-  }
-
-  const authOverlayEl = document.getElementById('auth-overlay');
-  if (authOverlayEl) {
-    authOverlayEl.addEventListener('click', (e) => {
-      if (e.target === authOverlayEl) closeAuthOverlay();
-    });
-  }
-
-  // ----- دکمه‌های سایدبار -----
+  // ---------- دکمه‌های سایدبار ----------
   if (sidebarLoginBtn) {
     sidebarLoginBtn.addEventListener('click', () => openAuthOverlay());
   }
@@ -940,10 +836,6 @@ document.addEventListener('DOMContentLoaded', () => {
       await sb.auth.signOut();
     });
   }
-
-  // ----- توابع پروفایل (همان‌هایی که قبلاً داشتید) -----
-  // فرض می‌کنم fetchProfile، applyUserProfile، checkUser و ... از قبل در کد شما وجود دارند
-  // و در DOMContentLoaded صدا زده می‌شوند. نیازی به تغییر آن‌ها نیست.
   /* ------------------------- INIT & LOADER ------------------------- */
   loadPrompts();
   renderAll();
