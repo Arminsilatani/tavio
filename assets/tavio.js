@@ -455,19 +455,14 @@ document.addEventListener('DOMContentLoaded', () => {
   }
 
   /* ------------------------- EVENT LISTENERS (Library) ------------------------- */
-  searchInput.addEventListener('input', (e) => {
-    currentSearch = e.target.value;
-    renderLibrary();
-  });
+  searchInput.addEventListener('input', (e) => { currentSearch = e.target.value; renderLibrary(); });
   categoryFilters.addEventListener('click', (e) => {
     const chip = e.target.closest('.filter-chip');
     if (!chip) return;
     currentFilter = chip.dataset.category;
     renderAll();
   });
-  cancelPromptBtn.addEventListener('click', () => {
-    promptFormContainer.classList.add('hidden');
-  });
+  cancelPromptBtn.addEventListener('click', () => { promptFormContainer.classList.add('hidden'); });
   savePromptBtn.addEventListener('click', () => {
     const name = promptNameInput.value.trim();
     const catRaw = promptCategoryInput.value.trim();
@@ -506,10 +501,7 @@ document.addEventListener('DOMContentLoaded', () => {
     aiModelsFull.innerHTML = '';
     generatedPrompt.value = '';
     document.querySelector('.container').classList.remove('builder-mode');
-    if (typingTimer) {
-      clearInterval(typingTimer);
-      generatedPrompt.classList.remove('typing');
-    }
+    if (typingTimer) { clearInterval(typingTimer); generatedPrompt.classList.remove('typing'); }
   });
   btnGeneratePrompt.addEventListener('click', generatePrompt);
   btnCopyPrompt.addEventListener('click', copyToClipboard);
@@ -517,40 +509,40 @@ document.addEventListener('DOMContentLoaded', () => {
 
   /* =========================== SIDEBAR MODULE =========================== */
   const MENU_TOOLS = [
-    { label: 'Codara Service Generator',    minRole: 'general',  link: 'https://arminsilatani.github.io/codara/', iconURL: 'assets/logos/Co.svg' },
-    { label: 'Nolvo Sitemap Builder',       minRole: 'general',  link: '', iconURL: 'assets/logos/No.svg' },
-    { label: 'Qerlo Shortener',             minRole: 'general',  link: '', iconURL: 'assets/logos/Qe.svg' },
-    { label: 'Tivra Minify',                minRole: 'general',  link: '', iconURL: 'assets/logos/Ti.svg' },
-    { label: 'Semora Schema Generator',     minRole: 'general',  link: '', iconURL: 'assets/logos/Se.svg' },
-    { label: 'Brilo Speed Check',           minRole: 'general',  link: '', iconURL: 'assets/logos/Br.svg' },
-    { label: 'Sorbi Robots Builder',        minRole: 'general',  link: '', iconURL: 'assets/logos/So.svg' },
-    { label: 'Velto Meta Inspector',        minRole: 'general',  link: '', iconURL: 'assets/logos/Ve.svg' },
-    { label: 'Zorio Image Converter',       minRole: 'recruit',  link: 'https://arminsilatani.github.io/zorio/', iconURL: 'assets/logos/Zo.svg' },
-    { label: 'Galvo Video Converter',       minRole: 'general',  link: '', iconURL: 'assets/logos/Ga.svg' },
-    { label: 'Xelpo Pass Generator',        minRole: 'general',  link: '', iconURL: 'assets/logos/Xe.svg' },
-    { label: 'Dirmo DNS Checker',           minRole: 'general',  link: '', iconURL: 'assets/logos/Di.svg' },
-    { label: 'Lemro Keyword Research',      minRole: 'general',  link: '', iconURL: 'assets/logos/Le.svg' },
-    { label: 'Hirvo Density',               minRole: 'general',  link: '', iconURL: 'assets/logos/Hi.svg' },
-    { label: 'Jorvi Redirect',              minRole: 'general',  link: '', iconURL: 'assets/logos/Jo.svg' },
-    { label: 'Mirto CRM',                   minRole: 'general',  link: '', iconURL: 'assets/logos/Mi.svg' },
-    { label: 'Ravlo Calendar',              minRole: 'sergeant', link: 'https://arminsilatani.github.io/ravlo/', iconURL: 'assets/logos/Ra.svg' },
-    { label: 'Rinvo Accounting',            minRole: 'general',  link: '', iconURL: 'assets/logos/Ri.svg' },
-    { label: 'Yelmo Brand Namer',           minRole: 'general',  link: '', iconURL: 'assets/logos/Ye.svg' },
-    { label: 'Cedro Flashcards',            minRole: 'general',  link: '', iconURL: 'assets/logos/Ce.svg' },
-    { label: 'Fresca Colors Tool',          minRole: 'general',  link: '', iconURL: 'assets/logos/Fr.svg' },
-    { label: 'Ubiro Beer Cost',             minRole: 'general',  link: '', iconURL: 'assets/logos/Ub.svg' },
-    { label: 'Refacto Code Beautifier',     minRole: 'general',  link: '', iconURL: 'assets/logos/Re.svg' },
-    { label: 'Pilvo Text Editor',           minRole: 'recruit',  link: 'https://arminsilatani.github.io/pilvo/', iconURL: 'assets/logos/Pi.svg' },
-    { label: 'Tavio Prompt Library',        minRole: 'recruit',  link: 'https://arminsilatani.github.io/tavio/', iconURL: 'assets/logos/Ta.svg' , isSelf: true },
-    { label: 'Falco Favicon Generator',     minRole: 'recruit',  link: 'https://arminsilatani.github.io/falco/', iconURL: 'assets/logos/Fa.svg' },
-    { label: 'Lume Epoch Converter',        minRole: 'recruit',  link: 'https://arminsilatani.github.io/lume/', iconURL: 'assets/logos/Lu.svg' },
-    { label: 'Valeno Expiry Date Reminder', minRole: 'general',  link: '', iconURL: 'assets/logos/Va.svg' },
-    { label: 'Alviano Recipe Manager',      minRole: 'general',  link: '', iconURL: 'assets/logos/Al.svg' },
-    { label: 'Mavero Workout Tracker',      minRole: 'general',  link: '', iconURL: 'assets/logos/Ma.svg' },
-    { label: 'Tempozio Time Tracker',       minRole: 'general',  link: '', iconURL: 'assets/logos/Te.svg' },
-    { label: 'Belluno Wishlist',            minRole: 'general',  link: '', iconURL: 'assets/logos/Be.svg' },
-    { label: 'Nuvello Wallpaper App',       minRole: 'general',  link: '', iconURL: 'assets/logos/Nu.svg' },
-    { label: 'Fiora Period Tracker',        minRole: 'general',  link: '', iconURL: 'assets/logos/Fi.svg' }
+      { label: 'Codara Service Generator',    minRole: 'general',  link: 'https://arminsilatani.github.io/codara/', iconURL: 'assets/logos/Co.svg' },
+      { label: 'Nolvo Sitemap Builder',       minRole: 'general',  link: '', iconURL: 'assets/logos/No.svg' },
+      { label: 'Qerlo Shortener',             minRole: 'general',  link: '', iconURL: 'assets/logos/Qe.svg' },
+      { label: 'Tivra Minify',                minRole: 'general',  link: '', iconURL: 'assets/logos/Ti.svg' },
+      { label: 'Semora Schema Generator',     minRole: 'general',  link: '', iconURL: 'assets/logos/Se.svg' },
+      { label: 'Brilo Speed Check',           minRole: 'general',  link: '', iconURL: 'assets/logos/Br.svg' },
+      { label: 'Sorbi Robots Builder',        minRole: 'general',  link: '', iconURL: 'assets/logos/So.svg' },
+      { label: 'Velto Meta Inspector',        minRole: 'general',  link: '', iconURL: 'assets/logos/Ve.svg' },
+      { label: 'Zorio Image Converter',       minRole: 'recruit',  link: 'https://arminsilatani.github.io/zorio/', iconURL: 'assets/logos/Zo.svg' },
+      { label: 'Galvo Video Converter',       minRole: 'general',  link: '', iconURL: 'assets/logos/Ga.svg' },
+      { label: 'Xelpo Pass Generator',        minRole: 'general',  link: '', iconURL: 'assets/logos/Xe.svg' },
+      { label: 'Dirmo DNS Checker',           minRole: 'general',  link: '', iconURL: 'assets/logos/Di.svg' },
+      { label: 'Lemro Keyword Research',      minRole: 'general',  link: '', iconURL: 'assets/logos/Le.svg' },
+      { label: 'Hirvo Density',               minRole: 'general',  link: '', iconURL: 'assets/logos/Hi.svg' },
+      { label: 'Jorvi Redirect',              minRole: 'general',  link: '', iconURL: 'assets/logos/Jo.svg' },
+      { label: 'Mirto CRM',                   minRole: 'general',  link: '', iconURL: 'assets/logos/Mi.svg' },
+      { label: 'Ravlo Calendar',              minRole: 'sergeant', link: 'https://arminsilatani.github.io/ravlo/', iconURL: 'assets/logos/Ra.svg' },
+      { label: 'Rinvo Accounting',            minRole: 'general',  link: '', iconURL: 'assets/logos/Ri.svg' },
+      { label: 'Yelmo Brand Namer',           minRole: 'general',  link: '', iconURL: 'assets/logos/Ye.svg' },
+      { label: 'Cedro Flashcards',            minRole: 'general',  link: '', iconURL: 'assets/logos/Ce.svg' },
+      { label: 'Fresca Colors Tool',          minRole: 'general',  link: '', iconURL: 'assets/logos/Fr.svg' },
+      { label: 'Ubiro Beer Cost',             minRole: 'general',  link: '', iconURL: 'assets/logos/Ub.svg' },
+      { label: 'Refacto Code Beautifier',     minRole: 'general',  link: '', iconURL: 'assets/logos/Re.svg' },
+      { label: 'Pilvo Text Editor',           minRole: 'recruit',  link: 'https://arminsilatani.github.io/pilvo/', iconURL: 'assets/logos/Pi.svg' },
+      { label: 'Tavio Prompt Library',        minRole: 'recruit',  link: 'https://arminsilatani.github.io/tavio/', iconURL: 'assets/logos/Ta.svg' , isSelf: true },
+      { label: 'Falco Favicon Generator',     minRole: 'recruit',  link: 'https://arminsilatani.github.io/falco/', iconURL: 'assets/logos/Fa.svg' },
+      { label: 'Lume Epoch Converter',        minRole: 'recruit',  link: 'https://arminsilatani.github.io/lume/', iconURL: 'assets/logos/Lu.svg' },
+      { label: 'Valeno Expiry Date Reminder', minRole: 'general',  link: '', iconURL: 'assets/logos/Va.svg' },
+      { label: 'Alviano Recipe Manager',      minRole: 'general',  link: '', iconURL: 'assets/logos/Al.svg' },
+      { label: 'Mavero Workout Tracker',      minRole: 'general',  link: '', iconURL: 'assets/logos/Ma.svg' },
+      { label: 'Tempozio Time Tracker',       minRole: 'general',  link: '', iconURL: 'assets/logos/Te.svg' },
+      { label: 'Belluno Wishlist',            minRole: 'general',  link: '', iconURL: 'assets/logos/Be.svg' },
+      { label: 'Nuvello Wallpaper App',       minRole: 'general',  link: '', iconURL: 'assets/logos/Nu.svg' },
+      { label: 'Fiora Period Tracker',        minRole: 'general',  link: '', iconURL: 'assets/logos/Fi.svg' }
   ];
 
   const ROLE_LEVELS = {
@@ -621,7 +613,7 @@ document.addEventListener('DOMContentLoaded', () => {
     document.addEventListener('keydown', (e) => { if (e.key === 'Escape' && isOpen) closeSidebar(); });
   })();
 
-  /* =========================== AUTH MODULE (NO RPC – uses profiles table) =========================== */
+  /* =========================== AUTH MODULE (RAVLO STYLE – profiles lookup) =========================== */
   const authOverlay       = document.getElementById('auth-overlay');
   const authStep1         = document.getElementById('step-1');
   const authStep2Login    = document.getElementById('step-2-login');
@@ -660,7 +652,7 @@ document.addEventListener('DOMContentLoaded', () => {
     if (stepEl) stepEl.classList.remove('hidden');
   }
 
-  // Continue – بررسی وجود ایمیل در جدول profiles
+  // Continue – بررسی وجود ایمیل در profiles
   if (authContinue) {
     authContinue.addEventListener('click', async () => {
       const email = authEmail.value.trim();
@@ -671,7 +663,6 @@ document.addEventListener('DOMContentLoaded', () => {
       authErrorEl.textContent = '';
 
       try {
-        // جستجوی ایمیل در profiles
         const { data, error } = await sb
           .from('profiles')
           .select('id')
@@ -679,22 +670,25 @@ document.addEventListener('DOMContentLoaded', () => {
           .limit(1);
 
         if (error) {
-          console.error('Profile query error:', error);
-          authErrorEl.textContent = 'Something went wrong. Please try again.';
+          console.warn('Profiles check error:', error);
+          // اگر کوئری شکست خورد (RLS یا مشکل موقت)، امن‌ترین کار رفتن به صفحه ورود است.
+          authUserEmail.textContent = email;
+          showStep('step-2-login');
           return;
         }
 
         if (data && data.length > 0) {
-          // کاربر وجود دارد – ورود
+          // کاربر وجود دارد
           authUserEmail.textContent = email;
           showStep('step-2-login');
         } else {
-          // کاربر جدید – ثبت‌نام
+          // کاربر جدید
           showStep('step-2-register');
         }
       } catch (err) {
-        console.error(err);
-        authErrorEl.textContent = 'Network error. Please try later.';
+        console.warn('Unexpected error during profiles check:', err);
+        authUserEmail.textContent = email;
+        showStep('step-2-login');
       }
     });
   }
@@ -779,10 +773,7 @@ document.addEventListener('DOMContentLoaded', () => {
   if (authSendReset) {
     authSendReset.addEventListener('click', async () => {
       const email = forgotEmailInput.value.trim();
-      if (!email) {
-        authSuccessMsg.textContent = 'Please enter your email.';
-        return;
-      }
+      if (!email) { authSuccessMsg.textContent = 'Please enter your email.'; return; }
       const { error } = await sb.auth.resetPasswordForEmail(email);
       authSuccessMsg.textContent = error ? 'Error: ' + error.message : 'If an account exists, a reset link has been sent.';
     });
@@ -831,14 +822,8 @@ document.addEventListener('DOMContentLoaded', () => {
     });
   }
 
-  if (sidebarLoginBtn) {
-    sidebarLoginBtn.addEventListener('click', () => openAuthOverlay());
-  }
-  if (sidebarLogoutBtn) {
-    sidebarLogoutBtn.addEventListener('click', async () => {
-      await sb.auth.signOut();
-    });
-  }
+  if (sidebarLoginBtn) sidebarLoginBtn.addEventListener('click', () => openAuthOverlay());
+  if (sidebarLogoutBtn) sidebarLogoutBtn.addEventListener('click', async () => { await sb.auth.signOut(); });
 
   /* =========================== PROFILE & ROLE =========================== */
   let currentUserProfile = null;
@@ -857,10 +842,7 @@ document.addEventListener('DOMContentLoaded', () => {
   }
 
   async function applyUserProfile(user) {
-    if (!user) {
-      setLoggedOutUI();
-      return;
-    }
+    if (!user) { setLoggedOutUI(); return; }
     if (!currentUserProfile || currentUserProfile.id !== user.id) {
       currentUserProfile = await fetchProfile(user.id);
     }
