@@ -1363,6 +1363,12 @@ body {
   border-color: var(--accent);
 }
 
+.auth-box img {
+  height: 44px;       /* ارتفاع ثابت، مثل Ravlo */
+  width: auto;        /* نسبت تصویر حفظ شود */
+  margin-bottom: 16px;
+}
+
 /* ----- BUTTONS ----- */
 .accent-btn {
   background: var(--accent);
