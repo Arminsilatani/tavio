@@ -1029,7 +1029,6 @@ body {
     font-weight: 400;
 }
 
-/* مخفی کردن المان‌ها (برای استفاده در JS) */
 .hidden {
     display: none !important;
 }
@@ -1038,7 +1037,7 @@ body {
 .hamburger-btn {
   position: fixed;
   top: 41px;
-  left: 44px;
+  left: 54px;
   z-index: 10;
   width: 18px;
   height: 24px;
