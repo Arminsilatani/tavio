@@ -1452,6 +1452,10 @@ body {
   font-size: 13px;
   margin-top: 8px;
 }
+
+#sidebar-menu-items {
+  padding-right: 10px; /* جبران margin منفی برای جلوگیری از بریدگی */
+}
 /* =========================== RESPONSIVE =========================== */
 
 @media (max-width: 640px) {
