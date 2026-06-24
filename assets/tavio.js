@@ -16,6 +16,9 @@ document.addEventListener('DOMContentLoaded', () => {
   const CURRENT_VERSION  = 1;
   const MASTER_PASSWORD  = '1320';
 
+  // آرایه پیش‌فرض خالی برای پرامپت‌های اولیه (در صورت نیاز می‌توانید پرامپت‌های پیش‌فرض را اینجا اضافه کنید)
+  const defaultPrompts = [];
+
   /* ------------------------- AI MODELS ------------------------- */
 
   const ALL_AI_MODELS = [
@@ -33,7 +36,7 @@ document.addEventListener('DOMContentLoaded', () => {
     { id: 'gemini-3-flash',             name: 'Gemini 3 Flash',                            active: true  },
     { id: 'gemini-2.5-flash',           name: 'Gemini 2.5 Flash',                          active: true  },
     { id: 'gemini-2.5-pro',             name: 'Gemini 2.5 pro',                            active: true  },
-    { id: 'nano-banana-2',name: 'Nano Banana 2',                             active: true  },
+    { id: 'nano-banana-2',              name: 'Nano Banana 2',                             active: true  },
     { id: 'deepseek-v4-flash',          name: 'DeepSeek V4 Flash',                         active: true  },
     { id: 'deepseek-r1',                name: 'DeepSeek R1',                               active: true  },
     { id: 'deepseek-v4-pro',            name: 'DeepSeek V4 Pro',                           active: true  },
@@ -67,7 +70,7 @@ document.addEventListener('DOMContentLoaded', () => {
     { id: 'copilot-search',             name: 'Copilot (Search)',                          active: true  },
     // Inactive
     { id: 'gpt-5.5',                    name: 'Chat GPT 5.5',                              active: false },
-    { id: 'gpt-5.4-pro',               name: 'Chat GPT 5.4 Pro',active: false },
+    { id: 'gpt-5.4-pro',                name: 'Chat GPT 5.4 Pro',                          active: false },
     { id: 'o3',                         name: 'Chat GPT o3',                               active: false },
     { id: 'o3-pro',                     name: 'Chat GPT o3 pro',                           active: false },
     { id: 'dalle-3',                    name: 'DALL-E 3',                                  active: false },
@@ -75,11 +78,11 @@ document.addEventListener('DOMContentLoaded', () => {
     { id: 'sora-2',                     name: 'Sora 2',                                    active: false },
     { id: 'claude-4.7-opus',            name: 'Claude 4.7 Opus',                           active: false },
     { id: 'nano-banana-pro',            name: 'Nano Banana Pro',                           active: false },
-    { id: 'gemini-3.5-flash',           name: 'Gemini 3.5 Flash',active: false },
+    { id: 'gemini-3.5-flash',           name: 'Gemini 3.5 Flash',                          active: false },
     { id: 'veo-3.1',                    name: 'Veo 3.1',                                   active: false },
     { id: 'veo-3.1-fast',               name: 'Veo 3.1 Fast',                              active: false },
     { id: 'imagen-4',                   name: 'Imagen 4',                                  active: false },
-    { id: 'grok-3-thinking',            name: 'Grok 3 Thinking',                active: false },
+    { id: 'grok-3-thinking',            name: 'Grok 3 Thinking',                           active: false },
   ];
 
   const getAiName = (id) => {
@@ -94,8 +97,6 @@ document.addEventListener('DOMContentLoaded', () => {
     try {
       const raw = localStorage.getItem(STORAGE_KEY);
       if (!raw) {
-        // اگر defaultPrompts تعریف نشده، این خط خطا می‌ده.
-        // آن را در جایی قبل از این تابع تعریف کنید یا با آرایه خالی جایگزین کنید.
         prompts = defaultPrompts.map(p => ({ ...p }));
         saveToStorage();
         return;
@@ -377,14 +378,12 @@ document.addEventListener('DOMContentLoaded', () => {
     if (!prompt) return;
     currentPromptId = id;
     builderTitle.textContent = prompt.name;
-    // نمایش توضیحات
     if (prompt.description) {
       promptDescription.textContent = prompt.description;
     } else {
       promptDescription.textContent = '';
     }
 
-    // ----- AI Models (تمام عرض) -----
     let aiHtml = '<div class="ai-status-section"><h4>AI Models</h4><div class="ai-status-list">';
     (prompt.ais || []).forEach(aiId => {
       const model = ALL_AI_MODELS.find(m => m.id === aiId);
@@ -396,7 +395,6 @@ document.addEventListener('DOMContentLoaded', () => {
     aiHtml += '</div></div>';
     aiModelsFull.innerHTML = aiHtml;
 
-    // ----- ورودی‌های placeholder -----
     const placeholders = extractPlaceholders(prompt.template);
     let fieldsHtml = '';
     if (placeholders.length === 0) {
@@ -416,7 +414,6 @@ document.addEventListener('DOMContentLoaded', () => {
     }
     placeholderInputs.innerHTML = fieldsHtml;
 
-    // فعال‌سازی حالت builder (افزایش عرض)
     document.querySelector('.container').classList.add('builder-mode');
 
     generatedPrompt.value = '';
@@ -438,7 +435,6 @@ document.addEventListener('DOMContentLoaded', () => {
       filled = filled.replace(regex, val || `{{${ph}}}`);
     });
 
-    // لغو تایپ قبلی
     if (typingTimer) clearInterval(typingTimer);
 
     generatedPrompt.value = '';
@@ -479,7 +475,7 @@ document.addEventListener('DOMContentLoaded', () => {
     }
   }
 
-  /* ------------------------- EVENT LISTENERS ------------------------- */
+  /* ------------------------- EVENT LISTENERS (Library) ------------------------- */
   searchInput.addEventListener('input', (e) => {
     currentSearch = e.target.value;
     renderLibrary();
@@ -547,7 +543,56 @@ document.addEventListener('DOMContentLoaded', () => {
   btnCopyPrompt.addEventListener('click', copyToClipboard);
   btnClearBuilder.addEventListener('click', clearBuilder);
 
-  /* ------------------------- INIT ------------------------- */
+  /* ------------------------- SIDEBAR LOGIC (GSAP) ------------------------- */
+  (function() {
+    const toggleBtn = document.getElementById('menu-toggle-btn');
+    const sidebar   = document.getElementById('sidebar');
+    const overlay   = document.getElementById('sidebar-overlay');
+    const closeRow  = document.getElementById('sidebar-close-row');
+
+    if (!toggleBtn || !sidebar || !overlay || !closeRow) return;
+
+    let isOpen = false;
+
+    function openSidebar() {
+      if (isOpen) return;
+      isOpen = true;
+      overlay.classList.add('active');
+      toggleBtn.classList.add('active');
+      gsap.to(sidebar, {
+        x: 0,
+        duration: 0.5,
+        ease: 'power3.out'
+      });
+    }
+
+    function closeSidebar() {
+      if (!isOpen) return;
+      isOpen = false;
+      overlay.classList.remove('active');
+      toggleBtn.classList.remove('active');
+      gsap.to(sidebar, {
+        x: '-100%',
+        duration: 0.4,
+        ease: 'power3.in'
+      });
+    }
+
+    toggleBtn.addEventListener('click', () => {
+      isOpen ? closeSidebar() : openSidebar();
+    });
+
+    closeRow.addEventListener('click', closeSidebar);
+    overlay.addEventListener('click', closeSidebar);
+
+    document.addEventListener('keydown', (e) => {
+      if (e.key === 'Escape' && isOpen) {
+        closeSidebar();
+      }
+    });
+  })();
+
+  /* ------------------------- INIT & LOADER ------------------------- */
   loadPrompts();
   renderAll();
   console.log('Tavio: Initialization complete.');
