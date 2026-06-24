@@ -138,6 +138,93 @@
 
 <!-- =========================== BODY ============================ -->
 <body>
+  <!-- =========================== AUTH OVERLAY ============================ -->
+<div id="auth-overlay" class="auth-overlay" style="display: none;">
+  <div class="auth-box">
+    <!-- لوگو و عنوان -->
+    <img src="assets/logos/Ra.svg" alt="Ravlo" class="auth-logo" />
+    <h2>Ravlo Calendar</h2>
+    <p class="sub">Sign in to sync your events</p>
+
+    <!-- مرحله ۱: ایمیل -->
+    <div id="step-1" class="auth-step">
+      <input type="email" id="auth-email" class="auth-field" placeholder="Email address" autocomplete="email" />
+      <button id="auth-continue-btn" class="accent-btn">Continue</button>
+      <div id="auth-email-error" class="auth-error"></div>
+    </div>
+
+    <!-- مرحله ۲: ورود (زمانی که ایمیل ثبت شده باشد) -->
+    <div id="step-2-login" class="auth-step" style="display: none;">
+      <div id="auth-user-email-display" class="auth-user-email"></div>
+      <div class="password-field-wrapper">
+        <input type="password" id="auth-password-login" class="auth-field" placeholder="Password" autocomplete="current-password" />
+        <button type="button" class="toggle-password-btn" data-target="auth-password-login">
+          <!-- آیکون چشم باز -->
+          <svg class="eye-open" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path>
+            <circle cx="12" cy="12" r="3"></circle>
+          </svg>
+          <!-- آیکون چشم بسته (hidden) -->
+          <svg class="eye-closed" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="display: none;">
+            <path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19m-6.72-1.07a3 3 0 1 1-4.24-4.24"></path>
+            <line x1="1" y1="1" x2="23" y2="23"></line>
+          </svg>
+        </button>
+      </div>
+      <button id="auth-signin-btn" class="accent-btn">Sign In</button>
+      <a id="auth-forgot-link" class="auth-forgot-link">Forgot password?</a>
+      <div id="auth-login-error" class="auth-error"></div>
+    </div>
+
+    <!-- مرحله ۲: ثبت‌نام (زمانی که ایمیل جدید باشد) -->
+    <div id="step-2-register" class="auth-step" style="display: none;">
+      <div id="auth-user-email-display-reg" class="auth-user-email"></div>
+      <input type="text" id="auth-firstname" class="auth-field" placeholder="First name" autocomplete="given-name" />
+      <input type="text" id="auth-lastname" class="auth-field" placeholder="Last name" autocomplete="family-name" />
+      <div class="password-field-wrapper">
+        <input type="password" id="auth-password-reg" class="auth-field" placeholder="Password" autocomplete="new-password" />
+        <button type="button" class="toggle-password-btn" data-target="auth-password-reg">
+          <svg class="eye-open" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path>
+            <circle cx="12" cy="12" r="3"></circle>
+          </svg>
+          <svg class="eye-closed" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="display: none;">
+            <path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19m-6.72-1.07a3 3 0 1 1-4.24-4.24"></path>
+            <line x1="1" y1="1" x2="23" y2="23"></line>
+          </svg>
+        </button>
+      </div>
+      <div class="password-field-wrapper">
+        <input type="password" id="auth-confirm-password" class="auth-field" placeholder="Confirm password" autocomplete="new-password" />
+        <button type="button" class="toggle-password-btn" data-target="auth-confirm-password">
+          <svg class="eye-open" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path>
+            <circle cx="12" cy="12" r="3"></circle>
+          </svg>
+          <svg class="eye-closed" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="display: none;">
+            <path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19m-6.72-1.07a3 3 0 1 1-4.24-4.24"></path>
+            <line x1="1" y1="1" x2="23" y2="23"></line>
+          </svg>
+        </button>
+      </div>
+      <button id="auth-register-btn" class="accent-btn">Create Account</button>
+      <div id="auth-register-error" class="auth-error"></div>
+      <!-- پیام موفقیت بعد از ثبت‌نام -->
+      <div id="reg-success" class="auth-success" style="display: none;">
+        <p>Account created! Check your email for verification.</p>
+        <button id="reg-to-login-btn" class="accent-btn" style="margin-top: 12px;">Go to Sign In</button>
+      </div>
+    </div>
+
+    <!-- مرحله فراموشی رمز عبور -->
+    <div id="step-forgot" class="auth-step" style="display: none;">
+      <input type="email" id="forgot-email" class="auth-field" placeholder="Email address" />
+      <button id="auth-send-reset-btn" class="accent-btn">Send Reset Link</button>
+      <div id="forgot-success" class="auth-success" style="display: none;">If an account exists, a reset link has been sent.</div>
+      <a id="auth-back-to-login" class="auth-back-link">Back to login</a>
+    </div>
+  </div>
+</div>
 <!-- =========================== FULL PAGE LOADER ============================ -->
 <div id="initial-loader" class="fullpage-loader">
   <div class="lds-grid">
