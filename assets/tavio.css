@@ -1309,11 +1309,6 @@ body {
   color: var(--text);
 }
 
-.auth-logo {
-  height: 44px;
-  margin-bottom: 16px;
-}
-
 .auth-box h2 {
   font-size: 22px;
   font-weight: 900;
