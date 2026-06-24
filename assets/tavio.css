@@ -1320,7 +1320,8 @@ body {
 }
 
 #sidebar-menu-items {
-  transform: translateX(-20px);
+  margin-left: -10px;
+  overflow-x: hidden;
 }
 /* =========================== RESPONSIVE =========================== */
 
