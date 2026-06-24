@@ -85,6 +85,87 @@ renderSidebarTools();
 document.addEventListener('DOMContentLoaded', () => {
   console.log('Tavio: DOM loaded');
 
+  /* =========================== SIDEBAR MODULE =========================== */
+
+// لیست ابزارها (همان آرایه‌ای که داری)
+const MENU_TOOLS = [
+  // ... آرایهٔ کامل ابزارها ...
+];
+
+(function() {
+  // DOM references
+  const toggleBtn = document.getElementById('menu-toggle-btn');
+  const sidebar   = document.getElementById('sidebar');
+  const overlay   = document.getElementById('sidebar-overlay');
+  const closeRow  = document.getElementById('sidebar-close-row');
+  const menuContainer = document.getElementById('sidebar-menu-items');
+
+  if (!toggleBtn || !sidebar || !overlay || !closeRow || !menuContainer) return;
+
+  let isOpen = false;
+
+  // Open / Close with GSAP
+  function openSidebar() {
+    if (isOpen) return;
+    isOpen = true;
+    overlay.classList.add('open');
+    toggleBtn.classList.add('open');
+    gsap.to(sidebar, { x: 0, duration: 0.5, ease: 'power3.out' });
+  }
+
+  function closeSidebar() {
+    if (!isOpen) return;
+    isOpen = false;
+    overlay.classList.remove('open');
+    toggleBtn.classList.remove('open');
+    gsap.to(sidebar, { x: '-100%', duration: 0.4, ease: 'power3.in' });
+  }
+
+  // Event listeners
+  toggleBtn.addEventListener('click', () => {
+    isOpen ? closeSidebar() : openSidebar();
+  });
+
+  closeRow.addEventListener('click', closeSidebar);
+  overlay.addEventListener('click', closeSidebar);
+
+  document.addEventListener('keydown', (e) => {
+    if (e.key === 'Escape' && isOpen) closeSidebar();
+  });
+
+  // رندر ابزارهای منو
+  function renderSidebarTools() {
+    const tools = MENU_TOOLS; // می‌تونی بر اساس نقش فیلتر کنی
+    let html = '';
+    tools.forEach(tool => {
+      const isDisabled = !tool.link;
+      const isComingSoon = !tool.link; // یا شرط دلخواه
+      const isSelf = tool.isSelf === true;
+
+      let classes = 'sidebar-item';
+      if (isDisabled) classes += ' disabled';
+      if (isComingSoon && !isDisabled) classes += ' coming-soon';
+      if (isSelf) classes += ' active';
+
+      const tag = tool.link ? 'a' : 'span';
+      const hrefAttr = tool.link ? `href="${tool.link}" target="_blank" rel="noopener noreferrer"` : '';
+      const tooltipHtml = isComingSoon && !isDisabled ? '<span class="coming-soon-tooltip">Soon</span>' : '';
+
+      html += `
+        <${tag} class="${classes}" ${hrefAttr}>
+          <span class="sidebar-icon">
+            <img src="${tool.iconURL}" alt="${tool.label}" onerror="this.style.display='none'" />
+          </span>
+          <span>${tool.label}</span>
+          ${tooltipHtml}
+        </${tag}>
+      `;
+    });
+    menuContainer.innerHTML = html;
+  }
+
+  renderSidebarTools();
+})();
   /* :::::::::::::::::::::::::: CONSTANTS :::::::::::::::::::::::::: */
 
   const STORAGE_KEY      = 'tavio_prompts';
