@@ -7,6 +7,14 @@
 
 /* =========================== TAVIO APP ============================ */
 
+/* :::::::::::::::::::::::::: SUPABASE CLIENT :::::::::::::::::::::::::: */
+const SUPABASE_URL = 'https://vzqicidepdmraygulrey.supabase.co';
+const SUPABASE_ANON_KEY = 'sb_publishable_kqRWgOmLISOE2EuLL1s8fw_WN6FJRTI';
+const {
+    createClient
+} = supabase;
+const sb = createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+
 document.addEventListener('DOMContentLoaded', () => {
   console.log('Tavio: DOM loaded');
 
