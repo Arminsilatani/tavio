@@ -9,7 +9,7 @@
 
 /* :::::::::::::::::::::::::: SUPABASE CLIENT :::::::::::::::::::::::::: */
 const SUPABASE_URL = 'https://vzqicidepdmraygulrey.supabase.co';
-const SUPABASE_ANON_KEY = 'sb_publishable_kqRWgOmLISOE2EuLL1s8fw_WN6FJRTI';
+const SUPABASE_ANON_KEY = 'sb_publishable_kqRWgOmLISOE2EuLL1s8fw_NW6FJRTI';
 const { createClient } = supabase;
 const sb = createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
@@ -627,14 +627,66 @@ document.addEventListener('DOMContentLoaded', () => {
       { label: 'Fiora Period Tracker',        minRole: 'general',  link: '', iconURL: 'assets/logos/Fi.svg' }
   ];
 
+  // سطوح دسترسی عددی
+  const ROLE_LEVELS = {
+    'recruit': 0,
+    'sergeant': 1,
+    'commander': 2,
+    'general': 3
+  };
+
+  function getRoleLevel(role) {
+    return ROLE_LEVELS[role] ?? -1;
+  }
+
+  // سطح دسترسی فعلی کاربر ( -1 = مهمان )
+  let currentUserRoleLevel = -1;
+
+  // تابع رندر ابزارهای سایدبار با توجه به سطح دسترسی
+  function renderSidebarTools(roleLevel) {
+    const container = document.getElementById('sidebar-menu-items');
+    if (!container) return;
+
+    let html = '';
+    MENU_TOOLS.forEach(tool => {
+      const isComingSoon = !tool.link;
+      const requiredLevel = getRoleLevel(tool.minRole);
+      const hasAccess = roleLevel >= requiredLevel;
+
+      // غیرفعال اگر لینک نداشته باشد یا دسترسی کافی نباشد
+      const isDisabled = !tool.link || !hasAccess;
+      const isSelf = tool.isSelf === true;
+
+      let classes = 'sidebar-item';
+      if (isDisabled) classes += ' disabled';
+      if (isComingSoon && !isDisabled) classes += ' coming-soon';
+      if (isSelf) classes += ' active';
+
+      const tag = tool.link ? 'a' : 'span';
+      const hrefAttr = tool.link ? `href="${tool.link}" target="_blank" rel="noopener noreferrer"` : '';
+      const tooltipHtml = isComingSoon && !isDisabled ? '<span class="coming-soon-tooltip">Soon</span>' : '';
+
+      html += `
+        <${tag} class="${classes}" ${hrefAttr}>
+          <span class="sidebar-icon">
+            <img src="${tool.iconURL}" alt="${tool.label}" onerror="this.style.display='none'" />
+          </span>
+          <span>${tool.label}</span>
+          ${tooltipHtml}
+        </${tag}>
+      `;
+    });
+    container.innerHTML = html;
+  }
+
+  // IIFE مدیریت باز/بسته شدن سایدبار
   (function() {
     const toggleBtn = document.getElementById('menu-toggle-btn');
     const sidebar   = document.getElementById('sidebar');
     const overlay   = document.getElementById('sidebar-overlay');
     const closeRow  = document.getElementById('sidebar-close-row');
-    const menuContainer = document.getElementById('sidebar-menu-items');
 
-    if (!toggleBtn || !sidebar || !overlay || !closeRow || !menuContainer) return;
+    if (!toggleBtn || !sidebar || !overlay || !closeRow) return;
 
     let isOpen = false;
 
@@ -664,48 +716,19 @@ document.addEventListener('DOMContentLoaded', () => {
     document.addEventListener('keydown', (e) => {
       if (e.key === 'Escape' && isOpen) closeSidebar();
     });
-
-    function renderSidebarTools() {
-      const tools = MENU_TOOLS;
-      let html = '';
-      tools.forEach(tool => {
-        const isDisabled = !tool.link;
-        const isComingSoon = !tool.link;
-        const isSelf = tool.isSelf === true;
-
-        let classes = 'sidebar-item';
-        if (isDisabled) classes += ' disabled';
-        if (isComingSoon && !isDisabled) classes += ' coming-soon';
-        if (isSelf) classes += ' active';
-
-        const tag = tool.link ? 'a' : 'span';
-        const hrefAttr = tool.link ? `href="${tool.link}" target="_blank" rel="noopener noreferrer"` : '';
-        const tooltipHtml = isComingSoon && !isDisabled ? '<span class="coming-soon-tooltip">Soon</span>' : '';
-
-        html += `
-          <${tag} class="${classes}" ${hrefAttr}>
-            <span class="sidebar-icon">
-              <img src="${tool.iconURL}" alt="${tool.label}" onerror="this.style.display='none'" />
-            </span>
-            <span>${tool.label}</span>
-            ${tooltipHtml}
-          </${tag}>
-        `;
-      });
-      menuContainer.innerHTML = html;
-    }
-
-    renderSidebarTools();
   })();
 
   /* =========================== AUTH MODULE =========================== */
 
-  // وضعیت اولیه رابط کاربری سایدبار
+  // به‌روزرسانی UI سایدبار بر اساس وضعیت احراز هویت
   function setLoggedOutUI() {
     sidebarLoginBtn.classList.remove('hidden');
     sidebarLogoutBtn.classList.add('hidden');
     sidebarDashboard.classList.add('hidden');
     if (avatarContent) avatarContent.textContent = '';
+
+    currentUserRoleLevel = -1;
+    renderSidebarTools(currentUserRoleLevel);
   }
 
   function setLoggedInUI(user) {
@@ -715,6 +738,11 @@ document.addEventListener('DOMContentLoaded', () => {
     const initial = user.email ? user.email.charAt(0).toUpperCase() : '?';
     if (avatarContent) avatarContent.textContent = initial;
     if (notifDot) notifDot.style.display = 'none';
+
+    // دریافت نقش از metadata کاربر (پیش‌فرض recruit)
+    const role = user.user_metadata?.role || 'recruit';
+    currentUserRoleLevel = getRoleLevel(role);
+    renderSidebarTools(currentUserRoleLevel);
   }
 
   async function checkUser() {
@@ -738,7 +766,6 @@ document.addEventListener('DOMContentLoaded', () => {
   function openAuthOverlay() {
     if (authOverlay) {
       authOverlay.style.display = 'flex';
-      // بازنشانی به مرحله اول
       showStep('step-1');
       authEmailInput.value = '';
       authEmailError.textContent = '';
@@ -751,14 +778,12 @@ document.addEventListener('DOMContentLoaded', () => {
     }
   }
 
-  // بستن با کلیک روی پس‌زمینه
   if (authOverlay) {
     authOverlay.addEventListener('click', (e) => {
       if (e.target === authOverlay) closeAuthOverlay();
     });
   }
 
-  // تغییر گام‌ها
   function showStep(stepId) {
     [step1, step2Login, step2Register, stepForgot].forEach(s => {
       if (s) s.style.display = 'none';
@@ -777,11 +802,8 @@ document.addEventListener('DOMContentLoaded', () => {
       }
       authEmailError.textContent = '';
 
-      // بررسی وجود ایمیل در Supabase (شبیه‌سازی شده)
-      // در نسخه واقعی باید یک RPC یا signInWithOtp بررسی کنید
-      // اینجا برای تست: اگر ایمیل شامل "exist" باشد لاگین، وگرنه ثبت‌نام
-      const userExists = email.includes('exist'); // TODO: جایگزین با بررسی واقعی
-
+      // TODO: در نسخه واقعی یک RPC یا signInWithOtp برای بررسی وجود کاربر استفاده کنید
+      const userExists = email.includes('exist'); // موقت
       if (userExists) {
         if (userEmailDisplay) userEmailDisplay.textContent = email;
         showStep('step-2-login');
@@ -803,11 +825,12 @@ document.addEventListener('DOMContentLoaded', () => {
       }
       authLoginError.textContent = '';
 
-      // await sb.auth.signInWithPassword({ email, password });
-      // if (error) { authLoginError.textContent = error.message; return; }
-      // closeAuthOverlay();
-      // شبیه‌سازی خطا برای تست
-      authLoginError.textContent = 'Sign in not implemented yet.';
+      const { error } = await sb.auth.signInWithPassword({ email, password });
+      if (error) {
+        authLoginError.textContent = error.message;
+        return;
+      }
+      closeAuthOverlay();
     });
   }
 
@@ -830,8 +853,22 @@ document.addEventListener('DOMContentLoaded', () => {
       }
       authRegisterError.textContent = '';
 
-      // await sb.auth.signUp({ email, password, options: { data: { first_name: firstname, last_name: lastname } } });
-      // if (error) { authRegisterError.textContent = error.message; return; }
+      const { error } = await sb.auth.signUp({
+        email,
+        password,
+        options: {
+          data: {
+            first_name: firstname,
+            last_name: lastname,
+            role: 'recruit'   // نقش پیش‌فرض
+          }
+        }
+      });
+
+      if (error) {
+        authRegisterError.textContent = error.message;
+        return;
+      }
 
       // نمایش موفقیت
       document.querySelectorAll('#step-2-register > :not(#reg-success)').forEach(el => el.style.display = 'none');
@@ -871,9 +908,12 @@ document.addEventListener('DOMContentLoaded', () => {
         }
         return;
       }
-      // await sb.auth.resetPasswordForEmail(email);
+
+      const { error } = await sb.auth.resetPasswordForEmail(email);
       if (forgotSuccess) {
-        forgotSuccess.textContent = 'If an account exists, a reset link has been sent.';
+        forgotSuccess.textContent = error
+          ? 'Error: ' + error.message
+          : 'If an account exists, a reset link has been sent.';
         forgotSuccess.style.display = 'block';
       }
     });
@@ -917,7 +957,6 @@ document.addEventListener('DOMContentLoaded', () => {
   if (sidebarLogoutBtn) {
     sidebarLogoutBtn.addEventListener('click', async () => {
       await sb.auth.signOut();
-      // وضعیت توسط onAuthStateChange به‌روز می‌شود
     });
   }
 
