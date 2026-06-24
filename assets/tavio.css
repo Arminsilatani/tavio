@@ -1363,6 +1363,33 @@ body {
   width: auto;        /* نسبت تصویر حفظ شود */
 }
 
+/* لوگوی ورود */
+.auth-logo {
+  height: 44px;
+  width: auto;
+  margin-bottom: 16px;
+}
+
+/* احتیاطی برای مخفی‌سازی صحیح */
+.hidden {
+  display: none !important;
+}
+
+/* auth-user-email */
+.auth-user-email {
+  font-size: 14px;
+  color: #aaa;
+  text-align: left;
+  margin-bottom: 4px;
+}
+
+/* auth-hint */
+.auth-hint {
+  font-size: 13px;
+  color: #888;
+  margin-bottom: 12px;
+}
+
 /* ----- BUTTONS ----- */
 .accent-btn {
   background: var(--accent);
