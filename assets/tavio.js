@@ -718,7 +718,148 @@ document.addEventListener('DOMContentLoaded', () => {
     });
   })();
 
+  /* =========================== AUTH MODULE (FINAL FIX) =========================== */
 
+  let currentUserProfile = null;
+
+  async function fetchProfile(userId) {
+    const { data, error } = await sb
+      .from('profiles')
+      .select('*')
+      .eq('id', userId)
+      .single();
+
+    if (error || !data) {
+      console.warn('Profile not found, using recruit fallback');
+      return { role: 'recruit', first_name: '', last_name: '', email: '' };
+    }
+    return data;
+  }
+
+  async function applyUserProfile(user) {
+    if (!user) {
+      setLoggedOutUI();
+      return;
+    }
+
+    if (!currentUserProfile || currentUserProfile.id !== user.id) {
+      currentUserProfile = await fetchProfile(user.id);
+    }
+
+    const profile = currentUserProfile;
+    const role = profile.role || 'recruit';
+
+    sidebarLoginBtn.classList.add('hidden');
+    sidebarLogoutBtn.classList.remove('hidden');
+    sidebarDashboard.classList.remove('hidden');
+
+    let avatarChar = '?';
+    if (profile.first_name) {
+      avatarChar = profile.first_name.charAt(0).toUpperCase();
+    } else if (user.email) {
+      avatarChar = user.email.charAt(0).toUpperCase();
+    }
+    if (avatarContent) avatarContent.textContent = avatarChar;
+    if (notifDot) notifDot.style.display = 'none';
+
+    currentUserRoleLevel = getRoleLevel(role);
+    renderSidebarTools(currentUserRoleLevel);
+  }
+
+  function setLoggedOutUI() {
+    sidebarLoginBtn.classList.remove('hidden');
+    sidebarLogoutBtn.classList.add('hidden');
+    sidebarDashboard.classList.add('hidden');
+    if (avatarContent) avatarContent.textContent = '';
+    currentUserProfile = null;
+    currentUserRoleLevel = -1;
+    renderSidebarTools(-1);
+  }
+
+  async function checkUser() {
+    const { data: { session } } = await sb.auth.getSession();
+    await applyUserProfile(session?.user ?? null);
+  }
+
+  sb.auth.onAuthStateChange(async (event, session) => {
+    await applyUserProfile(session?.user ?? null);
+  });
+
+  // ---------- Overlay controls (unchanged) ----------
+  function openAuthOverlay() {
+    if (authOverlay) {
+      authOverlay.style.display = 'flex';
+      showStep('step-1');
+      authEmailInput.value = '';
+      authEmailError.textContent = '';
+    }
+  }
+
+  function closeAuthOverlay() {
+    if (authOverlay) authOverlay.style.display = 'none';
+  }
+
+  if (authOverlay) {
+    authOverlay.addEventListener('click', (e) => {
+      if (e.target === authOverlay) closeAuthOverlay();
+    });
+  }
+
+  function showStep(stepId) {
+    [step1, step2Login, step2Register, stepForgot].forEach(s => {
+      if (s) s.style.display = 'none';
+    });
+    const stepEl = document.getElementById(stepId);
+    if (stepEl) stepEl.style.display = 'flex';
+  }
+
+  // ---------- مرحله ۱: ادامه با ایمیل (بررسی واقعی با RPC) ----------
+  if (authContinueBtn) {
+    authContinueBtn.addEventListener('click', async () => {
+      const email = authEmailInput.value.trim();
+      if (!email) {
+        authEmailError.textContent = 'Please enter an email address.';
+        return;
+      }
+      authEmailError.textContent = '';
+
+      try {
+        const { data: userExists, error: rpcError } = await sb.rpc('user_exists', { email_input: email });
+        if (rpcError) {
+          console.error('RPC error:', rpcError);
+          authEmailError.textContent = 'Could not verify email. Try again.';
+          return;
+        }
+
+        if (userExists === true) {
+          if (userEmailDisplay) userEmailDisplay.textContent = email;
+          showStep('step-2-login');
+        } else {
+          if (userEmailDisplayReg) userEmailDisplayReg.textContent = email;
+          showStep('step-2-register');
+        }
+      } catch (err) {
+        console.error(err);
+        authEmailError.textContent = 'Network error. Please try later.';
+      }
+    });
+  }
+
+  // ---------- ورود ----------
+  if (authSigninBtn) {
+    authSigninBtn.addEventListener('click', async () => {
+      const email = authEmailInput.value.trim();
+      const password = authPasswordLogin.value;
+      if (!password) {
+        authLoginError.textContent = 'Password is required.';
+        return;
+      }
+      authLoginError.textContent = '';
+
+      const { error } = await sb.auth.signInWithPassword({ email, password });
+      if (error) {
+        authLoginError.textContent = error.message;
+        return;
       }
       closeAuthOverlay();
     });
