@@ -1340,6 +1340,12 @@ body {
   margin-bottom: 4px;
 }
 
+.auth-hint {
+  font-size: 13px;
+  color: #888;
+  margin-bottom: 12px;
+}
+
 .auth-field {
   width: 100%;
   padding: 12px 16px;
