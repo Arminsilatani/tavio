@@ -1471,11 +1471,7 @@ body {
         min-height: 50vh;
     }
 }
-#sidebar-login,
-#sidebar-logout,
-#sidebar-coffee {
-  transform: translateX(-10px);
-}
+
 /* =========================== FOOTER =========================== */
 
 .footer {
