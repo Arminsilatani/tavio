@@ -1,7 +1,7 @@
 <!--****************************************************
   *  Author: Armin Silatani
   *  Date: 2026-05-28
-  *  Version: 0.1.0
+  *  Version: 0.2.0
   ****************************************************
 -->
 <!DOCTYPE html>
@@ -138,8 +138,18 @@
 
 <!-- =========================== BODY ============================ -->
 <body>
-<!-- =========================== AUTH OVERLAY (EXACT RAVLO) ============================ -->
-<div id="auth-overlay">
+
+<!-- =========================== FULL PAGE LOADER ============================ -->
+<div id="initial-loader" class="fullpage-loader">
+  <div class="lds-grid">
+    <div></div><div></div><div></div>
+    <div></div><div></div><div></div>
+    <div></div><div></div><div></div>
+  </div>
+</div>
+
+<!-- =========================== AUTH OVERLAY (RAVLO STYLE) ============================ -->
+<div id="auth-overlay" class="hidden">
     <div class="auth-box">
         <img src="assets/Ta.svg" alt="Tavio" class="auth-logo" onerror="this.style.display='none'">
         <h2>Tavio</h2>
@@ -190,6 +200,7 @@
                 <button id="auth-register-btn" class="accent-btn">Create Account</button>
             </div>
 
+            <!-- Success message (hidden) -->
             <div id="reg-success" style="display:none; text-align:center;">
                 <p class="reg-success-text">We've sent a confirmation link to your email.<br>Check your inbox and click the link to activate your account.</p>
                 <button id="reg-to-login-btn" class="accent-btn" style="width:auto; margin-top:16px;">Go to Sign In</button>
@@ -198,7 +209,7 @@
             <div class="auth-error" id="auth-error-register"></div>
         </div>
 
-        <!-- Forgot password -->
+        <!-- Forgot password form -->
         <div id="step-forgot" class="auth-step hidden">
             <p class="auth-hint">Enter your email to receive a reset link.</p>
             <input type="email" id="forgot-email" class="auth-field" placeholder="Email" required>
@@ -208,15 +219,8 @@
         </div>
     </div>
 </div>
-<!-- =========================== FULL PAGE LOADER ============================ -->
-<div id="initial-loader" class="fullpage-loader">
-  <div class="lds-grid">
-    <div></div><div></div><div></div>
-    <div></div><div></div><div></div>
-    <div></div><div></div><div></div>
-  </div>
-</div>
 
+<!-- =========================== SIDEBAR TOGGLE & PANEL ============================ -->
 <!-- دکمهٔ همبرگری -->
 <button id="menu-toggle-btn" class="hamburger-btn" aria-label="Menu">
   <span class="hamburger-line"></span>
@@ -285,175 +289,178 @@
     </a>
   </nav>
 </aside>
-  <!-- =========================== HEADER ============================ -->
-  <header class="glass-header">
-    <div class="header-container">
-      <div class="header-inner">
-        <img
-          src="assets/Ta.svg"
-          alt="Tavio Logo"
-          class="header-logo"
-          onerror="this.style.display='none'"
-        >
-        <div class="header-text">
-          <h1 class="tool-name">Tavio</h1>
-          <h2 class="tool-tagline">Prompt Library</h2>
-        </div>
-      </div>
-      <p class="tool-description">
-        Keep your prompts organized by category, find them instantly,
-        and fill placeholders step-by-step.
-      </p>
-    </div>
-  </header>
 
-  <!-- =========================== MAIN CONTENT ============================ -->
-  <main class="container" id="appRoot">
-
-    <!-- ------------------------- LIBRARY VIEW ------------------------- -->
-    <section id="libraryView" class="view">
-
-      <!-- Search bar -->
-      <div class="search-bar">
-        <svg class="search-icon" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-          <circle cx="11" cy="11" r="8"></circle>
-          <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
-        </svg>
-        <input type="text" id="searchInput" placeholder="Search prompts..." autocomplete="off">
-      </div>
-
-      <!-- Category filters -->
-      <div class="category-filters" id="categoryFilters">
-        <button class="filter-chip active" data-category="all">All</button>
-      </div>
-
-      <!-- Prompt creation form -->
-      <div id="promptFormContainer" class="prompt-form hidden">
-        <div class="form-card">
-          <h3>Create Prompt</h3>
-
-          <div class="form-group">
-            <label for="promptName">Name</label>
-            <input type="text" id="promptName" placeholder="e.g., Blog Post Generator">
-          </div>
-
-          <div class="form-group">
-            <label for="promptCategory">Categories (comma separated)</label>
-            <input type="text" id="promptCategory" placeholder="e.g., Writing, SEO" list="categorySuggestions">
-            <datalist id="categorySuggestions"></datalist>
-          </div>
-
-          <div class="form-group">
-            <label for="promptTemplate">Template</label>
-            <textarea id="promptTemplate" rows="4" placeholder="Write a blog post about {{topic}} with a {{tone}} tone..."></textarea>
-            <small>Use {{placeholder}} for inputs</small>
-          </div>
-
-          <div class="form-group">
-            <label for="promptAi">AI Models (hold Ctrl/Cmd to select multiple)</label>
-            <select id="promptAi" multiple size="5">
-              <option value="GPT-5.5">GPT-5.5</option>
-              <option value="GPT-5.4 Pro">GPT-5.4 Pro</option>
-              <option value="Claude 4.7 Opus">Claude 4.7 Opus</option>
-              <option value="Gemini 3.1 Pro">Gemini 3.1 Pro</option>
-              <option value="GPT-5.4">GPT-5.4</option>
-              <option value="o3 pro">o3 pro</option>
-              <option value="DeepSeek V4 Pro">DeepSeek V4 Pro</option>
-              <option value="Qwen 3 Max">Qwen 3 Max</option>
-              <option value="Grok 4">Grok 4</option>
-              <option value="deepseek">DeepSeek</option>
-              <option value="chatgpt">ChatGPT</option>
-              <option value="claude">Claude</option>
-            </select>
-          </div>
-
-          <div class="form-group">
-            <label class="checkbox-label">
-              <input type="checkbox" id="promptLocked">
-              <span>Lock with password</span>
-            </label><small>Master password required to open</small>
-          </div>
-
-          <div class="form-buttons">
-            <button id="savePrompt" class="btn btn-accent">Save</button>
-            <button id="cancelPrompt" class="btn btn-outline">Cancel</button>
-          </div>
-        </div>
-      </div>
-
-      <!-- Prompt cards list -->
-      <div id="promptList" class="prompt-grid">
-        <!-- dynamically generated cards -->
-      </div></section>
-
-    <!-- ------------------------- BUILDER VIEW ------------------------- -->
-    <section id="builderView" class="view hidden">
-
-      <div class="builder-header">
-        <button id="btnBackToLibrary" class="btn btn-back" title="Back to library">
-          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" class="back-icon">
-            <polyline points="15 18 9 12 15 6"></polyline>
-          </svg><span class="back-text">Back</span>
-        </button><h3 id="builderTitle" class="builder-title"></h3>
-      </div>
-
-      <!-- AI Models full-width section -->
-      <div id="aiModelsFull" class="ai-models-full"></div>
-
-      <!-- Prompt description -->
-      <div id="promptDescription" class="prompt-description"></div>
-
-      <!-- Two-column builder layout -->
-      <div class="builder-columns"><div class="builder-left">
-          <div id="placeholderInputs" class="placeholder-inputs"></div>
-          <button id="btnGeneratePrompt" class="btn btn-accent full-width">
-            Generate Prompt
-          </button>
-        </div>
-
-        <div class="builder-right">
-          <div id="resultArea" class="result-area">
-            <div class="result-header">
-              <span>Your Prompt</span>
-              <div class="result-actions">
-                <button id="btnClearBuilder" class="btn btn-outline btn-sm" title="Clear all fields">Clear</button>
-                <button id="btnCopyPrompt" class="btn btn-icon" title="Copy to clipboard">
-                  <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                    <rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect>
-                    <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path>
-                  </svg>
-                </button>
-              </div>
-            </div>
-            <textarea id="generatedPrompt" readonly></textarea>
-          </div>
-        </div>
-
-      </div>
-
-    </section>
-
-  </main>
-
-  <!-- =========================== FOOTER ============================ -->
-  <footer class="footer">
-    <div class="footer-signature">
-      <a
-        href="https://arminsilatani.com/en/"
-        target="_blank"
-        rel="noopener noreferrer"
-        title="Armin Silatani | Official Website"
+<!-- =========================== HEADER ============================ -->
+<header class="glass-header">
+  <div class="header-container">
+    <div class="header-inner">
+      <img
+        src="assets/Ta.svg"
+        alt="Tavio Logo"
+        class="header-logo"
+        onerror="this.style.display='none'"
       >
-        <span class="crafted">crafted by</span>
-        <img src="assets/ArminSilatani.svg" alt="Armin Silatani" class="signature">
-      </a>
+      <div class="header-text">
+        <h1 class="tool-name">Tavio</h1>
+        <h2 class="tool-tagline">Prompt Library</h2>
+      </div>
     </div>
-  </footer>
+    <p class="tool-description">
+      Keep your prompts organized by category, find them instantly,
+      and fill placeholders step-by-step.
+    </p>
+  </div>
+</header>
 
-  <!-- :::::::::::::::::::::::::: SCRIPTS :::::::::::::::::::::::::: -->
+<!-- =========================== MAIN CONTENT ============================ -->
+<main class="container" id="appRoot">
+
+  <!-- ------------------------- LIBRARY VIEW ------------------------- -->
+  <section id="libraryView" class="view">
+
+    <!-- Search bar -->
+    <div class="search-bar">
+      <svg class="search-icon" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+        <circle cx="11" cy="11" r="8"></circle>
+        <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
+      </svg>
+      <input type="text" id="searchInput" placeholder="Search prompts..." autocomplete="off">
+    </div>
+
+    <!-- Category filters -->
+    <div class="category-filters" id="categoryFilters">
+      <button class="filter-chip active" data-category="all">All</button>
+    </div>
+
+    <!-- Prompt creation form -->
+    <div id="promptFormContainer" class="prompt-form hidden">
+      <div class="form-card">
+        <h3>Create Prompt</h3>
+
+        <div class="form-group">
+          <label for="promptName">Name</label>
+          <input type="text" id="promptName" placeholder="e.g., Blog Post Generator">
+        </div>
+
+        <div class="form-group">
+          <label for="promptCategory">Categories (comma separated)</label>
+          <input type="text" id="promptCategory" placeholder="e.g., Writing, SEO" list="categorySuggestions">
+          <datalist id="categorySuggestions"></datalist>
+        </div>
+
+        <div class="form-group">
+          <label for="promptTemplate">Template</label>
+          <textarea id="promptTemplate" rows="4" placeholder="Write a blog post about {{topic}} with a {{tone}} tone..."></textarea>
+          <small>Use {{placeholder}} for inputs</small>
+        </div>
+
+        <div class="form-group">
+          <label for="promptAi">AI Models (hold Ctrl/Cmd to select multiple)</label>
+          <select id="promptAi" multiple size="5">
+            <option value="GPT-5.5">GPT-5.5</option>
+            <option value="GPT-5.4 Pro">GPT-5.4 Pro</option>
+            <option value="Claude 4.7 Opus">Claude 4.7 Opus</option>
+            <option value="Gemini 3.1 Pro">Gemini 3.1 Pro</option>
+            <option value="GPT-5.4">GPT-5.4</option>
+            <option value="o3 pro">o3 pro</option>
+            <option value="DeepSeek V4 Pro">DeepSeek V4 Pro</option>
+            <option value="Qwen 3 Max">Qwen 3 Max</option>
+            <option value="Grok 4">Grok 4</option>
+            <option value="deepseek">DeepSeek</option>
+            <option value="chatgpt">ChatGPT</option>
+            <option value="claude">Claude</option>
+          </select>
+        </div>
+
+        <div class="form-group">
+          <label class="checkbox-label">
+            <input type="checkbox" id="promptLocked">
+            <span>Lock with password</span>
+          </label><small>Master password required to open</small>
+        </div>
+
+        <div class="form-buttons">
+          <button id="savePrompt" class="btn btn-accent">Save</button>
+          <button id="cancelPrompt" class="btn btn-outline">Cancel</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Prompt cards list -->
+    <div id="promptList" class="prompt-grid">
+      <!-- dynamically generated cards -->
+    </div>
+  </section>
+
+  <!-- ------------------------- BUILDER VIEW ------------------------- -->
+  <section id="builderView" class="view hidden">
+
+    <div class="builder-header">
+      <button id="btnBackToLibrary" class="btn btn-back" title="Back to library">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" class="back-icon">
+          <polyline points="15 18 9 12 15 6"></polyline>
+        </svg><span class="back-text">Back</span>
+      </button><h3 id="builderTitle" class="builder-title"></h3>
+    </div>
+
+    <!-- AI Models full-width section -->
+    <div id="aiModelsFull" class="ai-models-full"></div>
+
+    <!-- Prompt description -->
+    <div id="promptDescription" class="prompt-description"></div>
+
+    <!-- Two-column builder layout -->
+    <div class="builder-columns">
+      <div class="builder-left">
+        <div id="placeholderInputs" class="placeholder-inputs"></div>
+        <button id="btnGeneratePrompt" class="btn btn-accent full-width">
+          Generate Prompt
+        </button>
+      </div>
+
+      <div class="builder-right">
+        <div id="resultArea" class="result-area">
+          <div class="result-header">
+            <span>Your Prompt</span>
+            <div class="result-actions">
+              <button id="btnClearBuilder" class="btn btn-outline btn-sm" title="Clear all fields">Clear</button>
+              <button id="btnCopyPrompt" class="btn btn-icon" title="Copy to clipboard">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                  <rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect>
+                  <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path>
+                </svg>
+              </button>
+            </div>
+          </div>
+          <textarea id="generatedPrompt" readonly></textarea>
+        </div>
+      </div>
+    </div>
+
+  </section>
+
+</main>
+
+<!-- =========================== FOOTER ============================ -->
+<footer class="footer">
+  <div class="footer-signature">
+    <a
+      href="https://arminsilatani.com/en/"
+      target="_blank"
+      rel="noopener noreferrer"
+      title="Armin Silatani | Official Website"
+    >
+      <span class="crafted">crafted by</span>
+      <img src="assets/ArminSilatani.svg" alt="Armin Silatani" class="signature">
+    </a>
+  </div>
+</footer>
+
+<!-- :::::::::::::::::::::::::: SCRIPTS :::::::::::::::::::::::::: -->
+<!-- کتابخانه‌های مورد نیاز (ترتیب مهم است) -->
 <script src="assets/supabase.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js"></script>
 <script src="assets/tavio.js"></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js"></script>
 
 </body>
 </html>
