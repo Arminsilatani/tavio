@@ -1307,6 +1307,10 @@ body {
   margin-top: 8px;
 }
 
+#sidebar-dashboard {
+  text-decoration: none;
+  border-bottom: none;
+} 
 /* =========================== RESPONSIVE =========================== */
 
 @media (max-width: 640px) {
