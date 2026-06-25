@@ -1316,54 +1316,59 @@ document.addEventListener('DOMContentLoaded', () => {
         { label: 'Fiora Period Tracker', minRole: 'general', link: '', iconURL: 'assets/logos/Fi.svg' }
     ];
 
-    function renderSidebarMenu() {
-        if (!sidebarMenuItems) {
-            console.error('sidebar-menu-items not found in DOM');
-            return;
-        }
-
-        if (!currentUser) {
-            sidebarMenuItems.innerHTML = `
-                <div style="padding: 12px 16px; color: #888; font-size: 13px;">
-                    Please sign in to see tools.
-                </div>
-            `;
-            return;
-        }
-
-        sidebarMenuItems.innerHTML = '';
-
-        const role = currentProfile?.role || 'recruit';
-
-        MENU_TOOLS.forEach(tool => {
-            if (tool.isSelf) return;
-            const allowed = getRoleLevel(role) >= getRoleLevel(tool.minRole);
-            const btn = document.createElement('button');
-            btn.className = 'sidebar-item' + (allowed ? '' : ' disabled');
-            btn.disabled = !allowed;
-            btn.innerHTML = `
-                <span class="sidebar-icon">
-                    <img src="${tool.iconURL}" width="20" height="20" alt="${tool.label}">
-                </span>
-                <span>${tool.label}</span>
-                ${!tool.link ? '<span class="coming-soon-tooltip">Soon</span>' : ''}
-            `;
-            btn.addEventListener('click', () => {
-                if (!currentUser) {
-                    openAuthOverlay();
-                    document.getElementById('auth-error').textContent = 'Please sign in to use this tool.';
-                    return;
-                }
-                if (!allowed) {
-                    showToast('Your access level is too low to use this tool.');
-                    return;
-                }
-                if (tool.link) window.open(tool.link, '_blank');
-                document.getElementById('sidebar-close-row')?.click();
-            });
-            sidebarMenuItems.appendChild(btn);
-        });
+function renderSidebarMenu() {
+    if (!sidebarMenuItems) {
+        console.error('sidebar-menu-items not found in DOM');
+        return;
     }
+
+    // همیشه لیست را از نو می‌سازیم
+    sidebarMenuItems.innerHTML = '';
+
+    const isLoggedIn = !!currentUser;
+    const role = currentProfile?.role || 'recruit';
+
+    MENU_TOOLS.forEach(tool => {
+        if (tool.isSelf) return;
+
+        // مهمان: همه غیرفعال | کاربر: بررسی سطح دسترسی
+        const allowed = isLoggedIn
+            ? getRoleLevel(role) >= getRoleLevel(tool.minRole)
+            : false;
+
+        const btn = document.createElement('button');
+        btn.className = 'sidebar-item' + (allowed ? '' : ' disabled');
+        btn.disabled = !allowed;
+
+        btn.innerHTML = `
+            <span class="sidebar-icon">
+                <img src="${tool.iconURL}" width="20" height="20" alt="${tool.label}">
+            </span>
+            <span>${tool.label}</span>
+            ${!tool.link ? '<span class="coming-soon-tooltip">Soon</span>' : ''}
+            ${!isLoggedIn ? '<span class="lock-icon" title="Sign in to use">🔒</span>' : ''}
+        `;
+
+        btn.addEventListener('click', () => {
+            if (!isLoggedIn) {
+                openAuthOverlay();
+                const authErrorEl = document.getElementById('auth-error');
+                if (authErrorEl) authErrorEl.textContent = 'Please sign in to use this tool.';
+                return;
+            }
+
+            if (!allowed) {
+                showToast('Your access level is too low to use this tool.');
+                return;
+            }
+
+            if (tool.link) window.open(tool.link, '_blank');
+            document.getElementById('sidebar-close-row')?.click();
+        });
+
+        sidebarMenuItems.appendChild(btn);
+    });
+}
 
     /* =========================== SIDEBAR TOGGLE ============================ */
     (function() {
@@ -1670,19 +1675,19 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     function setLoggedOutUI() {
-        if (sidebarLoginBtn) sidebarLoginBtn.classList.remove('hidden');
-        if (sidebarLogoutBtn) sidebarLogoutBtn.classList.add('hidden');
-        if (sidebarDashboard) sidebarDashboard.classList.add('hidden');
-        if (avatarContent) avatarContent.textContent = '';
-        currentUser = null;
-        currentProfile = null;
-        currentUserRoleLevel = -1;
-        tavioPrompts = [];
-        tavioCategories = [];
-        tavioSharedPrompts = [];
-        renderSidebarMenu();
-        renderAll();
-    }
+    if (sidebarLoginBtn) sidebarLoginBtn.classList.remove('hidden');
+    if (sidebarLogoutBtn) sidebarLogoutBtn.classList.add('hidden');
+    if (sidebarDashboard) sidebarDashboard.classList.add('hidden');
+    if (avatarContent) avatarContent.textContent = '';
+    currentUser = null;
+    currentProfile = null;
+    currentUserRoleLevel = -1;
+    tavioPrompts = [];
+    tavioCategories = [];
+    tavioSharedPrompts = [];
+    renderSidebarMenu();   // <-- این خط رو مطمئن شو وجود داره
+    renderAll();
+}
 
     /* =========================== AUTH STATE ============================ */
     async function checkUser() {
