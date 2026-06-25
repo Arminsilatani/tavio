@@ -1093,7 +1093,7 @@ body {
 /* =========================== AVATAR & NOTIFICATION =========================== */
 
 .avatar-content {
-  display: flex;              /* inline-flex را با flex جایگزین می‌کنیم تا اندازه مشخصی بگیرد */
+  display: flex;
   align-items: center;
   justify-content: center;
 }
