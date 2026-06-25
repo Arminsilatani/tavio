@@ -1,7 +1,7 @@
 /*****************************************************
  *  Author: Armin Silatani
  *  Date: 2026-05-28
- *  Version: 1.0.0
+ *  Version: 2.0.0 (Ravlo‑style Auth)
  ****************************************************
 */
 
@@ -9,7 +9,7 @@
 
 /* :::::::::::::::::::::::::: SUPABASE CLIENT :::::::::::::::::::::::::: */
 const SUPABASE_URL = 'https://vzqicidepdmraygulrey.supabase.co';
-const SUPABASE_ANON_KEY = 'sb_publishable_kqRWgOmLISOE2EuLL1s8fw_WN6FJRTI';
+const SUPABASE_ANON_KEY = 'sb_publishable_kqRWgOmLISOE2EuLL1s8fw_NW6FJRTI';
 const { createClient } = supabase;
 const sb = createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
@@ -509,40 +509,40 @@ document.addEventListener('DOMContentLoaded', () => {
 
   /* =========================== SIDEBAR MODULE =========================== */
   const MENU_TOOLS = [
-      { label: 'Codara Service Generator',    minRole: 'general',  link: 'https://arminsilatani.github.io/codara/', iconURL: 'assets/logos/Co.svg' },
-      { label: 'Nolvo Sitemap Builder',       minRole: 'general',  link: '', iconURL: 'assets/logos/No.svg' },
-      { label: 'Qerlo Shortener',             minRole: 'general',  link: '', iconURL: 'assets/logos/Qe.svg' },
-      { label: 'Tivra Minify',                minRole: 'general',  link: '', iconURL: 'assets/logos/Ti.svg' },
-      { label: 'Semora Schema Generator',     minRole: 'general',  link: '', iconURL: 'assets/logos/Se.svg' },
-      { label: 'Brilo Speed Check',           minRole: 'general',  link: '', iconURL: 'assets/logos/Br.svg' },
-      { label: 'Sorbi Robots Builder',        minRole: 'general',  link: '', iconURL: 'assets/logos/So.svg' },
-      { label: 'Velto Meta Inspector',        minRole: 'general',  link: '', iconURL: 'assets/logos/Ve.svg' },
-      { label: 'Zorio Image Converter',       minRole: 'recruit',  link: 'https://arminsilatani.github.io/zorio/', iconURL: 'assets/logos/Zo.svg' },
-      { label: 'Galvo Video Converter',       minRole: 'general',  link: '', iconURL: 'assets/logos/Ga.svg' },
-      { label: 'Xelpo Pass Generator',        minRole: 'general',  link: '', iconURL: 'assets/logos/Xe.svg' },
-      { label: 'Dirmo DNS Checker',           minRole: 'general',  link: '', iconURL: 'assets/logos/Di.svg' },
-      { label: 'Lemro Keyword Research',      minRole: 'general',  link: '', iconURL: 'assets/logos/Le.svg' },
-      { label: 'Hirvo Density',               minRole: 'general',  link: '', iconURL: 'assets/logos/Hi.svg' },
-      { label: 'Jorvi Redirect',              minRole: 'general',  link: '', iconURL: 'assets/logos/Jo.svg' },
-      { label: 'Mirto CRM',                   minRole: 'general',  link: '', iconURL: 'assets/logos/Mi.svg' },
-      { label: 'Ravlo Calendar',              minRole: 'sergeant', link: 'https://arminsilatani.github.io/ravlo/', iconURL: 'assets/logos/Ra.svg' },
-      { label: 'Rinvo Accounting',            minRole: 'general',  link: '', iconURL: 'assets/logos/Ri.svg' },
-      { label: 'Yelmo Brand Namer',           minRole: 'general',  link: '', iconURL: 'assets/logos/Ye.svg' },
-      { label: 'Cedro Flashcards',            minRole: 'general',  link: '', iconURL: 'assets/logos/Ce.svg' },
-      { label: 'Fresca Colors Tool',          minRole: 'general',  link: '', iconURL: 'assets/logos/Fr.svg' },
-      { label: 'Ubiro Beer Cost',             minRole: 'general',  link: '', iconURL: 'assets/logos/Ub.svg' },
-      { label: 'Refacto Code Beautifier',     minRole: 'general',  link: '', iconURL: 'assets/logos/Re.svg' },
-      { label: 'Pilvo Text Editor',           minRole: 'recruit',  link: 'https://arminsilatani.github.io/pilvo/', iconURL: 'assets/logos/Pi.svg' },
-      { label: 'Tavio Prompt Library',        minRole: 'recruit',  link: 'https://arminsilatani.github.io/tavio/', iconURL: 'assets/logos/Ta.svg' , isSelf: true },
-      { label: 'Falco Favicon Generator',     minRole: 'recruit',  link: 'https://arminsilatani.github.io/falco/', iconURL: 'assets/logos/Fa.svg' },
-      { label: 'Lume Epoch Converter',        minRole: 'recruit',  link: 'https://arminsilatani.github.io/lume/', iconURL: 'assets/logos/Lu.svg' },
-      { label: 'Valeno Expiry Date Reminder', minRole: 'general',  link: '', iconURL: 'assets/logos/Va.svg' },
-      { label: 'Alviano Recipe Manager',      minRole: 'general',  link: '', iconURL: 'assets/logos/Al.svg' },
-      { label: 'Mavero Workout Tracker',      minRole: 'general',  link: '', iconURL: 'assets/logos/Ma.svg' },
-      { label: 'Tempozio Time Tracker',       minRole: 'general',  link: '', iconURL: 'assets/logos/Te.svg' },
-      { label: 'Belluno Wishlist',            minRole: 'general',  link: '', iconURL: 'assets/logos/Be.svg' },
-      { label: 'Nuvello Wallpaper App',       minRole: 'general',  link: '', iconURL: 'assets/logos/Nu.svg' },
-      { label: 'Fiora Period Tracker',        minRole: 'general',  link: '', iconURL: 'assets/logos/Fi.svg' }
+    { label: 'Codara Service Generator',    minRole: 'general',  link: 'https://arminsilatani.github.io/codara/', iconURL: 'assets/logos/Co.svg' },
+    { label: 'Nolvo Sitemap Builder',       minRole: 'general',  link: '', iconURL: 'assets/logos/No.svg' },
+    { label: 'Qerlo Shortener',             minRole: 'general',  link: '', iconURL: 'assets/logos/Qe.svg' },
+    { label: 'Tivra Minify',                minRole: 'general',  link: '', iconURL: 'assets/logos/Ti.svg' },
+    { label: 'Semora Schema Generator',     minRole: 'general',  link: '', iconURL: 'assets/logos/Se.svg' },
+    { label: 'Brilo Speed Check',           minRole: 'general',  link: '', iconURL: 'assets/logos/Br.svg' },
+    { label: 'Sorbi Robots Builder',        minRole: 'general',  link: '', iconURL: 'assets/logos/So.svg' },
+    { label: 'Velto Meta Inspector',        minRole: 'general',  link: '', iconURL: 'assets/logos/Ve.svg' },
+    { label: 'Zorio Image Converter',       minRole: 'recruit',  link: 'https://arminsilatani.github.io/zorio/', iconURL: 'assets/logos/Zo.svg' },
+    { label: 'Galvo Video Converter',       minRole: 'general',  link: '', iconURL: 'assets/logos/Ga.svg' },
+    { label: 'Xelpo Pass Generator',        minRole: 'general',  link: '', iconURL: 'assets/logos/Xe.svg' },
+    { label: 'Dirmo DNS Checker',           minRole: 'general',  link: '', iconURL: 'assets/logos/Di.svg' },
+    { label: 'Lemro Keyword Research',      minRole: 'general',  link: '', iconURL: 'assets/logos/Le.svg' },
+    { label: 'Hirvo Density',               minRole: 'general',  link: '', iconURL: 'assets/logos/Hi.svg' },
+    { label: 'Jorvi Redirect',              minRole: 'general',  link: '', iconURL: 'assets/logos/Jo.svg' },
+    { label: 'Mirto CRM',                   minRole: 'general',  link: '', iconURL: 'assets/logos/Mi.svg' },
+    { label: 'Ravlo Calendar',              minRole: 'sergeant', link: 'https://arminsilatani.github.io/ravlo/', iconURL: 'assets/logos/Ra.svg' },
+    { label: 'Rinvo Accounting',            minRole: 'general',  link: '', iconURL: 'assets/logos/Ri.svg' },
+    { label: 'Yelmo Brand Namer',           minRole: 'general',  link: '', iconURL: 'assets/logos/Ye.svg' },
+    { label: 'Cedro Flashcards',            minRole: 'general',  link: '', iconURL: 'assets/logos/Ce.svg' },
+    { label: 'Fresca Colors Tool',          minRole: 'general',  link: '', iconURL: 'assets/logos/Fr.svg' },
+    { label: 'Ubiro Beer Cost',             minRole: 'general',  link: '', iconURL: 'assets/logos/Ub.svg' },
+    { label: 'Refacto Code Beautifier',     minRole: 'general',  link: '', iconURL: 'assets/logos/Re.svg' },
+    { label: 'Pilvo Text Editor',           minRole: 'recruit',  link: 'https://arminsilatani.github.io/pilvo/', iconURL: 'assets/logos/Pi.svg' },
+    { label: 'Tavio Prompt Library',        minRole: 'recruit',  link: 'https://arminsilatani.github.io/tavio/', iconURL: 'assets/logos/Ta.svg' , isSelf: true },
+    { label: 'Falco Favicon Generator',     minRole: 'recruit',  link: 'https://arminsilatani.github.io/falco/', iconURL: 'assets/logos/Fa.svg' },
+    { label: 'Lume Epoch Converter',        minRole: 'recruit',  link: 'https://arminsilatani.github.io/lume/', iconURL: 'assets/logos/Lu.svg' },
+    { label: 'Valeno Expiry Date Reminder', minRole: 'general',  link: '', iconURL: 'assets/logos/Va.svg' },
+    { label: 'Alviano Recipe Manager',      minRole: 'general',  link: '', iconURL: 'assets/logos/Al.svg' },
+    { label: 'Mavero Workout Tracker',      minRole: 'general',  link: '', iconURL: 'assets/logos/Ma.svg' },
+    { label: 'Tempozio Time Tracker',       minRole: 'general',  link: '', iconURL: 'assets/logos/Te.svg' },
+    { label: 'Belluno Wishlist',            minRole: 'general',  link: '', iconURL: 'assets/logos/Be.svg' },
+    { label: 'Nuvello Wallpaper App',       minRole: 'general',  link: '', iconURL: 'assets/logos/Nu.svg' },
+    { label: 'Fiora Period Tracker',        minRole: 'general',  link: '', iconURL: 'assets/logos/Fi.svg' }
   ];
 
   const ROLE_LEVELS = {
@@ -558,32 +558,39 @@ document.addEventListener('DOMContentLoaded', () => {
 
   let currentUserRoleLevel = -1;
 
-  function renderSidebarTools(roleLevel) {
+  function renderSidebarMenu() {
     const container = document.getElementById('sidebar-menu-items');
     if (!container) return;
-    let html = '';
+    container.innerHTML = '';
+    const role = (currentUserProfile?.role || '').toLowerCase();
     MENU_TOOLS.forEach(tool => {
-      const requiredLevel = getRoleLevel(tool.minRole);
-      const hasAccess = roleLevel >= requiredLevel;
-      const isDisabled = !tool.link || !hasAccess;
-      const isSelf = tool.isSelf === true;
-      let classes = 'sidebar-item';
-      if (isDisabled) classes += ' disabled';
-      if (isSelf) classes += ' active';
-      const tag = tool.link ? 'a' : 'span';
-      const hrefAttr = tool.link ? `href="${tool.link}" target="_blank" rel="noopener noreferrer"` : '';
-      const tooltipHtml = !tool.link ? '<span class="coming-soon-tooltip">Soon</span>' : '';
-      html += `
-        <${tag} class="${classes}" ${hrefAttr}>
-          <span class="sidebar-icon">
-            <img src="${tool.iconURL}" alt="${tool.label}" onerror="this.style.display='none'" />
-          </span>
-          <span>${tool.label}</span>
-          ${tooltipHtml}
-        </${tag}>
+      if (tool.isSelf) return;
+      const allowed = getRoleLevel(role) >= getRoleLevel(tool.minRole);
+      const btn = document.createElement('button');
+      btn.className = 'sidebar-item' + (allowed ? '' : ' disabled');
+      btn.disabled = !allowed;
+      btn.innerHTML = `
+        <span class="sidebar-icon">
+          <img src="${tool.iconURL}" width="20" height="20" alt="${tool.label}">
+        </span>
+        <span>${tool.label}</span>
+        ${!tool.link ? '<span class="coming-soon-tooltip">Soon</span>' : ''}
       `;
+      btn.addEventListener('click', () => {
+        if (!currentUserProfile) {
+          openAuthOverlay();
+          document.getElementById('auth-error').textContent = 'Please sign in to use this tool.';
+          return;
+        }
+        if (!allowed) {
+          alert('Your access level is too low to use this tool.');
+          return;
+        }
+        if (tool.link) window.open(tool.link, '_blank');
+        document.getElementById('sidebar-close-row')?.click();
+      });
+      container.appendChild(btn);
     });
-    container.innerHTML = html;
   }
 
   (function() {
@@ -613,14 +620,16 @@ document.addEventListener('DOMContentLoaded', () => {
     document.addEventListener('keydown', (e) => { if (e.key === 'Escape' && isOpen) closeSidebar(); });
   })();
 
-  /* =========================== AUTH MODULE (RAVLO STYLE – profiles lookup) =========================== */
+  /* =========================== AUTH MODULE (RAVLO STYLE – check_email_exists RPC) =========================== */
+  let authEmail = ''; // ذخیره ایمیل بین مراحل
+
   const authOverlay       = document.getElementById('auth-overlay');
   const authStep1         = document.getElementById('step-1');
   const authStep2Login    = document.getElementById('step-2-login');
   const authStep2Reg      = document.getElementById('step-2-register');
   const authStepForgot    = document.getElementById('step-forgot');
 
-  const authEmail         = document.getElementById('auth-email');
+  const authEmailInput    = document.getElementById('auth-email');
   const authContinue      = document.getElementById('auth-continue-btn');
   const authErrorEl       = document.getElementById('auth-error');
 
@@ -652,43 +661,34 @@ document.addEventListener('DOMContentLoaded', () => {
     if (stepEl) stepEl.classList.remove('hidden');
   }
 
-  // Continue – بررسی وجود ایمیل در profiles
+  // Continue – RPC check_email_exists
   if (authContinue) {
     authContinue.addEventListener('click', async () => {
-      const email = authEmail.value.trim();
+      const email = authEmailInput.value.trim();
       if (!email) {
         authErrorEl.textContent = 'Please enter an email address.';
         return;
       }
       authErrorEl.textContent = '';
+      authEmail = email;
 
       try {
-        const { data, error } = await sb
-          .from('profiles')
-          .select('id')
-          .eq('email', email)
-          .limit(1);
-
+        const { data: exists, error } = await sb.rpc('check_email_exists', { email_to_check: email });
         if (error) {
-          console.warn('Profiles check error:', error);
-          // اگر کوئری شکست خورد (RLS یا مشکل موقت)، امن‌ترین کار رفتن به صفحه ورود است.
-          authUserEmail.textContent = email;
-          showStep('step-2-login');
+          console.error('RPC error:', error);
+          authErrorEl.textContent = 'Service unavailable. Please try again.';
           return;
         }
 
-        if (data && data.length > 0) {
-          // کاربر وجود دارد
+        if (exists) {
           authUserEmail.textContent = email;
           showStep('step-2-login');
         } else {
-          // کاربر جدید
           showStep('step-2-register');
         }
       } catch (err) {
-        console.warn('Unexpected error during profiles check:', err);
-        authUserEmail.textContent = email;
-        showStep('step-2-login');
+        console.error(err);
+        authErrorEl.textContent = 'Network error. Please try later.';
       }
     });
   }
@@ -696,14 +696,13 @@ document.addEventListener('DOMContentLoaded', () => {
   // Sign In
   if (authSignin) {
     authSignin.addEventListener('click', async () => {
-      const email = authEmail.value.trim();
       const password = authPassword.value;
       if (!password) {
         authErrorLogin.textContent = 'Password is required.';
         return;
       }
       authErrorLogin.textContent = '';
-      const { error } = await sb.auth.signInWithPassword({ email, password });
+      const { error } = await sb.auth.signInWithPassword({ email: authEmail, password });
       if (error) {
         authErrorLogin.textContent = error.message;
         return;
@@ -715,26 +714,25 @@ document.addEventListener('DOMContentLoaded', () => {
   // Register
   if (authRegister) {
     authRegister.addEventListener('click', async () => {
-      const email    = authEmail.value.trim();
-      const password = regPassword.value;
-      const confirm  = regConfirm.value;
       const first    = regFirstname.value.trim();
       const last     = regLastname.value.trim();
+      const password = regPassword.value;
+      const confirm  = regConfirm.value;
       if (!first || !last) {
-        authErrorReg.textContent = 'Please fill in all fields.';
-        return;
-      }
-      if (password.length < 6) {
-        authErrorReg.textContent = 'Password must be at least 6 characters.';
+        authErrorReg.textContent = 'All fields are required.';
         return;
       }
       if (password !== confirm) {
         authErrorReg.textContent = 'Passwords do not match.';
         return;
       }
+      if (password.length < 6) {
+        authErrorReg.textContent = 'Password must be at least 6 characters.';
+        return;
+      }
       authErrorReg.textContent = '';
       const { error } = await sb.auth.signUp({
-        email,
+        email: authEmail,
         password,
         options: {
           data: { first_name: first, last_name: last }
@@ -754,7 +752,7 @@ document.addEventListener('DOMContentLoaded', () => {
       regSuccessEl.style.display = 'none';
       document.getElementById('reg-form-fields').style.display = '';
       showStep('step-1');
-      authEmail.value = '';
+      authEmailInput.value = '';
       regFirstname.value = '';
       regLastname.value = '';
       regPassword.value = '';
@@ -765,7 +763,7 @@ document.addEventListener('DOMContentLoaded', () => {
   if (authForgotLink) {
     authForgotLink.addEventListener('click', (e) => {
       e.preventDefault();
-      forgotEmailInput.value = authEmail.value.trim();
+      forgotEmailInput.value = authEmail;
       showStep('step-forgot');
     });
   }
@@ -805,15 +803,19 @@ document.addEventListener('DOMContentLoaded', () => {
 
   function openAuthOverlay() {
     if (authOverlay) {
+      authOverlay.classList.remove('hidden');
       authOverlay.style.display = 'flex';
       showStep('step-1');
-      authEmail.value = '';
+      authEmailInput.value = '';
       if (authErrorEl) authErrorEl.textContent = '';
     }
   }
 
   function closeAuthOverlay() {
-    if (authOverlay) authOverlay.style.display = 'none';
+    if (authOverlay) {
+      authOverlay.classList.add('hidden');
+      authOverlay.style.display = 'none';
+    }
   }
 
   if (authOverlay) {
@@ -823,7 +825,9 @@ document.addEventListener('DOMContentLoaded', () => {
   }
 
   if (sidebarLoginBtn) sidebarLoginBtn.addEventListener('click', () => openAuthOverlay());
-  if (sidebarLogoutBtn) sidebarLogoutBtn.addEventListener('click', async () => { await sb.auth.signOut(); });
+  if (sidebarLogoutBtn) sidebarLogoutBtn.addEventListener('click', async () => {
+    await sb.auth.signOut();
+  });
 
   /* =========================== PROFILE & ROLE =========================== */
   let currentUserProfile = null;
@@ -835,29 +839,46 @@ document.addEventListener('DOMContentLoaded', () => {
       .eq('id', userId)
       .single();
     if (error || !data) {
-      console.warn('Profile not found, using recruit fallback');
-      return { role: 'recruit', first_name: '', last_name: '', email: '' };
+      console.warn('Profile not found, using metadata fallback');
+      // بازگشت یک پروفایل پیش‌فرض از user_metadata
+      const { data: { user } } = await sb.auth.getUser();
+      const md = user?.user_metadata || {};
+      return {
+        role: md.role || 'recruit',
+        first_name: md.first_name || '',
+        last_name: md.last_name || '',
+        email: user?.email || ''
+      };
     }
     return data;
   }
 
   async function applyUserProfile(user) {
-    if (!user) { setLoggedOutUI(); return; }
+    if (!user) {
+      setLoggedOutUI();
+      return;
+    }
     if (!currentUserProfile || currentUserProfile.id !== user.id) {
       currentUserProfile = await fetchProfile(user.id);
     }
     const profile = currentUserProfile;
     const role = profile.role || 'recruit';
+
     sidebarLoginBtn.classList.add('hidden');
     sidebarLogoutBtn.classList.remove('hidden');
     sidebarDashboard.classList.remove('hidden');
+
     let avatarChar = '?';
-    if (profile.first_name) avatarChar = profile.first_name.charAt(0).toUpperCase();
-    else if (user.email) avatarChar = user.email.charAt(0).toUpperCase();
+    if (profile.first_name) {
+      avatarChar = profile.first_name.charAt(0).toUpperCase();
+    } else if (user.email) {
+      avatarChar = user.email.charAt(0).toUpperCase();
+    }
     if (avatarContent) avatarContent.textContent = avatarChar;
     if (notifDot) notifDot.style.display = 'none';
+
     currentUserRoleLevel = getRoleLevel(role);
-    renderSidebarTools(currentUserRoleLevel);
+    renderSidebarMenu();
   }
 
   function setLoggedOutUI() {
@@ -867,7 +888,7 @@ document.addEventListener('DOMContentLoaded', () => {
     if (avatarContent) avatarContent.textContent = '';
     currentUserProfile = null;
     currentUserRoleLevel = -1;
-    renderSidebarTools(-1);
+    renderSidebarMenu();
   }
 
   async function checkUser() {
