@@ -53,6 +53,7 @@ document.addEventListener('DOMContentLoaded', () => {
     let currentSearchTerm = '';
     let typingTimer = null;
     let currentPromptId = null;
+    let currentUserRole = 'public';
 
     /* =========================== ROLE SYSTEM ============================ */
     const ROLE_LEVELS = {
@@ -1316,25 +1317,38 @@ document.addEventListener('DOMContentLoaded', () => {
         { label: 'Fiora Period Tracker', minRole: 'general', link: '', iconURL: 'assets/logos/Fi.svg' }
     ];
 
+/* =========================== ROLE SYSTEM (Ravlo) ============================ */
+const ROLE_HIERARCHY = ['recruit', 'sergeant', 'commander', 'general'];
+
+function normalizeRole(role) {
+    return String(role || '').trim().toLowerCase();
+}
+
+function hasAccess(userRole, minRole) {
+    const userIndex = ROLE_HIERARCHY.indexOf(normalizeRole(userRole));
+    const minIndex  = ROLE_HIERARCHY.indexOf(normalizeRole(minRole || 'recruit'));
+    if (minIndex === -1 || userIndex === -1) return false;
+    return userIndex >= minIndex;
+}
+
+/* =========================== RENDER SIDEBAR MENU ============================ */
 function renderSidebarMenu() {
-    if (!sidebarMenuItems) {
+    const container = document.getElementById('sidebar-menu-items');
+    if (!container) {
         console.error('sidebar-menu-items not found in DOM');
         return;
     }
 
-    // همیشه لیست را از نو می‌سازیم
-    sidebarMenuItems.innerHTML = '';
+    // همیشه لیست را از نو بساز (حتی اگر کاربر مهمان است)
+    container.innerHTML = '';
 
-    const isLoggedIn = !!currentUser;
-    const role = currentProfile?.role || 'recruit';
+    // نقش کاربر را از متغیر سراسری بخوان (در حالت مهمان: 'public')
+    const role = normalizeRole(currentUserRole);
 
     MENU_TOOLS.forEach(tool => {
-        if (tool.isSelf) return;
+        if (tool.isSelf) return; // ابزار جاری را دوباره نمایش نده
 
-        // مهمان: همه غیرفعال | کاربر: بررسی سطح دسترسی
-        const allowed = isLoggedIn
-            ? getRoleLevel(role) >= getRoleLevel(tool.minRole)
-            : false;
+        const allowed = hasAccess(role, tool.minRole);
 
         const btn = document.createElement('button');
         btn.className = 'sidebar-item' + (allowed ? '' : ' disabled');
@@ -1345,28 +1359,32 @@ function renderSidebarMenu() {
                 <img src="${tool.iconURL}" width="20" height="20" alt="${tool.label}">
             </span>
             <span>${tool.label}</span>
-            ${!tool.link ? '<span class="coming-soon-tooltip">Soon</span>' : ''}
-            ${!isLoggedIn ? '<span class="lock-icon" title="Sign in to use">🔒</span>' : ''}
+            ${!tool.link ? '<span class="coming-soon-tooltip">Coming Soon</span>' : ''}
         `;
 
         btn.addEventListener('click', () => {
-            if (!isLoggedIn) {
+            // اگر کاربر لاگین نکرده، مستقیماً صفحهٔ لاگین را باز کن
+            if (!currentUser) {
                 openAuthOverlay();
                 const authErrorEl = document.getElementById('auth-error');
                 if (authErrorEl) authErrorEl.textContent = 'Please sign in to use this tool.';
                 return;
             }
 
+            // اگر نقش کافی ندارد
             if (!allowed) {
                 showToast('Your access level is too low to use this tool.');
                 return;
             }
 
+            // باز کردن لینک
             if (tool.link) window.open(tool.link, '_blank');
+
+            // بستن منو
             document.getElementById('sidebar-close-row')?.click();
         });
 
-        sidebarMenuItems.appendChild(btn);
+        container.appendChild(btn);
     });
 }
 
@@ -1631,61 +1649,73 @@ function renderSidebarMenu() {
     }
 
     async function applyUserProfile(user) {
-        if (!user) {
-            currentUser = null;
-            currentProfile = null;
-            currentUserRoleLevel = -1;
-            setLoggedOutUI();
-            return;
-        }
-
-        currentUser = user;
-        if (!currentProfile || currentProfile.id !== user.id) {
-            currentProfile = await fetchProfile(user.id);
-        }
-
-        const profile = currentProfile;
-        const role = profile.role || 'recruit';
-
-        if (sidebarLoginBtn) sidebarLoginBtn.classList.add('hidden');
-        if (sidebarLogoutBtn) sidebarLogoutBtn.classList.remove('hidden');
-        if (sidebarDashboard) sidebarDashboard.classList.remove('hidden');
-
-        const fullName = [profile.first_name, profile.last_name].filter(Boolean).join(' ') || user.email || 'Dashboard';
-        const dashboardTextEl = document.querySelector('.sidebar-dashboard-text');
-        if (dashboardTextEl) dashboardTextEl.textContent = fullName;
-
-        if (avatarContent) {
-            if (profile.photo_url) {
-                avatarContent.innerHTML = `<img src="${profile.photo_url}" alt="Profile" width="20" height="20" style="border-radius:50%; object-fit:cover;" onerror="this.outerHTML='<span class=\\'avatar-initial\\'>${fullName.charAt(0).toUpperCase()}</span>';">`;
-            } else {
-                avatarContent.innerHTML = `<span class="avatar-initial">${fullName.charAt(0).toUpperCase()}</span>`;
-            }
-        }
-
-        if (notifDot) notifDot.style.display = 'none';
-
-        currentUserRoleLevel = getRoleLevel(role);
-        renderSidebarMenu();
-
-        await fetchTavioCategories();
-        await fetchTavioPrompts();
-        await fetchSharedPrompts();
-        renderAll();
+    if (!user) {
+        currentUser = null;
+        currentProfile = null;
+        currentUserRole = 'public';
+        currentUserRoleLevel = -1;
+        setLoggedOutUI();
+        return;
     }
 
-    function setLoggedOutUI() {
+    currentUser = user;
+    if (!currentProfile || currentProfile.id !== user.id) {
+        currentProfile = await fetchProfile(user.id);
+    }
+
+    const profile = currentProfile;
+    const role = profile.role || 'recruit';
+
+    // به‌روزرسانی نقش‌ها مطابق سیستم Ravlo
+    currentUserRole = role;
+    currentUserRoleLevel = getRoleLevel(role);
+
+    // نمایش دکمه‌های لاگین/لاگاوت و داشبورد
+    if (sidebarLoginBtn) sidebarLoginBtn.classList.add('hidden');
+    if (sidebarLogoutBtn) sidebarLogoutBtn.classList.remove('hidden');
+    if (sidebarDashboard) sidebarDashboard.classList.remove('hidden');
+
+    // نام کامل و آواتار
+    const fullName = [profile.first_name, profile.last_name].filter(Boolean).join(' ') || user.email || 'Dashboard';
+    const dashboardTextEl = document.querySelector('.sidebar-dashboard-text');
+    if (dashboardTextEl) dashboardTextEl.textContent = fullName;
+
+    if (avatarContent) {
+        if (profile.photo_url) {
+            avatarContent.innerHTML = `<img src="${profile.photo_url}" alt="Profile" width="20" height="20" style="border-radius:50%; object-fit:cover;" onerror="this.outerHTML='<span class=\\'avatar-initial\\'>${fullName.charAt(0).toUpperCase()}</span>';">`;
+        } else {
+            avatarContent.innerHTML = `<span class="avatar-initial">${fullName.charAt(0).toUpperCase()}</span>`;
+        }
+    }
+
+    if (notifDot) notifDot.style.display = 'none';
+
+    // رندر منو با نقش جدید
+    renderSidebarMenu();
+
+    // بارگذاری داده‌ها
+    await fetchTavioCategories();
+    await fetchTavioPrompts();
+    await fetchSharedPrompts();
+    renderAll();
+}
+
+function setLoggedOutUI() {
     if (sidebarLoginBtn) sidebarLoginBtn.classList.remove('hidden');
     if (sidebarLogoutBtn) sidebarLogoutBtn.classList.add('hidden');
     if (sidebarDashboard) sidebarDashboard.classList.add('hidden');
     if (avatarContent) avatarContent.textContent = '';
+
     currentUser = null;
     currentProfile = null;
+    currentUserRole = 'public';
     currentUserRoleLevel = -1;
+
     tavioPrompts = [];
     tavioCategories = [];
     tavioSharedPrompts = [];
-    renderSidebarMenu();   // <-- این خط رو مطمئن شو وجود داره
+
+    renderSidebarMenu();
     renderAll();
 }
 
