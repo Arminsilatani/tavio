@@ -1,8 +1,9 @@
-<!--****************************************************
-  *  Author: Armin Silatani
-  *  Date: 2026-05-28
-  *  Version: 0.2.0
-  ****************************************************
+<!--
+****************************************************
+*  Author: Armin Silatani
+*  Date: 2026-05-28
+*  Version: 0.2.0
+****************************************************
 -->
 <!DOCTYPE html>
 <html lang="en" dir="ltr">
@@ -315,6 +316,31 @@
 <!-- =========================== MAIN CONTENT ============================ -->
 <main class="container" id="appRoot">
 
+  <!-- ------------------------- TOOLBAR (actions) ------------------------- -->
+  <div class="tavio-toolbar">
+    <div class="tavio-actions">
+      <button id="tavio-new-prompt-btn" class="btn btn-accent">+ New Prompt</button>
+      <button id="tavio-categories-btn" class="btn btn-outline btn-sm" title="Manage Categories">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <rect x="3" y="3" width="7" height="7" rx="1"/>
+          <rect x="14" y="3" width="7" height="7" rx="1"/>
+          <rect x="3" y="14" width="7" height="7" rx="1"/>
+          <rect x="14" y="14" width="7" height="7" rx="1"/>
+        </svg>
+        Categories
+      </button>
+      <button id="tavio-shared-btn" class="btn btn-outline btn-sm" title="Shared Prompts">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <path d="M4 12v8a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-8"/>
+          <polyline points="16 6 12 2 8 6"/>
+          <line x1="12" y1="2" x2="12" y2="15"/>
+        </svg>
+        Shared
+        <span id="tavio-shared-count" class="badge">0</span>
+      </button>
+    </div>
+  </div>
+
   <!-- ------------------------- LIBRARY VIEW ------------------------- -->
   <section id="libraryView" class="view">
 
@@ -332,7 +358,7 @@
       <button class="filter-chip active" data-category="all">All</button>
     </div>
 
-    <!-- Prompt creation form -->
+    <!-- Prompt creation form (hidden initially) -->
     <div id="promptFormContainer" class="prompt-form hidden">
       <div class="form-card">
         <h3>Create Prompt</h3>
@@ -376,7 +402,8 @@
           <label class="checkbox-label">
             <input type="checkbox" id="promptLocked">
             <span>Lock with password</span>
-          </label><small>Master password required to open</small>
+          </label>
+          <small>Master password required to open</small>
         </div>
 
         <div class="form-buttons">
@@ -399,8 +426,10 @@
       <button id="btnBackToLibrary" class="btn btn-back" title="Back to library">
         <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" class="back-icon">
           <polyline points="15 18 9 12 15 6"></polyline>
-        </svg><span class="back-text">Back</span>
-      </button><h3 id="builderTitle" class="builder-title"></h3>
+        </svg>
+        <span class="back-text">Back</span>
+      </button>
+      <h3 id="builderTitle" class="builder-title"></h3>
     </div>
 
     <!-- AI Models full-width section -->
@@ -440,6 +469,87 @@
   </section>
 
 </main>
+
+<!-- =========================== MODALS ============================ -->
+
+<!-- مودال مدیریت دسته‌بندی‌ها -->
+<div id="tavio-categories-modal" class="modal">
+  <div class="modal-content">
+    <span class="close-modal" id="tavio-categories-modal-close">&times;</span>
+    <h3>Manage Categories</h3>
+    <div id="tavio-categories-list"></div>
+    <div class="tavio-add-category">
+      <input type="text" id="tavio-new-category-input" class="auth-field" placeholder="New category name..." />
+      <input type="color" id="tavio-new-category-color" class="color-picker" value="#ff6f91" />
+      <button id="tavio-add-category-btn" class="btn btn-accent">Add</button>
+    </div>
+  </div>
+</div>
+
+<!-- مودال اشتراک‌گذاری -->
+<div id="tavio-share-modal" class="modal">
+  <div class="modal-content">
+    <span class="close-modal" id="tavio-share-modal-close">&times;</span>
+    <h3>Share Prompt</h3>
+    <p id="tavio-share-prompt-title" style="color:var(--text-secondary); margin-bottom:12px;"></p>
+    <select id="tavio-share-user-select" class="auth-field">
+      <option value="">Select a connection...</option>
+    </select>
+    <button id="tavio-share-confirm-btn" class="btn btn-accent" style="margin-top:12px;">Share</button>
+  </div>
+</div>
+
+<!-- مودال درخواست‌های اشتراک‌گذاری -->
+<div id="tavio-shared-requests-modal" class="modal">
+  <div class="modal-content">
+    <span class="close-modal" id="tavio-shared-requests-close">&times;</span>
+    <h3>Shared Prompts</h3>
+    <div id="tavio-shared-requests-list"></div>
+  </div>
+</div>
+
+<!-- مودال ویرایش پرامپت (از همان فرم استفاده می‌کند اما با دیتا پر می‌شود) -->
+<div id="tavio-edit-modal" class="modal">
+  <div class="modal-content">
+    <span class="close-modal" id="tavio-edit-modal-close">&times;</span>
+    <h3 id="tavio-edit-modal-title">Edit Prompt</h3>
+    <input type="text" id="tavio-edit-prompt-title" class="auth-field" placeholder="Title" />
+    <textarea id="tavio-edit-prompt-content" class="auth-field" rows="6" placeholder="Content..."></textarea>
+    <select id="tavio-edit-prompt-category" class="auth-field">
+      <option value="">No Category</option>
+    </select>
+    <label class="checkbox-label">
+      <input type="checkbox" id="tavio-edit-prompt-pinned" />
+      <span>Pin this prompt</span>
+    </label>
+    <div class="form-buttons" style="margin-top:12px;">
+      <button id="tavio-edit-save-btn" class="btn btn-accent">Save</button>
+      <button id="tavio-edit-cancel-btn" class="btn btn-outline">Cancel</button>
+    </div>
+  </div>
+</div>
+
+<!-- مودال تأیید حذف (مشترک) -->
+<div id="confirm-modal" class="modal">
+  <div class="modal-content" style="max-width:360px; text-align:center;">
+    <p id="confirm-modal-message" style="margin-bottom:20px; color:#ccc;"></p>
+    <div class="confirm-actions">
+      <button id="confirm-modal-yes" class="btn btn-accent">Yes</button>
+      <button id="confirm-modal-no" class="btn btn-outline">No</button>
+    </div>
+  </div>
+</div>
+
+<!-- مودال لاگاوت -->
+<div id="logout-confirm-modal" class="modal">
+  <div class="modal-content" style="max-width:360px; text-align:center;">
+    <h3>Are you sure you want to log out?</h3>
+    <div class="confirm-actions" style="margin-top:20px;">
+      <button id="logout-confirm-yes" class="btn btn-accent">Yes, logout</button>
+      <button id="logout-confirm-no" class="btn btn-outline">No, stay</button>
+    </div>
+  </div>
+</div>
 
 <!-- =========================== FOOTER ============================ -->
 <footer class="footer">
