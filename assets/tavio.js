@@ -1,7 +1,7 @@
 /*****************************************************
  *  Author: Armin Silatani
  *  Date: 2026-06-25
- *  Version: 3.0.2 (Fixed loader with timeout)
+ *  Version: 3.0.4 (Full)
  ****************************************************
  */
 
@@ -35,7 +35,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
     const sbClient = getSupabaseClient();
     if (!sbClient) {
-        console.error('Supabase client not available. Please check your connection.');
+        console.error('Supabase client not available.');
         const loader = document.getElementById('initial-loader');
         if (loader) loader.classList.add('hidden');
         return;
@@ -159,6 +159,7 @@ document.addEventListener('DOMContentLoaded', () => {
     const sidebarLoginBtn = document.getElementById('sidebar-login');
     const sidebarLogoutBtn = document.getElementById('sidebar-logout');
     const sidebarDashboard = document.getElementById('sidebar-dashboard');
+    const sidebarMenuItems = document.getElementById('sidebar-menu-items');
     const avatarContent = document.querySelector('.avatar-content');
     const notifDot = document.getElementById('avatar-notif-dot');
 
@@ -203,7 +204,6 @@ document.addEventListener('DOMContentLoaded', () => {
     };
 
     /* =========================== SUPABASE CRUD OPERATIONS ============================ */
-
     async function fetchTavioPrompts() {
         if (!currentUser) {
             tavioPrompts = [];
@@ -1278,7 +1278,7 @@ document.addEventListener('DOMContentLoaded', () => {
     btnCopyPrompt?.addEventListener('click', copyToClipboard);
     btnClearBuilder?.addEventListener('click', clearBuilder);
 
-    /* =========================== SIDEBAR ============================ */
+    /* =========================== SIDEBAR MENU ============================ */
     const MENU_TOOLS = [
         { label: 'Codara Service Generator', minRole: 'general', link: 'https://arminsilatani.github.io/codara/', iconURL: 'assets/logos/Co.svg' },
         { label: 'Nolvo Sitemap Builder', minRole: 'general', link: '', iconURL: 'assets/logos/No.svg' },
@@ -1317,9 +1317,21 @@ document.addEventListener('DOMContentLoaded', () => {
     ];
 
     function renderSidebarMenu() {
-        const container = document.getElementById('sidebar-menu-items');
-        if (!container) return;
-        container.innerHTML = '';
+        if (!sidebarMenuItems) {
+            console.error('sidebar-menu-items not found in DOM');
+            return;
+        }
+
+        if (!currentUser) {
+            sidebarMenuItems.innerHTML = `
+                <div style="padding: 12px 16px; color: #888; font-size: 13px;">
+                    Please sign in to see tools.
+                </div>
+            `;
+            return;
+        }
+
+        sidebarMenuItems.innerHTML = '';
 
         const role = currentProfile?.role || 'recruit';
 
@@ -1349,10 +1361,11 @@ document.addEventListener('DOMContentLoaded', () => {
                 if (tool.link) window.open(tool.link, '_blank');
                 document.getElementById('sidebar-close-row')?.click();
             });
-            container.appendChild(btn);
+            sidebarMenuItems.appendChild(btn);
         });
     }
 
+    /* =========================== SIDEBAR TOGGLE ============================ */
     (function() {
         const toggleBtn = document.getElementById('menu-toggle-btn');
         const sidebar = document.getElementById('sidebar');
@@ -1650,7 +1663,6 @@ document.addEventListener('DOMContentLoaded', () => {
         currentUserRoleLevel = getRoleLevel(role);
         renderSidebarMenu();
 
-        // Load data
         await fetchTavioCategories();
         await fetchTavioPrompts();
         await fetchSharedPrompts();
@@ -1695,31 +1707,22 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     });
 
-    /* =========================== INIT (with timeout) ============================ */
+    /* =========================== INIT ============================ */
     async function initApp() {
         console.log('Tavio: Initializing...');
-        let loaderHidden = false;
         const loader = document.getElementById('initial-loader');
 
-        const hideLoader = () => {
-            if (!loaderHidden) {
-                if (loader) loader.classList.add('hidden');
-                loaderHidden = true;
-                console.log('Tavio: Loader hidden.');
-            }
-        };
-
-        // Hide loader after 3 seconds anyway (safety net)
-        const timeoutId = setTimeout(hideLoader, 3000);
+        const timeoutId = setTimeout(() => {
+            if (loader) loader.classList.add('hidden');
+        }, 3000);
 
         try {
             await checkUser();
-            // If everything loaded, hide loader
-            hideLoader();
+            if (loader) loader.classList.add('hidden');
             clearTimeout(timeoutId);
         } catch (e) {
             console.error('Init error:', e);
-            hideLoader();
+            if (loader) loader.classList.add('hidden');
             clearTimeout(timeoutId);
         }
         console.log('Tavio: Initialization complete.');
