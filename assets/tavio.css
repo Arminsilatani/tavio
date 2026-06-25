@@ -2,7 +2,7 @@
   ****************************************************
   *  Author: Armin Silatani
   *  Date: 2026-05-28
-  *  Version: 1.0.0
+  *  Version: 1.1.0
   ****************************************************
 */
 
@@ -857,188 +857,13 @@ body {
   display: none !important;
 }
 
-/* =========================== SIDEBAR OVERLAY =========================== */
-
-.sidebar-overlay {
-    position: fixed;
-    inset: 0;
-    background: rgba(0, 0, 0, 0.55);
-    z-index: 99990;
-    opacity: 0;
-    pointer-events: none;
-    transition: opacity 0.35s ease;
-}
-
-.sidebar-overlay.active {
-    opacity: 1;
-    pointer-events: all;
-}
-
-/* =========================== SIDEBAR PANEL =========================== */
-
-.sidebar {
-    position: fixed;
-    top: 0;
-    left: 0;
-    width: 280px;
-    max-width: 85vw;
-    height: 100%;
-    background: rgba(13, 13, 13, 0.9);
-    backdrop-filter: blur(20px);
-    -webkit-backdrop-filter: blur(20px);
-    border-right: 1px solid rgba(255, 255, 255, 0.08);
-    z-index: 99995;
-    transform: translateX(-100%);
-    display: flex;
-    flex-direction: column;
-    padding: 20px 0;
-    box-shadow: 4px 0 20px rgba(0, 0, 0, 0.5);
-    overflow-y: auto;
-}
-
-/* =========================== CLOSE ROW =========================== */
-
-.sidebar-close-row {
-    display: flex;
-    align-items: center;
-    justify-content: flex-end;
-    padding: 0 18px 12px;
-    cursor: pointer;
-    color: rgba(245, 245, 245, 0.7);
-    font-size: 14px;
-    transition: color 0.2s;
-    user-select: none;
-}
-
-.sidebar-close-row:hover {
-    color: var(--accent);
-}
-
-/* =========================== SEPARATOR =========================== */
-
-.sidebar-separator {
-    height: 1px;
-    background: rgba(255, 255, 255, 0.07);
-    margin: 0 12px;
-}
-
-/* =========================== NAVIGATION =========================== */
-
-.sidebar-nav {
-    flex: 1;
-    display: flex;
-    flex-direction: column;
-    gap: 2px;
-    padding: 8px 0;
-}
-
-/* =========================== SIDEBAR ITEMS =========================== */
-
-.sidebar-item {
-    display: flex;
-    align-items: center;
-    gap: 10px;
-    padding: 11px 18px;
-    border-radius: 10px;
-    margin: 0 8px;
-    color: var(--text);
-    text-decoration: none;
-    font-size: 15px;
-    font-family: inherit;
-    background: transparent;
-    border: none;
-    cursor: pointer;
-    transition: background 0.2s, color 0.2s;
-}
-
-.sidebar-item:hover {
-    background: rgba(255, 255, 255, 0.06);
-    color: var(--accent);
-}
-
-.sidebar-item.disabled {
-    opacity: 0.4;
-    pointer-events: none;
-}
-
-.sidebar-item.coming-soon {
-    position: relative;
-}
-
-.sidebar-item.coming-soon::after {
-    content: 'Soon';
-    position: absolute;
-    right: 10px;
-    top: 50%;
-    transform: translateY(-50%);
-    font-size: 10px;
-    background: var(--accent);
-    color: #0d0d0d;
-    padding: 2px 6px;
-    border-radius: 4px;
-    font-weight: 400;
-    pointer-events: none;
-}
-
-.login-item,
-.logout-item {
-    margin-top: 4px;
-}
-
-/* =========================== SIDEBAR ICON CONTAINER =========================== */
-
-.sidebar-icon {
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    width: 24px;
-    height: 24px;
-    flex-shrink: 0;
-    position: relative;
-}
-
-/* آواتار داخل آیکون (دایره رنگی با حرف اول) */
-.avatar-content {
-    display: block;
-    width: 24px;
-    height: 24px;
-    border-radius: 50%;
-    background: var(--accent);
-    color: #0d0d0d;
-    font-size: 12px;
-    font-weight: 900;
-    line-height: 24px;
-    text-align: center;
-    text-transform: uppercase;
-}
-
-/* نقطه اعلان */
-.notification-dot {
-    position: absolute;
-    top: -2px;
-    right: -2px;
-    width: 8px;
-    height: 8px;
-    background: #ff4757;
-    border-radius: 50%;
-    border: 1px solid #0d0d0d;
-}
-
-/* متن داشبورد */
-.sidebar-dashboard-text {
-    font-weight: 400;
-}
-
-.hidden {
-    display: none !important;
-}
-
 /* =========================== HAMBURGER BUTTON =========================== */
+
 .hamburger-btn {
   position: fixed;
   top: 41px;
-  left: 49px;
-  z-index: 10;
+  left: 44px;
+  z-index: 1001;
   width: 18px;
   height: 24px;
   background: transparent;
@@ -1055,7 +880,7 @@ body {
 }
 
 .hamburger-line {
-  width: 20px;
+  width: 18px;
   height: 2px;
   background: currentColor;
   border-radius: 2px;
@@ -1075,12 +900,13 @@ body {
 }
 
 /* =========================== SIDEBAR OVERLAY =========================== */
+
 .sidebar-overlay {
   position: fixed;
   inset: 0;
   background: rgba(0, 0, 0, 0.5);
   backdrop-filter: blur(4px);
-  z-index: 2;
+  z-index: 998;
   opacity: 0;
   visibility: hidden;
   pointer-events: none;
@@ -1094,6 +920,7 @@ body {
 }
 
 /* =========================== SIDEBAR PANEL =========================== */
+
 .sidebar {
   position: fixed;
   top: 0;
@@ -1104,7 +931,7 @@ body {
   background: rgba(18, 18, 18, 0.85);
   backdrop-filter: blur(24px);
   border-right: 1px solid rgba(255, 255, 255, 0.06);
-  z-index: 3;
+  z-index: 999;
   transform: translateX(-100%);
   display: flex;
   flex-direction: column;
@@ -1116,8 +943,8 @@ body {
 .sidebar-close-row {
   display: flex;
   align-items: center;
-  justify-content: flex-start;  /* چپ‌چین */
-  padding: 20px 16px 2px 64px; /* فاصلهٔ یکسان از چپ و راست */
+  justify-content: flex-end;
+  padding: 22px 166px 12px 16px;
   margin-bottom: 12px;
   border-radius: 12px;
   background: transparent;
@@ -1145,11 +972,22 @@ body {
   scrollbar-width: thin;
   scrollbar-color: var(--accent) transparent;
   scrollbar-gutter: stable;
-  direction: rtl;
+  direction: rtl; /* برای اسکرول از راست */
 }
 
 .sidebar-nav > * {
-  direction: ltr;
+  direction: ltr; /* محتوا چپ‌چین */
+}
+
+.sidebar-nav::-webkit-scrollbar {
+  width: 4px;
+}
+.sidebar-nav::-webkit-scrollbar-track {
+  background: transparent;
+}
+.sidebar-nav::-webkit-scrollbar-thumb {
+  background-color: var(--accent);
+  border-radius: 4px;
 }
 
 .sidebar-separator {
@@ -1159,6 +997,8 @@ body {
   margin: 12px 0;
   width: 100%;
 }
+
+/* =========================== SIDEBAR ITEMS =========================== */
 
 .sidebar-item {
   display: flex;
@@ -1219,6 +1059,8 @@ body {
   filter: grayscale(100%) opacity(0.5);
 }
 
+/* ------------------------- COMING SOON TOOLTIP ------------------------- */
+
 .sidebar-item.coming-soon {
   position: relative;
   overflow: visible;
@@ -1248,8 +1090,27 @@ body {
   opacity: 1;
 }
 
-#sidebar-coffee {
-  transform: translateX(-4px);
+/* =========================== AVATAR & NOTIFICATION =========================== */
+
+.avatar-content {
+  display: flex;              /* inline-flex را با flex جایگزین می‌کنیم تا اندازه مشخصی بگیرد */
+  align-items: center;
+  justify-content: center;
+}
+
+.avatar-initial {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 20px;
+  height: 20px;
+  background: var(--accent);
+  color: white;
+  border-radius: 50%;
+  font-size: 12px;
+  font-weight: bold;
+  line-height: 1;
+  text-transform: uppercase;
 }
 
 .notification-dot {
@@ -1270,18 +1131,8 @@ body {
   transform: translateY(0px);
 }
 
-@keyframes blink {
-  0%, 100% { opacity: 1; }
-  50% { opacity: 0.2; }
-}
-
-#sidebar-menu-items {
-  transform: translateX(-20px);
-}
-.sidebar-nav {
-  overflow-x: hidden;
-}
 /* =========================== AUTH OVERLAY =========================== */
+
 #auth-overlay {
   display: none;
   position: fixed;
@@ -1307,6 +1158,12 @@ body {
   text-align: center;
   backdrop-filter: blur(10px);
   color: var(--text);
+}
+
+.auth-logo {
+  height: 44px;
+  width: auto;
+  margin-bottom: 16px;
 }
 
 .auth-box h2 {
@@ -1356,33 +1213,6 @@ body {
 
 .auth-field:focus {
   border-color: var(--accent);
-}
-
-
-/* لوگوی ورود */
-.auth-logo {
-  height: 44px;
-  width: auto;
-}
-
-/* احتیاطی برای مخفی‌سازی صحیح */
-.hidden {
-  display: none !important;
-}
-
-/* auth-user-email */
-.auth-user-email {
-  font-size: 14px;
-  color: #aaa;
-  text-align: left;
-  margin-bottom: 4px;
-}
-
-/* auth-hint */
-.auth-hint {
-  font-size: 13px;
-  color: #888;
-  margin-bottom: 12px;
 }
 
 /* ----- BUTTONS ----- */
@@ -1477,20 +1307,6 @@ body {
   margin-top: 8px;
 }
 
-.avatar-initial {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  width: 20px;
-  height: 20px;
-  background: var(--accent);
-  color: #0d0d0d;
-  border-radius: 50%;
-  font-size: 12px;
-  font-weight: 900;
-  line-height: 1;
-  text-transform: uppercase;
-}
 /* =========================== RESPONSIVE =========================== */
 
 @media (max-width: 640px) {
@@ -1508,9 +1324,7 @@ body {
         min-height: 50vh;
     }
 }
-#sidebar-login {
-  transform: translateX(-5px);
-}
+
 /* =========================== FOOTER =========================== */
 
 .footer {
