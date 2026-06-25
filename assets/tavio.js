@@ -1,13 +1,13 @@
 /*****************************************************
  *  Author: Armin Silatani
  *  Date: 2026-06-25
- *  Version: 3.0.4 (Full)
+ *  Version: 3.0.5 (Sidebar Fix)
  ****************************************************
  */
 
 /* =========================== SUPABASE CLIENT ============================ */
 const SUPABASE_URL = 'https://vzqicidepdmraygulrey.supabase.co';
-const SUPABASE_ANON_KEY = 'sb_publishable_kqRWgOmLISOE2EuLL1s8fw_WN6FJRTI';
+const SUPABASE_ANON_KEY = 'sb_publishable_kqRWgOmLISOE2EuLL1s8fw_NW6FJRTI';
 
 let sb = null;
 
@@ -469,9 +469,7 @@ document.addEventListener('DOMContentLoaded', () => {
             const { data, error } = await sbClient
                 .from('dashboard_connectionrequests')
                 .select('from_id, to_id, status')
-                .or(
-                    `from_id.eq.${currentUser.id},to_id.eq.${currentUser.id}`
-                )
+                .or(`from_id.eq.${currentUser.id},to_id.eq.${currentUser.id}`)
                 .eq('status', 'accepted');
 
             if (error) {
@@ -546,11 +544,7 @@ document.addEventListener('DOMContentLoaded', () => {
         try {
             const { data, error } = await sbClient
                 .from('tavio_shared_prompts')
-                .select(`
-                    *,
-                    sender:sender_id(id, first_name, last_name, photo_url),
-                    prompt:prompt_id(*)
-                `)
+                .select(`*, sender:sender_id(id, first_name, last_name, photo_url), prompt:prompt_id(*)`)
                 .eq('receiver_id', currentUser.id)
                 .eq('status', 'pending');
 
@@ -573,10 +567,7 @@ document.addEventListener('DOMContentLoaded', () => {
             const status = accept ? 'accepted' : 'rejected';
             const { error } = await sbClient
                 .from('tavio_shared_prompts')
-                .update({
-                    status: status,
-                    responded_at: new Date().toISOString()
-                })
+                .update({ status: status, responded_at: new Date().toISOString() })
                 .eq('id', shareId)
                 .eq('receiver_id', currentUser.id);
 
@@ -594,9 +585,7 @@ document.addEventListener('DOMContentLoaded', () => {
                         share.prompt.categories || [],
                         share.prompt.ais || [],
                         share.prompt.content || '',
-                        false,
-                        false,
-                        share.prompt.description || ''
+                        false, false, share.prompt.description || ''
                     );
                     showToast('Prompt added to your library!');
                 }
@@ -615,11 +604,7 @@ document.addEventListener('DOMContentLoaded', () => {
     async function addNotificationToUser(userId, type, title, body, link) {
         try {
             await sbClient.from('notifications').insert({
-                user_id: userId,
-                type: type,
-                title: title,
-                body: body,
-                link: link
+                user_id: userId, type: type, title: title, body: body, link: link
             });
         } catch (e) {
             console.warn('Notification failed:', e);
@@ -629,9 +614,7 @@ document.addEventListener('DOMContentLoaded', () => {
     /* =========================== RENDER FUNCTIONS ============================ */
     function updateSharedBadge() {
         const badge = document.getElementById('tavio-shared-count');
-        if (badge) {
-            badge.textContent = tavioSharedPrompts.length;
-        }
+        if (badge) badge.textContent = tavioSharedPrompts.length;
     }
 
     function renderCategoryFilters() {
@@ -660,25 +643,17 @@ document.addEventListener('DOMContentLoaded', () => {
         }
 
         promptList.innerHTML = filtered.map(p => {
-            const catBadges = (p.categories || []).map(c =>
-                `<span class="card-category">${escapeHtml(c)}</span>`
-            ).join('');
-
+            const catBadges = (p.categories || []).map(c => `<span class="card-category">${escapeHtml(c)}</span>`).join('');
             const maxShow = 3;
             const aiList = p.ais || [];
             let aiBadgesHtml = '';
             if (aiList.length <= maxShow) {
-                aiBadgesHtml = aiList.map(ai =>
-                    `<span class="ai-badge">${escapeHtml(getAiName(ai))}</span>`
-                ).join('');
+                aiBadgesHtml = aiList.map(ai => `<span class="ai-badge">${escapeHtml(getAiName(ai))}</span>`).join('');
             } else {
                 const visible = aiList.slice(0, maxShow);
                 const hiddenCount = aiList.length - maxShow;
-                aiBadgesHtml =
-                    visible.map(ai => `<span class="ai-badge">${escapeHtml(getAiName(ai))}</span>`).join('') +
-                    `<span class="ai-badge">+${hiddenCount} more</span>`;
+                aiBadgesHtml = visible.map(ai => `<span class="ai-badge">${escapeHtml(getAiName(ai))}</span>`).join('') + `<span class="ai-badge">+${hiddenCount} more</span>`;
             }
-
             const lockIcon = p.locked ? `
                 <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="card-lock-icon">
                     <rect x="5" y="11" width="14" height="11" rx="2" />
@@ -692,35 +667,21 @@ document.addEventListener('DOMContentLoaded', () => {
                     <div class="card-main-content">
                         <div class="card-info">
                             <div class="card-name">${escapeHtml(p.name)}</div>
-                            <div class="card-meta">
-                                ${catBadges}
-                                ${aiBadgesHtml}
-                            </div>
+                            <div class="card-meta">${catBadges}${aiBadgesHtml}</div>
                         </div>
                         <div class="card-actions">
                             ${lockIcon}
                             <button class="card-pin ${p.pinned ? 'pinned' : ''}" data-action="pin" data-id="${p.id}" title="Pin prompt">
-                                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                                    <path d="M12 2 L15 9 L22 12 L15 15 L12 22 L9 15 L2 12 L9 9 Z" />
-                                </svg>
+                                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2 L15 9 L22 12 L15 15 L12 22 L9 15 L2 12 L9 9 Z" /></svg>
                             </button>
                             <button class="card-share" data-action="share" data-id="${p.id}" title="Share prompt">
-                                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                                    <path d="M4 12v8a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-8"/>
-                                    <polyline points="16 6 12 2 8 6"/>
-                                    <line x1="12" y1="2" x2="12" y2="15"/>
-                                </svg>
+                                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 12v8a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-8"/><polyline points="16 6 12 2 8 6"/><line x1="12" y1="2" x2="12" y2="15"/></svg>
                             </button>
                             <button class="card-edit" data-action="edit" data-id="${p.id}" title="Edit prompt">
-                                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                                    <path d="M17 3a2.828 2.828 0 1 1 4 4L7.5 20.5 2 22l1.5-5.5L17 3z"/>
-                                </svg>
+                                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17 3a2.828 2.828 0 1 1 4 4L7.5 20.5 2 22l1.5-5.5L17 3z"/></svg>
                             </button>
                             <button class="card-delete" data-action="delete" data-id="${p.id}" title="Delete prompt">
-                                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                                    <polyline points="3 6 5 6 21 6"/>
-                                    <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/>
-                                </svg>
+                                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/></svg>
                             </button>
                         </div>
                     </div>
@@ -752,26 +713,14 @@ document.addEventListener('DOMContentLoaded', () => {
         });
 
         document.querySelectorAll('[data-action="pin"]').forEach(btn => {
-            btn.addEventListener('click', (e) => {
-                e.stopPropagation();
-                togglePinPrompt(btn.dataset.id);
-            });
+            btn.addEventListener('click', (e) => { e.stopPropagation(); togglePinPrompt(btn.dataset.id); });
         });
-
         document.querySelectorAll('[data-action="share"]').forEach(btn => {
-            btn.addEventListener('click', (e) => {
-                e.stopPropagation();
-                openShareModal(btn.dataset.id);
-            });
+            btn.addEventListener('click', (e) => { e.stopPropagation(); openShareModal(btn.dataset.id); });
         });
-
         document.querySelectorAll('[data-action="edit"]').forEach(btn => {
-            btn.addEventListener('click', (e) => {
-                e.stopPropagation();
-                openEditModal(btn.dataset.id);
-            });
+            btn.addEventListener('click', (e) => { e.stopPropagation(); openEditModal(btn.dataset.id); });
         });
-
         document.querySelectorAll('[data-action="delete"]').forEach(btn => {
             btn.addEventListener('click', (e) => {
                 e.stopPropagation();
@@ -807,7 +756,6 @@ document.addEventListener('DOMContentLoaded', () => {
         const cancelBtn = passwordForm.querySelector('.card-password-cancel');
         const errorDiv = passwordForm.querySelector('.card-password-error');
         input.focus();
-
         const handleSubmit = () => {
             const entered = input.value;
             if (entered === MASTER_PASSWORD) {
@@ -824,9 +772,7 @@ document.addEventListener('DOMContentLoaded', () => {
         };
         submitBtn.addEventListener('click', handleSubmit);
         cancelBtn.addEventListener('click', handleCancel);
-        input.addEventListener('keypress', (e) => {
-            if (e.key === 'Enter') handleSubmit();
-        });
+        input.addEventListener('keypress', (e) => { if (e.key === 'Enter') handleSubmit(); });
         submitBtn.addEventListener('click', (e) => e.stopPropagation());
         cancelBtn.addEventListener('click', (e) => e.stopPropagation());
     }
@@ -834,18 +780,10 @@ document.addEventListener('DOMContentLoaded', () => {
     /* =========================== BUILDER ============================ */
     function openBuilder(id) {
         const prompt = tavioPrompts.find(p => p.id === id);
-        if (!prompt) {
-            showToast('Prompt not found.');
-            return;
-        }
+        if (!prompt) { showToast('Prompt not found.'); return; }
         currentPromptId = id;
         builderTitle.textContent = prompt.name;
-
-        if (prompt.description) {
-            promptDescription.textContent = prompt.description;
-        } else {
-            promptDescription.textContent = '';
-        }
+        promptDescription.textContent = prompt.description || '';
 
         let aiHtml = '<div class="ai-status-section"><h4>AI Models</h4><div class="ai-status-list">';
         (prompt.ais || []).forEach(aiId => {
@@ -867,16 +805,10 @@ document.addEventListener('DOMContentLoaded', () => {
                 const isLong = /faq|anchor|full article|full persian article|full translated text|image description/i.test(ph);
                 const tag = isLong ? 'textarea' : 'input';
                 const extra = isLong ? ' rows="4"' : ' type="text"';
-                return `
-                    <div class="placeholder-field">
-                        <label for="input_${escapeHtml(ph)}">${escapeHtml(ph)}</label>
-                        <${tag}${extra} id="input_${escapeHtml(ph)}" placeholder="Enter ${escapeHtml(ph)}" autocomplete="off"></${tag}>
-                    </div>
-                `;
+                return `<div class="placeholder-field"><label for="input_${escapeHtml(ph)}">${escapeHtml(ph)}</label><${tag}${extra} id="input_${escapeHtml(ph)}" placeholder="Enter ${escapeHtml(ph)}" autocomplete="off"></${tag}></div>`;
             }).join('');
         }
         placeholderInputs.innerHTML = fieldsHtml;
-
         document.querySelector('.container').classList.add('builder-mode');
         generatedPrompt.value = '';
         libraryView.classList.add('hidden');
@@ -886,7 +818,6 @@ document.addEventListener('DOMContentLoaded', () => {
     function generatePrompt() {
         const prompt = tavioPrompts.find(p => p.id === currentPromptId);
         if (!prompt) return;
-
         const placeholders = extractPlaceholders(prompt.template);
         let filled = prompt.template;
         placeholders.forEach(ph => {
@@ -896,12 +827,10 @@ document.addEventListener('DOMContentLoaded', () => {
             const regex = new RegExp(`{{${escapedPh}}}`, 'gi');
             filled = filled.replace(regex, val || `{{${ph}}}`);
         });
-
         if (typingTimer) clearInterval(typingTimer);
         generatedPrompt.value = '';
         generatedPrompt.classList.add('typing');
         generatedPrompt.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
-
         let i = 0;
         const chars = filled.split('');
         const speed = 5;
@@ -929,88 +858,51 @@ document.addEventListener('DOMContentLoaded', () => {
         const inputs = document.querySelectorAll('#placeholderInputs input, #placeholderInputs textarea');
         inputs.forEach(input => { input.value = ''; });
         generatedPrompt.value = '';
-        if (typingTimer) {
-            clearInterval(typingTimer);
-            generatedPrompt.classList.remove('typing');
-        }
+        if (typingTimer) { clearInterval(typingTimer); generatedPrompt.classList.remove('typing'); }
     }
 
     /* =========================== MODALS ============================ */
     function openModal(id) {
         const el = document.getElementById(id);
-        if (el) {
-            el.classList.add('open');
-            el.style.display = 'flex';
-            document.body.classList.add('modal-open');
-        }
+        if (el) { el.classList.add('open'); el.style.display = 'flex'; document.body.classList.add('modal-open'); }
     }
-
     function closeModal(id) {
         const el = document.getElementById(id);
-        if (el) {
-            el.classList.remove('open');
-            el.style.display = 'none';
-            document.body.classList.remove('modal-open');
-        }
+        if (el) { el.classList.remove('open'); el.style.display = 'none'; document.body.classList.remove('modal-open'); }
     }
 
     function openConfirmModal(message, onConfirm) {
         const modal = document.getElementById('confirm-modal');
         const msgEl = document.getElementById('confirm-modal-message');
         if (!modal || !msgEl) return;
-
         msgEl.textContent = message;
         openModal('confirm-modal');
-
         const yesBtn = document.getElementById('confirm-modal-yes');
         const noBtn = document.getElementById('confirm-modal-no');
-
-        function cleanup() {
-            closeModal('confirm-modal');
-            yesBtn.removeEventListener('click', handleYes);
-            noBtn.removeEventListener('click', handleNo);
-        }
-
-        function handleYes() {
-            cleanup();
-            if (typeof onConfirm === 'function') onConfirm();
-        }
-
-        function handleNo() {
-            cleanup();
-        }
-
+        function cleanup() { closeModal('confirm-modal'); yesBtn.removeEventListener('click', handleYes); noBtn.removeEventListener('click', handleNo); }
+        function handleYes() { cleanup(); if (typeof onConfirm === 'function') onConfirm(); }
+        function handleNo() { cleanup(); }
         yesBtn.addEventListener('click', handleYes);
         noBtn.addEventListener('click', handleNo);
-
-        modal.addEventListener('click', function(e) {
-            if (e.target === modal) cleanup();
-        });
+        modal.addEventListener('click', function(e) { if (e.target === modal) cleanup(); });
     }
 
-    // ---- EDIT MODAL ----
     function openEditModal(id) {
         const prompt = tavioPrompts.find(p => p.id === id);
         if (!prompt) return;
-
         editingPromptId = id;
         document.getElementById('tavio-edit-modal-title').textContent = 'Edit Prompt';
         document.getElementById('tavio-edit-prompt-title').value = prompt.name;
         document.getElementById('tavio-edit-prompt-content').value = prompt.template;
         document.getElementById('tavio-edit-prompt-pinned').checked = prompt.pinned;
-
         const catSelect = document.getElementById('tavio-edit-prompt-category');
         catSelect.innerHTML = '<option value="">No Category</option>';
         tavioCategories.forEach(cat => {
             const opt = document.createElement('option');
-            opt.value = cat.id;
-            opt.textContent = cat.name;
-            if (prompt.categories && prompt.categories.includes(cat.id)) {
-                opt.selected = true;
-            }
+            opt.value = cat.id; opt.textContent = cat.name;
+            if (prompt.categories && prompt.categories.includes(cat.id)) opt.selected = true;
             catSelect.appendChild(opt);
         });
-
         openModal('tavio-edit-modal');
     }
 
@@ -1020,204 +912,82 @@ document.addEventListener('DOMContentLoaded', () => {
         const pinned = document.getElementById('tavio-edit-prompt-pinned').checked;
         const catSelect = document.getElementById('tavio-edit-prompt-category');
         const categoryId = catSelect.value || null;
-
-        if (!title || !content) {
-            showToast('Title and content are required.');
-            return;
-        }
-
+        if (!title || !content) { showToast('Title and content are required.'); return; }
         const prompt = tavioPrompts.find(p => p.id === editingPromptId);
         if (!prompt) return;
-
         let categories = prompt.categories || [];
-        if (categoryId && !categories.includes(categoryId)) {
-            categories.push(categoryId);
-        }
-
-        const success = await updateTavioPrompt(editingPromptId, {
-            name: title,
-            template: content,
-            categories: categories,
-            pinned: pinned,
-            ais: prompt.ais || [],
-            locked: prompt.locked || false,
-            description: prompt.description || ''
-        });
-
-        if (success) {
-            closeModal('tavio-edit-modal');
-            renderAll();
-        }
+        if (categoryId && !categories.includes(categoryId)) categories.push(categoryId);
+        const success = await updateTavioPrompt(editingPromptId, { name: title, template: content, categories: categories, pinned: pinned, ais: prompt.ais || [], locked: prompt.locked || false, description: prompt.description || '' });
+        if (success) { closeModal('tavio-edit-modal'); renderAll(); }
     });
+    document.getElementById('tavio-edit-cancel-btn')?.addEventListener('click', () => closeModal('tavio-edit-modal'));
+    document.getElementById('tavio-edit-modal-close')?.addEventListener('click', () => closeModal('tavio-edit-modal'));
 
-    document.getElementById('tavio-edit-cancel-btn')?.addEventListener('click', () => {
-        closeModal('tavio-edit-modal');
-    });
-
-    document.getElementById('tavio-edit-modal-close')?.addEventListener('click', () => {
-        closeModal('tavio-edit-modal');
-    });
-
-    // ---- CATEGORIES MODAL ----
-    document.getElementById('tavio-categories-btn')?.addEventListener('click', async () => {
-        await renderCategoriesModal();
-        openModal('tavio-categories-modal');
-    });
-
+    document.getElementById('tavio-categories-btn')?.addEventListener('click', async () => { await renderCategoriesModal(); openModal('tavio-categories-modal'); });
     async function renderCategoriesModal() {
         const container = document.getElementById('tavio-categories-list');
         if (!container) return;
-
         await fetchTavioCategories();
-
-        if (tavioCategories.length === 0) {
-            container.innerHTML = '<p style="color:var(--text-secondary);">No categories yet. Create one below.</p>';
-            return;
-        }
-
-        container.innerHTML = tavioCategories.map(cat => `
-            <div class="tavio-category-item" data-id="${cat.id}">
-                <span class="cat-color" style="background:${cat.color || '#B0FFA5'}"></span>
-                <span class="cat-name">${escapeHtml(cat.name)}</span>
-                <button class="cat-delete" data-action="delete-category" data-id="${cat.id}" title="Delete category">✕</button>
-            </div>
-        `).join('');
-
+        if (tavioCategories.length === 0) { container.innerHTML = '<p style="color:var(--text-secondary);">No categories yet. Create one below.</p>'; return; }
+        container.innerHTML = tavioCategories.map(cat => `<div class="tavio-category-item" data-id="${cat.id}"><span class="cat-color" style="background:${cat.color || '#B0FFA5'}"></span><span class="cat-name">${escapeHtml(cat.name)}</span><button class="cat-delete" data-action="delete-category" data-id="${cat.id}" title="Delete category">✕</button></div>`).join('');
         container.querySelectorAll('[data-action="delete-category"]').forEach(btn => {
             btn.addEventListener('click', async function() {
-                const id = this.dataset.id;
-                openConfirmModal('Delete this category? All prompts in this category will lose their category.', async () => {
-                    await deleteTavioCategory(id);
-                    await renderCategoriesModal();
-                    renderAll();
-                });
+                openConfirmModal('Delete this category? All prompts in this category will lose their category.', async () => { await deleteTavioCategory(this.dataset.id); await renderCategoriesModal(); renderAll(); });
             });
         });
     }
-
     document.getElementById('tavio-add-category-btn')?.addEventListener('click', async function() {
         const input = document.getElementById('tavio-new-category-input');
         const colorInput = document.getElementById('tavio-new-category-color');
         const name = input.value.trim();
-        if (!name) {
-            showToast('Please enter a category name.');
-            return;
-        }
+        if (!name) { showToast('Please enter a category name.'); return; }
         await createTavioCategory(name, colorInput.value);
         input.value = '';
         await renderCategoriesModal();
         renderAll();
     });
+    document.getElementById('tavio-categories-modal-close')?.addEventListener('click', () => closeModal('tavio-categories-modal'));
 
-    document.getElementById('tavio-categories-modal-close')?.addEventListener('click', () => {
-        closeModal('tavio-categories-modal');
-    });
-
-    // ---- SHARE MODAL ----
     async function openShareModal(promptId) {
         const prompt = tavioPrompts.find(p => p.id === promptId);
         if (!prompt) return;
-
         document.getElementById('tavio-share-prompt-title').textContent = `Sharing: ${prompt.name}`;
         document.getElementById('tavio-share-confirm-btn').dataset.promptId = promptId;
-
         const select = document.getElementById('tavio-share-user-select');
         select.innerHTML = '<option value="">Select a connection...</option>';
-
         const connections = await fetchConnections();
-        if (connections.length === 0) {
-            select.innerHTML = '<option value="">No connections found. Connect with others first.</option>';
-        } else {
-            connections.forEach(conn => {
-                const opt = document.createElement('option');
-                opt.value = conn.id;
-                opt.textContent = [conn.first_name, conn.last_name].filter(Boolean).join(' ') || conn.id;
-                select.appendChild(opt);
-            });
-        }
-
+        if (connections.length === 0) { select.innerHTML = '<option value="">No connections found. Connect with others first.</option>'; }
+        else { connections.forEach(conn => { const opt = document.createElement('option'); opt.value = conn.id; opt.textContent = [conn.first_name, conn.last_name].filter(Boolean).join(' ') || conn.id; select.appendChild(opt); }); }
         openModal('tavio-share-modal');
     }
-
     document.getElementById('tavio-share-confirm-btn')?.addEventListener('click', async function() {
         const promptId = this.dataset.promptId;
         const receiverId = document.getElementById('tavio-share-user-select').value;
-        if (!receiverId) {
-            showToast('Please select a user to share with.');
-            return;
-        }
+        if (!receiverId) { showToast('Please select a user to share with.'); return; }
         await shareTavioPrompt(promptId, receiverId);
         closeModal('tavio-share-modal');
     });
+    document.getElementById('tavio-share-modal-close')?.addEventListener('click', () => closeModal('tavio-share-modal'));
 
-    document.getElementById('tavio-share-modal-close')?.addEventListener('click', () => {
-        closeModal('tavio-share-modal');
-    });
-
-    // ---- SHARED REQUESTS MODAL ----
-    document.getElementById('tavio-shared-btn')?.addEventListener('click', async () => {
-        await openSharedRequestsModal();
-    });
-
+    document.getElementById('tavio-shared-btn')?.addEventListener('click', async () => { await openSharedRequestsModal(); });
     async function openSharedRequestsModal() {
         const requests = await fetchSharedPrompts();
         const container = document.getElementById('tavio-shared-requests-list');
-
-        if (requests.length === 0) {
-            container.innerHTML = '<p style="color:var(--text-secondary); text-align:center; padding:20px;">No pending requests.</p>';
-        } else {
-            container.innerHTML = requests.map(req => `
-                <div class="tavio-shared-request" data-id="${req.id}">
-                    <div class="tavio-shared-request-info">
-                        <strong>${escapeHtml(req.sender?.first_name || 'Someone')}</strong>
-                        <span>shared: ${escapeHtml(req.prompt?.title || 'Untitled')}</span>
-                    </div>
-                    <div class="tavio-shared-request-actions">
-                        <button class="btn btn-accent btn-sm" data-action="accept-share" data-id="${req.id}">Accept</button>
-                        <button class="btn btn-outline btn-sm" data-action="reject-share" data-id="${req.id}">Reject</button>
-                    </div>
-                </div>
-            `).join('');
-
-            container.querySelectorAll('[data-action="accept-share"]').forEach(btn => {
-                btn.addEventListener('click', async function() {
-                    const id = this.dataset.id;
-                    await respondToSharedPrompt(id, true);
-                    await openSharedRequestsModal();
-                    renderAll();
-                });
-            });
-
-            container.querySelectorAll('[data-action="reject-share"]').forEach(btn => {
-                btn.addEventListener('click', async function() {
-                    const id = this.dataset.id;
-                    await respondToSharedPrompt(id, false);
-                    await openSharedRequestsModal();
-                    renderAll();
-                });
-            });
+        if (requests.length === 0) { container.innerHTML = '<p style="color:var(--text-secondary); text-align:center; padding:20px;">No pending requests.</p>'; }
+        else {
+            container.innerHTML = requests.map(req => `<div class="tavio-shared-request" data-id="${req.id}"><div class="tavio-shared-request-info"><strong>${escapeHtml(req.sender?.first_name || 'Someone')}</strong><span>shared: ${escapeHtml(req.prompt?.title || 'Untitled')}</span></div><div class="tavio-shared-request-actions"><button class="btn btn-accent btn-sm" data-action="accept-share" data-id="${req.id}">Accept</button><button class="btn btn-outline btn-sm" data-action="reject-share" data-id="${req.id}">Reject</button></div></div>`).join('');
+            container.querySelectorAll('[data-action="accept-share"]').forEach(btn => { btn.addEventListener('click', async function() { await respondToSharedPrompt(this.dataset.id, true); await openSharedRequestsModal(); renderAll(); }); });
+            container.querySelectorAll('[data-action="reject-share"]').forEach(btn => { btn.addEventListener('click', async function() { await respondToSharedPrompt(this.dataset.id, false); await openSharedRequestsModal(); renderAll(); }); });
         }
-
         updateSharedBadge();
         openModal('tavio-shared-requests-modal');
     }
+    document.getElementById('tavio-shared-requests-close')?.addEventListener('click', () => closeModal('tavio-shared-requests-modal'));
 
-    document.getElementById('tavio-shared-requests-close')?.addEventListener('click', () => {
-        closeModal('tavio-shared-requests-modal');
-    });
-
-    // ---- NEW PROMPT ----
     document.getElementById('tavio-new-prompt-btn')?.addEventListener('click', () => {
-        if (!currentUser) {
-            openAuthOverlay();
-            showToast('Please sign in to create prompts.');
-            return;
-        }
+        if (!currentUser) { openAuthOverlay(); showToast('Please sign in to create prompts.'); return; }
         promptFormContainer.classList.remove('hidden');
-        promptNameInput.value = '';
-        promptCategoryInput.value = '';
-        promptTemplateInput.value = '';
-        promptLockedCheckbox.checked = false;
+        promptNameInput.value = ''; promptCategoryInput.value = ''; promptTemplateInput.value = ''; promptLockedCheckbox.checked = false;
         Array.from(promptAiSelect.options).forEach(opt => opt.selected = false);
         promptAiSelect.selectedIndex = -1;
     });
@@ -1228,31 +998,14 @@ document.addEventListener('DOMContentLoaded', () => {
         const template = promptTemplateInput.value.trim();
         const selected = Array.from(promptAiSelect.selectedOptions).map(opt => opt.value);
         const locked = promptLockedCheckbox ? promptLockedCheckbox.checked : false;
-
-        if (!name || !catRaw || !template) {
-            showToast('Please fill in all fields.');
-            return;
-        }
-
+        if (!name || !catRaw || !template) { showToast('Please fill in all fields.'); return; }
         const categories = catRaw.split(',').map(c => c.trim()).filter(Boolean);
-
         const result = await createTavioPrompt(name, categories, selected, template, false, locked);
-        if (result) {
-            promptFormContainer.classList.add('hidden');
-            renderAll();
-        }
+        if (result) { promptFormContainer.classList.add('hidden'); renderAll(); }
     });
+    cancelPromptBtn?.addEventListener('click', () => { promptFormContainer.classList.add('hidden'); });
 
-    cancelPromptBtn?.addEventListener('click', () => {
-        promptFormContainer.classList.add('hidden');
-    });
-
-    /* =========================== SEARCH & FILTERS ============================ */
-    searchInput?.addEventListener('input', (e) => {
-        currentSearchTerm = e.target.value;
-        renderLibrary();
-    });
-
+    searchInput?.addEventListener('input', (e) => { currentSearchTerm = e.target.value; renderLibrary(); });
     categoryFilters?.addEventListener('click', (e) => {
         const chip = e.target.closest('.filter-chip');
         if (!chip) return;
@@ -1262,18 +1015,12 @@ document.addEventListener('DOMContentLoaded', () => {
         renderLibrary();
     });
 
-    /* =========================== BUILDER EVENT LISTENERS ============================ */
     btnBackToLibrary?.addEventListener('click', () => {
-        builderView.classList.add('hidden');
-        libraryView.classList.remove('hidden');
-        currentPromptId = null;
-        placeholderInputs.innerHTML = '';
-        aiModelsFull.innerHTML = '';
-        generatedPrompt.value = '';
+        builderView.classList.add('hidden'); libraryView.classList.remove('hidden');
+        currentPromptId = null; placeholderInputs.innerHTML = ''; aiModelsFull.innerHTML = ''; generatedPrompt.value = '';
         document.querySelector('.container').classList.remove('builder-mode');
         if (typingTimer) { clearInterval(typingTimer); generatedPrompt.classList.remove('typing'); }
     });
-
     btnGeneratePrompt?.addEventListener('click', generatePrompt);
     btnCopyPrompt?.addEventListener('click', copyToClipboard);
     btnClearBuilder?.addEventListener('click', clearBuilder);
@@ -1317,12 +1064,16 @@ document.addEventListener('DOMContentLoaded', () => {
     ];
 
     function renderSidebarMenu() {
+        // ★★★ همیشه منو را رندر کن، حتی اگر کاربر لاگین نکرده باشد ★★★
         if (!sidebarMenuItems) {
             console.error('sidebar-menu-items not found in DOM');
             return;
         }
 
+        sidebarMenuItems.innerHTML = '';
+
         if (!currentUser) {
+            // حالت مهمان: نمایش پیام
             sidebarMenuItems.innerHTML = `
                 <div style="padding: 12px 16px; color: #888; font-size: 13px;">
                     Please sign in to see tools.
@@ -1330,8 +1081,6 @@ document.addEventListener('DOMContentLoaded', () => {
             `;
             return;
         }
-
-        sidebarMenuItems.innerHTML = '';
 
         const role = currentProfile?.role || 'recruit';
 
@@ -1465,47 +1214,24 @@ document.addEventListener('DOMContentLoaded', () => {
 
     authContinue?.addEventListener('click', async () => {
         const email = authEmailInput.value.trim();
-        if (!email) {
-            authErrorEl.textContent = 'Please enter an email address.';
-            return;
-        }
+        if (!email) { authErrorEl.textContent = 'Please enter an email address.'; return; }
         authErrorEl.textContent = '';
         authEmail = email;
 
         try {
             const { data: exists, error } = await sbClient.rpc('check_email_exists', { email_to_check: email });
-            if (error) {
-                console.error('RPC error:', error);
-                authErrorEl.textContent = 'Service unavailable. Please try again.';
-                return;
-            }
-
-            if (exists) {
-                authUserEmail.textContent = email;
-                showStep('step-2-login');
-            } else {
-                showStep('step-2-register');
-                document.getElementById('reg-form-fields').style.display = '';
-                regSuccessEl.style.display = 'none';
-            }
-        } catch (err) {
-            console.error(err);
-            authErrorEl.textContent = 'Network error. Please try later.';
-        }
+            if (error) { console.error('RPC error:', error); authErrorEl.textContent = 'Service unavailable. Please try again.'; return; }
+            if (exists) { authUserEmail.textContent = email; showStep('step-2-login'); }
+            else { showStep('step-2-register'); document.getElementById('reg-form-fields').style.display = ''; regSuccessEl.style.display = 'none'; }
+        } catch (err) { console.error(err); authErrorEl.textContent = 'Network error. Please try later.'; }
     });
 
     authSignin?.addEventListener('click', async () => {
         const password = authPassword.value;
-        if (!password) {
-            authErrorLogin.textContent = 'Password is required.';
-            return;
-        }
+        if (!password) { authErrorLogin.textContent = 'Password is required.'; return; }
         authErrorLogin.textContent = '';
         const { error } = await sbClient.auth.signInWithPassword({ email: authEmail, password });
-        if (error) {
-            authErrorLogin.textContent = error.message;
-            return;
-        }
+        if (error) { authErrorLogin.textContent = error.message; return; }
         closeAuthOverlay();
     });
 
@@ -1514,34 +1240,12 @@ document.addEventListener('DOMContentLoaded', () => {
         const last = regLastname.value.trim();
         const password = regPassword.value;
         const confirm = regConfirm.value;
-
-        if (!first || !last) {
-            authErrorReg.textContent = 'All fields are required.';
-            return;
-        }
-        if (password !== confirm) {
-            authErrorReg.textContent = 'Passwords do not match.';
-            return;
-        }
-        if (password.length < 6) {
-            authErrorReg.textContent = 'Password must be at least 6 characters.';
-            return;
-        }
+        if (!first || !last) { authErrorReg.textContent = 'All fields are required.'; return; }
+        if (password !== confirm) { authErrorReg.textContent = 'Passwords do not match.'; return; }
+        if (password.length < 6) { authErrorReg.textContent = 'Password must be at least 6 characters.'; return; }
         authErrorReg.textContent = '';
-
-        const { error } = await sbClient.auth.signUp({
-            email: authEmail,
-            password,
-            options: {
-                data: { first_name: first, last_name: last }
-            }
-        });
-
-        if (error) {
-            authErrorReg.textContent = error.message;
-            return;
-        }
-
+        const { error } = await sbClient.auth.signUp({ email: authEmail, password, options: { data: { first_name: first, last_name: last } } });
+        if (error) { authErrorReg.textContent = error.message; return; }
         document.getElementById('reg-form-fields').style.display = 'none';
         regSuccessEl.style.display = 'block';
     });
@@ -1549,89 +1253,48 @@ document.addEventListener('DOMContentLoaded', () => {
     regToLoginBtn?.addEventListener('click', () => {
         regSuccessEl.style.display = 'none';
         document.getElementById('reg-form-fields').style.display = '';
-        showStep('step-1');
-        authEmailInput.value = '';
-        regFirstname.value = '';
-        regLastname.value = '';
-        regPassword.value = '';
-        regConfirm.value = '';
+        showStep('step-1'); authEmailInput.value = ''; regFirstname.value = ''; regLastname.value = ''; regPassword.value = ''; regConfirm.value = '';
     });
 
-    authForgotLink?.addEventListener('click', (e) => {
-        e.preventDefault();
-        forgotEmailInput.value = authEmail;
-        showStep('step-forgot');
-    });
-
+    authForgotLink?.addEventListener('click', (e) => { e.preventDefault(); forgotEmailInput.value = authEmail; showStep('step-forgot'); });
     authSendReset?.addEventListener('click', async () => {
         const email = forgotEmailInput.value.trim();
-        if (!email) {
-            authSuccessMsg.textContent = 'Please enter your email.';
-            return;
-        }
+        if (!email) { authSuccessMsg.textContent = 'Please enter your email.'; return; }
         const { error } = await sbClient.auth.resetPasswordForEmail(email);
         authSuccessMsg.textContent = error ? 'Error: ' + error.message : 'If an account exists, a reset link has been sent.';
     });
-
-    authBackToLogin?.addEventListener('click', (e) => {
-        e.preventDefault();
-        showStep('step-2-login');
-    });
+    authBackToLogin?.addEventListener('click', (e) => { e.preventDefault(); showStep('step-2-login'); });
 
     document.querySelectorAll('.toggle-password-btn').forEach(btn => {
         btn.addEventListener('click', () => {
             const targetId = btn.getAttribute('data-target');
             const input = document.getElementById(targetId);
             if (!input) return;
-            const isPassword = input.type === 'password';
-            input.type = isPassword ? 'text' : 'password';
+            input.type = input.type === 'password' ? 'text' : 'password';
         });
     });
 
-    authOverlay?.addEventListener('click', (e) => {
-        if (e.target === authOverlay) closeAuthOverlay();
-    });
-
+    authOverlay?.addEventListener('click', (e) => { if (e.target === authOverlay) closeAuthOverlay(); });
     sidebarLoginBtn?.addEventListener('click', () => openAuthOverlay());
-    sidebarLogoutBtn?.addEventListener('click', async () => {
-        await sbClient.auth.signOut();
-    });
+    sidebarLogoutBtn?.addEventListener('click', async () => { await sbClient.auth.signOut(); });
 
     /* =========================== PROFILE ============================ */
     async function fetchProfile(userId) {
         try {
-            const { data, error } = await sbClient
-                .from('profiles')
-                .select('*')
-                .eq('id', userId)
-                .single();
-
+            const { data, error } = await sbClient.from('profiles').select('*').eq('id', userId).single();
             if (error || !data) {
                 const { data: { user } } = await sbClient.auth.getUser();
                 const md = user?.user_metadata || {};
-                return {
-                    id: userId,
-                    role: md.role || 'recruit',
-                    first_name: md.first_name || '',
-                    last_name: md.last_name || '',
-                    photo_url: md.photo_url || '',
-                    email: user?.email || ''
-                };
+                return { id: userId, role: md.role || 'recruit', first_name: md.first_name || '', last_name: md.last_name || '', photo_url: md.photo_url || '', email: user?.email || '' };
             }
             return data;
-        } catch (e) {
-            console.warn('Profile fetch error:', e);
-            return { id: userId, role: 'recruit', first_name: '', last_name: '', photo_url: '' };
-        }
+        } catch (e) { console.warn('Profile fetch error:', e); return { id: userId, role: 'recruit', first_name: '', last_name: '', photo_url: '' }; }
     }
 
     async function applyUserProfile(user) {
         if (!user) {
-            currentUser = null;
-            currentProfile = null;
-            currentUserRoleLevel = -1;
-            setLoggedOutUI();
-            return;
+            currentUser = null; currentProfile = null; currentUserRoleLevel = -1;
+            setLoggedOutUI(); return;
         }
 
         currentUser = user;
@@ -1642,6 +1305,7 @@ document.addEventListener('DOMContentLoaded', () => {
         const profile = currentProfile;
         const role = profile.role || 'recruit';
 
+        // ★★★ نمایش المان‌های کاربر لاگین شده ★★★
         if (sidebarLoginBtn) sidebarLoginBtn.classList.add('hidden');
         if (sidebarLogoutBtn) sidebarLogoutBtn.classList.remove('hidden');
         if (sidebarDashboard) sidebarDashboard.classList.remove('hidden');
@@ -1670,17 +1334,14 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     function setLoggedOutUI() {
+        // ★★★ نمایش دکمه Sign In در حالت مهمان ★★★
         if (sidebarLoginBtn) sidebarLoginBtn.classList.remove('hidden');
         if (sidebarLogoutBtn) sidebarLogoutBtn.classList.add('hidden');
         if (sidebarDashboard) sidebarDashboard.classList.add('hidden');
         if (avatarContent) avatarContent.textContent = '';
-        currentUser = null;
-        currentProfile = null;
-        currentUserRoleLevel = -1;
-        tavioPrompts = [];
-        tavioCategories = [];
-        tavioSharedPrompts = [];
-        renderSidebarMenu();
+        currentUser = null; currentProfile = null; currentUserRoleLevel = -1;
+        tavioPrompts = []; tavioCategories = []; tavioSharedPrompts = [];
+        renderSidebarMenu();  // منو را با پیام مهمان بازسازی می‌کند
         renderAll();
     }
 
@@ -1689,42 +1350,25 @@ document.addEventListener('DOMContentLoaded', () => {
         try {
             const { data: { session } } = await sbClient.auth.getSession();
             await applyUserProfile(session?.user ?? null);
-        } catch (e) {
-            console.warn('Session check error:', e);
-            setLoggedOutUI();
-        }
+        } catch (e) { console.warn('Session check error:', e); setLoggedOutUI(); }
     }
 
     sbClient.auth.onAuthStateChange(async (event, session) => {
         await applyUserProfile(session?.user ?? null);
-        if (event === 'SIGNED_IN') {
-            closeAuthOverlay();
-            showToast('Signed in successfully!');
-        }
-        if (event === 'SIGNED_OUT') {
-            setLoggedOutUI();
-            showToast('Signed out.');
-        }
+        if (event === 'SIGNED_IN') { closeAuthOverlay(); showToast('Signed in successfully!'); }
+        if (event === 'SIGNED_OUT') { setLoggedOutUI(); showToast('Signed out.'); }
     });
 
     /* =========================== INIT ============================ */
     async function initApp() {
         console.log('Tavio: Initializing...');
         const loader = document.getElementById('initial-loader');
-
-        const timeoutId = setTimeout(() => {
-            if (loader) loader.classList.add('hidden');
-        }, 3000);
-
+        const timeoutId = setTimeout(() => { if (loader) loader.classList.add('hidden'); }, 3000);
         try {
             await checkUser();
             if (loader) loader.classList.add('hidden');
             clearTimeout(timeoutId);
-        } catch (e) {
-            console.error('Init error:', e);
-            if (loader) loader.classList.add('hidden');
-            clearTimeout(timeoutId);
-        }
+        } catch (e) { console.error('Init error:', e); if (loader) loader.classList.add('hidden'); clearTimeout(timeoutId); }
         console.log('Tavio: Initialization complete.');
     }
 
