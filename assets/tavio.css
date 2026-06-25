@@ -1,8 +1,8 @@
 /*
   ****************************************************
   *  Author: Armin Silatani
-  *  Date: 2026-05-28
-  *  Version: 1.1.0
+  *  Date: 2026-06-25
+  *  Version: 2.0.0
   ****************************************************
 */
 
@@ -31,6 +31,7 @@
     --text:   #f5f5f5;
     --accent: #B0FFA5;
     --border: rgba(255, 255, 255, 0.08);
+    --text-secondary: rgba(245, 245, 245, 0.7);
 }
 
 /* =========================== RESET & BASE =========================== */
@@ -125,7 +126,6 @@ body {
     align-self: center;
 }
 
-/* Expands width when builder mode is active */
 .container.builder-mode {
     max-width: 1300px;
 }
@@ -136,6 +136,36 @@ body {
 
 .view.hidden {
     display: none;
+}
+
+/* =========================== TOOLBAR =========================== */
+
+.tavio-toolbar {
+    display: flex;
+    justify-content: flex-end;
+    align-items: center;
+    margin-bottom: 20px;
+    gap: 8px;
+    flex-wrap: wrap;
+}
+
+.tavio-actions {
+    display: flex;
+    gap: 8px;
+    align-items: center;
+}
+
+.tavio-actions .badge {
+    background: var(--accent);
+    color: #0d0d0d;
+    font-size: 10px;
+    font-weight: 600;
+    border-radius: 50%;
+    padding: 2px 6px;
+    min-width: 18px;
+    text-align: center;
+    line-height: 1.4;
+    margin-left: 2px;
 }
 
 /* =========================== SEARCH & FILTERS =========================== */
@@ -290,7 +320,6 @@ body {
     transform: translateX(-3px);
 }
 
-/* Hidden text that reveals on hover */
 .back-text {
     max-width: 0;
     opacity: 0;
@@ -397,6 +426,21 @@ body {
     display: flex;
     gap: 10px;
     justify-content: flex-end;
+}
+
+.checkbox-label {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 14px;
+    cursor: pointer;
+}
+
+.checkbox-label input[type="checkbox"] {
+    width: 18px;
+    height: 18px;
+    accent-color: var(--accent);
+    cursor: pointer;
 }
 
 /* =========================== PROMPT CARDS =========================== */
@@ -640,7 +684,6 @@ body {
     color: var(--accent);
 }
 
-/* Full-width AI models row above the two columns */
 .ai-models-full {
     width: 100%;
     margin-bottom: 24px;
@@ -685,8 +728,6 @@ body {
     color: rgba(245, 245, 245, 0.4);
 }
 
-/* ------------------------- TWO-COLUMN LAYOUT ------------------------- */
-
 .builder-columns {
     display: flex;
     gap: 24px;
@@ -701,7 +742,6 @@ body {
     flex-direction: column;
 }
 
-/* Input column */
 .placeholder-inputs {
     display: flex;
     flex-direction: column;
@@ -736,7 +776,6 @@ body {
     border-color: var(--accent);
 }
 
-/* Output column */
 .result-area {
     display: flex;
     flex-direction: column;
@@ -778,7 +817,6 @@ body {
     outline: none;
 }
 
-/* Blinking cursor typing effect */
 #generatedPrompt.typing::after {
     content: '|';
     animation: blink 1s step-end infinite;
@@ -789,8 +827,6 @@ body {
 @keyframes blink {
     50% { opacity: 0; }
 }
-
-/* ------------------------- PROMPT DESCRIPTION ------------------------- */
 
 .prompt-description {
     background: rgba(176, 255, 165, 0.04);
@@ -972,11 +1008,11 @@ body {
   scrollbar-width: thin;
   scrollbar-color: var(--accent) transparent;
   scrollbar-gutter: stable;
-  direction: rtl; /* برای اسکرول از راست */
+  direction: rtl;
 }
 
 .sidebar-nav > * {
-  direction: ltr; /* محتوا چپ‌چین */
+  direction: ltr;
 }
 
 .sidebar-nav::-webkit-scrollbar {
@@ -1057,13 +1093,6 @@ body {
 
 .sidebar-item.disabled .sidebar-icon img {
   filter: grayscale(100%) opacity(0.5);
-}
-
-/* ------------------------- COMING SOON TOOLTIP ------------------------- */
-
-.sidebar-item.coming-soon {
-  position: relative;
-  overflow: visible;
 }
 
 .sidebar-item .coming-soon-tooltip {
@@ -1178,7 +1207,6 @@ body {
   margin-bottom: 24px;
 }
 
-/* ----- STEP & FORM ----- */
 .auth-step {
   display: flex;
   flex-direction: column;
@@ -1215,7 +1243,6 @@ body {
   border-color: var(--accent);
 }
 
-/* ----- BUTTONS ----- */
 .accent-btn {
   background: var(--accent);
   border: none;
@@ -1238,7 +1265,6 @@ body {
   transform: scale(0.98);
 }
 
-/* ----- PASSWORD TOGGLE ----- */
 .password-field-wrapper {
   position: relative;
   display: flex;
@@ -1275,7 +1301,6 @@ body {
   height: 20px;
 }
 
-/* ----- LINKS ----- */
 .auth-forgot-link {
   font-size: 12px;
   color: var(--accent);
@@ -1293,7 +1318,6 @@ body {
   display: inline-block;
 }
 
-/* ----- ERROR & SUCCESS ----- */
 .auth-error {
   color: #ff6b6b;
   font-size: 12px;
@@ -1310,7 +1334,265 @@ body {
 #sidebar-dashboard {
   text-decoration: none;
   border-bottom: none;
-} 
+}
+
+/* =========================== MODALS (GENERAL) =========================== */
+
+.modal {
+  display: none;
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.7);
+  backdrop-filter: blur(6px);
+  z-index: 100;
+  justify-content: center;
+  align-items: center;
+}
+
+.modal.open {
+  display: flex;
+}
+
+.modal-content {
+  background: rgba(255, 255, 255, 0.03);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 20px;
+  padding: 32px 28px;
+  width: 90%;
+  max-width: 480px;
+  color: var(--text);
+  backdrop-filter: blur(10px);
+  max-height: 80vh;
+  overflow-y: auto;
+  scrollbar-width: thin;
+  scrollbar-color: var(--accent) transparent;
+  animation: modalIn 0.22s cubic-bezier(0.4, 0, 0.2, 1);
+  position: relative;
+}
+
+@keyframes modalIn {
+  from { opacity: 0; transform: scale(0.92) translateY(12px); }
+  to   { opacity: 1; transform: scale(1) translateY(0); }
+}
+
+.modal-content::-webkit-scrollbar {
+  width: 6px;
+}
+.modal-content::-webkit-scrollbar-track {
+  background: transparent;
+}
+.modal-content::-webkit-scrollbar-thumb {
+  background: var(--accent);
+  border-radius: 3px;
+}
+
+.close-modal {
+  position: absolute;
+  top: 12px;
+  right: 16px;
+  font-size: 24px;
+  color: #aaa;
+  cursor: pointer;
+  background: none;
+  border: none;
+  transition: color 0.2s;
+  line-height: 1;
+}
+
+.close-modal:hover {
+  color: #fff;
+}
+
+.modal h3,
+.modal-heading {
+  margin-bottom: 16px;
+  font-weight: 400;
+  color: var(--accent);
+}
+
+.modal .auth-field {
+  margin-bottom: 12px;
+}
+
+.modal .btn {
+  width: 100%;
+  justify-content: center;
+}
+
+.modal .btn + .btn {
+  margin-top: 8px;
+}
+
+/* =========================== CATEGORIES MODAL =========================== */
+
+#tavio-categories-list {
+  margin-bottom: 16px;
+  max-height: 200px;
+  overflow-y: auto;
+}
+
+.tavio-category-item {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 8px 12px;
+  background: rgba(255, 255, 255, 0.04);
+  border-radius: 8px;
+  margin-bottom: 6px;
+  transition: background 0.2s;
+}
+
+.tavio-category-item:hover {
+  background: rgba(255, 255, 255, 0.08);
+}
+
+.tavio-category-item .cat-color {
+  width: 16px;
+  height: 16px;
+  border-radius: 4px;
+  flex-shrink: 0;
+  margin-right: 10px;
+}
+
+.tavio-category-item .cat-name {
+  flex: 1;
+  font-size: 14px;
+}
+
+.tavio-category-item .cat-delete {
+  background: none;
+  border: none;
+  color: #666;
+  cursor: pointer;
+  font-size: 18px;
+  transition: color 0.2s;
+  padding: 0 4px;
+}
+
+.tavio-category-item .cat-delete:hover {
+  color: #ff6b6b;
+}
+
+.tavio-add-category {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+  flex-wrap: wrap;
+}
+
+.tavio-add-category input[type="text"] {
+  flex: 1;
+  min-width: 120px;
+}
+
+.tavio-add-category .color-picker {
+  width: 40px;
+  height: 40px;
+  border: none;
+  border-radius: 8px;
+  cursor: pointer;
+  background: transparent;
+  padding: 0;
+}
+
+.tavio-add-category .btn {
+  flex-shrink: 0;
+}
+
+/* =========================== SHARE MODAL =========================== */
+
+#tavio-share-prompt-title {
+  color: var(--text-secondary);
+  margin-bottom: 12px;
+  font-size: 15px;
+}
+
+#tavio-share-user-select {
+  width: 100%;
+  padding: 10px 14px;
+  background: rgba(255, 255, 255, 0.04);
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  color: var(--text);
+  font-family: inherit;
+  font-size: 14px;
+  outline: none;
+}
+
+/* =========================== SHARED REQUESTS MODAL =========================== */
+
+#tavio-shared-requests-list {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  margin-top: 8px;
+}
+
+.tavio-shared-request {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 12px 16px;
+  background: rgba(255, 255, 255, 0.04);
+  border-radius: 10px;
+  border: 1px solid var(--border);
+}
+
+.tavio-shared-request-info {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.tavio-shared-request-info strong {
+  font-weight: 600;
+  color: var(--text);
+}
+
+.tavio-shared-request-info span {
+  font-size: 14px;
+  color: var(--text-secondary);
+}
+
+.tavio-shared-request-actions {
+  display: flex;
+  gap: 6px;
+}
+
+.tavio-shared-request-actions .btn {
+  padding: 4px 12px;
+  font-size: 12px;
+}
+
+/* =========================== EDIT MODAL =========================== */
+
+#tavio-edit-modal .modal-content {
+  max-width: 480px;
+}
+
+#tavio-edit-modal .form-buttons {
+  margin-top: 16px;
+}
+
+/* =========================== CONFIRM MODAL =========================== */
+
+#confirm-modal .modal-content {
+  max-width: 360px;
+  text-align: center;
+}
+
+#confirm-modal .confirm-actions {
+  display: flex;
+  gap: 12px;
+  justify-content: center;
+  margin-top: 20px;
+}
+
+#confirm-modal .confirm-actions .btn {
+  width: auto;
+  min-width: 80px;
+}
+
 /* =========================== RESPONSIVE =========================== */
 
 @media (max-width: 640px) {
@@ -1326,6 +1608,27 @@ body {
 
     .result-area {
         min-height: 50vh;
+    }
+
+    .tavio-toolbar {
+        justify-content: flex-start;
+    }
+
+    .tavio-actions {
+        flex-wrap: wrap;
+    }
+
+    .modal-content {
+        padding: 24px 16px;
+    }
+
+    .tavio-add-category {
+        flex-direction: column;
+        align-items: stretch;
+    }
+
+    .tavio-add-category .color-picker {
+        align-self: flex-start;
     }
 }
 
