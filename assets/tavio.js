@@ -1,7 +1,7 @@
 /*****************************************************
  *  Author: Armin Silatani
  *  Date: 2026-06-25
- *  Version: 3.0.0 (Supabase + Auth)
+ *  Version: 3.0.1 (Fixed loader)
  ****************************************************
  */
 
@@ -36,6 +36,9 @@ document.addEventListener('DOMContentLoaded', () => {
     const sbClient = getSupabaseClient();
     if (!sbClient) {
         console.error('Supabase client not available. Please check your connection.');
+        // حتی با خطا هم لودر را مخفی کن
+        const loader = document.getElementById('initial-loader');
+        if (loader) loader.classList.add('hidden');
         return;
     }
 
@@ -108,7 +111,6 @@ document.addEventListener('DOMContentLoaded', () => {
         { id: 'copilot-learn&study', name: 'Copilot (Learn & Study)', active: true },
         { id: 'copilot-deepresearch', name: 'Copilot (Deep Research)', active: true },
         { id: 'copilot-search', name: 'Copilot (Search)', active: true },
-        // Inactive
         { id: 'gpt-5.5', name: 'Chat GPT 5.5', active: false },
         { id: 'gpt-5.4-pro', name: 'Chat GPT 5.4 Pro', active: false },
         { id: 'o3', name: 'Chat GPT o3', active: false },
@@ -155,14 +157,13 @@ document.addEventListener('DOMContentLoaded', () => {
     const aiModelsFull = document.getElementById('aiModelsFull');
     const promptDescription = document.getElementById('promptDescription');
 
-    // Sidebar elements
     const sidebarLoginBtn = document.getElementById('sidebar-login');
     const sidebarLogoutBtn = document.getElementById('sidebar-logout');
     const sidebarDashboard = document.getElementById('sidebar-dashboard');
     const avatarContent = document.querySelector('.avatar-content');
     const notifDot = document.getElementById('avatar-notif-dot');
 
-    /* =========================== UTILITY FUNCTIONS ============================ */
+    /* =========================== UTILITY ============================ */
     const escapeHtml = (text) => {
         if (!text) return '';
         const div = document.createElement('div');
@@ -204,8 +205,6 @@ document.addEventListener('DOMContentLoaded', () => {
 
     /* =========================== SUPABASE CRUD OPERATIONS ============================ */
 
-    // ---- PROMPTS ----
-
     async function fetchTavioPrompts() {
         if (!currentUser) {
             tavioPrompts = [];
@@ -224,7 +223,6 @@ document.addEventListener('DOMContentLoaded', () => {
                 return [];
             }
 
-            // تبدیل داده‌ها به فرمت مورد انتظار UI
             tavioPrompts = (data || []).map(p => ({
                 id: p.id,
                 name: p.title,
@@ -324,7 +322,6 @@ document.addEventListener('DOMContentLoaded', () => {
                 return false;
             }
 
-            // به‌روزرسانی لیست محلی
             const idx = tavioPrompts.findIndex(p => p.id === id);
             if (idx !== -1) {
                 tavioPrompts[idx] = { ...tavioPrompts[idx], ...updates };
@@ -379,8 +376,6 @@ document.addEventListener('DOMContentLoaded', () => {
         }
         return success;
     }
-
-    // ---- CATEGORIES ----
 
     async function fetchTavioCategories() {
         if (!currentUser) {
@@ -440,7 +435,6 @@ document.addEventListener('DOMContentLoaded', () => {
     async function deleteTavioCategory(id) {
         if (!currentUser) return false;
         try {
-            // حذف دسته‌بندی از تمام پرامپت‌ها
             for (const prompt of tavioPrompts) {
                 if (prompt.categories && prompt.categories.includes(id)) {
                     const newCategories = prompt.categories.filter(c => c !== id);
@@ -469,8 +463,6 @@ document.addEventListener('DOMContentLoaded', () => {
             return false;
         }
     }
-
-    // ---- SHARING ----
 
     async function fetchConnections() {
         if (!currentUser) return [];
@@ -532,7 +524,6 @@ document.addEventListener('DOMContentLoaded', () => {
                 return false;
             }
 
-            // ایجاد نوتیفیکیشن برای گیرنده
             const prompt = tavioPrompts.find(p => p.id === promptId);
             await addNotificationToUser(
                 receiverId,
@@ -622,8 +613,6 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     }
 
-    // ---- NOTIFICATIONS ----
-
     async function addNotificationToUser(userId, type, title, body, link) {
         try {
             await sbClient.from('notifications').insert({
@@ -639,7 +628,6 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     /* =========================== RENDER FUNCTIONS ============================ */
-
     function updateSharedBadge() {
         const badge = document.getElementById('tavio-shared-count');
         if (badge) {
@@ -750,7 +738,6 @@ document.addEventListener('DOMContentLoaded', () => {
             `;
         }).join('');
 
-        // رویدادهای کلیک روی کارت‌ها
         document.querySelectorAll('.prompt-card').forEach(card => {
             card.addEventListener('click', (e) => {
                 if (card.classList.contains('password-active')) return;
@@ -765,7 +752,6 @@ document.addEventListener('DOMContentLoaded', () => {
             });
         });
 
-        // رویدادهای دکمه‌ها
         document.querySelectorAll('[data-action="pin"]').forEach(btn => {
             btn.addEventListener('click', (e) => {
                 e.stopPropagation();
@@ -810,7 +796,7 @@ document.addEventListener('DOMContentLoaded', () => {
         categorySuggestions.innerHTML = cats.map(c => `<option value="${escapeHtml(c)}">`).join('');
     }
 
-    /* =========================== IN-CARD PASSWORD ============================ */
+    /* =========================== PASSWORD ============================ */
     const MASTER_PASSWORD = '1320';
 
     function convertCardToPasswordInput(cardElement, promptId) {
@@ -846,7 +832,7 @@ document.addEventListener('DOMContentLoaded', () => {
         cancelBtn.addEventListener('click', (e) => e.stopPropagation());
     }
 
-    /* =========================== BUILDER VIEW ============================ */
+    /* =========================== BUILDER ============================ */
     function openBuilder(id) {
         const prompt = tavioPrompts.find(p => p.id === id);
         if (!prompt) {
@@ -951,9 +937,59 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     /* =========================== MODALS ============================ */
+    function openModal(id) {
+        const el = document.getElementById(id);
+        if (el) {
+            el.classList.add('open');
+            el.style.display = 'flex';
+            document.body.classList.add('modal-open');
+        }
+    }
+
+    function closeModal(id) {
+        const el = document.getElementById(id);
+        if (el) {
+            el.classList.remove('open');
+            el.style.display = 'none';
+            document.body.classList.remove('modal-open');
+        }
+    }
+
+    function openConfirmModal(message, onConfirm) {
+        const modal = document.getElementById('confirm-modal');
+        const msgEl = document.getElementById('confirm-modal-message');
+        if (!modal || !msgEl) return;
+
+        msgEl.textContent = message;
+        openModal('confirm-modal');
+
+        const yesBtn = document.getElementById('confirm-modal-yes');
+        const noBtn = document.getElementById('confirm-modal-no');
+
+        function cleanup() {
+            closeModal('confirm-modal');
+            yesBtn.removeEventListener('click', handleYes);
+            noBtn.removeEventListener('click', handleNo);
+        }
+
+        function handleYes() {
+            cleanup();
+            if (typeof onConfirm === 'function') onConfirm();
+        }
+
+        function handleNo() {
+            cleanup();
+        }
+
+        yesBtn.addEventListener('click', handleYes);
+        noBtn.addEventListener('click', handleNo);
+
+        modal.addEventListener('click', function(e) {
+            if (e.target === modal) cleanup();
+        });
+    }
 
     // ---- EDIT MODAL ----
-
     function openEditModal(id) {
         const prompt = tavioPrompts.find(p => p.id === id);
         if (!prompt) return;
@@ -964,7 +1000,6 @@ document.addEventListener('DOMContentLoaded', () => {
         document.getElementById('tavio-edit-prompt-content').value = prompt.template;
         document.getElementById('tavio-edit-prompt-pinned').checked = prompt.pinned;
 
-        // پر کردن دسته‌بندی‌ها
         const catSelect = document.getElementById('tavio-edit-prompt-category');
         catSelect.innerHTML = '<option value="">No Category</option>';
         tavioCategories.forEach(cat => {
@@ -995,7 +1030,6 @@ document.addEventListener('DOMContentLoaded', () => {
         const prompt = tavioPrompts.find(p => p.id === editingPromptId);
         if (!prompt) return;
 
-        // اضافه کردن دسته‌بندی جدید اگر وجود نداشت
         let categories = prompt.categories || [];
         if (categoryId && !categories.includes(categoryId)) {
             categories.push(categoryId);
@@ -1026,7 +1060,6 @@ document.addEventListener('DOMContentLoaded', () => {
     });
 
     // ---- CATEGORIES MODAL ----
-
     document.getElementById('tavio-categories-btn')?.addEventListener('click', async () => {
         await renderCategoriesModal();
         openModal('tavio-categories-modal');
@@ -1082,7 +1115,6 @@ document.addEventListener('DOMContentLoaded', () => {
     });
 
     // ---- SHARE MODAL ----
-
     async function openShareModal(promptId) {
         const prompt = tavioPrompts.find(p => p.id === promptId);
         if (!prompt) return;
@@ -1124,7 +1156,6 @@ document.addEventListener('DOMContentLoaded', () => {
     });
 
     // ---- SHARED REQUESTS MODAL ----
-
     document.getElementById('tavio-shared-btn')?.addEventListener('click', async () => {
         await openSharedRequestsModal();
     });
@@ -1143,8 +1174,8 @@ document.addEventListener('DOMContentLoaded', () => {
                         <span>shared: ${escapeHtml(req.prompt?.title || 'Untitled')}</span>
                     </div>
                     <div class="tavio-shared-request-actions">
-                        <button class="btn btn-accept-share" data-action="accept-share" data-id="${req.id}">Accept</button>
-                        <button class="btn btn-outline" data-action="reject-share" data-id="${req.id}">Reject</button>
+                        <button class="btn btn-accent btn-sm" data-action="accept-share" data-id="${req.id}">Accept</button>
+                        <button class="btn btn-outline btn-sm" data-action="reject-share" data-id="${req.id}">Reject</button>
                     </div>
                 </div>
             `).join('');
@@ -1176,8 +1207,7 @@ document.addEventListener('DOMContentLoaded', () => {
         closeModal('tavio-shared-requests-modal');
     });
 
-    // ---- NEW PROMPT MODAL (using the form in library view) ----
-
+    // ---- NEW PROMPT ----
     document.getElementById('tavio-new-prompt-btn')?.addEventListener('click', () => {
         if (!currentUser) {
             openAuthOverlay();
@@ -1189,13 +1219,9 @@ document.addEventListener('DOMContentLoaded', () => {
         promptCategoryInput.value = '';
         promptTemplateInput.value = '';
         promptLockedCheckbox.checked = false;
-        // پر کردن AI select با مدل‌های فعال
         Array.from(promptAiSelect.options).forEach(opt => opt.selected = false);
         promptAiSelect.selectedIndex = -1;
-        document.getElementById('savePrompt').dataset.mode = 'new';
     });
-
-    // ---- SAVE PROMPT (from form) ----
 
     savePromptBtn?.addEventListener('click', async function() {
         const name = promptNameInput.value.trim();
@@ -1222,60 +1248,7 @@ document.addEventListener('DOMContentLoaded', () => {
         promptFormContainer.classList.add('hidden');
     });
 
-    /* =========================== MODAL HELPERS ============================ */
-    function openModal(id) {
-        const el = document.getElementById(id);
-        if (el) {
-            el.classList.add('open');
-            el.style.display = 'flex';
-            document.body.classList.add('modal-open');
-        }
-    }
-
-    function closeModal(id) {
-        const el = document.getElementById(id);
-        if (el) {
-            el.classList.remove('open');
-            el.style.display = 'none';
-            document.body.classList.remove('modal-open');
-        }
-    }
-
-    function openConfirmModal(message, onConfirm) {
-        const modal = document.getElementById('confirm-modal');
-        const msgEl = document.getElementById('confirm-modal-message');
-        if (!modal || !msgEl) return;
-
-        msgEl.textContent = message;
-        openModal('confirm-modal');
-
-        const yesBtn = document.getElementById('confirm-modal-yes');
-        const noBtn = document.getElementById('confirm-modal-no');
-
-        function cleanup() {
-            closeModal('confirm-modal');
-            yesBtn.removeEventListener('click', handleYes);
-            noBtn.removeEventListener('click', handleNo);
-        }
-
-        function handleYes() {
-            cleanup();
-            if (typeof onConfirm === 'function') onConfirm();
-        }
-
-        function handleNo() {
-            cleanup();
-        }
-
-        yesBtn.addEventListener('click', handleYes);
-        noBtn.addEventListener('click', handleNo);
-
-        modal.addEventListener('click', function(e) {
-            if (e.target === modal) cleanup();
-        });
-    }
-
-    /* =========================== EVENT LISTENERS (Library) ============================ */
+    /* =========================== SEARCH & FILTERS ============================ */
     searchInput?.addEventListener('input', (e) => {
         currentSearchTerm = e.target.value;
         renderLibrary();
@@ -1306,7 +1279,7 @@ document.addEventListener('DOMContentLoaded', () => {
     btnCopyPrompt?.addEventListener('click', copyToClipboard);
     btnClearBuilder?.addEventListener('click', clearBuilder);
 
-    /* =========================== SIDEBAR MODULE ============================ */
+    /* =========================== SIDEBAR ============================ */
     const MENU_TOOLS = [
         { label: 'Codara Service Generator', minRole: 'general', link: 'https://arminsilatani.github.io/codara/', iconURL: 'assets/logos/Co.svg' },
         { label: 'Nolvo Sitemap Builder', minRole: 'general', link: '', iconURL: 'assets/logos/No.svg' },
@@ -1381,7 +1354,6 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     }
 
-    /* =========================== SIDEBAR TOGGLE ============================ */
     (function() {
         const toggleBtn = document.getElementById('menu-toggle-btn');
         const sidebar = document.getElementById('sidebar');
@@ -1421,7 +1393,7 @@ document.addEventListener('DOMContentLoaded', () => {
         document.addEventListener('keydown', (e) => { if (e.key === 'Escape' && isOpen) closeSidebar(); });
     })();
 
-    /* =========================== AUTH MODULE ============================ */
+    /* =========================== AUTH ============================ */
     let authEmail = '';
 
     const authOverlay = document.getElementById('auth-overlay');
@@ -1479,7 +1451,6 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     }
 
-    // Continue – RPC check_email_exists
     authContinue?.addEventListener('click', async () => {
         const email = authEmailInput.value.trim();
         if (!email) {
@@ -1511,7 +1482,6 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     });
 
-    // Sign In
     authSignin?.addEventListener('click', async () => {
         const password = authPassword.value;
         if (!password) {
@@ -1527,7 +1497,6 @@ document.addEventListener('DOMContentLoaded', () => {
         closeAuthOverlay();
     });
 
-    // Register
     authRegister?.addEventListener('click', async () => {
         const first = regFirstname.value.trim();
         const last = regLastname.value.trim();
@@ -1597,7 +1566,6 @@ document.addEventListener('DOMContentLoaded', () => {
         showStep('step-2-login');
     });
 
-    // Toggle password visibility
     document.querySelectorAll('.toggle-password-btn').forEach(btn => {
         btn.addEventListener('click', () => {
             const targetId = btn.getAttribute('data-target');
@@ -1617,7 +1585,7 @@ document.addEventListener('DOMContentLoaded', () => {
         await sbClient.auth.signOut();
     });
 
-    /* =========================== PROFILE & USER STATE ============================ */
+    /* =========================== PROFILE ============================ */
     async function fetchProfile(userId) {
         try {
             const { data, error } = await sbClient
@@ -1666,12 +1634,10 @@ document.addEventListener('DOMContentLoaded', () => {
         if (sidebarLogoutBtn) sidebarLogoutBtn.classList.remove('hidden');
         if (sidebarDashboard) sidebarDashboard.classList.remove('hidden');
 
-        // Update dashboard text
         const fullName = [profile.first_name, profile.last_name].filter(Boolean).join(' ') || user.email || 'Dashboard';
         const dashboardTextEl = document.querySelector('.sidebar-dashboard-text');
         if (dashboardTextEl) dashboardTextEl.textContent = fullName;
 
-        // Update avatar
         if (avatarContent) {
             if (profile.photo_url) {
                 avatarContent.innerHTML = `<img src="${profile.photo_url}" alt="Profile" width="20" height="20" style="border-radius:50%; object-fit:cover;" onerror="this.outerHTML='<span class=\\'avatar-initial\\'>${fullName.charAt(0).toUpperCase()}</span>';">`;
@@ -1685,7 +1651,6 @@ document.addEventListener('DOMContentLoaded', () => {
         currentUserRoleLevel = getRoleLevel(role);
         renderSidebarMenu();
 
-        // Load prompts and categories
         await fetchTavioCategories();
         await fetchTavioPrompts();
         await fetchSharedPrompts();
@@ -1707,7 +1672,7 @@ document.addEventListener('DOMContentLoaded', () => {
         renderAll();
     }
 
-    // Check session on load
+    /* =========================== AUTH STATE ============================ */
     async function checkUser() {
         try {
             const { data: { session } } = await sbClient.auth.getSession();
@@ -1718,7 +1683,6 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     }
 
-    // Listen for auth changes
     sbClient.auth.onAuthStateChange(async (event, session) => {
         await applyUserProfile(session?.user ?? null);
         if (event === 'SIGNED_IN') {
@@ -1733,12 +1697,17 @@ document.addEventListener('DOMContentLoaded', () => {
 
     /* =========================== INIT ============================ */
     async function initApp() {
-        await checkUser();
-        const loader = document.getElementById('initial-loader');
-        if (loader) {
-            loader.classList.add('hidden');
+        try {
+            await checkUser();
+        } catch (e) {
+            console.error('Init error:', e);
+        } finally {
+            const loader = document.getElementById('initial-loader');
+            if (loader) {
+                loader.classList.add('hidden');
+            }
+            console.log('Tavio: Initialization complete.');
         }
-        console.log('Tavio: Initialization complete.');
     }
 
     initApp();
