@@ -853,7 +853,7 @@ document.addEventListener('DOMContentLoaded', () => {
     return data;
   }
 
-  async function applyUserProfile(user) {
+    async function applyUserProfile(user) {
     if (!user) {
       setLoggedOutUI();
       return;
@@ -868,13 +868,25 @@ document.addEventListener('DOMContentLoaded', () => {
     sidebarLogoutBtn.classList.remove('hidden');
     sidebarDashboard.classList.remove('hidden');
 
-    let avatarChar = '?';
-    if (profile.first_name) {
-      avatarChar = profile.first_name.charAt(0).toUpperCase();
-    } else if (user.email) {
-      avatarChar = user.email.charAt(0).toUpperCase();
+    // ----- به‌روزرسانی متن داشبورد (نام کامل) -----
+    const fullName = [profile.first_name, profile.last_name]
+      .filter(Boolean)
+      .join(' ') || (user.email ? user.email : 'Dashboard');
+    const dashboardTextEl = document.querySelector('.sidebar-dashboard-text');
+    if (dashboardTextEl) dashboardTextEl.textContent = fullName;
+
+    // ----- آواتار (حرف اول یا عکس) -----
+    const avatarEl = document.querySelector('.avatar-content');
+    if (avatarEl) {
+      if (profile.photo_url) {
+        // اگر عکس پروفایل وجود داشت
+        avatarEl.innerHTML = `<img src="${profile.photo_url}" alt="Profile" width="20" height="20" style="border-radius:50%; object-fit:cover;" onerror="this.outerHTML='<span class=\\'avatar-initial\\'>${fullName.charAt(0).toUpperCase()}</span>';">`;
+      } else {
+        // در غیر این صورت حرف اول با استایل دایره‌ای
+        avatarEl.innerHTML = `<span class="avatar-initial">${fullName.charAt(0).toUpperCase()}</span>`;
+      }
     }
-    if (avatarContent) avatarContent.textContent = avatarChar;
+
     if (notifDot) notifDot.style.display = 'none';
 
     currentUserRoleLevel = getRoleLevel(role);
