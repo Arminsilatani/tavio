@@ -1,7 +1,7 @@
 /*****************************************************
  *  Author: Armin Silatani
  *  Date: 2026-06-25
- *  Version: 3.0.1 (Fixed loader)
+ *  Version: 3.0.2 (Fixed loader with timeout)
  ****************************************************
  */
 
@@ -36,7 +36,6 @@ document.addEventListener('DOMContentLoaded', () => {
     const sbClient = getSupabaseClient();
     if (!sbClient) {
         console.error('Supabase client not available. Please check your connection.');
-        // حتی با خطا هم لودر را مخفی کن
         const loader = document.getElementById('initial-loader');
         if (loader) loader.classList.add('hidden');
         return;
@@ -1651,6 +1650,7 @@ document.addEventListener('DOMContentLoaded', () => {
         currentUserRoleLevel = getRoleLevel(role);
         renderSidebarMenu();
 
+        // Load data
         await fetchTavioCategories();
         await fetchTavioPrompts();
         await fetchSharedPrompts();
@@ -1695,19 +1695,34 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     });
 
-    /* =========================== INIT ============================ */
+    /* =========================== INIT (with timeout) ============================ */
     async function initApp() {
+        console.log('Tavio: Initializing...');
+        let loaderHidden = false;
+        const loader = document.getElementById('initial-loader');
+
+        const hideLoader = () => {
+            if (!loaderHidden) {
+                if (loader) loader.classList.add('hidden');
+                loaderHidden = true;
+                console.log('Tavio: Loader hidden.');
+            }
+        };
+
+        // Hide loader after 3 seconds anyway (safety net)
+        const timeoutId = setTimeout(hideLoader, 3000);
+
         try {
             await checkUser();
+            // If everything loaded, hide loader
+            hideLoader();
+            clearTimeout(timeoutId);
         } catch (e) {
             console.error('Init error:', e);
-        } finally {
-            const loader = document.getElementById('initial-loader');
-            if (loader) {
-                loader.classList.add('hidden');
-            }
-            console.log('Tavio: Initialization complete.');
+            hideLoader();
+            clearTimeout(timeoutId);
         }
+        console.log('Tavio: Initialization complete.');
     }
 
     initApp();
