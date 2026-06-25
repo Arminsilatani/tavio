@@ -1730,24 +1730,3 @@ document.addEventListener('DOMContentLoaded', () => {
 
     initApp();
 });
-// =========================== FIX: Ensure sidebar elements exist ============================
-(function ensureSidebarElements() {
-    const menuItems = document.getElementById('sidebar-menu-items');
-    if (!menuItems) {
-        console.warn('sidebar-menu-items not found. Creating a fallback container.');
-        const nav = document.querySelector('#sidebar-nav');
-        if (nav) {
-            const newDiv = document.createElement('div');
-            newDiv.id = 'sidebar-menu-items';
-            // insert before the first separator or at the end
-            nav.insertBefore(newDiv, nav.querySelector('.sidebar-separator'));
-        }
-    }
-    // Also ensure login/logout buttons exist
-    const loginBtn = document.getElementById('sidebar-login');
-    const logoutBtn = document.getElementById('sidebar-logout');
-    const dashboardLink = document.getElementById('sidebar-dashboard');
-    if (!loginBtn) console.warn('sidebar-login not found');
-    if (!logoutBtn) console.warn('sidebar-logout not found');
-    if (!dashboardLink) console.warn('sidebar-dashboard not found');
-})();
