@@ -1333,75 +1333,73 @@ document.addEventListener('DOMContentLoaded', () => {
 
     /* =========================== RENDER SIDEBAR MENU (FINAL) ============================ */
     function renderSidebarMenu() {
-        console.log('🔵 renderSidebarMenu called');
+    console.log('🔵 renderSidebarMenu called');
 
-        let container = document.getElementById('sidebar-menu-items');
-        if (!container) {
-            console.warn('⚠️ sidebar-menu-items not found, creating fallback');
-            const nav = document.getElementById('sidebar-nav');
-            if (nav) {
-                container = document.createElement('div');
-                container.id = 'sidebar-menu-items';
-                const separator = nav.querySelector('.sidebar-separator');
-                if (separator) {
-                    nav.insertBefore(container, separator);
-                } else {
-                    nav.appendChild(container);
-                }
-                console.log('✅ Fallback container created');
-            } else {
-                console.error('❌ Sidebar nav not found');
+    // پیدا کردن یا ساختن container
+    let container = document.getElementById('sidebar-menu-items');
+    if (!container) {
+        console.warn('⚠️ sidebar-menu-items not found, creating fallback');
+        const nav = document.getElementById('sidebar-nav');
+        if (!nav) return;
+        container = document.createElement('div');
+        container.id = 'sidebar-menu-items';
+        const separator = nav.querySelector('.sidebar-separator');
+        if (separator) {
+            nav.insertBefore(container, separator);
+        } else {
+            nav.appendChild(container);
+        }
+    }
+
+    // خالی کردن container
+    container.innerHTML = '';
+
+    // نقش کاربر را بگیر (اگر لاگین نکرده، 'public')
+    const role = currentUserRole || 'public';
+    console.log('📌 Role for sidebar:', role);
+
+    let count = 0;
+    MENU_TOOLS.forEach(tool => {
+        if (tool.isSelf) return; // خود Tavio را نمایش نده
+
+        // بررسی دسترسی با استفاده از getRoleLevel
+        const userLevel = getRoleLevel(role);
+        const requiredLevel = getRoleLevel(tool.minRole);
+        const allowed = userLevel >= requiredLevel;
+
+        const btn = document.createElement('button');
+        btn.className = 'sidebar-item' + (allowed ? '' : ' disabled');
+        btn.disabled = !allowed;
+
+        btn.innerHTML = `
+            <span class="sidebar-icon">
+                <img src="${tool.iconURL}" width="20" height="20" alt="${tool.label}">
+            </span>
+            <span>${tool.label}</span>
+            ${!tool.link ? '<span class="coming-soon-tooltip">Coming Soon</span>' : ''}
+        `;
+
+        btn.addEventListener('click', () => {
+            if (!currentUser) {
+                openAuthOverlay();
+                const authErrorEl = document.getElementById('auth-error');
+                if (authErrorEl) authErrorEl.textContent = 'Please sign in to use this tool.';
                 return;
             }
-        }
-
-        // Clear container
-        container.innerHTML = '';
-
-        const role = normalizeRole(currentUserRole);
-        console.log('📌 Current user role:', role);
-
-        let count = 0;
-        MENU_TOOLS.forEach(tool => {
-            if (tool.isSelf) return;
-
-            const allowed = hasAccess(role, tool.minRole);
-
-            const btn = document.createElement('button');
-            btn.className = 'sidebar-item' + (allowed ? '' : ' disabled');
-            btn.disabled = !allowed;
-
-            btn.innerHTML = `
-                <span class="sidebar-icon">
-                    <img src="${tool.iconURL}" width="20" height="20" alt="${tool.label}">
-                </span>
-                <span>${tool.label}</span>
-                ${!tool.link ? '<span class="coming-soon-tooltip">Coming Soon</span>' : ''}
-            `;
-
-            btn.addEventListener('click', () => {
-                if (!currentUser) {
-                    openAuthOverlay();
-                    const authErrorEl = document.getElementById('auth-error');
-                    if (authErrorEl) authErrorEl.textContent = 'Please sign in to use this tool.';
-                    return;
-                }
-
-                if (!allowed) {
-                    showToast('Your access level is too low to use this tool.');
-                    return;
-                }
-
-                if (tool.link) window.open(tool.link, '_blank');
-                document.getElementById('sidebar-close-row')?.click();
-            });
-
-            container.appendChild(btn);
-            count++;
+            if (!allowed) {
+                showToast('Your access level is too low to use this tool.');
+                return;
+            }
+            if (tool.link) window.open(tool.link, '_blank');
+            document.getElementById('sidebar-close-row')?.click();
         });
 
-        console.log(`✅ Sidebar menu rendered with ${count} items`);
-    }
+        container.appendChild(btn);
+        count++;
+    });
+
+    console.log(`✅ Sidebar menu rendered with ${count} items`);
+}
 
     /* =========================== SIDEBAR TOGGLE ============================ */
     (function() {
