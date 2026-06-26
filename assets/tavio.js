@@ -1,7 +1,7 @@
 /*****************************************************
  *  Author: Armin Silatani
  *  Date: 2026-06-26
- *  Version: 4.0.2 (No more loader delay – instant UI)
+ *  Version: 4.0.3 (Final fully working Tavio with shared sidebar)
  ****************************************************/
 
 /* =========================== SUPABASE CLIENT ============================ */
@@ -612,7 +612,6 @@ document.addEventListener('DOMContentLoaded', () => {
         if (!comp) return;
         comp.addEventListener('login-request', () => openAuthOverlay());
         comp.addEventListener('logout-request', async () => await sbClient.auth.signOut());
-        restoreSessionAndSidebar();
     });
 
     async function restoreSessionAndSidebar() {
@@ -863,8 +862,13 @@ document.addEventListener('DOMContentLoaded', () => {
     btnClearBuilder?.addEventListener('click', clearBuilder);
 
     /* =========================== INIT ============================ */
-    function initApp() {
+    async function initApp() {
         const loader = document.getElementById('initial-loader');
+        if (loader) loader.classList.remove('hidden');
+
+        await customElements.whenDefined('sidebar-component');
+        await restoreSessionAndSidebar();
+
         if (loader) loader.classList.add('hidden');
         renderAll();
     }
