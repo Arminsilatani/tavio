@@ -529,62 +529,120 @@ document.addEventListener('DOMContentLoaded', () => {
         openModal('tavio-share-modal');
     }
 
-    /* =========================== SIDEBAR COMPONENT INTEGRATION ============================ */
-    let sidebarComponent = null;
+/* =========================== SIDEBAR COMPONENT INTEGRATION ============================ */
+let sidebarComponent = null;
+let sidebarListenersAttached = false;
 
-    function getSidebarComponent() {
-        if (!sidebarComponent) {
-            sidebarComponent = document.querySelector('sidebar-component');
-            if (sidebarComponent) {
-                sidebarComponent.addEventListener('login-request', () => openAuthOverlay());
-                sidebarComponent.addEventListener('logout-request', async () => await sbClient.auth.signOut());
-                sidebarComponent.addEventListener('session-restore-request', async () => {
-                    const { data: { session } } = await sbClient.auth.getSession();
-                    if (session?.user) {
-                        currentUser = session.user;
-                        currentProfile = await fetchProfile(session.user.id);
-                        currentUserRole = currentProfile?.role || 'recruit';
-                        sidebarComponent.setUser(currentUser, currentProfile);
-                        await fetchTavioCategories(); await fetchTavioPrompts(); await fetchSharedPrompts();
-                        renderAll();
-                    }
-                });
-            }
+function getSidebarComponent() {
+    if (!sidebarComponent) {
+        sidebarComponent = document.querySelector('sidebar-component');
+    }
+    return sidebarComponent;
+}
+
+// تنظیم listenerها پس از آماده شدن کامپوننت
+customElements.whenDefined('sidebar-component').then(() => {
+    const comp = document.querySelector('sidebar-component');
+    if (!comp || sidebarListenersAttached) return;
+    sidebarListenersAttached = true;
+
+    comp.addEventListener('login-request', () => {
+        openAuthOverlay();
+    });
+
+    comp.addEventListener('logout-request', async () => {
+        const sbClient = getSupabaseClient();
+        if (sbClient) {
+            await sbClient.auth.signOut();
         }
-        return sidebarComponent;
+    });
+
+    comp.addEventListener('session-restore-request', async () => {
+        const sbClient = getSupabaseClient();
+        if (!sbClient) return;
+        const { data: { session } } = await sbClient.auth.getSession();
+        if (session?.user) {
+            currentUser = session.user;
+            currentProfile = await fetchProfile(session.user.id);
+            currentUserRole = currentProfile?.role || 'recruit';
+            comp.setUser(currentUser, currentProfile);
+            await fetchTavioCategories();
+            await fetchTavioPrompts();
+            await fetchSharedPrompts();
+            renderAll();
+        }
+    });
+
+    // اگر کاربر از قبل وارد شده بود، وضعیت را به‌روز کن
+    checkUser().then(() => {
+        // بعد از checkUser، applyUserProfile صدا زده می‌شود که setUser را انجام می‌دهد
+    });
+});
+
+async function fetchProfile(userId) {
+    try {
+        const sbClient = getSupabaseClient();
+        if (!sbClient) return null;
+        const { data, error } = await sbClient
+            .from('profiles')
+            .select('*')
+            .eq('id', userId)
+            .single();
+        if (error || !data) {
+            const { data: { user } } = await sbClient.auth.getUser();
+            const md = user?.user_metadata || {};
+            return {
+                id: userId,
+                role: md.role || 'recruit',
+                first_name: md.first_name || '',
+                last_name: md.last_name || '',
+                photo_url: md.photo_url || '',
+                email: user?.email || ''
+            };
+        }
+        return data;
+    } catch (e) {
+        console.warn('Profile fetch error:', e);
+        return { id: userId, role: 'recruit', first_name: '', last_name: '', photo_url: '' };
+    }
+}
+
+async function applyUserProfile(user) {
+    if (!user) {
+        setLoggedOutUI();
+        return;
+    }
+    currentUser = user;
+    if (!currentProfile || currentProfile.id !== user.id) {
+        currentProfile = await fetchProfile(user.id);
+    }
+    currentUserRole = currentProfile?.role || 'recruit';
+
+    const comp = getSidebarComponent();
+    if (comp && typeof comp.setUser === 'function') {
+        comp.setUser(currentUser, currentProfile);
     }
 
-    async function fetchProfile(userId) {
-        try {
-            const { data, error } = await sbClient.from('profiles').select('*').eq('id', userId).single();
-            if (error || !data) {
-                const { data: { user } } = await sbClient.auth.getUser();
-                const md = user?.user_metadata || {};
-                return { id: userId, role: md.role || 'recruit', first_name: md.first_name || '', last_name: md.last_name || '', photo_url: md.photo_url || '', email: user?.email || '' };
-            }
-            return data;
-        } catch (e) { return { id: userId, role: 'recruit', first_name: '', last_name: '', photo_url: '' }; }
-    }
+    await fetchTavioCategories();
+    await fetchTavioPrompts();
+    await fetchSharedPrompts();
+    renderAll();
+}
 
-    async function applyUserProfile(user) {
-        if (!user) { setLoggedOutUI(); return; }
-        currentUser = user;
-        if (!currentProfile || currentProfile.id !== user.id) currentProfile = await fetchProfile(user.id);
-        currentUserRole = currentProfile?.role || 'recruit';
-        const comp = getSidebarComponent();
-        if (comp) comp.setUser(currentUser, currentProfile);
-        await fetchTavioCategories(); await fetchTavioPrompts(); await fetchSharedPrompts();
-        renderAll();
+function setLoggedOutUI() {
+    currentUser = null;
+    currentProfile = null;
+    currentUserRole = 'public';
+    tavioPrompts = [];
+    tavioCategories = [];
+    tavioSharedPrompts = [];
+    const comp = getSidebarComponent();
+    if (comp && typeof comp.clearUser === 'function') {
+        comp.clearUser();
     }
+    renderAll();
+}
 
-    function setLoggedOutUI() {
-        currentUser = null; currentProfile = null; currentUserRole = 'public';
-        tavioPrompts = []; tavioCategories = []; tavioSharedPrompts = [];
-        const comp = getSidebarComponent(); if (comp) comp.clearUser();
-        renderAll();
-    }
-
-    /* =========================== AUTH ============================ */
 /* =========================== AUTH ============================ */
 let authEmail = '';
 
