@@ -1791,3 +1791,64 @@ document.addEventListener('DOMContentLoaded', () => {
 
     initApp();
 });
+// =========================== FORCE SIDEBAR RENDER (FINAL FIX) ============================
+// این کد را به انتهای فایل tavio.js اضافه کنید (بعد از initApp())
+setTimeout(function() {
+    console.log('🔵 FORCE: renderSidebarMenu called from setTimeout');
+    
+    let container = document.getElementById('sidebar-menu-items');
+    if (!container) {
+        console.warn('⚠️ FORCE: sidebar-menu-items not found, creating fallback');
+        const nav = document.getElementById('sidebar-nav');
+        if (nav) {
+            container = document.createElement('div');
+            container.id = 'sidebar-menu-items';
+            const separator = nav.querySelector('.sidebar-separator');
+            if (separator) {
+                nav.insertBefore(container, separator);
+            } else {
+                nav.appendChild(container);
+            }
+        }
+    }
+
+    if (container) {
+        container.innerHTML = '';
+        const role = normalizeRole(currentUserRole || 'public');
+        console.log('📌 FORCE: Current user role:', role);
+        let count = 0;
+        MENU_TOOLS.forEach(tool => {
+            if (tool.isSelf) return;
+            const allowed = hasAccess(role, tool.minRole);
+            const btn = document.createElement('button');
+            btn.className = 'sidebar-item' + (allowed ? '' : ' disabled');
+            btn.disabled = !allowed;
+            btn.innerHTML = `
+                <span class="sidebar-icon">
+                    <img src="${tool.iconURL}" width="20" height="20" alt="${tool.label}">
+                </span>
+                <span>${tool.label}</span>
+                ${!tool.link ? '<span class="coming-soon-tooltip">Coming Soon</span>' : ''}
+            `;
+            btn.addEventListener('click', () => {
+                if (!currentUser) {
+                    openAuthOverlay();
+                    const authErrorEl = document.getElementById('auth-error');
+                    if (authErrorEl) authErrorEl.textContent = 'Please sign in to use this tool.';
+                    return;
+                }
+                if (!allowed) {
+                    showToast('Your access level is too low to use this tool.');
+                    return;
+                }
+                if (tool.link) window.open(tool.link, '_blank');
+                document.getElementById('sidebar-close-row')?.click();
+            });
+            container.appendChild(btn);
+            count++;
+        });
+        console.log(`✅ FORCE: Sidebar menu rendered with ${count} items`);
+    } else {
+        console.error('❌ FORCE: Container still not found!');
+    }
+}, 500); // 500ms delay to ensure DOM is fully loaded
