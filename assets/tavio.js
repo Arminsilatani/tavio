@@ -624,21 +624,13 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     customElements.whenDefined('sidebar-component').then(() => {
-        const comp = getSidebarComponent();
-        if (!comp) return;
-
-        // event listeners
-        comp.addEventListener('login-request', () => openAuthOverlay());
-        comp.addEventListener('logout-request', async () => {
-            await sbClient.auth.signOut();
-        });
-        comp.addEventListener('session-restore-request', async () => {
-            await restoreSessionAndSidebar();
-        });
-
-        // restore session on load
-        restoreSessionAndSidebar();
+    const comp = getSidebarComponent();
+    if (!comp) return;
+    comp.addEventListener('login-request', () => openAuthOverlay());
+    comp.addEventListener('logout-request', async () => await sbClient.auth.signOut());
+    comp.addEventListener('session-restore-request', async () => {
     });
+});
 
     async function restoreSessionAndSidebar() {
         const comp = getSidebarComponent();
@@ -956,11 +948,27 @@ document.addEventListener('DOMContentLoaded', () => {
     btnClearBuilder?.addEventListener('click', clearBuilder);
 
     /* =========================== INIT ============================ */
-    function initApp() {
-        const loader = document.getElementById('initial-loader');
+async function initApp() {
+    const loader = document.getElementById('initial-loader');
+    // ۱. نمایش لودر (اگر مخفی شده بود)
+    if (loader) loader.classList.remove('hidden');
+
+    // ۲. صبر کن تا کامپوننت سایدبار تعریف شود
+    await customElements.whenDefined('sidebar-component');
+
+    // ۳. بازیابی نشست (در صورت وجود)
+    await restoreSessionAndSidebar();
+
+    // ۴. مخفی کردن لودر
+    if (loader) loader.classList.add('hidden');
+
+    // ۵. رندر اولیه (در صورت نیاز)
+    renderAll();
+
+    // ۶. تایم‌اوت امن (در صورت خطا)
+    setTimeout(() => {
         if (loader) loader.classList.add('hidden');
-        // initial render with empty data (no user)
-        renderAll();
-    }
-    initApp();
-});
+    }, 5000);
+}
+
+initApp();
