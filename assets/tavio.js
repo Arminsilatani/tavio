@@ -1787,6 +1787,8 @@ sbClient.auth.onAuthStateChange(async (event, session) => {
         if (loader) loader.classList.add('hidden');
         clearTimeout(timeoutId);
     }
+    console.log('✅ Tavio: Initialization complete.');
+}
 
     initApp();
 });
