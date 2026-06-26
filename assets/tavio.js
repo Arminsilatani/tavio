@@ -1333,20 +1333,32 @@ function hasAccess(userRole, minRole) {
 
 /* =========================== RENDER SIDEBAR MENU ============================ */
 function renderSidebarMenu() {
-    const container = document.getElementById('sidebar-menu-items');
+    let container = document.getElementById('sidebar-menu-items');
     if (!container) {
-        console.error('sidebar-menu-items not found in DOM');
-        return;
+        // Fallback: create container if missing
+        const nav = document.getElementById('sidebar-nav');
+        if (nav) {
+            container = document.createElement('div');
+            container.id = 'sidebar-menu-items';
+            const separator = nav.querySelector('.sidebar-separator');
+            if (separator) {
+                nav.insertBefore(container, separator);
+            } else {
+                nav.appendChild(container);
+            }
+        } else {
+            console.error('Sidebar nav not found');
+            return;
+        }
     }
 
-    // همیشه لیست را از نو بساز (حتی اگر کاربر مهمان است)
+    // Clear container
     container.innerHTML = '';
 
-    // نقش کاربر را از متغیر سراسری بخوان (در حالت مهمان: 'public')
-    const role = normalizeRole(currentUserRole);
+    const role = normalizeRole(currentUserRole); // currentUserRole is 'public' or user role
 
     MENU_TOOLS.forEach(tool => {
-        if (tool.isSelf) return; // ابزار جاری را دوباره نمایش نده
+        if (tool.isSelf) return;
 
         const allowed = hasAccess(role, tool.minRole);
 
@@ -1363,7 +1375,6 @@ function renderSidebarMenu() {
         `;
 
         btn.addEventListener('click', () => {
-            // اگر کاربر لاگین نکرده، مستقیماً صفحهٔ لاگین را باز کن
             if (!currentUser) {
                 openAuthOverlay();
                 const authErrorEl = document.getElementById('auth-error');
@@ -1371,16 +1382,12 @@ function renderSidebarMenu() {
                 return;
             }
 
-            // اگر نقش کافی ندارد
             if (!allowed) {
                 showToast('Your access level is too low to use this tool.');
                 return;
             }
 
-            // باز کردن لینک
             if (tool.link) window.open(tool.link, '_blank');
-
-            // بستن منو
             document.getElementById('sidebar-close-row')?.click();
         });
 
@@ -1744,24 +1751,26 @@ function setLoggedOutUI() {
 
     /* =========================== INIT ============================ */
     async function initApp() {
-        console.log('Tavio: Initializing...');
-        const loader = document.getElementById('initial-loader');
+    console.log('Tavio: Initializing...');
+    const loader = document.getElementById('initial-loader');
 
-        const timeoutId = setTimeout(() => {
-            if (loader) loader.classList.add('hidden');
-        }, 3000);
+    const timeoutId = setTimeout(() => {
+        if (loader) loader.classList.add('hidden');
+    }, 3000);
 
-        try {
-            await checkUser();
-            if (loader) loader.classList.add('hidden');
-            clearTimeout(timeoutId);
-        } catch (e) {
-            console.error('Init error:', e);
-            if (loader) loader.classList.add('hidden');
-            clearTimeout(timeoutId);
-        }
-        console.log('Tavio: Initialization complete.');
+    try {
+        await checkUser();
+        // ✅ Force render sidebar menu after user state is set
+        renderSidebarMenu();
+        if (loader) loader.classList.add('hidden');
+        clearTimeout(timeoutId);
+    } catch (e) {
+        console.error('Init error:', e);
+        if (loader) loader.classList.add('hidden');
+        clearTimeout(timeoutId);
     }
+    console.log('Tavio: Initialization complete.');
+}
 
     initApp();
 });
