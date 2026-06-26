@@ -26,10 +26,6 @@
     font-display: swap;
 }
 
-sidebar-component:not(:defined) {
-    display: none;
-}
-
 :root {
     --bg:     #0d0d0d;
     --text:   #f5f5f5;
