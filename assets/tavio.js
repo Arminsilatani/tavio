@@ -1,7 +1,7 @@
 /*****************************************************
  *  Author: Armin Silatani
- *  Date: 2026-06-25
- *  Version: 3.0.4 (Full)
+ *  Date: 2026-06-26
+ *  Version: 3.0.5 (Final Fix for Sidebar)
  ****************************************************
  */
 
@@ -1317,83 +1317,88 @@ document.addEventListener('DOMContentLoaded', () => {
         { label: 'Fiora Period Tracker', minRole: 'general', link: '', iconURL: 'assets/logos/Fi.svg' }
     ];
 
-/* =========================== ROLE SYSTEM (Ravlo) ============================ */
-const ROLE_HIERARCHY = ['recruit', 'sergeant', 'commander', 'general'];
+    /* =========================== ROLE SYSTEM ============================ */
+    const ROLE_HIERARCHY = ['recruit', 'sergeant', 'commander', 'general'];
 
-function normalizeRole(role) {
-    return String(role || '').trim().toLowerCase();
-}
-
-function hasAccess(userRole, minRole) {
-    const userIndex = ROLE_HIERARCHY.indexOf(normalizeRole(userRole));
-    const minIndex  = ROLE_HIERARCHY.indexOf(normalizeRole(minRole || 'recruit'));
-    if (minIndex === -1 || userIndex === -1) return false;
-    return userIndex >= minIndex;
-}
-
-/* =========================== RENDER SIDEBAR MENU ============================ */
-function renderSidebarMenu() {
-    let container = document.getElementById('sidebar-menu-items');
-    if (!container) {
-        // Fallback: create container if missing
-        const nav = document.getElementById('sidebar-nav');
-        if (nav) {
-            container = document.createElement('div');
-            container.id = 'sidebar-menu-items';
-            const separator = nav.querySelector('.sidebar-separator');
-            if (separator) {
-                nav.insertBefore(container, separator);
-            } else {
-                nav.appendChild(container);
-            }
-        } else {
-            console.error('Sidebar nav not found');
-            return;
-        }
+    function normalizeRole(role) {
+        return String(role || '').trim().toLowerCase();
     }
 
-    // Clear container
-    container.innerHTML = '';
+    function hasAccess(userRole, minRole) {
+        const userIndex = ROLE_HIERARCHY.indexOf(normalizeRole(userRole));
+        const minIndex  = ROLE_HIERARCHY.indexOf(normalizeRole(minRole || 'recruit'));
+        if (minIndex === -1 || userIndex === -1) return false;
+        return userIndex >= minIndex;
+    }
 
-    const role = normalizeRole(currentUserRole); // currentUserRole is 'public' or user role
+    /* =========================== RENDER SIDEBAR MENU ============================ */
+    function renderSidebarMenu() {
+        console.log('renderSidebarMenu called');
 
-    MENU_TOOLS.forEach(tool => {
-        if (tool.isSelf) return;
-
-        const allowed = hasAccess(role, tool.minRole);
-
-        const btn = document.createElement('button');
-        btn.className = 'sidebar-item' + (allowed ? '' : ' disabled');
-        btn.disabled = !allowed;
-
-        btn.innerHTML = `
-            <span class="sidebar-icon">
-                <img src="${tool.iconURL}" width="20" height="20" alt="${tool.label}">
-            </span>
-            <span>${tool.label}</span>
-            ${!tool.link ? '<span class="coming-soon-tooltip">Coming Soon</span>' : ''}
-        `;
-
-        btn.addEventListener('click', () => {
-            if (!currentUser) {
-                openAuthOverlay();
-                const authErrorEl = document.getElementById('auth-error');
-                if (authErrorEl) authErrorEl.textContent = 'Please sign in to use this tool.';
+        let container = document.getElementById('sidebar-menu-items');
+        if (!container) {
+            console.warn('sidebar-menu-items not found, creating fallback');
+            const nav = document.getElementById('sidebar-nav');
+            if (nav) {
+                container = document.createElement('div');
+                container.id = 'sidebar-menu-items';
+                const separator = nav.querySelector('.sidebar-separator');
+                if (separator) {
+                    nav.insertBefore(container, separator);
+                } else {
+                    nav.appendChild(container);
+                }
+            } else {
+                console.error('Sidebar nav not found');
                 return;
             }
+        }
 
-            if (!allowed) {
-                showToast('Your access level is too low to use this tool.');
-                return;
-            }
+        // Clear container
+        container.innerHTML = '';
 
-            if (tool.link) window.open(tool.link, '_blank');
-            document.getElementById('sidebar-close-row')?.click();
+        const role = normalizeRole(currentUserRole);
+        console.log('Current user role:', role);
+
+        MENU_TOOLS.forEach(tool => {
+            if (tool.isSelf) return;
+
+            const allowed = hasAccess(role, tool.minRole);
+
+            const btn = document.createElement('button');
+            btn.className = 'sidebar-item' + (allowed ? '' : ' disabled');
+            btn.disabled = !allowed;
+
+            btn.innerHTML = `
+                <span class="sidebar-icon">
+                    <img src="${tool.iconURL}" width="20" height="20" alt="${tool.label}">
+                </span>
+                <span>${tool.label}</span>
+                ${!tool.link ? '<span class="coming-soon-tooltip">Coming Soon</span>' : ''}
+            `;
+
+            btn.addEventListener('click', () => {
+                if (!currentUser) {
+                    openAuthOverlay();
+                    const authErrorEl = document.getElementById('auth-error');
+                    if (authErrorEl) authErrorEl.textContent = 'Please sign in to use this tool.';
+                    return;
+                }
+
+                if (!allowed) {
+                    showToast('Your access level is too low to use this tool.');
+                    return;
+                }
+
+                if (tool.link) window.open(tool.link, '_blank');
+                document.getElementById('sidebar-close-row')?.click();
+            });
+
+            container.appendChild(btn);
         });
 
-        container.appendChild(btn);
-    });
-}
+        console.log('Sidebar menu rendered with', container.children.length, 'items');
+    }
 
     /* =========================== SIDEBAR TOGGLE ============================ */
     (function() {
@@ -1656,75 +1661,73 @@ function renderSidebarMenu() {
     }
 
     async function applyUserProfile(user) {
-    if (!user) {
+        console.log('applyUserProfile called with user:', user);
+
+        if (!user) {
+            currentUser = null;
+            currentProfile = null;
+            currentUserRole = 'public';
+            currentUserRoleLevel = -1;
+            setLoggedOutUI();
+            return;
+        }
+
+        currentUser = user;
+        if (!currentProfile || currentProfile.id !== user.id) {
+            currentProfile = await fetchProfile(user.id);
+        }
+
+        const profile = currentProfile;
+        const role = profile.role || 'recruit';
+
+        currentUserRole = role;
+        currentUserRoleLevel = getRoleLevel(role);
+
+        if (sidebarLoginBtn) sidebarLoginBtn.classList.add('hidden');
+        if (sidebarLogoutBtn) sidebarLogoutBtn.classList.remove('hidden');
+        if (sidebarDashboard) sidebarDashboard.classList.remove('hidden');
+
+        const fullName = [profile.first_name, profile.last_name].filter(Boolean).join(' ') || user.email || 'Dashboard';
+        const dashboardTextEl = document.querySelector('.sidebar-dashboard-text');
+        if (dashboardTextEl) dashboardTextEl.textContent = fullName;
+
+        if (avatarContent) {
+            if (profile.photo_url) {
+                avatarContent.innerHTML = `<img src="${profile.photo_url}" alt="Profile" width="20" height="20" style="border-radius:50%; object-fit:cover;" onerror="this.outerHTML='<span class=\\'avatar-initial\\'>${fullName.charAt(0).toUpperCase()}</span>';">`;
+            } else {
+                avatarContent.innerHTML = `<span class="avatar-initial">${fullName.charAt(0).toUpperCase()}</span>`;
+            }
+        }
+
+        if (notifDot) notifDot.style.display = 'none';
+
+        renderSidebarMenu();
+
+        await fetchTavioCategories();
+        await fetchTavioPrompts();
+        await fetchSharedPrompts();
+        renderAll();
+    }
+
+    function setLoggedOutUI() {
+        console.log('setLoggedOutUI called');
+        if (sidebarLoginBtn) sidebarLoginBtn.classList.remove('hidden');
+        if (sidebarLogoutBtn) sidebarLogoutBtn.classList.add('hidden');
+        if (sidebarDashboard) sidebarDashboard.classList.add('hidden');
+        if (avatarContent) avatarContent.textContent = '';
+
         currentUser = null;
         currentProfile = null;
         currentUserRole = 'public';
         currentUserRoleLevel = -1;
-        setLoggedOutUI();
-        return;
+
+        tavioPrompts = [];
+        tavioCategories = [];
+        tavioSharedPrompts = [];
+
+        renderSidebarMenu();
+        renderAll();
     }
-
-    currentUser = user;
-    if (!currentProfile || currentProfile.id !== user.id) {
-        currentProfile = await fetchProfile(user.id);
-    }
-
-    const profile = currentProfile;
-    const role = profile.role || 'recruit';
-
-    // به‌روزرسانی نقش‌ها مطابق سیستم Ravlo
-    currentUserRole = role;
-    currentUserRoleLevel = getRoleLevel(role);
-
-    // نمایش دکمه‌های لاگین/لاگاوت و داشبورد
-    if (sidebarLoginBtn) sidebarLoginBtn.classList.add('hidden');
-    if (sidebarLogoutBtn) sidebarLogoutBtn.classList.remove('hidden');
-    if (sidebarDashboard) sidebarDashboard.classList.remove('hidden');
-
-    // نام کامل و آواتار
-    const fullName = [profile.first_name, profile.last_name].filter(Boolean).join(' ') || user.email || 'Dashboard';
-    const dashboardTextEl = document.querySelector('.sidebar-dashboard-text');
-    if (dashboardTextEl) dashboardTextEl.textContent = fullName;
-
-    if (avatarContent) {
-        if (profile.photo_url) {
-            avatarContent.innerHTML = `<img src="${profile.photo_url}" alt="Profile" width="20" height="20" style="border-radius:50%; object-fit:cover;" onerror="this.outerHTML='<span class=\\'avatar-initial\\'>${fullName.charAt(0).toUpperCase()}</span>';">`;
-        } else {
-            avatarContent.innerHTML = `<span class="avatar-initial">${fullName.charAt(0).toUpperCase()}</span>`;
-        }
-    }
-
-    if (notifDot) notifDot.style.display = 'none';
-
-    // رندر منو با نقش جدید
-    renderSidebarMenu();
-
-    // بارگذاری داده‌ها
-    await fetchTavioCategories();
-    await fetchTavioPrompts();
-    await fetchSharedPrompts();
-    renderAll();
-}
-
-function setLoggedOutUI() {
-    if (sidebarLoginBtn) sidebarLoginBtn.classList.remove('hidden');
-    if (sidebarLogoutBtn) sidebarLogoutBtn.classList.add('hidden');
-    if (sidebarDashboard) sidebarDashboard.classList.add('hidden');
-    if (avatarContent) avatarContent.textContent = '';
-
-    currentUser = null;
-    currentProfile = null;
-    currentUserRole = 'public';
-    currentUserRoleLevel = -1;
-
-    tavioPrompts = [];
-    tavioCategories = [];
-    tavioSharedPrompts = [];
-
-    renderSidebarMenu();
-    renderAll();
-}
 
     /* =========================== AUTH STATE ============================ */
     async function checkUser() {
@@ -1738,6 +1741,7 @@ function setLoggedOutUI() {
     }
 
     sbClient.auth.onAuthStateChange(async (event, session) => {
+        console.log('Auth state change:', event, session);
         await applyUserProfile(session?.user ?? null);
         if (event === 'SIGNED_IN') {
             closeAuthOverlay();
@@ -1751,26 +1755,26 @@ function setLoggedOutUI() {
 
     /* =========================== INIT ============================ */
     async function initApp() {
-    console.log('Tavio: Initializing...');
-    const loader = document.getElementById('initial-loader');
+        console.log('Tavio: Initializing...');
+        const loader = document.getElementById('initial-loader');
 
-    const timeoutId = setTimeout(() => {
-        if (loader) loader.classList.add('hidden');
-    }, 3000);
+        const timeoutId = setTimeout(() => {
+            if (loader) loader.classList.add('hidden');
+        }, 3000);
 
-    try {
-        await checkUser();
-        // ✅ Force render sidebar menu after user state is set
-        renderSidebarMenu();
-        if (loader) loader.classList.add('hidden');
-        clearTimeout(timeoutId);
-    } catch (e) {
-        console.error('Init error:', e);
-        if (loader) loader.classList.add('hidden');
-        clearTimeout(timeoutId);
+        try {
+            await checkUser();
+            // ✅ Force render sidebar menu after user state is set
+            renderSidebarMenu();
+            if (loader) loader.classList.add('hidden');
+            clearTimeout(timeoutId);
+        } catch (e) {
+            console.error('Init error:', e);
+            if (loader) loader.classList.add('hidden');
+            clearTimeout(timeoutId);
+        }
+        console.log('Tavio: Initialization complete.');
     }
-    console.log('Tavio: Initialization complete.');
-}
 
     initApp();
 });
