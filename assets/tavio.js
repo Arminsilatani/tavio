@@ -866,19 +866,16 @@ async function initApp() {
     const loader = document.getElementById('initial-loader');
 
     try {
-        // سعی می‌کنیم منتظر کامپوننت بمانیم
         await customElements.whenDefined('sidebar-component');
         await restoreSessionAndSidebar();
     } catch (e) {
         console.warn('Init error (non-fatal):', e);
     }
 
-    // مهم نیست چه اتفاقی افتاد، لودر باید مخفی شود
     if (loader) loader.classList.add('hidden');
 
     renderAll();
 
-    // تایم‌اوت امن
     setTimeout(() => {
         if (loader && !loader.classList.contains('hidden')) {
             loader.classList.add('hidden');
