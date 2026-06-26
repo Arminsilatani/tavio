@@ -1,7 +1,7 @@
 /*****************************************************
  *  Author: Armin Silatani
  *  Date: 2026-06-26
- *  Version: 3.0.5 (Final Fix for Sidebar)
+ *  Version: 3.0.6 (Sidebar Final Fix)
  ****************************************************
  */
 
@@ -30,6 +30,7 @@ function getSupabaseClient() {
     return sb;
 }
 
+/* =========================== MAIN APP ============================ */
 document.addEventListener('DOMContentLoaded', () => {
     console.log('Tavio: DOM loaded');
 
@@ -65,6 +66,19 @@ document.addEventListener('DOMContentLoaded', () => {
 
     function getRoleLevel(role) {
         return ROLE_LEVELS[role?.toLowerCase()] ?? -1;
+    }
+
+    const ROLE_HIERARCHY = ['recruit', 'sergeant', 'commander', 'general'];
+
+    function normalizeRole(role) {
+        return String(role || '').trim().toLowerCase();
+    }
+
+    function hasAccess(userRole, minRole) {
+        const userIndex = ROLE_HIERARCHY.indexOf(normalizeRole(userRole));
+        const minIndex = ROLE_HIERARCHY.indexOf(normalizeRole(minRole || 'recruit'));
+        if (minIndex === -1 || userIndex === -1) return false;
+        return userIndex >= minIndex;
     }
 
     /* =========================== AI MODELS ============================ */
@@ -1317,91 +1331,77 @@ document.addEventListener('DOMContentLoaded', () => {
         { label: 'Fiora Period Tracker', minRole: 'general', link: '', iconURL: 'assets/logos/Fi.svg' }
     ];
 
-    /* =========================== ROLE SYSTEM ============================ */
-    const ROLE_HIERARCHY = ['recruit', 'sergeant', 'commander', 'general'];
-
-    function normalizeRole(role) {
-        return String(role || '').trim().toLowerCase();
-    }
-
-    function hasAccess(userRole, minRole) {
-        const userIndex = ROLE_HIERARCHY.indexOf(normalizeRole(userRole));
-        const minIndex  = ROLE_HIERARCHY.indexOf(normalizeRole(minRole || 'recruit'));
-        if (minIndex === -1 || userIndex === -1) return false;
-        return userIndex >= minIndex;
-    }
-
-    /* =========================== RENDER SIDEBAR MENU ============================ */
+    /* =========================== RENDER SIDEBAR MENU (FINAL) ============================ */
     function renderSidebarMenu() {
-    console.log('🔵 renderSidebarMenu called');
+        console.log('🔵 renderSidebarMenu called');
 
-    let container = document.getElementById('sidebar-menu-items');
-    if (!container) {
-        console.warn('⚠️ sidebar-menu-items not found, creating fallback');
-        const nav = document.getElementById('sidebar-nav');
-        if (nav) {
-            container = document.createElement('div');
-            container.id = 'sidebar-menu-items';
-            const separator = nav.querySelector('.sidebar-separator');
-            if (separator) {
-                nav.insertBefore(container, separator);
+        let container = document.getElementById('sidebar-menu-items');
+        if (!container) {
+            console.warn('⚠️ sidebar-menu-items not found, creating fallback');
+            const nav = document.getElementById('sidebar-nav');
+            if (nav) {
+                container = document.createElement('div');
+                container.id = 'sidebar-menu-items';
+                const separator = nav.querySelector('.sidebar-separator');
+                if (separator) {
+                    nav.insertBefore(container, separator);
+                } else {
+                    nav.appendChild(container);
+                }
+                console.log('✅ Fallback container created');
             } else {
-                nav.appendChild(container);
+                console.error('❌ Sidebar nav not found');
+                return;
             }
-            console.log('✅ Fallback container created');
-        } else {
-            console.error('❌ Sidebar nav not found');
-            return;
         }
-    }
 
-    // Clear container
-    container.innerHTML = '';
+        // Clear container
+        container.innerHTML = '';
 
-    const role = normalizeRole(currentUserRole);
-    console.log('📌 Current user role:', role);
+        const role = normalizeRole(currentUserRole);
+        console.log('📌 Current user role:', role);
 
-    let count = 0;
-    MENU_TOOLS.forEach(tool => {
-        if (tool.isSelf) return;
+        let count = 0;
+        MENU_TOOLS.forEach(tool => {
+            if (tool.isSelf) return;
 
-        const allowed = hasAccess(role, tool.minRole);
+            const allowed = hasAccess(role, tool.minRole);
 
-        const btn = document.createElement('button');
-        btn.className = 'sidebar-item' + (allowed ? '' : ' disabled');
-        btn.disabled = !allowed;
+            const btn = document.createElement('button');
+            btn.className = 'sidebar-item' + (allowed ? '' : ' disabled');
+            btn.disabled = !allowed;
 
-        btn.innerHTML = `
-            <span class="sidebar-icon">
-                <img src="${tool.iconURL}" width="20" height="20" alt="${tool.label}">
-            </span>
-            <span>${tool.label}</span>
-            ${!tool.link ? '<span class="coming-soon-tooltip">Coming Soon</span>' : ''}
-        `;
+            btn.innerHTML = `
+                <span class="sidebar-icon">
+                    <img src="${tool.iconURL}" width="20" height="20" alt="${tool.label}">
+                </span>
+                <span>${tool.label}</span>
+                ${!tool.link ? '<span class="coming-soon-tooltip">Coming Soon</span>' : ''}
+            `;
 
-        btn.addEventListener('click', () => {
-            if (!currentUser) {
-                openAuthOverlay();
-                const authErrorEl = document.getElementById('auth-error');
-                if (authErrorEl) authErrorEl.textContent = 'Please sign in to use this tool.';
-                return;
-            }
+            btn.addEventListener('click', () => {
+                if (!currentUser) {
+                    openAuthOverlay();
+                    const authErrorEl = document.getElementById('auth-error');
+                    if (authErrorEl) authErrorEl.textContent = 'Please sign in to use this tool.';
+                    return;
+                }
 
-            if (!allowed) {
-                showToast('Your access level is too low to use this tool.');
-                return;
-            }
+                if (!allowed) {
+                    showToast('Your access level is too low to use this tool.');
+                    return;
+                }
 
-            if (tool.link) window.open(tool.link, '_blank');
-            document.getElementById('sidebar-close-row')?.click();
+                if (tool.link) window.open(tool.link, '_blank');
+                document.getElementById('sidebar-close-row')?.click();
+            });
+
+            container.appendChild(btn);
+            count++;
         });
 
-        container.appendChild(btn);
-        count++;
-    });
-
-    console.log(`✅ Sidebar menu rendered with ${count} items`);
-}
+        console.log(`✅ Sidebar menu rendered with ${count} items`);
+    }
 
     /* =========================== SIDEBAR TOGGLE ============================ */
     (function() {
@@ -1663,132 +1663,131 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     }
 
-    /* =========================== PROFILE ============================ */
-async function applyUserProfile(user) {
-    console.log('🔵 applyUserProfile called with user:', user);
+    async function applyUserProfile(user) {
+        console.log('🔵 applyUserProfile called with user:', user);
 
-    if (!user) {
+        if (!user) {
+            currentUser = null;
+            currentProfile = null;
+            currentUserRole = 'public';
+            currentUserRoleLevel = -1;
+            setLoggedOutUI();
+            return;
+        }
+
+        currentUser = user;
+        if (!currentProfile || currentProfile.id !== user.id) {
+            currentProfile = await fetchProfile(user.id);
+            console.log('📌 Profile fetched:', currentProfile);
+        }
+
+        const profile = currentProfile;
+        const role = profile.role || 'recruit';
+
+        currentUserRole = role;
+        currentUserRoleLevel = getRoleLevel(role);
+
+        console.log('📌 Current user role set to:', currentUserRole);
+
+        // Update UI elements
+        if (sidebarLoginBtn) sidebarLoginBtn.classList.add('hidden');
+        if (sidebarLogoutBtn) sidebarLogoutBtn.classList.remove('hidden');
+        if (sidebarDashboard) sidebarDashboard.classList.remove('hidden');
+
+        const fullName = [profile.first_name, profile.last_name].filter(Boolean).join(' ') || user.email || 'Dashboard';
+        const dashboardTextEl = document.querySelector('.sidebar-dashboard-text');
+        if (dashboardTextEl) dashboardTextEl.textContent = fullName;
+
+        if (avatarContent) {
+            if (profile.photo_url) {
+                avatarContent.innerHTML = `<img src="${profile.photo_url}" alt="Profile" width="20" height="20" style="border-radius:50%; object-fit:cover;" onerror="this.outerHTML='<span class=\\'avatar-initial\\'>${fullName.charAt(0).toUpperCase()}</span>';">`;
+            } else {
+                avatarContent.innerHTML = `<span class="avatar-initial">${fullName.charAt(0).toUpperCase()}</span>`;
+            }
+        }
+
+        if (notifDot) notifDot.style.display = 'none';
+
+        console.log('🔄 Calling renderSidebarMenu from applyUserProfile');
+        renderSidebarMenu();
+
+        // Load data
+        await fetchTavioCategories();
+        await fetchTavioPrompts();
+        await fetchSharedPrompts();
+        renderAll();
+    }
+
+    function setLoggedOutUI() {
+        console.log('🔵 setLoggedOutUI called');
+        if (sidebarLoginBtn) sidebarLoginBtn.classList.remove('hidden');
+        if (sidebarLogoutBtn) sidebarLogoutBtn.classList.add('hidden');
+        if (sidebarDashboard) sidebarDashboard.classList.add('hidden');
+        if (avatarContent) avatarContent.textContent = '';
+
         currentUser = null;
         currentProfile = null;
         currentUserRole = 'public';
         currentUserRoleLevel = -1;
-        setLoggedOutUI();
-        return;
+
+        tavioPrompts = [];
+        tavioCategories = [];
+        tavioSharedPrompts = [];
+
+        console.log('🔄 Calling renderSidebarMenu from setLoggedOutUI');
+        renderSidebarMenu();
+        renderAll();
     }
-
-    currentUser = user;
-    if (!currentProfile || currentProfile.id !== user.id) {
-        currentProfile = await fetchProfile(user.id);
-        console.log('📌 Profile fetched:', currentProfile);
-    }
-
-    const profile = currentProfile;
-    const role = profile.role || 'recruit';
-
-    currentUserRole = role;
-    currentUserRoleLevel = getRoleLevel(role);
-
-    console.log('📌 Current user role set to:', currentUserRole);
-
-    // Update UI elements
-    if (sidebarLoginBtn) sidebarLoginBtn.classList.add('hidden');
-    if (sidebarLogoutBtn) sidebarLogoutBtn.classList.remove('hidden');
-    if (sidebarDashboard) sidebarDashboard.classList.remove('hidden');
-
-    const fullName = [profile.first_name, profile.last_name].filter(Boolean).join(' ') || user.email || 'Dashboard';
-    const dashboardTextEl = document.querySelector('.sidebar-dashboard-text');
-    if (dashboardTextEl) dashboardTextEl.textContent = fullName;
-
-    if (avatarContent) {
-        if (profile.photo_url) {
-            avatarContent.innerHTML = `<img src="${profile.photo_url}" alt="Profile" width="20" height="20" style="border-radius:50%; object-fit:cover;" onerror="this.outerHTML='<span class=\\'avatar-initial\\'>${fullName.charAt(0).toUpperCase()}</span>';">`;
-        } else {
-            avatarContent.innerHTML = `<span class="avatar-initial">${fullName.charAt(0).toUpperCase()}</span>`;
-        }
-    }
-
-    if (notifDot) notifDot.style.display = 'none';
-
-    console.log('🔄 Calling renderSidebarMenu from applyUserProfile');
-    renderSidebarMenu();
-
-    // Load data
-    await fetchTavioCategories();
-    await fetchTavioPrompts();
-    await fetchSharedPrompts();
-    renderAll();
-}
-
-    function setLoggedOutUI() {
-    console.log('🔵 setLoggedOutUI called');
-    if (sidebarLoginBtn) sidebarLoginBtn.classList.remove('hidden');
-    if (sidebarLogoutBtn) sidebarLogoutBtn.classList.add('hidden');
-    if (sidebarDashboard) sidebarDashboard.classList.add('hidden');
-    if (avatarContent) avatarContent.textContent = '';
-
-    currentUser = null;
-    currentProfile = null;
-    currentUserRole = 'public';
-    currentUserRoleLevel = -1;
-
-    tavioPrompts = [];
-    tavioCategories = [];
-    tavioSharedPrompts = [];
-
-    console.log('🔄 Calling renderSidebarMenu from setLoggedOutUI');
-    renderSidebarMenu();
-    renderAll();
-}
 
     /* =========================== AUTH STATE ============================ */
     async function checkUser() {
-    try {
-        const { data: { session } } = await sbClient.auth.getSession();
-        console.log('📌 Session found:', session?.user);
-        await applyUserProfile(session?.user ?? null);
-    } catch (e) {
-        console.warn('Session check error:', e);
-        setLoggedOutUI();
+        try {
+            const { data: { session } } = await sbClient.auth.getSession();
+            console.log('📌 Session found:', session?.user);
+            await applyUserProfile(session?.user ?? null);
+        } catch (e) {
+            console.warn('Session check error:', e);
+            setLoggedOutUI();
+        }
     }
-}
 
-sbClient.auth.onAuthStateChange(async (event, session) => {
-    console.log('🔵 Auth state change:', event, session);
-    await applyUserProfile(session?.user ?? null);
-    if (event === 'SIGNED_IN') {
-        closeAuthOverlay();
-        showToast('Signed in successfully!');
-    }
-    if (event === 'SIGNED_OUT') {
-        setLoggedOutUI();
-        showToast('Signed out.');
-    }
-});
+    sbClient.auth.onAuthStateChange(async (event, session) => {
+        console.log('🔵 Auth state change:', event, session);
+        await applyUserProfile(session?.user ?? null);
+        if (event === 'SIGNED_IN') {
+            closeAuthOverlay();
+            showToast('Signed in successfully!');
+        }
+        if (event === 'SIGNED_OUT') {
+            setLoggedOutUI();
+            showToast('Signed out.');
+        }
+    });
 
     /* =========================== INIT ============================ */
     async function initApp() {
-    console.log('🔵 Tavio: Initializing...');
-    const loader = document.getElementById('initial-loader');
+        console.log('🔵 Tavio: Initializing...');
+        const loader = document.getElementById('initial-loader');
 
-    const timeoutId = setTimeout(() => {
-        if (loader) loader.classList.add('hidden');
-        console.log('⏰ Loader hidden by timeout');
-    }, 3000);
+        const timeoutId = setTimeout(() => {
+            if (loader) loader.classList.add('hidden');
+            console.log('⏰ Loader hidden by timeout');
+        }, 3000);
 
-    try {
-        await checkUser();
-        // ✅ Force render sidebar menu after user state is set
-        console.log('🔄 Calling renderSidebarMenu from initApp (force)');
-        renderSidebarMenu();
-        if (loader) loader.classList.add('hidden');
-        clearTimeout(timeoutId);
-    } catch (e) {
-        console.error('❌ Init error:', e);
-        if (loader) loader.classList.add('hidden');
-        clearTimeout(timeoutId);
+        try {
+            await checkUser();
+            // ✅ Force render sidebar menu after user state is set
+            console.log('🔄 Calling renderSidebarMenu from initApp (force)');
+            renderSidebarMenu();
+            if (loader) loader.classList.add('hidden');
+            clearTimeout(timeoutId);
+        } catch (e) {
+            console.error('❌ Init error:', e);
+            if (loader) loader.classList.add('hidden');
+            clearTimeout(timeoutId);
+        }
+        console.log('✅ Tavio: Initialization complete.');
     }
-    console.log('✅ Tavio: Initialization complete.');
-}
 
     initApp();
 });
