@@ -878,3 +878,4 @@ async function initApp() {
 
     renderAll();
 }
+});
