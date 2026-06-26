@@ -1789,3 +1789,8 @@ document.addEventListener('DOMContentLoaded', () => {
 
     initApp();
 });
+// در انتهای DOMContentLoaded، بعد از initApp()
+setTimeout(function() {
+    console.log('🔄 Forcing sidebar render from setTimeout');
+    renderSidebarMenu();
+}, 500);
