@@ -1,7 +1,7 @@
 /*****************************************************
  *  Author: Armin Silatani
  *  Date: 2026-06-26
- *  Version: 4.0.1 (Loader fix – same as Ravlo)
+ *  Version: 4.0.2 (No more loader delay – instant UI)
  ****************************************************/
 
 /* =========================== SUPABASE CLIENT ============================ */
@@ -612,6 +612,7 @@ document.addEventListener('DOMContentLoaded', () => {
         if (!comp) return;
         comp.addEventListener('login-request', () => openAuthOverlay());
         comp.addEventListener('logout-request', async () => await sbClient.auth.signOut());
+        restoreSessionAndSidebar();
     });
 
     async function restoreSessionAndSidebar() {
@@ -862,25 +863,10 @@ document.addEventListener('DOMContentLoaded', () => {
     btnClearBuilder?.addEventListener('click', clearBuilder);
 
     /* =========================== INIT ============================ */
-async function initApp() {
-    const loader = document.getElementById('initial-loader');
-    if (loader) loader.classList.remove('hidden');
-
-    try {
-        await customElements.whenDefined('sidebar-component');
-        await restoreSessionAndSidebar();
-    } catch (e) {
-        console.warn('Init error:', e);
-    } finally {
-        // همیشه لودر را مخفی کن، حتی اگر خطا رخ دهد
+    function initApp() {
+        const loader = document.getElementById('initial-loader');
         if (loader) loader.classList.add('hidden');
+        renderAll();
     }
-
-    renderAll();
-}
+    initApp();
 });
-// fallback timeout
-setTimeout(() => {
-    const loader = document.getElementById('initial-loader');
-    if (loader) loader.classList.add('hidden');
-}, 6000);
