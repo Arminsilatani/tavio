@@ -27,7 +27,7 @@
 }
 
 sidebar-component:not(:defined) {
-    visibility: hidden;
+    display: none;
 }
 
 :root {
