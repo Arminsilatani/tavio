@@ -350,29 +350,135 @@ document.addEventListener('DOMContentLoaded', () => {
         let filtered = tavioPrompts.filter(p => (currentFilterCategory === 'all' || (p.categories || []).includes(currentFilterCategory)) && (!currentSearchTerm || p.name.toLowerCase().includes(currentSearchTerm.toLowerCase())));
         filtered = sortPrompts(filtered);
         if (filtered.length === 0) { promptList.innerHTML = '<p style="text-align:center; opacity:0.5; padding:40px;">No prompts found. Create your first prompt!</p>'; return; }
-        promptList.innerHTML = filtered.map(p => { /* ... همان HTML کارت‌ها بدون تغییر */ }).join('');
-        // event listeners روی کارت‌ها (بدون تغییر)
+
+        promptList.innerHTML = filtered.map(p => {
+            const catBadges = (p.categories || []).map(c => `<span class="card-category">${escapeHtml(c)}</span>`).join('');
+            const maxShow = 3;
+            const aiList = p.ais || [];
+            let aiBadgesHtml = '';
+            if (aiList.length <= maxShow) {
+                aiBadgesHtml = aiList.map(ai => `<span class="ai-badge">${escapeHtml(getAiName(ai))}</span>`).join('');
+            } else {
+                const visible = aiList.slice(0, maxShow);
+                const hiddenCount = aiList.length - maxShow;
+                aiBadgesHtml = visible.map(ai => `<span class="ai-badge">${escapeHtml(getAiName(ai))}</span>`).join('') + `<span class="ai-badge">+${hiddenCount} more</span>`;
+            }
+            const lockIcon = p.locked ? `
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="card-lock-icon">
+                    <rect x="5" y="11" width="14" height="11" rx="2" />
+                    <path d="M8 11V8a4 4 0 0 1 8 0v3" />
+                    <circle cx="12" cy="15" r="1" fill="currentColor" stroke="none" />
+                </svg>
+            ` : '';
+            return `
+                <div class="prompt-card ${p.pinned ? 'pinned' : ''}" data-id="${p.id}">
+                    <div class="card-main-content">
+                        <div class="card-info">
+                            <div class="card-name">${escapeHtml(p.name)}</div>
+                            <div class="card-meta">
+                                ${catBadges}
+                                ${aiBadgesHtml}
+                            </div>
+                        </div>
+                        <div class="card-actions">
+                            ${lockIcon}
+                            <button class="card-pin ${p.pinned ? 'pinned' : ''}" data-action="pin" data-id="${p.id}" title="Pin prompt">
+                                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                    <path d="M12 2 L15 9 L22 12 L15 15 L12 22 L9 15 L2 12 L9 9 Z" />
+                                </svg>
+                            </button>
+                            <button class="card-share" data-action="share" data-id="${p.id}" title="Share prompt">
+                                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                    <path d="M4 12v8a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-8"/>
+                                    <polyline points="16 6 12 2 8 6"/>
+                                    <line x1="12" y1="2" x2="12" y2="15"/>
+                                </svg>
+                            </button>
+                            <button class="card-edit" data-action="edit" data-id="${p.id}" title="Edit prompt">
+                                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                    <path d="M17 3a2.828 2.828 0 1 1 4 4L7.5 20.5 2 22l1.5-5.5L17 3z"/>
+                                </svg>
+                            </button>
+                            <button class="card-delete" data-action="delete" data-id="${p.id}" title="Delete prompt">
+                                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                    <polyline points="3 6 5 6 21 6"/>
+                                    <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/>
+                                </svg>
+                            </button>
+                        </div>
+                    </div>
+                    <div class="card-password-form hidden">
+                        <p class="card-password-text">This prompt is locked. Enter the master password to unlock.</p>
+                        <input type="password" class="card-password-input" placeholder="Master password" autocomplete="off" />
+                        <div class="card-password-actions">
+                            <button class="btn btn-accent card-password-submit">Unlock</button>
+                            <button class="btn btn-outline card-password-cancel">Cancel</button>
+                        </div>
+                        <div class="card-password-error"></div>
+                    </div>
+                </div>
+            `;
+        }).join('');
+
+        // event listeners for cards
+        document.querySelectorAll('.prompt-card').forEach(card => {
+            card.addEventListener('click', (e) => {
+                if (card.classList.contains('password-active')) return;
+                if (e.target.closest('[data-action]')) return;
+                const id = card.dataset.id;
+                const prompt = tavioPrompts.find(p => p.id === id);
+                if (prompt && prompt.locked) {
+                    convertCardToPasswordInput(card, id);
+                } else {
+                    openBuilder(id);
+                }
+            });
+        });
+        // pin, share, edit, delete listeners
+        document.querySelectorAll('[data-action="pin"]').forEach(btn => {
+            btn.addEventListener('click', (e) => { e.stopPropagation(); togglePinPrompt(btn.dataset.id); });
+        });
+        document.querySelectorAll('[data-action="share"]').forEach(btn => {
+            btn.addEventListener('click', (e) => { e.stopPropagation(); openShareModal(btn.dataset.id); });
+        });
+        document.querySelectorAll('[data-action="edit"]').forEach(btn => {
+            btn.addEventListener('click', (e) => { e.stopPropagation(); openEditModal(btn.dataset.id); });
+        });
+        document.querySelectorAll('[data-action="delete"]').forEach(btn => {
+            btn.addEventListener('click', (e) => { e.stopPropagation(); openConfirmModal('Delete this prompt?', async () => { await deleteTavioPrompt(btn.dataset.id); renderAll(); }); });
+        });
     }
 
     function renderAll() { renderCategoryFilters(); renderLibrary(); updateCategoryDatalist(); updateSharedBadge(); }
     function updateCategoryDatalist() { categorySuggestions.innerHTML = getAllCategories().map(c => `<option value="${escapeHtml(c)}">`).join(''); }
 
-    /* =========================== BUILDER & MODALS (بدون تغییر) ============================ */
-       function openBuilder(id) {
+    /* =========================== PASSWORD ============================ */
+    const MASTER_PASSWORD = '1320';
+    function convertCardToPasswordInput(cardElement, promptId) {
+        if (cardElement.classList.contains('password-active')) return;
+        cardElement.classList.add('password-active');
+        const passwordForm = cardElement.querySelector('.card-password-form');
+        const input = passwordForm.querySelector('.card-password-input');
+        const submitBtn = passwordForm.querySelector('.card-password-submit');
+        const cancelBtn = passwordForm.querySelector('.card-password-cancel');
+        const errorDiv = passwordForm.querySelector('.card-password-error');
+        input.focus();
+        const handleSubmit = () => { if (input.value === MASTER_PASSWORD) openBuilder(promptId); else { errorDiv.textContent = 'Incorrect password.'; input.select(); } };
+        const handleCancel = () => { cardElement.classList.remove('password-active'); input.value = ''; errorDiv.textContent = ''; };
+        submitBtn.addEventListener('click', handleSubmit);
+        cancelBtn.addEventListener('click', handleCancel);
+        input.addEventListener('keypress', (e) => { if (e.key === 'Enter') handleSubmit(); });
+        submitBtn.addEventListener('click', (e) => e.stopPropagation());
+        cancelBtn.addEventListener('click', (e) => e.stopPropagation());
+    }
+
+    /* =========================== BUILDER ============================ */
+    function openBuilder(id) {
         const prompt = tavioPrompts.find(p => p.id === id);
-        if (!prompt) {
-            showToast('Prompt not found.');
-            return;
-        }
+        if (!prompt) { showToast('Prompt not found.'); return; }
         currentPromptId = id;
         builderTitle.textContent = prompt.name;
-
-        if (prompt.description) {
-            promptDescription.textContent = prompt.description;
-        } else {
-            promptDescription.textContent = '';
-        }
-
+        promptDescription.textContent = prompt.description || '';
         let aiHtml = '<div class="ai-status-section"><h4>AI Models</h4><div class="ai-status-list">';
         (prompt.ais || []).forEach(aiId => {
             const model = ALL_AI_MODELS.find(m => m.id === aiId);
@@ -383,7 +489,6 @@ document.addEventListener('DOMContentLoaded', () => {
         });
         aiHtml += '</div></div>';
         aiModelsFull.innerHTML = aiHtml;
-
         const placeholders = extractPlaceholders(prompt.template);
         let fieldsHtml = '';
         if (placeholders.length === 0) {
@@ -393,26 +498,19 @@ document.addEventListener('DOMContentLoaded', () => {
                 const isLong = /faq|anchor|full article|full persian article|full translated text|image description/i.test(ph);
                 const tag = isLong ? 'textarea' : 'input';
                 const extra = isLong ? ' rows="4"' : ' type="text"';
-                return `
-                    <div class="placeholder-field">
-                        <label for="input_${escapeHtml(ph)}">${escapeHtml(ph)}</label>
-                        <${tag}${extra} id="input_${escapeHtml(ph)}" placeholder="Enter ${escapeHtml(ph)}" autocomplete="off"></${tag}>
-                    </div>
-                `;
+                return `<div class="placeholder-field"><label for="input_${escapeHtml(ph)}">${escapeHtml(ph)}</label><${tag}${extra} id="input_${escapeHtml(ph)}" placeholder="Enter ${escapeHtml(ph)}" autocomplete="off"></${tag}></div>`;
             }).join('');
         }
         placeholderInputs.innerHTML = fieldsHtml;
-
         document.querySelector('.container').classList.add('builder-mode');
         generatedPrompt.value = '';
         libraryView.classList.add('hidden');
         builderView.classList.remove('hidden');
     }
 
-        function generatePrompt() {
+    function generatePrompt() {
         const prompt = tavioPrompts.find(p => p.id === currentPromptId);
         if (!prompt) return;
-
         const placeholders = extractPlaceholders(prompt.template);
         let filled = prompt.template;
         placeholders.forEach(ph => {
@@ -422,24 +520,16 @@ document.addEventListener('DOMContentLoaded', () => {
             const regex = new RegExp(`{{${escapedPh}}}`, 'gi');
             filled = filled.replace(regex, val || `{{${ph}}}`);
         });
-
         if (typingTimer) clearInterval(typingTimer);
         generatedPrompt.value = '';
         generatedPrompt.classList.add('typing');
         generatedPrompt.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
-
         let i = 0;
         const chars = filled.split('');
         const speed = 5;
         typingTimer = setInterval(() => {
-            if (i < chars.length) {
-                generatedPrompt.value += chars[i];
-                generatedPrompt.scrollTop = generatedPrompt.scrollHeight;
-                i++;
-            } else {
-                clearInterval(typingTimer);
-                generatedPrompt.classList.remove('typing');
-            }
+            if (i < chars.length) { generatedPrompt.value += chars[i]; generatedPrompt.scrollTop = generatedPrompt.scrollHeight; i++; }
+            else { clearInterval(typingTimer); generatedPrompt.classList.remove('typing'); }
         }, speed);
     }
 
@@ -455,65 +545,62 @@ document.addEventListener('DOMContentLoaded', () => {
         const inputs = document.querySelectorAll('#placeholderInputs input, #placeholderInputs textarea');
         inputs.forEach(input => { input.value = ''; });
         generatedPrompt.value = '';
-        if (typingTimer) {
-            clearInterval(typingTimer);
-            generatedPrompt.classList.remove('typing');
-        }
+        if (typingTimer) { clearInterval(typingTimer); generatedPrompt.classList.remove('typing'); }
     }
 
+    /* =========================== MODALS ============================ */
     function openModal(id) {
         const el = document.getElementById(id);
-        if (el) {
-            el.classList.add('open');
-            el.style.display = 'flex';
-            document.body.classList.add('modal-open');
-        }
+        if (el) { el.classList.add('open'); el.style.display = 'flex'; document.body.classList.add('modal-open'); }
     }
-
     function closeModal(id) {
         const el = document.getElementById(id);
-        if (el) {
-            el.classList.remove('open');
-            el.style.display = 'none';
-            document.body.classList.remove('modal-open');
-        }
+        if (el) { el.classList.remove('open'); el.style.display = 'none'; document.body.classList.remove('modal-open'); }
+    }
+
+    function openConfirmModal(message, onConfirm) {
+        const modal = document.getElementById('confirm-modal');
+        const msgEl = document.getElementById('confirm-modal-message');
+        if (!modal || !msgEl) return;
+        msgEl.textContent = message;
+        openModal('confirm-modal');
+        const yesBtn = document.getElementById('confirm-modal-yes');
+        const noBtn = document.getElementById('confirm-modal-no');
+        function cleanup() { closeModal('confirm-modal'); yesBtn.removeEventListener('click', handleYes); noBtn.removeEventListener('click', handleNo); }
+        function handleYes() { cleanup(); if (typeof onConfirm === 'function') onConfirm(); }
+        function handleNo() { cleanup(); }
+        yesBtn.addEventListener('click', handleYes);
+        noBtn.addEventListener('click', handleNo);
+        modal.addEventListener('click', function(e) { if (e.target === modal) cleanup(); });
     }
 
     function openEditModal(id) {
         const prompt = tavioPrompts.find(p => p.id === id);
         if (!prompt) return;
-
         editingPromptId = id;
         document.getElementById('tavio-edit-modal-title').textContent = 'Edit Prompt';
         document.getElementById('tavio-edit-prompt-title').value = prompt.name;
         document.getElementById('tavio-edit-prompt-content').value = prompt.template;
         document.getElementById('tavio-edit-prompt-pinned').checked = prompt.pinned;
-
         const catSelect = document.getElementById('tavio-edit-prompt-category');
         catSelect.innerHTML = '<option value="">No Category</option>';
         tavioCategories.forEach(cat => {
             const opt = document.createElement('option');
             opt.value = cat.id;
             opt.textContent = cat.name;
-            if (prompt.categories && prompt.categories.includes(cat.id)) {
-                opt.selected = true;
-            }
+            if (prompt.categories && prompt.categories.includes(cat.id)) opt.selected = true;
             catSelect.appendChild(opt);
         });
-
         openModal('tavio-edit-modal');
     }
 
     async function openShareModal(promptId) {
         const prompt = tavioPrompts.find(p => p.id === promptId);
         if (!prompt) return;
-
         document.getElementById('tavio-share-prompt-title').textContent = `Sharing: ${prompt.name}`;
         document.getElementById('tavio-share-confirm-btn').dataset.promptId = promptId;
-
         const select = document.getElementById('tavio-share-user-select');
         select.innerHTML = '<option value="">Select a connection...</option>';
-
         const connections = await fetchConnections();
         if (connections.length === 0) {
             select.innerHTML = '<option value="">No connections found. Connect with others first.</option>';
@@ -525,325 +612,355 @@ document.addEventListener('DOMContentLoaded', () => {
                 select.appendChild(opt);
             });
         }
-
         openModal('tavio-share-modal');
     }
 
-/* =========================== SIDEBAR COMPONENT INTEGRATION ============================ */
-let sidebarComponent = null;
-let sidebarListenersAttached = false;
+    /* =========================== SIDEBAR COMPONENT INTEGRATION ============================ */
+    let sidebarComponent = null;
 
-function getSidebarComponent() {
-    if (!sidebarComponent) {
-        sidebarComponent = document.querySelector('sidebar-component');
+    function getSidebarComponent() {
+        if (!sidebarComponent) sidebarComponent = document.querySelector('sidebar-component');
+        return sidebarComponent;
     }
-    return sidebarComponent;
-}
 
-// تنظیم listenerها پس از آماده شدن کامپوننت
-customElements.whenDefined('sidebar-component').then(() => {
-    const comp = document.querySelector('sidebar-component');
-    if (!comp || sidebarListenersAttached) return;
-    sidebarListenersAttached = true;
+    customElements.whenDefined('sidebar-component').then(() => {
+        const comp = getSidebarComponent();
+        if (!comp) return;
 
-    comp.addEventListener('login-request', () => {
-        openAuthOverlay();
-    });
-
-    comp.addEventListener('logout-request', async () => {
-        const sbClient = getSupabaseClient();
-        if (sbClient) {
+        // event listeners
+        comp.addEventListener('login-request', () => openAuthOverlay());
+        comp.addEventListener('logout-request', async () => {
             await sbClient.auth.signOut();
+        });
+        comp.addEventListener('session-restore-request', async () => {
+            await restoreSessionAndSidebar();
+        });
+
+        // restore session on load
+        restoreSessionAndSidebar();
+    });
+
+    async function restoreSessionAndSidebar() {
+        const comp = getSidebarComponent();
+        if (!comp) return;
+        try {
+            const { data: { session } } = await sbClient.auth.getSession();
+            if (session?.user) {
+                currentUser = session.user;
+                currentProfile = await fetchProfile(session.user.id);
+                currentUserRole = currentProfile?.role || 'recruit';
+                if (comp.setUser) comp.setUser(currentUser, currentProfile);
+                await fetchTavioCategories();
+                await fetchTavioPrompts();
+                await fetchSharedPrompts();
+                renderAll();
+            }
+        } catch (e) {
+            console.warn('Session restore failed:', e);
         }
-    });
+    }
 
-    comp.addEventListener('session-restore-request', async () => {
-        const sbClient = getSupabaseClient();
-        if (!sbClient) return;
-        const { data: { session } } = await sbClient.auth.getSession();
-        if (session?.user) {
-            currentUser = session.user;
-            currentProfile = await fetchProfile(session.user.id);
-            currentUserRole = currentProfile?.role || 'recruit';
-            comp.setUser(currentUser, currentProfile);
-            await fetchTavioCategories();
-            await fetchTavioPrompts();
-            await fetchSharedPrompts();
-            renderAll();
+    async function fetchProfile(userId) {
+        try {
+            const { data, error } = await sbClient.from('profiles').select('*').eq('id', userId).single();
+            if (error || !data) {
+                const { data: { user } } = await sbClient.auth.getUser();
+                const md = user?.user_metadata || {};
+                return { id: userId, role: md.role || 'recruit', first_name: md.first_name || '', last_name: md.last_name || '', photo_url: md.photo_url || '', email: user?.email || '' };
+            }
+            return data;
+        } catch (e) { return { id: userId, role: 'recruit', first_name: '', last_name: '', photo_url: '' }; }
+    }
+
+    async function applyUserProfile(user) {
+        if (!user) { setLoggedOutUI(); return; }
+        currentUser = user;
+        if (!currentProfile || currentProfile.id !== user.id) currentProfile = await fetchProfile(user.id);
+        currentUserRole = currentProfile?.role || 'recruit';
+        const comp = getSidebarComponent();
+        if (comp && comp.setUser) comp.setUser(currentUser, currentProfile);
+        await fetchTavioCategories(); await fetchTavioPrompts(); await fetchSharedPrompts();
+        renderAll();
+    }
+
+    function setLoggedOutUI() {
+        currentUser = null; currentProfile = null; currentUserRole = 'public';
+        tavioPrompts = []; tavioCategories = []; tavioSharedPrompts = [];
+        const comp = getSidebarComponent();
+        if (comp && comp.clearUser) comp.clearUser();
+        renderAll();
+    }
+
+    /* =========================== AUTH ============================ */
+    let authEmail = '';
+    const authOverlay = document.getElementById('auth-overlay');
+    const authStep1 = document.getElementById('step-1');
+    const authStep2Login = document.getElementById('step-2-login');
+    const authStep2Reg = document.getElementById('step-2-register');
+    const authStepForgot = document.getElementById('step-forgot');
+
+    const authEmailInput = document.getElementById('auth-email');
+    const authContinue = document.getElementById('auth-continue-btn');
+    const authErrorEl = document.getElementById('auth-error');
+    const authUserEmail = document.getElementById('auth-user-email');
+    const authPassword = document.getElementById('auth-password');
+    const authSignin = document.getElementById('auth-signin-btn');
+    const authForgotLink = document.getElementById('auth-forgot-link');
+    const authErrorLogin = document.getElementById('auth-error-login');
+    const regFirstname = document.getElementById('reg-firstname');
+    const regLastname = document.getElementById('reg-lastname');
+    const regPassword = document.getElementById('reg-password');
+    const regConfirm = document.getElementById('reg-confirm');
+    const authRegister = document.getElementById('auth-register-btn');
+    const authErrorReg = document.getElementById('auth-error-register');
+    const regSuccessEl = document.getElementById('reg-success');
+    const regToLoginBtn = document.getElementById('reg-to-login-btn');
+    const forgotEmailInput = document.getElementById('forgot-email');
+    const authSendReset = document.getElementById('auth-send-reset-btn');
+    const authBackToLogin = document.getElementById('auth-back-to-login');
+    const authSuccessMsg = document.getElementById('auth-success-msg');
+
+    function showStep(stepId) {
+        [authStep1, authStep2Login, authStep2Reg, authStepForgot].forEach(s => { if (s) s.classList.add('hidden'); });
+        const stepEl = document.getElementById(stepId);
+        if (stepEl) stepEl.classList.remove('hidden');
+    }
+
+    function openAuthOverlay() {
+        if (authOverlay) {
+            authOverlay.classList.remove('hidden');
+            authOverlay.style.display = 'flex';
+            showStep('step-1');
+            authEmailInput.value = '';
+            if (authErrorEl) authErrorEl.textContent = '';
         }
+    }
+
+    function closeAuthOverlay() {
+        if (authOverlay) { authOverlay.classList.add('hidden'); authOverlay.style.display = 'none'; }
+    }
+
+    authContinue?.addEventListener('click', async () => {
+        const email = authEmailInput.value.trim();
+        if (!email) { authErrorEl.textContent = 'Please enter an email address.'; return; }
+        authErrorEl.textContent = '';
+        authEmail = email;
+        try {
+            const { data: exists, error } = await sbClient.rpc('check_email_exists', { email_to_check: email });
+            if (error) { authErrorEl.textContent = 'Service unavailable. Please try again.'; return; }
+            if (exists) { authUserEmail.textContent = email; showStep('step-2-login'); }
+            else { showStep('step-2-register'); document.getElementById('reg-form-fields').style.display = ''; regSuccessEl.style.display = 'none'; }
+        } catch (err) { authErrorEl.textContent = 'Network error. Please try later.'; }
     });
 
-    // اگر کاربر از قبل وارد شده بود، وضعیت را به‌روز کن
-    checkUser().then(() => {
-        // بعد از checkUser، applyUserProfile صدا زده می‌شود که setUser را انجام می‌دهد
+    authSignin?.addEventListener('click', async () => {
+        const password = authPassword.value;
+        if (!password) { authErrorLogin.textContent = 'Password is required.'; return; }
+        authErrorLogin.textContent = '';
+        const { error } = await sbClient.auth.signInWithPassword({ email: authEmail, password });
+        if (error) { authErrorLogin.textContent = error.message; return; }
+        closeAuthOverlay();
     });
-});
 
-async function fetchProfile(userId) {
-    try {
-        const sbClient = getSupabaseClient();
-        if (!sbClient) return null;
-        const { data, error } = await sbClient
-            .from('profiles')
-            .select('*')
-            .eq('id', userId)
-            .single();
-        if (error || !data) {
-            const { data: { user } } = await sbClient.auth.getUser();
-            const md = user?.user_metadata || {};
-            return {
-                id: userId,
-                role: md.role || 'recruit',
-                first_name: md.first_name || '',
-                last_name: md.last_name || '',
-                photo_url: md.photo_url || '',
-                email: user?.email || ''
-            };
-        }
-        return data;
-    } catch (e) {
-        console.warn('Profile fetch error:', e);
-        return { id: userId, role: 'recruit', first_name: '', last_name: '', photo_url: '' };
-    }
-}
-
-async function applyUserProfile(user) {
-    if (!user) {
-        setLoggedOutUI();
-        return;
-    }
-    currentUser = user;
-    if (!currentProfile || currentProfile.id !== user.id) {
-        currentProfile = await fetchProfile(user.id);
-    }
-    currentUserRole = currentProfile?.role || 'recruit';
-
-    const comp = getSidebarComponent();
-    if (comp && typeof comp.setUser === 'function') {
-        comp.setUser(currentUser, currentProfile);
-    }
-
-    await fetchTavioCategories();
-    await fetchTavioPrompts();
-    await fetchSharedPrompts();
-    renderAll();
-}
-
-function setLoggedOutUI() {
-    currentUser = null;
-    currentProfile = null;
-    currentUserRole = 'public';
-    tavioPrompts = [];
-    tavioCategories = [];
-    tavioSharedPrompts = [];
-    const comp = getSidebarComponent();
-    if (comp && typeof comp.clearUser === 'function') {
-        comp.clearUser();
-    }
-    renderAll();
-}
-
-/* =========================== AUTH ============================ */
-let authEmail = '';
-
-const authOverlay = document.getElementById('auth-overlay');
-const authStep1 = document.getElementById('step-1');
-const authStep2Login = document.getElementById('step-2-login');
-const authStep2Reg = document.getElementById('step-2-register');
-const authStepForgot = document.getElementById('step-forgot');
-
-const authEmailInput = document.getElementById('auth-email');
-const authContinue = document.getElementById('auth-continue-btn');
-const authErrorEl = document.getElementById('auth-error');
-
-const authUserEmail = document.getElementById('auth-user-email');
-const authPassword = document.getElementById('auth-password');
-const authSignin = document.getElementById('auth-signin-btn');
-const authForgotLink = document.getElementById('auth-forgot-link');
-const authErrorLogin = document.getElementById('auth-error-login');
-
-const regFirstname = document.getElementById('reg-firstname');
-const regLastname = document.getElementById('reg-lastname');
-const regPassword = document.getElementById('reg-password');
-const regConfirm = document.getElementById('reg-confirm');
-const authRegister = document.getElementById('auth-register-btn');
-const authErrorReg = document.getElementById('auth-error-register');
-const regSuccessEl = document.getElementById('reg-success');
-const regToLoginBtn = document.getElementById('reg-to-login-btn');
-
-const forgotEmailInput = document.getElementById('forgot-email');
-const authSendReset = document.getElementById('auth-send-reset-btn');
-const authBackToLogin = document.getElementById('auth-back-to-login');
-const authSuccessMsg = document.getElementById('auth-success-msg');
-
-function showStep(stepId) {
-    [authStep1, authStep2Login, authStep2Reg, authStepForgot].forEach(s => {
-        if (s) s.classList.add('hidden');
+    authRegister?.addEventListener('click', async () => {
+        const first = regFirstname.value.trim(), last = regLastname.value.trim();
+        const password = regPassword.value, confirm = regConfirm.value;
+        if (!first || !last) { authErrorReg.textContent = 'All fields are required.'; return; }
+        if (password !== confirm) { authErrorReg.textContent = 'Passwords do not match.'; return; }
+        if (password.length < 6) { authErrorReg.textContent = 'Password must be at least 6 characters.'; return; }
+        authErrorReg.textContent = '';
+        const { error } = await sbClient.auth.signUp({ email: authEmail, password, options: { data: { first_name: first, last_name: last } } });
+        if (error) { authErrorReg.textContent = error.message; return; }
+        document.getElementById('reg-form-fields').style.display = 'none';
+        regSuccessEl.style.display = 'block';
     });
-    const stepEl = document.getElementById(stepId);
-    if (stepEl) stepEl.classList.remove('hidden');
-}
 
-function openAuthOverlay() {
-    if (authOverlay) {
-        authOverlay.classList.remove('hidden');
-        authOverlay.style.display = 'flex';
+    regToLoginBtn?.addEventListener('click', () => {
+        regSuccessEl.style.display = 'none';
+        document.getElementById('reg-form-fields').style.display = '';
         showStep('step-1');
-        authEmailInput.value = '';
-        if (authErrorEl) authErrorEl.textContent = '';
-    }
-}
-
-function closeAuthOverlay() {
-    if (authOverlay) {
-        authOverlay.classList.add('hidden');
-        authOverlay.style.display = 'none';
-    }
-}
-
-authContinue?.addEventListener('click', async () => {
-    const email = authEmailInput.value.trim();
-    if (!email) {
-        authErrorEl.textContent = 'Please enter an email address.';
-        return;
-    }
-    authErrorEl.textContent = '';
-    authEmail = email;
-
-    try {
-        const { data: exists, error } = await sbClient.rpc('check_email_exists', { email_to_check: email });
-        if (error) {
-            console.error('RPC error:', error);
-            authErrorEl.textContent = 'Service unavailable. Please try again.';
-            return;
-        }
-
-        if (exists) {
-            authUserEmail.textContent = email;
-            showStep('step-2-login');
-        } else {
-            showStep('step-2-register');
-            document.getElementById('reg-form-fields').style.display = '';
-            regSuccessEl.style.display = 'none';
-        }
-    } catch (err) {
-        console.error(err);
-        authErrorEl.textContent = 'Network error. Please try later.';
-    }
-});
-
-authSignin?.addEventListener('click', async () => {
-    const password = authPassword.value;
-    if (!password) {
-        authErrorLogin.textContent = 'Password is required.';
-        return;
-    }
-    authErrorLogin.textContent = '';
-    const { error } = await sbClient.auth.signInWithPassword({ email: authEmail, password });
-    if (error) {
-        authErrorLogin.textContent = error.message;
-        return;
-    }
-    closeAuthOverlay();
-});
-
-authRegister?.addEventListener('click', async () => {
-    const first = regFirstname.value.trim();
-    const last = regLastname.value.trim();
-    const password = regPassword.value;
-    const confirm = regConfirm.value;
-
-    if (!first || !last) {
-        authErrorReg.textContent = 'All fields are required.';
-        return;
-    }
-    if (password !== confirm) {
-        authErrorReg.textContent = 'Passwords do not match.';
-        return;
-    }
-    if (password.length < 6) {
-        authErrorReg.textContent = 'Password must be at least 6 characters.';
-        return;
-    }
-    authErrorReg.textContent = '';
-
-    const { error } = await sbClient.auth.signUp({
-        email: authEmail,
-        password,
-        options: {
-            data: { first_name: first, last_name: last }
-        }
+        authEmailInput.value = ''; regFirstname.value = ''; regLastname.value = ''; regPassword.value = ''; regConfirm.value = '';
     });
 
-    if (error) {
-        authErrorReg.textContent = error.message;
-        return;
-    }
-
-    document.getElementById('reg-form-fields').style.display = 'none';
-    regSuccessEl.style.display = 'block';
-});
-
-regToLoginBtn?.addEventListener('click', () => {
-    regSuccessEl.style.display = 'none';
-    document.getElementById('reg-form-fields').style.display = '';
-    showStep('step-1');
-    authEmailInput.value = '';
-    regFirstname.value = '';
-    regLastname.value = '';
-    regPassword.value = '';
-    regConfirm.value = '';
-});
-
-authForgotLink?.addEventListener('click', (e) => {
-    e.preventDefault();
-    forgotEmailInput.value = authEmail;
-    showStep('step-forgot');
-});
-
-authSendReset?.addEventListener('click', async () => {
-    const email = forgotEmailInput.value.trim();
-    if (!email) {
-        authSuccessMsg.textContent = 'Please enter your email.';
-        return;
-    }
-    const { error } = await sbClient.auth.resetPasswordForEmail(email);
-    authSuccessMsg.textContent = error ? 'Error: ' + error.message : 'If an account exists, a reset link has been sent.';
-});
-
-authBackToLogin?.addEventListener('click', (e) => {
-    e.preventDefault();
-    showStep('step-2-login');
-});
-
-document.querySelectorAll('.toggle-password-btn').forEach(btn => {
-    btn.addEventListener('click', () => {
-        const targetId = btn.getAttribute('data-target');
-        const input = document.getElementById(targetId);
-        if (!input) return;
-        const isPassword = input.type === 'password';
-        input.type = isPassword ? 'text' : 'password';
+    authForgotLink?.addEventListener('click', (e) => { e.preventDefault(); forgotEmailInput.value = authEmail; showStep('step-forgot'); });
+    authSendReset?.addEventListener('click', async () => {
+        const email = forgotEmailInput.value.trim();
+        if (!email) { authSuccessMsg.textContent = 'Please enter your email.'; return; }
+        const { error } = await sbClient.auth.resetPasswordForEmail(email);
+        authSuccessMsg.textContent = error ? 'Error: ' + error.message : 'If an account exists, a reset link has been sent.';
     });
-});
+    authBackToLogin?.addEventListener('click', (e) => { e.preventDefault(); showStep('step-2-login'); });
 
-authOverlay?.addEventListener('click', (e) => {
-    if (e.target === authOverlay) closeAuthOverlay();
-});
+    document.querySelectorAll('.toggle-password-btn').forEach(btn => {
+        btn.addEventListener('click', () => {
+            const input = document.getElementById(btn.getAttribute('data-target'));
+            if (input) input.type = input.type === 'password' ? 'text' : 'password';
+        });
+    });
+
+    authOverlay?.addEventListener('click', (e) => { if (e.target === authOverlay) closeAuthOverlay(); });
 
     /* =========================== AUTH STATE ============================ */
     sbClient.auth.onAuthStateChange(async (event, session) => {
-        await applyUserProfile(session?.user ?? null);
+        if (session?.user) {
+            await applyUserProfile(session.user);
+        } else {
+            setLoggedOutUI();
+        }
         if (event === 'SIGNED_IN') { closeAuthOverlay(); showToast('Signed in successfully!'); }
-        if (event === 'SIGNED_OUT') { setLoggedOutUI(); showToast('Signed out.'); }
+        else if (event === 'SIGNED_OUT') { showToast('Signed out.'); }
     });
 
+    /* =========================== OTHER EVENT LISTENERS ============================ */
+    document.getElementById('tavio-edit-save-btn')?.addEventListener('click', async function() {
+        const title = document.getElementById('tavio-edit-prompt-title').value.trim();
+        const content = document.getElementById('tavio-edit-prompt-content').value.trim();
+        const pinned = document.getElementById('tavio-edit-prompt-pinned').checked;
+        const catSelect = document.getElementById('tavio-edit-prompt-category');
+        const categoryId = catSelect.value || null;
+        if (!title || !content) { showToast('Title and content are required.'); return; }
+        const prompt = tavioPrompts.find(p => p.id === editingPromptId);
+        if (!prompt) return;
+        let categories = prompt.categories || [];
+        if (categoryId && !categories.includes(categoryId)) categories.push(categoryId);
+        const success = await updateTavioPrompt(editingPromptId, {
+            name: title, template: content, categories: categories, pinned: pinned,
+            ais: prompt.ais || [], locked: prompt.locked || false, description: prompt.description || ''
+        });
+        if (success) { closeModal('tavio-edit-modal'); renderAll(); }
+    });
+    document.getElementById('tavio-edit-cancel-btn')?.addEventListener('click', () => closeModal('tavio-edit-modal'));
+    document.getElementById('tavio-edit-modal-close')?.addEventListener('click', () => closeModal('tavio-edit-modal'));
+
+    document.getElementById('tavio-categories-btn')?.addEventListener('click', async () => {
+        await renderCategoriesModal();
+        openModal('tavio-categories-modal');
+    });
+
+    async function renderCategoriesModal() {
+        const container = document.getElementById('tavio-categories-list');
+        if (!container) return;
+        await fetchTavioCategories();
+        if (tavioCategories.length === 0) {
+            container.innerHTML = '<p style="color:var(--text-secondary);">No categories yet. Create one below.</p>';
+            return;
+        }
+        container.innerHTML = tavioCategories.map(cat => `
+            <div class="tavio-category-item" data-id="${cat.id}">
+                <span class="cat-color" style="background:${cat.color || '#B0FFA5'}"></span>
+                <span class="cat-name">${escapeHtml(cat.name)}</span>
+                <button class="cat-delete" data-action="delete-category" data-id="${cat.id}" title="Delete category">✕</button>
+            </div>
+        `).join('');
+        container.querySelectorAll('[data-action="delete-category"]').forEach(btn => {
+            btn.addEventListener('click', async function() {
+                openConfirmModal('Delete this category?', async () => {
+                    await deleteTavioCategory(this.dataset.id);
+                    await renderCategoriesModal();
+                    renderAll();
+                });
+            });
+        });
+    }
+
+    document.getElementById('tavio-add-category-btn')?.addEventListener('click', async function() {
+        const input = document.getElementById('tavio-new-category-input');
+        const colorInput = document.getElementById('tavio-new-category-color');
+        const name = input.value.trim();
+        if (!name) { showToast('Please enter a category name.'); return; }
+        await createTavioCategory(name, colorInput.value);
+        input.value = '';
+        await renderCategoriesModal();
+        renderAll();
+    });
+    document.getElementById('tavio-categories-modal-close')?.addEventListener('click', () => closeModal('tavio-categories-modal'));
+    document.getElementById('tavio-share-confirm-btn')?.addEventListener('click', async function() {
+        const promptId = this.dataset.promptId;
+        const receiverId = document.getElementById('tavio-share-user-select').value;
+        if (!receiverId) { showToast('Please select a user to share with.'); return; }
+        await shareTavioPrompt(promptId, receiverId);
+        closeModal('tavio-share-modal');
+    });
+    document.getElementById('tavio-share-modal-close')?.addEventListener('click', () => closeModal('tavio-share-modal'));
+    document.getElementById('tavio-shared-btn')?.addEventListener('click', async () => {
+        await openSharedRequestsModal();
+    });
+    async function openSharedRequestsModal() {
+        const requests = await fetchSharedPrompts();
+        const container = document.getElementById('tavio-shared-requests-list');
+        if (requests.length === 0) {
+            container.innerHTML = '<p style="color:var(--text-secondary); text-align:center; padding:20px;">No pending requests.</p>';
+        } else {
+            container.innerHTML = requests.map(req => `
+                <div class="tavio-shared-request" data-id="${req.id}">
+                    <div class="tavio-shared-request-info">
+                        <strong>${escapeHtml(req.sender?.first_name || 'Someone')}</strong>
+                        <span>shared: ${escapeHtml(req.prompt?.title || 'Untitled')}</span>
+                    </div>
+                    <div class="tavio-shared-request-actions">
+                        <button class="btn btn-accent btn-sm" data-action="accept-share" data-id="${req.id}">Accept</button>
+                        <button class="btn btn-outline btn-sm" data-action="reject-share" data-id="${req.id}">Reject</button>
+                    </div>
+                </div>
+            `).join('');
+            container.querySelectorAll('[data-action="accept-share"]').forEach(btn => {
+                btn.addEventListener('click', async function() { await respondToSharedPrompt(this.dataset.id, true); await openSharedRequestsModal(); renderAll(); });
+            });
+            container.querySelectorAll('[data-action="reject-share"]').forEach(btn => {
+                btn.addEventListener('click', async function() { await respondToSharedPrompt(this.dataset.id, false); await openSharedRequestsModal(); renderAll(); });
+            });
+        }
+        updateSharedBadge();
+        openModal('tavio-shared-requests-modal');
+    }
+    document.getElementById('tavio-shared-requests-close')?.addEventListener('click', () => closeModal('tavio-shared-requests-modal'));
+
+    document.getElementById('tavio-new-prompt-btn')?.addEventListener('click', () => {
+        if (!currentUser) { openAuthOverlay(); showToast('Please sign in to create prompts.'); return; }
+        promptFormContainer.classList.remove('hidden');
+        promptNameInput.value = ''; promptCategoryInput.value = ''; promptTemplateInput.value = ''; promptLockedCheckbox.checked = false;
+        Array.from(promptAiSelect.options).forEach(opt => opt.selected = false); promptAiSelect.selectedIndex = -1;
+    });
+
+    savePromptBtn?.addEventListener('click', async function() {
+        const name = promptNameInput.value.trim();
+        const catRaw = promptCategoryInput.value.trim();
+        const template = promptTemplateInput.value.trim();
+        const selected = Array.from(promptAiSelect.selectedOptions).map(opt => opt.value);
+        const locked = promptLockedCheckbox ? promptLockedCheckbox.checked : false;
+        if (!name || !catRaw || !template) { showToast('Please fill in all fields.'); return; }
+        const categories = catRaw.split(',').map(c => c.trim()).filter(Boolean);
+        const result = await createTavioPrompt(name, categories, selected, template, false, locked);
+        if (result) { promptFormContainer.classList.add('hidden'); renderAll(); }
+    });
+    cancelPromptBtn?.addEventListener('click', () => { promptFormContainer.classList.add('hidden'); });
+
+    searchInput?.addEventListener('input', (e) => { currentSearchTerm = e.target.value; renderLibrary(); });
+    categoryFilters?.addEventListener('click', (e) => {
+        const chip = e.target.closest('.filter-chip');
+        if (!chip) return;
+        currentFilterCategory = chip.dataset.category;
+        document.querySelectorAll('.filter-chip').forEach(c => c.classList.remove('active'));
+        chip.classList.add('active');
+        renderLibrary();
+    });
+
+    btnBackToLibrary?.addEventListener('click', () => {
+        builderView.classList.add('hidden'); libraryView.classList.remove('hidden');
+        currentPromptId = null; placeholderInputs.innerHTML = ''; aiModelsFull.innerHTML = ''; generatedPrompt.value = '';
+        document.querySelector('.container').classList.remove('builder-mode');
+        if (typingTimer) { clearInterval(typingTimer); generatedPrompt.classList.remove('typing'); }
+    });
+    btnGeneratePrompt?.addEventListener('click', generatePrompt);
+    btnCopyPrompt?.addEventListener('click', copyToClipboard);
+    btnClearBuilder?.addEventListener('click', clearBuilder);
+
     /* =========================== INIT ============================ */
-    async function initApp() {
+    function initApp() {
         const loader = document.getElementById('initial-loader');
-        try {
-            await checkUser();  // همان checkUser قبلی که getSession می‌کند
-            if (loader) loader.classList.add('hidden');
-        } catch (e) { if (loader) loader.classList.add('hidden'); }
+        if (loader) loader.classList.add('hidden');
+        // initial render with empty data (no user)
+        renderAll();
     }
     initApp();
 });
