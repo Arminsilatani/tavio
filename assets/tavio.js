@@ -1333,6 +1333,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
     /* =========================== RENDER SIDEBAR MENU (FINAL) ============================ */
     function renderSidebarMenu() {
+        debugger;
     console.log('🔵 renderSidebarMenu called');
 
     // پیدا کردن یا ساختن container
