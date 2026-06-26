@@ -1,7 +1,7 @@
 /*****************************************************
  *  Author: Armin Silatani
  *  Date: 2026-06-26
- *  Version: 4.0.0 (Refactored with shared sidebar-component)
+ *  Version: 4.0.1 (Loader fix – same as Ravlo)
  ****************************************************/
 
 /* =========================== SUPABASE CLIENT ============================ */
@@ -420,7 +420,6 @@ document.addEventListener('DOMContentLoaded', () => {
             `;
         }).join('');
 
-        // event listeners for cards
         document.querySelectorAll('.prompt-card').forEach(card => {
             card.addEventListener('click', (e) => {
                 if (card.classList.contains('password-active')) return;
@@ -434,7 +433,6 @@ document.addEventListener('DOMContentLoaded', () => {
                 }
             });
         });
-        // pin, share, edit, delete listeners
         document.querySelectorAll('[data-action="pin"]').forEach(btn => {
             btn.addEventListener('click', (e) => { e.stopPropagation(); togglePinPrompt(btn.dataset.id); });
         });
@@ -549,14 +547,8 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     /* =========================== MODALS ============================ */
-    function openModal(id) {
-        const el = document.getElementById(id);
-        if (el) { el.classList.add('open'); el.style.display = 'flex'; document.body.classList.add('modal-open'); }
-    }
-    function closeModal(id) {
-        const el = document.getElementById(id);
-        if (el) { el.classList.remove('open'); el.style.display = 'none'; document.body.classList.remove('modal-open'); }
-    }
+    function openModal(id) { const el = document.getElementById(id); if (el) { el.classList.add('open'); el.style.display = 'flex'; document.body.classList.add('modal-open'); } }
+    function closeModal(id) { const el = document.getElementById(id); if (el) { el.classList.remove('open'); el.style.display = 'none'; document.body.classList.remove('modal-open'); } }
 
     function openConfirmModal(message, onConfirm) {
         const modal = document.getElementById('confirm-modal');
@@ -602,16 +594,8 @@ document.addEventListener('DOMContentLoaded', () => {
         const select = document.getElementById('tavio-share-user-select');
         select.innerHTML = '<option value="">Select a connection...</option>';
         const connections = await fetchConnections();
-        if (connections.length === 0) {
-            select.innerHTML = '<option value="">No connections found. Connect with others first.</option>';
-        } else {
-            connections.forEach(conn => {
-                const opt = document.createElement('option');
-                opt.value = conn.id;
-                opt.textContent = [conn.first_name, conn.last_name].filter(Boolean).join(' ') || conn.id;
-                select.appendChild(opt);
-            });
-        }
+        if (connections.length === 0) { select.innerHTML = '<option value="">No connections found. Connect with others first.</option>'; }
+        else { connections.forEach(conn => { const opt = document.createElement('option'); opt.value = conn.id; opt.textContent = [conn.first_name, conn.last_name].filter(Boolean).join(' ') || conn.id; select.appendChild(opt); }); }
         openModal('tavio-share-modal');
     }
 
@@ -624,13 +608,11 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     customElements.whenDefined('sidebar-component').then(() => {
-    const comp = getSidebarComponent();
-    if (!comp) return;
-    comp.addEventListener('login-request', () => openAuthOverlay());
-    comp.addEventListener('logout-request', async () => await sbClient.auth.signOut());
-    comp.addEventListener('session-restore-request', async () => {
+        const comp = getSidebarComponent();
+        if (!comp) return;
+        comp.addEventListener('login-request', () => openAuthOverlay());
+        comp.addEventListener('logout-request', async () => await sbClient.auth.signOut());
     });
-});
 
     async function restoreSessionAndSidebar() {
         const comp = getSidebarComponent();
@@ -647,9 +629,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 await fetchSharedPrompts();
                 renderAll();
             }
-        } catch (e) {
-            console.warn('Session restore failed:', e);
-        }
+        } catch (e) { console.warn('Session restore failed:', e); }
     }
 
     async function fetchProfile(userId) {
@@ -686,34 +666,12 @@ document.addEventListener('DOMContentLoaded', () => {
     /* =========================== AUTH ============================ */
     let authEmail = '';
     const authOverlay = document.getElementById('auth-overlay');
-    const authStep1 = document.getElementById('step-1');
-    const authStep2Login = document.getElementById('step-2-login');
-    const authStep2Reg = document.getElementById('step-2-register');
-    const authStepForgot = document.getElementById('step-forgot');
-
-    const authEmailInput = document.getElementById('auth-email');
-    const authContinue = document.getElementById('auth-continue-btn');
-    const authErrorEl = document.getElementById('auth-error');
-    const authUserEmail = document.getElementById('auth-user-email');
-    const authPassword = document.getElementById('auth-password');
-    const authSignin = document.getElementById('auth-signin-btn');
-    const authForgotLink = document.getElementById('auth-forgot-link');
-    const authErrorLogin = document.getElementById('auth-error-login');
-    const regFirstname = document.getElementById('reg-firstname');
-    const regLastname = document.getElementById('reg-lastname');
-    const regPassword = document.getElementById('reg-password');
-    const regConfirm = document.getElementById('reg-confirm');
-    const authRegister = document.getElementById('auth-register-btn');
-    const authErrorReg = document.getElementById('auth-error-register');
-    const regSuccessEl = document.getElementById('reg-success');
-    const regToLoginBtn = document.getElementById('reg-to-login-btn');
-    const forgotEmailInput = document.getElementById('forgot-email');
-    const authSendReset = document.getElementById('auth-send-reset-btn');
-    const authBackToLogin = document.getElementById('auth-back-to-login');
-    const authSuccessMsg = document.getElementById('auth-success-msg');
 
     function showStep(stepId) {
-        [authStep1, authStep2Login, authStep2Reg, authStepForgot].forEach(s => { if (s) s.classList.add('hidden'); });
+        ['step-1', 'step-2-login', 'step-2-register', 'step-forgot'].forEach(id => {
+            const el = document.getElementById(id);
+            if (el) el.classList.add('hidden');
+        });
         const stepEl = document.getElementById(stepId);
         if (stepEl) stepEl.classList.remove('hidden');
     }
@@ -723,8 +681,9 @@ document.addEventListener('DOMContentLoaded', () => {
             authOverlay.classList.remove('hidden');
             authOverlay.style.display = 'flex';
             showStep('step-1');
-            authEmailInput.value = '';
-            if (authErrorEl) authErrorEl.textContent = '';
+            document.getElementById('auth-email').value = '';
+            const errEl = document.getElementById('auth-error');
+            if (errEl) errEl.textContent = '';
         }
     }
 
@@ -732,56 +691,72 @@ document.addEventListener('DOMContentLoaded', () => {
         if (authOverlay) { authOverlay.classList.add('hidden'); authOverlay.style.display = 'none'; }
     }
 
-    authContinue?.addEventListener('click', async () => {
-        const email = authEmailInput.value.trim();
-        if (!email) { authErrorEl.textContent = 'Please enter an email address.'; return; }
-        authErrorEl.textContent = '';
+    document.getElementById('auth-continue-btn')?.addEventListener('click', async () => {
+        const email = document.getElementById('auth-email').value.trim();
+        const errEl = document.getElementById('auth-error');
+        if (!email) { errEl.textContent = 'Please enter an email address.'; return; }
+        errEl.textContent = '';
         authEmail = email;
         try {
             const { data: exists, error } = await sbClient.rpc('check_email_exists', { email_to_check: email });
-            if (error) { authErrorEl.textContent = 'Service unavailable. Please try again.'; return; }
-            if (exists) { authUserEmail.textContent = email; showStep('step-2-login'); }
-            else { showStep('step-2-register'); document.getElementById('reg-form-fields').style.display = ''; regSuccessEl.style.display = 'none'; }
-        } catch (err) { authErrorEl.textContent = 'Network error. Please try later.'; }
+            if (error) { errEl.textContent = 'Service unavailable.'; return; }
+            if (exists) { document.getElementById('auth-user-email').textContent = email; showStep('step-2-login'); }
+            else { showStep('step-2-register'); document.getElementById('reg-form-fields').style.display = ''; document.getElementById('reg-success').style.display = 'none'; }
+        } catch { errEl.textContent = 'Network error.'; }
     });
 
-    authSignin?.addEventListener('click', async () => {
-        const password = authPassword.value;
-        if (!password) { authErrorLogin.textContent = 'Password is required.'; return; }
-        authErrorLogin.textContent = '';
+    document.getElementById('auth-signin-btn')?.addEventListener('click', async () => {
+        const password = document.getElementById('auth-password').value;
+        const errEl = document.getElementById('auth-error-login');
+        if (!password) { errEl.textContent = 'Password is required.'; return; }
+        errEl.textContent = '';
         const { error } = await sbClient.auth.signInWithPassword({ email: authEmail, password });
-        if (error) { authErrorLogin.textContent = error.message; return; }
+        if (error) { errEl.textContent = error.message; return; }
         closeAuthOverlay();
     });
 
-    authRegister?.addEventListener('click', async () => {
-        const first = regFirstname.value.trim(), last = regLastname.value.trim();
-        const password = regPassword.value, confirm = regConfirm.value;
-        if (!first || !last) { authErrorReg.textContent = 'All fields are required.'; return; }
-        if (password !== confirm) { authErrorReg.textContent = 'Passwords do not match.'; return; }
-        if (password.length < 6) { authErrorReg.textContent = 'Password must be at least 6 characters.'; return; }
-        authErrorReg.textContent = '';
+    document.getElementById('auth-register-btn')?.addEventListener('click', async () => {
+        const first = document.getElementById('reg-firstname').value.trim();
+        const last = document.getElementById('reg-lastname').value.trim();
+        const password = document.getElementById('reg-password').value;
+        const confirm = document.getElementById('reg-confirm').value;
+        const errEl = document.getElementById('auth-error-register');
+        if (!first || !last) { errEl.textContent = 'All fields are required.'; return; }
+        if (password !== confirm) { errEl.textContent = 'Passwords do not match.'; return; }
+        if (password.length < 6) { errEl.textContent = 'Password must be at least 6 characters.'; return; }
+        errEl.textContent = '';
         const { error } = await sbClient.auth.signUp({ email: authEmail, password, options: { data: { first_name: first, last_name: last } } });
-        if (error) { authErrorReg.textContent = error.message; return; }
+        if (error) { errEl.textContent = error.message; return; }
         document.getElementById('reg-form-fields').style.display = 'none';
-        regSuccessEl.style.display = 'block';
+        document.getElementById('reg-success').style.display = 'block';
     });
 
-    regToLoginBtn?.addEventListener('click', () => {
-        regSuccessEl.style.display = 'none';
+    document.getElementById('reg-to-login-btn')?.addEventListener('click', () => {
+        document.getElementById('reg-success').style.display = 'none';
         document.getElementById('reg-form-fields').style.display = '';
         showStep('step-1');
-        authEmailInput.value = ''; regFirstname.value = ''; regLastname.value = ''; regPassword.value = ''; regConfirm.value = '';
+        document.getElementById('auth-email').value = '';
+        document.getElementById('reg-firstname').value = '';
+        document.getElementById('reg-lastname').value = '';
+        document.getElementById('reg-password').value = '';
+        document.getElementById('reg-confirm').value = '';
     });
 
-    authForgotLink?.addEventListener('click', (e) => { e.preventDefault(); forgotEmailInput.value = authEmail; showStep('step-forgot'); });
-    authSendReset?.addEventListener('click', async () => {
-        const email = forgotEmailInput.value.trim();
-        if (!email) { authSuccessMsg.textContent = 'Please enter your email.'; return; }
-        const { error } = await sbClient.auth.resetPasswordForEmail(email);
-        authSuccessMsg.textContent = error ? 'Error: ' + error.message : 'If an account exists, a reset link has been sent.';
+    document.getElementById('auth-forgot-link')?.addEventListener('click', (e) => {
+        e.preventDefault();
+        document.getElementById('forgot-email').value = authEmail;
+        showStep('step-forgot');
     });
-    authBackToLogin?.addEventListener('click', (e) => { e.preventDefault(); showStep('step-2-login'); });
+
+    document.getElementById('auth-send-reset-btn')?.addEventListener('click', async () => {
+        const email = document.getElementById('forgot-email').value.trim();
+        const msgEl = document.getElementById('auth-success-msg');
+        if (!email) { msgEl.textContent = 'Please enter your email.'; return; }
+        const { error } = await sbClient.auth.resetPasswordForEmail(email);
+        msgEl.textContent = error ? 'Error: ' + error.message : 'If an account exists, a reset link has been sent.';
+    });
+
+    document.getElementById('auth-back-to-login')?.addEventListener('click', (e) => { e.preventDefault(); showStep('step-2-login'); });
 
     document.querySelectorAll('.toggle-password-btn').forEach(btn => {
         btn.addEventListener('click', () => {
@@ -794,11 +769,8 @@ document.addEventListener('DOMContentLoaded', () => {
 
     /* =========================== AUTH STATE ============================ */
     sbClient.auth.onAuthStateChange(async (event, session) => {
-        if (session?.user) {
-            await applyUserProfile(session.user);
-        } else {
-            setLoggedOutUI();
-        }
+        if (session?.user) { await applyUserProfile(session.user); }
+        else { setLoggedOutUI(); }
         if (event === 'SIGNED_IN') { closeAuthOverlay(); showToast('Signed in successfully!'); }
         else if (event === 'SIGNED_OUT') { showToast('Signed out.'); }
     });
@@ -815,46 +787,21 @@ document.addEventListener('DOMContentLoaded', () => {
         if (!prompt) return;
         let categories = prompt.categories || [];
         if (categoryId && !categories.includes(categoryId)) categories.push(categoryId);
-        const success = await updateTavioPrompt(editingPromptId, {
-            name: title, template: content, categories: categories, pinned: pinned,
-            ais: prompt.ais || [], locked: prompt.locked || false, description: prompt.description || ''
-        });
+        const success = await updateTavioPrompt(editingPromptId, { name: title, template: content, categories, pinned, ais: prompt.ais || [], locked: prompt.locked || false, description: prompt.description || '' });
         if (success) { closeModal('tavio-edit-modal'); renderAll(); }
     });
     document.getElementById('tavio-edit-cancel-btn')?.addEventListener('click', () => closeModal('tavio-edit-modal'));
     document.getElementById('tavio-edit-modal-close')?.addEventListener('click', () => closeModal('tavio-edit-modal'));
 
-    document.getElementById('tavio-categories-btn')?.addEventListener('click', async () => {
-        await renderCategoriesModal();
-        openModal('tavio-categories-modal');
-    });
-
+    document.getElementById('tavio-categories-btn')?.addEventListener('click', async () => { await renderCategoriesModal(); openModal('tavio-categories-modal'); });
     async function renderCategoriesModal() {
         const container = document.getElementById('tavio-categories-list');
         if (!container) return;
         await fetchTavioCategories();
-        if (tavioCategories.length === 0) {
-            container.innerHTML = '<p style="color:var(--text-secondary);">No categories yet. Create one below.</p>';
-            return;
-        }
-        container.innerHTML = tavioCategories.map(cat => `
-            <div class="tavio-category-item" data-id="${cat.id}">
-                <span class="cat-color" style="background:${cat.color || '#B0FFA5'}"></span>
-                <span class="cat-name">${escapeHtml(cat.name)}</span>
-                <button class="cat-delete" data-action="delete-category" data-id="${cat.id}" title="Delete category">✕</button>
-            </div>
-        `).join('');
-        container.querySelectorAll('[data-action="delete-category"]').forEach(btn => {
-            btn.addEventListener('click', async function() {
-                openConfirmModal('Delete this category?', async () => {
-                    await deleteTavioCategory(this.dataset.id);
-                    await renderCategoriesModal();
-                    renderAll();
-                });
-            });
-        });
+        if (tavioCategories.length === 0) { container.innerHTML = '<p style="color:var(--text-secondary);">No categories yet.</p>'; return; }
+        container.innerHTML = tavioCategories.map(cat => `<div class="tavio-category-item" data-id="${cat.id}"><span class="cat-color" style="background:${cat.color || '#B0FFA5'}"></span><span class="cat-name">${escapeHtml(cat.name)}</span><button class="cat-delete" data-action="delete-category" data-id="${cat.id}">✕</button></div>`).join('');
+        container.querySelectorAll('[data-action="delete-category"]').forEach(btn => btn.addEventListener('click', async function() { openConfirmModal('Delete this category?', async () => { await deleteTavioCategory(this.dataset.id); await renderCategoriesModal(); renderAll(); }); }));
     }
-
     document.getElementById('tavio-add-category-btn')?.addEventListener('click', async function() {
         const input = document.getElementById('tavio-new-category-input');
         const colorInput = document.getElementById('tavio-new-category-color');
@@ -874,33 +821,15 @@ document.addEventListener('DOMContentLoaded', () => {
         closeModal('tavio-share-modal');
     });
     document.getElementById('tavio-share-modal-close')?.addEventListener('click', () => closeModal('tavio-share-modal'));
-    document.getElementById('tavio-shared-btn')?.addEventListener('click', async () => {
-        await openSharedRequestsModal();
-    });
+    document.getElementById('tavio-shared-btn')?.addEventListener('click', async () => { await openSharedRequestsModal(); });
     async function openSharedRequestsModal() {
         const requests = await fetchSharedPrompts();
         const container = document.getElementById('tavio-shared-requests-list');
-        if (requests.length === 0) {
-            container.innerHTML = '<p style="color:var(--text-secondary); text-align:center; padding:20px;">No pending requests.</p>';
-        } else {
-            container.innerHTML = requests.map(req => `
-                <div class="tavio-shared-request" data-id="${req.id}">
-                    <div class="tavio-shared-request-info">
-                        <strong>${escapeHtml(req.sender?.first_name || 'Someone')}</strong>
-                        <span>shared: ${escapeHtml(req.prompt?.title || 'Untitled')}</span>
-                    </div>
-                    <div class="tavio-shared-request-actions">
-                        <button class="btn btn-accent btn-sm" data-action="accept-share" data-id="${req.id}">Accept</button>
-                        <button class="btn btn-outline btn-sm" data-action="reject-share" data-id="${req.id}">Reject</button>
-                    </div>
-                </div>
-            `).join('');
-            container.querySelectorAll('[data-action="accept-share"]').forEach(btn => {
-                btn.addEventListener('click', async function() { await respondToSharedPrompt(this.dataset.id, true); await openSharedRequestsModal(); renderAll(); });
-            });
-            container.querySelectorAll('[data-action="reject-share"]').forEach(btn => {
-                btn.addEventListener('click', async function() { await respondToSharedPrompt(this.dataset.id, false); await openSharedRequestsModal(); renderAll(); });
-            });
+        if (requests.length === 0) { container.innerHTML = '<p style="color:var(--text-secondary); text-align:center; padding:20px;">No pending requests.</p>'; }
+        else {
+            container.innerHTML = requests.map(req => `<div class="tavio-shared-request" data-id="${req.id}"><div class="tavio-shared-request-info"><strong>${escapeHtml(req.sender?.first_name || 'Someone')}</strong><span>shared: ${escapeHtml(req.prompt?.title || 'Untitled')}</span></div><div class="tavio-shared-request-actions"><button class="btn btn-accent btn-sm" data-action="accept-share" data-id="${req.id}">Accept</button><button class="btn btn-outline btn-sm" data-action="reject-share" data-id="${req.id}">Reject</button></div></div>`).join('');
+            container.querySelectorAll('[data-action="accept-share"]').forEach(btn => btn.addEventListener('click', async function() { await respondToSharedPrompt(this.dataset.id, true); await openSharedRequestsModal(); renderAll(); }));
+            container.querySelectorAll('[data-action="reject-share"]').forEach(btn => btn.addEventListener('click', async function() { await respondToSharedPrompt(this.dataset.id, false); await openSharedRequestsModal(); renderAll(); }));
         }
         updateSharedBadge();
         openModal('tavio-shared-requests-modal');
@@ -913,11 +842,8 @@ document.addEventListener('DOMContentLoaded', () => {
         promptNameInput.value = ''; promptCategoryInput.value = ''; promptTemplateInput.value = ''; promptLockedCheckbox.checked = false;
         Array.from(promptAiSelect.options).forEach(opt => opt.selected = false); promptAiSelect.selectedIndex = -1;
     });
-
     savePromptBtn?.addEventListener('click', async function() {
-        const name = promptNameInput.value.trim();
-        const catRaw = promptCategoryInput.value.trim();
-        const template = promptTemplateInput.value.trim();
+        const name = promptNameInput.value.trim(); const catRaw = promptCategoryInput.value.trim(); const template = promptTemplateInput.value.trim();
         const selected = Array.from(promptAiSelect.selectedOptions).map(opt => opt.value);
         const locked = promptLockedCheckbox ? promptLockedCheckbox.checked : false;
         if (!name || !catRaw || !template) { showToast('Please fill in all fields.'); return; }
@@ -928,47 +854,22 @@ document.addEventListener('DOMContentLoaded', () => {
     cancelPromptBtn?.addEventListener('click', () => { promptFormContainer.classList.add('hidden'); });
 
     searchInput?.addEventListener('input', (e) => { currentSearchTerm = e.target.value; renderLibrary(); });
-    categoryFilters?.addEventListener('click', (e) => {
-        const chip = e.target.closest('.filter-chip');
-        if (!chip) return;
-        currentFilterCategory = chip.dataset.category;
-        document.querySelectorAll('.filter-chip').forEach(c => c.classList.remove('active'));
-        chip.classList.add('active');
-        renderLibrary();
-    });
+    categoryFilters?.addEventListener('click', (e) => { const chip = e.target.closest('.filter-chip'); if (!chip) return; currentFilterCategory = chip.dataset.category; document.querySelectorAll('.filter-chip').forEach(c => c.classList.remove('active')); chip.classList.add('active'); renderLibrary(); });
 
-    btnBackToLibrary?.addEventListener('click', () => {
-        builderView.classList.add('hidden'); libraryView.classList.remove('hidden');
-        currentPromptId = null; placeholderInputs.innerHTML = ''; aiModelsFull.innerHTML = ''; generatedPrompt.value = '';
-        document.querySelector('.container').classList.remove('builder-mode');
-        if (typingTimer) { clearInterval(typingTimer); generatedPrompt.classList.remove('typing'); }
-    });
+    btnBackToLibrary?.addEventListener('click', () => { builderView.classList.add('hidden'); libraryView.classList.remove('hidden'); currentPromptId = null; placeholderInputs.innerHTML = ''; aiModelsFull.innerHTML = ''; generatedPrompt.value = ''; document.querySelector('.container').classList.remove('builder-mode'); if (typingTimer) { clearInterval(typingTimer); generatedPrompt.classList.remove('typing'); } });
     btnGeneratePrompt?.addEventListener('click', generatePrompt);
     btnCopyPrompt?.addEventListener('click', copyToClipboard);
     btnClearBuilder?.addEventListener('click', clearBuilder);
 
     /* =========================== INIT ============================ */
-async function initApp() {
-    const loader = document.getElementById('initial-loader');
-    // ۱. نمایش لودر (اگر مخفی شده بود)
-    if (loader) loader.classList.remove('hidden');
-
-    // ۲. صبر کن تا کامپوننت سایدبار تعریف شود
-    await customElements.whenDefined('sidebar-component');
-
-    // ۳. بازیابی نشست (در صورت وجود)
-    await restoreSessionAndSidebar();
-
-    // ۴. مخفی کردن لودر
-    if (loader) loader.classList.add('hidden');
-
-    // ۵. رندر اولیه (در صورت نیاز)
-    renderAll();
-
-    // ۶. تایم‌اوت امن (در صورت خطا)
-    setTimeout(() => {
+    async function initApp() {
+        const loader = document.getElementById('initial-loader');
+        if (loader) loader.classList.remove('hidden');
+        await customElements.whenDefined('sidebar-component');
+        await restoreSessionAndSidebar();
         if (loader) loader.classList.add('hidden');
-    }, 5000);
-}
-
-initApp();
+        renderAll();
+        setTimeout(() => { if (loader) loader.classList.add('hidden'); }, 5000);
+    }
+    initApp();
+});
