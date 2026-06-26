@@ -862,14 +862,19 @@ document.addEventListener('DOMContentLoaded', () => {
     btnClearBuilder?.addEventListener('click', clearBuilder);
 
     /* =========================== INIT ============================ */
-    async function initApp() {
-        const loader = document.getElementById('initial-loader');
-        if (loader) loader.classList.remove('hidden');
+async function initApp() {
+    const loader = document.getElementById('initial-loader');
+    if (loader) loader.classList.remove('hidden');
+
+    try {
         await customElements.whenDefined('sidebar-component');
         await restoreSessionAndSidebar();
+    } catch (e) {
+        console.warn('Init error:', e);
+    } finally {
+        // همیشه لودر را مخفی کن، حتی اگر خطا رخ دهد
         if (loader) loader.classList.add('hidden');
-        renderAll();
-        setTimeout(() => { if (loader) loader.classList.add('hidden'); }, 5000);
     }
-    initApp();
-});
+
+    renderAll();
+}
