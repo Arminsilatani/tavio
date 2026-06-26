@@ -56,6 +56,10 @@ body {
     align-items: center;
 }
 
+sidebar-component:not(:defined) {
+    visibility: hidden;
+}
+
 /* =========================== HEADER =========================== */
 
 .glass-header {
