@@ -2,7 +2,7 @@
 ****************************************************
 *  Author: Armin Silatani
 *  Date: 2026-05-28
-*  Version: 0.2.0
+*  Version: 0.3.0 (Refactored with shared sidebar-component)
 ****************************************************
 -->
 <!DOCTYPE html>
@@ -149,7 +149,7 @@
   </div>
 </div>
 
-<!-- =========================== AUTH OVERLAY (RAVLO STYLE) ============================ -->
+<!-- =========================== AUTH OVERLAY ============================ -->
 <div id="auth-overlay" class="hidden">
     <div class="auth-box">
         <img src="assets/Ta.svg" alt="Tavio" class="auth-logo" onerror="this.style.display='none'">
@@ -221,75 +221,8 @@
     </div>
 </div>
 
-<!-- =========================== SIDEBAR TOGGLE & PANEL ============================ -->
-<!-- دکمهٔ همبرگری -->
-<button id="menu-toggle-btn" class="hamburger-btn" aria-label="Menu">
-  <span class="hamburger-line"></span>
-  <span class="hamburger-line"></span>
-  <span class="hamburger-line"></span>
-</button>
-
-<!-- overlay تیره -->
-<div id="sidebar-overlay" class="sidebar-overlay"></div>
-
-<!-- پنل سایدبار -->
-<aside id="sidebar" class="sidebar">
-  <div id="sidebar-close-row" class="sidebar-close-row">
-    <span>Close</span>
-  </div>
-  <div class="sidebar-separator"></div>
-
-  <nav class="sidebar-nav" id="sidebar-nav">
-    <!-- ابزارهای منو به‌صورت خودکار از MENU_TOOLS پر می‌شوند -->
-    <div id="sidebar-menu-items"></div>
-    <div class="sidebar-separator"></div>
-
-    <!-- لینک داشبورد -->
-    <a id="sidebar-dashboard" class="sidebar-item hidden" href="https://arminsilatani.github.io/dashboard/" target="_blank">
-      <span class="sidebar-icon" style="position: relative;">
-        <span class="avatar-content"></span>
-        <span class="notification-dot" id="avatar-notif-dot" style="display: none;"></span>
-      </span>
-      <span class="sidebar-dashboard-text">Dashboard</span>
-    </a>
-
-    <!-- دکمه‌های ورود/خروج -->
-    <button id="sidebar-login" class="sidebar-item login-item hidden">
-      <span class="sidebar-icon">
-        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round">
-          <path d="M15 3h4a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2h-4"/>
-          <polyline points="10 17 15 12 10 7"/>
-          <line x1="15" y1="12" x2="3" y2="12"/>
-        </svg>
-      </span>
-      <span>Sign In</span>
-    </button>
-    <button id="sidebar-logout" class="sidebar-item logout-item hidden">
-      <span class="sidebar-icon">
-        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round">
-          <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/>
-          <polyline points="16 17 21 12 16 7"/>
-          <line x1="21" y1="12" x2="9" y2="12"/>
-        </svg>
-      </span>
-      <span>Logout</span>
-    </button>
-
-    <!-- Buy Me a Coffee -->
-    <a id="sidebar-coffee" class="sidebar-item" href="#" target="_blank" rel="noopener noreferrer">
-      <span class="sidebar-icon">
-        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-          <path d="M18 8h1a4 4 0 0 1 0 8h-1"/>
-          <path d="M2 8h16v9a4 4 0 0 1-4 4H6a4 4 0 0 1-4-4V8z"/>
-          <line x1="6" y1="1" x2="6" y2="4"/>
-          <line x1="10" y1="1" x2="10" y2="4"/>
-          <line x1="14" y1="1" x2="14" y2="4"/>
-        </svg>
-      </span>
-      <span>Buy Me a Coffee</span>
-    </a>
-  </nav>
-</aside>
+<!-- =========================== SIDEBAR COMPONENT (shared) ============================ -->
+<sidebar-component current-app="Tavio Prompt Library"></sidebar-component>
 
 <!-- =========================== HEADER ============================ -->
 <header class="glass-header">
@@ -508,7 +441,7 @@
   </div>
 </div>
 
-<!-- مودال ویرایش پرامپت (از همان فرم استفاده می‌کند اما با دیتا پر می‌شود) -->
+<!-- مودال ویرایش پرامپت -->
 <div id="tavio-edit-modal" class="modal">
   <div class="modal-content">
     <span class="close-modal" id="tavio-edit-modal-close">&times;</span>
@@ -567,9 +500,13 @@
 </footer>
 
 <!-- :::::::::::::::::::::::::: SCRIPTS :::::::::::::::::::::::::: -->
-<!-- کتابخانه‌های مورد نیاز (ترتیب مهم است) -->
 <script src="assets/supabase.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js"></script>
+
+<!-- Shared Sidebar Component (module) -->
+<script type="module" src="https://arminsilatani.github.io/tools/assets/sidebar-component.js"></script>
+
+<!-- Tavio Specific Logic -->
 <script src="assets/tavio.js"></script>
 
 </body>
