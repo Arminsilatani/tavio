@@ -957,18 +957,10 @@ document.addEventListener('DOMContentLoaded', () => {
 
     /* =========================== INIT ============================ */
     function initApp() {
-    const loader = document.getElementById('initial-loader');
-
-    // صبر کن تا کامپوننت سایدبار کاملاً تعریف شود
-    customElements.whenDefined('sidebar-component').then(() => {
+        const loader = document.getElementById('initial-loader');
         if (loader) loader.classList.add('hidden');
-    });
-
-    // یک تایم‌اوت امن برای مواقعی که کامپوننت اصلاً لود نشود (۵ ثانیه)
-    setTimeout(() => {
-        if (loader) loader.classList.add('hidden');
-    }, 5000);
-
-    renderAll();
-}
+        // initial render with empty data (no user)
+        renderAll();
+    }
+    initApp();
 });
