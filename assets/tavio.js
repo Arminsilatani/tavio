@@ -879,3 +879,8 @@ async function initApp() {
     renderAll();
 }
 });
+// fallback timeout
+setTimeout(() => {
+    const loader = document.getElementById('initial-loader');
+    if (loader) loader.classList.add('hidden');
+}, 6000);
