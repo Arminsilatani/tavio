@@ -84,26 +84,16 @@ function syncSidebarComponent() {
         comp.clearUser();
     }
 
-    // مخفی‌کردن بخش Today/Overdue
-    if (comp.shadowRoot) {
-        const todayList = comp.shadowRoot.getElementById('sidebar-today-list');
-        if (todayList) {
-            const section = todayList.closest('.sidebar-section') || todayList.parentElement;
-            if (section) section.style.display = 'none';
-        }
-        const overdueList = comp.shadowRoot.getElementById('sidebar-overdue-list');
-        if (overdueList) {
-            const section = overdueList.closest('.sidebar-section') || overdueList.parentElement;
-            if (section) section.style.display = 'none';
-        }
-    }
-
     comp.setTodayList([], []);
     comp.setEvents([]);
     updateNotificationDot();
 
-    // بارگذاری اعلان‌های مخصوص Tavio
+    // بارگذاری اعلان‌های Tavio
     loadTavioSidebarNotifications();
+
+    // ✅ نمایش ناوبری (رفع display: none)
+    const nav = comp.shadowRoot?.getElementById('sidebar-nav');
+    if (nav) nav.style.display = 'block';
 }
 
 async function updateNotificationDot() {
