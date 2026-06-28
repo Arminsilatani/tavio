@@ -154,6 +154,7 @@ async function logout() {
 async function restoreSession() {
     showGlobalLoader();
 
+    // Handle tokens from email confirmation
     const urlParams = new URLSearchParams(window.location.search);
     const accessToken = urlParams.get('access_token');
     const refreshToken = urlParams.get('refresh_token');
@@ -172,7 +173,8 @@ async function restoreSession() {
         document.getElementById('app-container').classList.remove('app-hidden');
         closeModal(document.getElementById('auth-overlay'));
         syncSidebarComponent();
-        attachTavioNewPromptListener();  // ← بعد از لاگین
+        attachTavioNewPromptListener();
+        // Initialize Tavio UI
         renderPromptGrid(prompts);
         filterByCategory('all');
     } else {
