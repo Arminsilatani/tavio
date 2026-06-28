@@ -114,8 +114,9 @@ function syncSidebarComponent() {
     comp.setTodayList([], []);
     comp.setEvents([]);
     updateNotificationDot();
-    loadTavioSidebarNotifications();
+    loadTavioSidebarNotifications();  // ← حالا خطا نمی‌ده
 }
+
 
 async function updateNotificationDot() {
     const comp = getSidebarComponent();
@@ -153,7 +154,6 @@ async function logout() {
 async function restoreSession() {
     showGlobalLoader();
 
-    // Handle tokens from email confirmation
     const urlParams = new URLSearchParams(window.location.search);
     const accessToken = urlParams.get('access_token');
     const refreshToken = urlParams.get('refresh_token');
@@ -172,8 +172,7 @@ async function restoreSession() {
         document.getElementById('app-container').classList.remove('app-hidden');
         closeModal(document.getElementById('auth-overlay'));
         syncSidebarComponent();
-        attachTavioNewPromptListener();
-        // Initialize Tavio UI
+        attachTavioNewPromptListener();  // ← بعد از لاگین
         renderPromptGrid(prompts);
         filterByCategory('all');
     } else {
@@ -202,24 +201,28 @@ function setupAuthListeners() {
     });
 
     document.getElementById('auth-signin-btn').addEventListener('click', async () => {
-        const email = document.getElementById('auth-email').value.trim();
-        const password = document.getElementById('auth-password-login').value;
-        document.getElementById('auth-error-login').style.display = 'none';
-        const { data, error } = await sb.auth.signInWithPassword({ email, password });
-        if (error) {
-            document.getElementById('auth-error-login').textContent = error.message;
-            document.getElementById('auth-error-login').style.display = 'block';
-            return;
-        }
-        currentUser = data.user;
-        currentProfile = await buildCurrentProfile(data.user);
-        currentUserRole = currentProfile?.role || 'recruit';
-        closeModal(authOverlay);
-        document.getElementById('app-container').classList.remove('app-hidden');
-        syncSidebarComponent();
-        renderPromptGrid(prompts);
-        filterByCategory('all');
-    });
+    const email = document.getElementById('auth-email').value.trim();
+    const password = document.getElementById('auth-password-login').value;
+    document.getElementById('auth-error-login').style.display = 'none';
+    
+    const { data, error } = await sb.auth.signInWithPassword({ email, password });
+    if (error) {
+        document.getElementById('auth-error-login').textContent = error.message;
+        document.getElementById('auth-error-login').style.display = 'block';
+        return;
+    }
+    
+    currentUser = data.user;
+    currentProfile = await buildCurrentProfile(data.user);
+    currentUserRole = currentProfile?.role || 'recruit';
+    closeModal(authOverlay);
+    document.getElementById('app-container').classList.remove('app-hidden');
+    syncSidebarComponent();
+    attachTavioNewPromptListener();  // ← بعد از لاگین
+    renderPromptGrid(prompts);
+    filterByCategory('all');
+});
+
 
     document.getElementById('auth-register-btn').addEventListener('click', async () => {
         const email = document.getElementById('auth-email').value.trim();
@@ -467,12 +470,11 @@ window.addEventListener('load', () => {
 document.addEventListener('DOMContentLoaded', async () => {
     setupAuthListeners();
 
-    // Wait for sidebar component to be defined before interacting
     customElements.whenDefined('sidebar-component').then(() => {
-        getSidebarComponent();       // attach listeners
-        syncSidebarComponent();      // show logged‑out state
-        attachTavioNewPromptListener();
+        getSidebarComponent();
+        syncSidebarComponent();
+        attachTavioNewPromptListener();  // ← بلافاصله بعد از بارگذاری
     });
 
-    await restoreSession();         // check if already logged in
+    await restoreSession();
 });
