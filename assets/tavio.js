@@ -88,12 +88,19 @@ function syncSidebarComponent() {
     comp.setEvents([]);
     updateNotificationDot();
 
-    // بارگذاری اعلان‌های Tavio
-    loadTavioSidebarNotifications();
-
-    // ✅ نمایش ناوبری (رفع display: none)
+    // Force sidebar nav to be visible
     const nav = comp.shadowRoot?.getElementById('sidebar-nav');
     if (nav) nav.style.display = 'block';
+
+    // HIDE today/overdue lists completely (remove "No events today")
+    const todayList = comp.shadowRoot?.getElementById('sidebar-today-list');
+    if (todayList) todayList.style.display = 'none';
+
+    const overdueList = comp.shadowRoot?.getElementById('sidebar-overdue-list');
+    if (overdueList) overdueList.style.display = 'none';
+
+    // Load Tavio notifications
+    loadTavioSidebarNotifications();
 }
 
 async function updateNotificationDot() {
@@ -143,7 +150,6 @@ async function loadTavioSidebarNotifications() {
             </div>
         `).join('');
 
-        // کلیک روی اعلان برای علامت خوانده‌شده
         container.querySelectorAll('.tavio-notif-item').forEach(item => {
             item.addEventListener('click', async () => {
                 const id = item.dataset.id;
@@ -181,7 +187,6 @@ async function logout() {
 async function restoreSession() {
     showGlobalLoader();
 
-    // Handle tokens from email confirmation
     const urlParams = new URLSearchParams(window.location.search);
     const accessToken = urlParams.get('access_token');
     const refreshToken = urlParams.get('refresh_token');
@@ -302,7 +307,6 @@ function setupAuthListeners() {
     });
     document.getElementById('auth-back-to-login').addEventListener('click', () => showStep('step-2-login'));
 
-    // Toggle password visibility
     document.querySelectorAll('.toggle-password-btn').forEach(btn => {
         btn.addEventListener('click', () => {
             const inputId = btn.getAttribute('data-target');
@@ -480,10 +484,8 @@ function saveCurrentPrompt() {
 
 // ================== UI EVENT LISTENERS ==================
 function setupUIListeners() {
-    // Search
     document.getElementById('search-input').addEventListener('input', filterPrompts);
 
-    // Category chips
     document.querySelectorAll('.category-chip').forEach(chip => {
         chip.addEventListener('click', () => {
             const cat = chip.dataset.category;
@@ -491,34 +493,20 @@ function setupUIListeners() {
         });
     });
 
-    // New Prompt button (main)
     document.getElementById('new-prompt-btn').addEventListener('click', showNewPromptModal);
-
-    // Modal actions
     document.getElementById('cancel-modal-btn').addEventListener('click', hideNewPromptModal);
     document.getElementById('add-prompt-btn').addEventListener('click', createNewPrompt);
-    // Close modal on overlay click
     document.getElementById('new-prompt-modal').addEventListener('click', (e) => {
         if (e.target === e.currentTarget) hideNewPromptModal();
     });
 
-    // Back to library
     document.getElementById('back-to-library-btn').addEventListener('click', backToLibrary);
-
-    // Detect variables button
     document.getElementById('detect-variables-btn').addEventListener('click', detectVariables);
-
-    // Generate prompt
     document.getElementById('generate-prompt-btn').addEventListener('click', generatePrompt);
-
-    // Copy and Reset
     document.getElementById('copy-prompt-btn').addEventListener('click', copyPrompt);
     document.getElementById('reset-btn').addEventListener('click', resetAll);
-
-    // Save prompt in editor
     document.getElementById('save-prompt-btn').addEventListener('click', saveCurrentPrompt);
 
-    // Sidebar "New Prompt" item
     const sidebarNewPrompt = document.getElementById('tavio-new-prompt-item');
     if (sidebarNewPrompt) {
         sidebarNewPrompt.addEventListener('click', showNewPromptModal);
@@ -530,7 +518,6 @@ document.addEventListener('DOMContentLoaded', async () => {
     setupAuthListeners();
     setupUIListeners();
 
-    // Wait for sidebar component to be defined before interacting
     customElements.whenDefined('sidebar-component').then(() => {
         getSidebarComponent();
         syncSidebarComponent();
