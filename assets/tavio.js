@@ -93,7 +93,6 @@ async function buildCurrentProfile(user) {
 
 // ================== TAVIO NOTIFICATIONS ==================
 function loadTavioSidebarNotifications() {
-    // در صورت نیاز به نمایش نوتیفیکیشن در سایدبار، اینجا پیاده‌سازی کن
 }
 
 
