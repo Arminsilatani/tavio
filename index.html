@@ -164,7 +164,7 @@
 
     <div id="new-prompt-modal" class="modal hidden">
         <div class="modal-content">
-            <h3>New Prompt Template</h3>
+            <h3 class="modal-title">New Prompt Template</h3>
             <input type="text" id="modal-title" class="modal-input" placeholder="Prompt Title">
             <select id="modal-category" class="modal-input">
                 <option value="writing">Writing</option>
@@ -172,7 +172,7 @@
                 <option value="marketing">Marketing</option>
                 <option value="business">Business</option>
             </select>
-            <textarea id="modal-template" placeholder="Paste your prompt template..."></textarea>
+            <textarea id="modal-template" class="modal-textarea" placeholder="Paste your prompt template..."></textarea>
             <div class="modal-actions">
                 <button id="cancel-modal-btn" class="btn-secondary">Cancel</button>
                 <button id="add-prompt-btn" class="btn-primary">Add to Library</button>
@@ -189,20 +189,18 @@
         </div>
     </footer>
 
-<sidebar-component current-app="tavio" style="--accent:#B0FFA5;--bg:#0d0d0d;--text:#f5f5f5;--border:rgba(255,255,255,0.08);">
-    <div slot="app-content" id="tavio-sidebar-content">
-        <!-- آیتم New Prompt -->
-        <div id="tavio-new-prompt-item" class="sidebar-item">
-            <svg width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" class="sidebar-item-icon">
-                <line x1="8" y1="2" x2="8" y2="14"></line>
-                <line x1="2" y1="8" x2="14" y2="8"></line>
-            </svg>
-            <span>New Prompt</span>
+    <sidebar-component current-app="tavio" style="--accent:#B0FFA5;--bg:#0d0d0d;--text:#f5f5f5;--border:rgba(255,255,255,0.08);">
+        <div slot="app-content" id="tavio-sidebar-content">
+            <div id="tavio-new-prompt-item" class="sidebar-item">
+                <svg width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" class="sidebar-item-icon">
+                    <line x1="8" y1="2" x2="8" y2="14"></line>
+                    <line x1="2" y1="8" x2="14" y2="8"></line>
+                </svg>
+                <span>New Prompt</span>
+            </div>
+            <div id="tavio-notif-list" class="sidebar-notif-list"></div>
         </div>
-        <!-- لیست اعلان‌ها (فقط در صورت وجود نوتیفیکیشن پر می‌شود) -->
-        <div id="tavio-notif-list" class="sidebar-notif-list"></div>
-    </div>
-</sidebar-component>
+    </sidebar-component>
 </div>
 
 </body>
