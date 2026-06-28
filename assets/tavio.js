@@ -9,7 +9,6 @@ let currentProfile = null;
 let currentUserRole = 'public';
 let sidebarComponent = null;
 
-// Original prompts
 let prompts = [
     { id: 1, title: "Story Writer", category: "writing", template: "Write an engaging short story about {{character}} who lives in {{setting}}. The main conflict involves {{conflict}}." },
     { id: 2, title: "Code Explainer", category: "coding", template: "Explain this {{language}} code snippet in simple terms: {{code}}" },
@@ -49,7 +48,6 @@ function getSidebarComponent() {
             sidebarComponent.addEventListener('logout-request', () => {
                 logout();
             });
-            // Other events can be added as needed
         }
     }
     return sidebarComponent;
@@ -74,7 +72,7 @@ async function buildCurrentProfile(user) {
     };
 }
 
-// ================== SYNC SIDEBAR ==================
+// ================== SYNC SIDEBAR (اصلاح شده — بدون تابع تودرتو) ==================
 function syncSidebarComponent() {
     const comp = getSidebarComponent();
     if (!comp || typeof comp.setUser !== 'function') return;
@@ -84,34 +82,20 @@ function syncSidebarComponent() {
     } else {
         comp.clearUser();
     }
-    comp.setTodayList([], []);
-    function syncSidebarComponent() {
-    const comp = getSidebarComponent();
-    if (!comp || typeof comp.setUser !== 'function') return;
 
-    if (currentUser) {
-        comp.setUser(currentUser, currentProfile);
-    } else {
-        comp.clearUser();
-    }
-
-    // پنهان کردن Today/Overdue پیش‌فرض
+    // پنهان کردن Today/Overdue پیش‌فرض سایدبار
     if (comp.shadowRoot) {
         const todayList = comp.shadowRoot.getElementById('sidebar-today-list');
         if (todayList) {
-            // مخفی‌کردن کل بخش (بسته به ساختار کامپوننت، ممکن است والد یا جدِ بالاتر)
             let section = todayList.closest('.sidebar-section') || todayList.parentElement;
             if (section) section.style.display = 'none';
         }
     }
 
-    comp.setTodayList([], []);   // اختیاری؛ می‌توانید این خط را هم بردارید
+    comp.setTodayList([], []);
     comp.setEvents([]);
     updateNotificationDot();
-    loadTavioSidebarNotifications();   // ← بارگذاری اعلان‌های مخصوص Tavio
-}
-    comp.setEvents([]);
-    updateNotificationDot();
+    loadTavioSidebarNotifications();
 }
 
 async function updateNotificationDot() {
@@ -150,13 +134,12 @@ async function logout() {
 async function restoreSession() {
     showGlobalLoader();
 
-    // Handle tokens from email confirmation
     const urlParams = new URLSearchParams(window.location.search);
     const accessToken = urlParams.get('access_token');
     const refreshToken = urlParams.get('refresh_token');
     if (accessToken && refreshToken) {
         try {
-            await sb.auth.setSession({ access_token, refresh_token });
+            await sb.auth.setSession({ access_token: accessToken, refresh_token: refreshToken });
             window.history.replaceState({}, document.title, window.location.pathname);
         } catch (e) {}
     }
@@ -169,7 +152,6 @@ async function restoreSession() {
         document.getElementById('app-container').classList.remove('app-hidden');
         closeModal(document.getElementById('auth-overlay'));
         syncSidebarComponent();
-        // Initialize Tavio UI
         renderPromptGrid(prompts);
         filterByCategory('all');
     } else {
@@ -246,7 +228,7 @@ function setupAuthListeners() {
     });
 
     document.getElementById('auth-back-to-email').addEventListener('click', () => showStep('step-1'));
-    document.getElementById('auth-back-to-email-2').addEventListener('click', () => showStep('step-2-register'));
+    document.getElementById('auth-back-to-email-2').addEventListener('click', () => showStep('step-1'));
 
     document.getElementById('forgot-link').addEventListener('click', (e) => {
         e.preventDefault();
@@ -272,27 +254,22 @@ function setupAuthListeners() {
     });
     document.getElementById('auth-back-to-login').addEventListener('click', () => showStep('step-2-login'));
 
-    // ---------- Password visibility toggle ----------
-document.querySelectorAll('.toggle-password-btn').forEach(btn => {
-    btn.addEventListener('click', () => {
-        const inputId = btn.getAttribute('data-target');
-        const input = document.getElementById(inputId);
-        if (!input) return;
-
-        const isPassword = input.type === 'password';
-        input.type = isPassword ? 'text' : 'password';
-
-        // تعویض آیکون چشم (باز ↔ بسته)
-        const svg = btn.querySelector('svg');
-        if (isPassword) {
-            // چشم باز (نمایش رمز)
-            svg.innerHTML = '<path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/>';
-        } else {
-            // چشم بسته (مخفی)
-            svg.innerHTML = '<path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19m-6.72-1.07a3 3 0 1 1-4.24-4.24"/><line x1="1" y1="1" x2="23" y2="23"/>';
-        }
+    // Password visibility toggle
+    document.querySelectorAll('.toggle-password-btn').forEach(btn => {
+        btn.addEventListener('click', () => {
+            const inputId = btn.getAttribute('data-target');
+            const input = document.getElementById(inputId);
+            if (!input) return;
+            const isPassword = input.type === 'password';
+            input.type = isPassword ? 'text' : 'password';
+            const svg = btn.querySelector('svg');
+            if (isPassword) {
+                svg.innerHTML = '<path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/>';
+            } else {
+                svg.innerHTML = '<path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19m-6.72-1.07a3 3 0 1 1-4.24-4.24"/><line x1="1" y1="1" x2="23" y2="23"/>';
+            }
+        });
     });
-});
 }
 
 // ================== TAVIO PROMPT LOGIC ==================
@@ -300,6 +277,10 @@ function renderPromptGrid(filteredPrompts) {
     const grid = document.getElementById('prompt-grid');
     if (!grid) return;
     grid.innerHTML = '';
+    if (filteredPrompts.length === 0) {
+        grid.innerHTML = '<p style="color:#666; grid-column:1/-1; text-align:center; padding:40px 0;">No prompts found.</p>';
+        return;
+    }
     filteredPrompts.forEach(prompt => {
         const card = document.createElement('div');
         card.className = 'prompt-card';
@@ -315,10 +296,14 @@ function renderPromptGrid(filteredPrompts) {
 
 function filterPrompts() {
     const searchTerm = document.getElementById('search-input').value.toLowerCase();
-    const activeCat = document.querySelector('.category-chip.active')?.id?.replace('cat-', '') || 'all';
+    const activeChip = document.querySelector('.category-chip.active');
+    const activeCat = activeChip ? activeChip.getAttribute('data-category') : 'all';
     let filtered = prompts;
     if (searchTerm) {
-        filtered = filtered.filter(p => p.title.toLowerCase().includes(searchTerm) || p.template.toLowerCase().includes(searchTerm));
+        filtered = filtered.filter(p =>
+            p.title.toLowerCase().includes(searchTerm) ||
+            p.template.toLowerCase().includes(searchTerm)
+        );
     }
     if (activeCat !== 'all') {
         filtered = filtered.filter(p => p.category === activeCat);
@@ -328,17 +313,19 @@ function filterPrompts() {
 
 function filterByCategory(cat) {
     document.querySelectorAll('.category-chip').forEach(chip => {
-        chip.classList.toggle('active', chip.id === `cat-${cat}`);
+        chip.classList.toggle('active', chip.getAttribute('data-category') === cat);
     });
     filterPrompts();
 }
 
 function loadPromptIntoEditor(prompt) {
-    currentPrompt = {...prompt};
+    currentPrompt = { ...prompt };
     document.getElementById('library-view').classList.remove('active');
     document.getElementById('editor-view').classList.add('active');
     document.getElementById('current-prompt-title').textContent = prompt.title;
     document.getElementById('template-textarea').value = prompt.template;
+    document.getElementById('result-display').textContent = '';
+    document.getElementById('result-actions').classList.add('hidden');
     detectVariables();
 }
 
@@ -360,7 +347,7 @@ function detectVariables() {
     const container = document.getElementById('variables-container');
     container.innerHTML = '';
     if (vars.size === 0) {
-        container.innerHTML = `<p style="color:#666; grid-column:1/-1;">No {{variables}} detected. Add some to your template.</p>`;
+        container.innerHTML = '<p style="color:#666; grid-column:1/-1;">No {{variables}} detected. Add some to your template.</p>';
         return;
     }
     vars.forEach(v => {
@@ -420,6 +407,8 @@ function resetAll() {
 
 function showNewPromptModal() {
     document.getElementById('new-prompt-modal').classList.remove('hidden');
+    document.getElementById('modal-title').value = '';
+    document.getElementById('modal-template').value = '';
     document.getElementById('modal-title').focus();
 }
 function hideNewPromptModal() {
@@ -453,21 +442,65 @@ function saveCurrentPrompt() {
     filterPrompts();
 }
 
-window.addEventListener('load', () => {
-    setTimeout(() => {
-        document.getElementById('initial-loader').classList.add('hidden');
-    }, 800); // small delay for effect
-});
+// ================== بارگذاری اعلان‌های سایدبار ==================
+function loadTavioSidebarNotifications() {
+    const listEl = document.getElementById('tavio-notif-list');
+    if (!listEl) return;
+    // فعلاً خالی — در آینده از دیتابیس پر می‌شود
+    listEl.innerHTML = '<p class="sidebar-empty-msg">No notifications yet.</p>';
+}
+
+// ================== تنظیم تمام event listener‌های UI ==================
+function setupUIListeners() {
+    // ─── دکمه New Prompt در صفحه اصلی ───
+    document.getElementById('new-prompt-btn').addEventListener('click', showNewPromptModal);
+
+    // ─── آیتم New Prompt در سایدبار ───
+    document.getElementById('tavio-new-prompt-item').addEventListener('click', showNewPromptModal);
+
+    // ─── مودال New Prompt ───
+    document.getElementById('cancel-modal-btn').addEventListener('click', hideNewPromptModal);
+    document.getElementById('add-prompt-btn').addEventListener('click', createNewPrompt);
+
+    // ─── Editor ───
+    document.getElementById('back-to-library-btn').addEventListener('click', backToLibrary);
+    document.getElementById('detect-variables-btn').addEventListener('click', detectVariables);
+    document.getElementById('generate-prompt-btn').addEventListener('click', generatePrompt);
+    document.getElementById('copy-prompt-btn').addEventListener('click', copyPrompt);
+    document.getElementById('reset-btn').addEventListener('click', resetAll);
+    document.getElementById('save-prompt-btn').addEventListener('click', saveCurrentPrompt);
+
+    // ─── Search ───
+    document.getElementById('search-input').addEventListener('input', filterPrompts);
+
+    // ─── Category chips ───
+    document.querySelectorAll('.category-chip').forEach(chip => {
+        chip.addEventListener('click', () => {
+            filterByCategory(chip.getAttribute('data-category'));
+        });
+    });
+
+    // ─── بستن مودال با کلیک روی پس‌زمینه ───
+    document.getElementById('new-prompt-modal').addEventListener('click', (e) => {
+        if (e.target === e.currentTarget) hideNewPromptModal();
+    });
+}
 
 // ================== INIT ==================
 document.addEventListener('DOMContentLoaded', async () => {
     setupAuthListeners();
+    setupUIListeners();          // ← اتصال تمام دکمه‌ها
 
-    // Wait for sidebar component to be defined before interacting
     customElements.whenDefined('sidebar-component').then(() => {
-        getSidebarComponent();       // attach listeners
-        syncSidebarComponent();      // show logged‑out state
+        getSidebarComponent();
+        syncSidebarComponent();
     });
 
-    await restoreSession();         // check if already logged in
+    await restoreSession();
+});
+
+window.addEventListener('load', () => {
+    setTimeout(() => {
+        document.getElementById('initial-loader').classList.add('hidden');
+    }, 800);
 });
