@@ -100,6 +100,22 @@ function syncSidebarComponent() {
     loadTavioSidebarNotifications();   // بارگذاری اعلان‌های اختصاصی Tavio
 }
 
+async function updateNotificationDot() {
+    const comp = getSidebarComponent();
+    if (!comp) return;
+    let hasNotifications = false;
+    if (currentUser) {
+        const { data } = await sb
+            .from('notifications')
+            .select('id')
+            .eq('user_id', currentUser.id)
+            .eq('is_read', false)
+            .limit(1);
+        if (data && data.length > 0) hasNotifications = true;
+    }
+    comp.setNotificationDot(hasNotifications);
+}
+
 // ================== AUTH ==================
 async function logout() {
     await sb.auth.signOut();
