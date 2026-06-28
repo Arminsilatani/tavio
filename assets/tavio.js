@@ -75,7 +75,60 @@ async function buildCurrentProfile(user) {
 }
 
 // ================== SYNC SIDEBAR ==================
+function syncSidebarComponent() {
+    const comp = getSidebarComponent();
+    if (!comp || typeof comp.setUser !== 'function') return;
 
+    if (currentUser) {
+        comp.setUser(currentUser, currentProfile);
+    } else {
+        comp.clearUser();
+    }
+    comp.setTodayList([], []);
+    function syncSidebarComponent() {
+    const comp = getSidebarComponent();
+    if (!comp || typeof comp.setUser !== 'function') return;
+
+    if (currentUser) {
+        comp.setUser(currentUser, currentProfile);
+    } else {
+        comp.clearUser();
+    }
+
+    // پنهان کردن Today/Overdue پیش‌فرض
+    if (comp.shadowRoot) {
+        const todayList = comp.shadowRoot.getElementById('sidebar-today-list');
+        if (todayList) {
+            // مخفی‌کردن کل بخش (بسته به ساختار کامپوننت، ممکن است والد یا جدِ بالاتر)
+            let section = todayList.closest('.sidebar-section') || todayList.parentElement;
+            if (section) section.style.display = 'none';
+        }
+    }
+
+    comp.setTodayList([], []);   // اختیاری؛ می‌توانید این خط را هم بردارید
+    comp.setEvents([]);
+    updateNotificationDot();
+    loadTavioSidebarNotifications();   // ← بارگذاری اعلان‌های مخصوص Tavio
+}
+    comp.setEvents([]);
+    updateNotificationDot();
+}
+
+async function updateNotificationDot() {
+    const comp = getSidebarComponent();
+    if (!comp) return;
+    let hasNotifications = false;
+    if (currentUser) {
+        const { data } = await sb
+            .from('notifications')
+            .select('id')
+            .eq('user_id', currentUser.id)
+            .eq('is_read', false)
+            .limit(1);
+        if (data && data.length > 0) hasNotifications = true;
+    }
+    comp.setNotificationDot(hasNotifications);
+}
 
 // ================== AUTH ==================
 async function logout() {
