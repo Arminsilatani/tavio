@@ -85,19 +85,25 @@ function syncSidebarComponent() {
         comp.clearUser();
     }
 
-    comp.setTodayList([], []);
-
-    // مخفی‌سازی Today/Overdue پیش‌فرض
-    if (comp.shadowRoot) {
-        const todayList = comp.shadowRoot.getElementById('sidebar-today-list');
-        if (todayList) {
-            let section = todayList.closest('.sidebar-section') || todayList.parentElement;
-            if (section) section.style.display = 'none';
+    // مخفی کردن Today/Overdue پیش‌فرض (بدون توقف در صورت خطا)
+    try {
+        if (comp.shadowRoot) {
+            const todayList = comp.shadowRoot.getElementById('sidebar-today-list');
+            if (todayList) {
+                const section = todayList.closest('.sidebar-section') || todayList.parentElement;
+                if (section) section.style.display = 'none';
+            }
         }
+    } catch (e) {
+        // از توقف ادامهٔ برنامه جلوگیری می‌کنیم
     }
 
+    comp.setTodayList([], []);
     comp.setEvents([]);
     updateNotificationDot();
+
+    // بارگذاری اعلان‌های اختصاصی (فعلاً خالی نگه داشته می‌شود)
+    loadTavioSidebarNotifications();
 }
 
 async function updateNotificationDot() {
