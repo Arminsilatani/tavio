@@ -75,7 +75,6 @@ async function buildCurrentProfile(user) {
 }
 
 // ================== SYNC SIDEBAR ==================
-
 function syncSidebarComponent() {
     const comp = getSidebarComponent();
     if (!comp || typeof comp.setUser !== 'function') return;
@@ -85,28 +84,51 @@ function syncSidebarComponent() {
     } else {
         comp.clearUser();
     }
-
-    // مخفی شدن خودکار Today: آرایه خالی = بخش مخفی
     comp.setTodayList([], []);
-    comp.setEvents([]);
-    updateNotificationDot();
+    function syncSidebarComponent() {
+    const comp = getSidebarComponent();
+    if (!comp || typeof comp.setUser !== 'function') return;
 
-    // اگر تابع مخصوص اعلان‌های Tavio دارید، بیرون از این تابع صدا بزنید
-    // loadTavioSidebarNotifications();
-}
+    if (currentUser) {
+        comp.setUser(currentUser, currentProfile);
+    } else {
+        comp.clearUser();
+    }
 
-// اگر می‌خواهید کل Today را از DOM حذف کنید (فقط یک بار بعد از ready):
-customElements.whenDefined('sidebar-component').then(() => {
-    const sidebar = document.querySelector('sidebar-component');
-    if (sidebar && sidebar.shadowRoot) {
-        const todayList = sidebar.shadowRoot.getElementById('sidebar-today-list');
+    // پنهان کردن Today/Overdue پیش‌فرض
+    if (comp.shadowRoot) {
+        const todayList = comp.shadowRoot.getElementById('sidebar-today-list');
         if (todayList) {
-            // مخفی کردن کل بخش Today
+            // مخفی‌کردن کل بخش (بسته به ساختار کامپوننت، ممکن است والد یا جدِ بالاتر)
             let section = todayList.closest('.sidebar-section') || todayList.parentElement;
             if (section) section.style.display = 'none';
         }
     }
-});
+
+    comp.setTodayList([], []);   // اختیاری؛ می‌توانید این خط را هم بردارید
+    comp.setEvents([]);
+    updateNotificationDot();
+    loadTavioSidebarNotifications();   // ← بارگذاری اعلان‌های مخصوص Tavio
+}
+    comp.setEvents([]);
+    updateNotificationDot();
+}
+
+async function updateNotificationDot() {
+    const comp = getSidebarComponent();
+    if (!comp) return;
+    let hasNotifications = false;
+    if (currentUser) {
+        const { data } = await sb
+            .from('notifications')
+            .select('id')
+            .eq('user_id', currentUser.id)
+            .eq('is_read', false)
+            .limit(1);
+        if (data && data.length > 0) hasNotifications = true;
+    }
+    comp.setNotificationDot(hasNotifications);
+}
 
 // ================== AUTH ==================
 async function logout() {
