@@ -1,121 +1,163 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="en" dir="ltr">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>tavio • Prompt Library</title>
+    <title>tavio • Categorized Prompt Library</title>
     <link rel="stylesheet" href="assets/tavio.css">
-    <script src="assets/tavio.js" defer></script>
+    <!-- Sidebar CSS from CDN -->
+    <link rel="stylesheet" href="https://arminsilatani.github.io/tools/assets/sidebar.css">
 </head>
 <body>
-    <div class="glass-header">
-        <div class="header-inner">
-            <img src="assets/favicon.svg" alt="tavio Logo" class="header-logo" onerror="this.style.display='none'">
-            <div class="header-text">
-                <h1 class="tool-name">tavio</h1>
-                <h2 class="tool-tagline">Categorized Prompt Library</h2>
-            </div>
-        </div>
-        <p class="tool-description">Organize your prompts, auto-detect variables, and generate filled prompts with typing animation.</p>
+    <!-- Initial Loader -->
+    <div id="initial-loader" class="fullpage-loader hidden">
+        <div class="loader-spinner"></div>
     </div>
 
-    <main class="main-container">
-        <!-- LIBRARY VIEW -->
-        <div id="library-view" class="view active">
-            <div class="controls">
-                <div class="search-container">
-                    <input type="text" id="search-input" placeholder="Search prompts..." onkeyup="filterPrompts()">
-                </div>
-                <button onclick="showNewPromptModal()" class="btn-primary">+ New Prompt</button>
+    <!-- Auth Overlay -->
+    <div id="auth-overlay" class="auth-overlay">
+        <div class="auth-modal">
+            <!-- Step 1: Email -->
+            <div id="step-1" class="auth-step active">
+                <h2>Welcome to tavio</h2>
+                <p>Sign in or create an account</p>
+                <input type="email" id="auth-email" placeholder="your@email.com" class="auth-input">
+                <button id="auth-continue-btn" class="btn-primary full">Continue</button>
             </div>
 
-            <div class="categories">
-                <button onclick="filterByCategory('all')" class="category-chip active" id="cat-all">All</button>
-                <button onclick="filterByCategory('writing')" class="category-chip" id="cat-writing">Writing</button>
-                <button onclick="filterByCategory('coding')" class="category-chip" id="cat-coding">Coding</button>
-                <button onclick="filterByCategory('marketing')" class="category-chip" id="cat-marketing">Marketing</button>
-                <button onclick="filterByCategory('business')" class="category-chip" id="cat-business">Business</button>
+            <!-- Step 2 Login -->
+            <div id="step-2-login" class="auth-step">
+                <h2>Enter password</h2>
+                <input type="password" id="auth-password" placeholder="Password" class="auth-input">
+                <button id="auth-signin-btn" class="btn-primary full">Sign In</button>
+                <button onclick="showStep('step-1')" class="btn-secondary full">Back</button>
             </div>
 
-            <div id="prompt-grid" class="prompt-grid">
-                <!-- Populated by JS -->
-            </div>
-        </div>
-
-        <!-- EDITOR VIEW -->
-        <div id="editor-view" class="view">
-            <div class="editor-header">
-                <button onclick="backToLibrary()" class="btn-secondary">← Back to Library</button>
-                <div class="editor-title">
-                    <h3 id="current-prompt-title">Prompt Editor</h3>
-                </div>
-                <button onclick="saveCurrentPrompt()" class="btn-primary">Save to Library</button>
-            </div>
-
-            <div class="editor-content">
-                <div class="template-section">
-                    <label class="section-label">Prompt Template</label>
-                    <textarea id="template-textarea" placeholder="Enter your prompt template here. Use {{variable}} for placeholders.&#10;Example: Write a story about {{character}} in {{setting}}."></textarea>
-                </div>
-
-                <div class="variables-section">
-                    <label class="section-label">Detected Variables</label>
-                    <div id="variables-container" class="variables-grid">
-                        <!-- Dynamic fields populated by JS -->
-                    </div>
-                    <button onclick="detectVariables()" class="btn-secondary small">Detect Variables</button>
-                </div>
-
-                <div class="generate-section">
-                    <button onclick="generatePrompt()" class="btn-generate">
-                        <span>Generate Prompt</span>
-                    </button>
-                </div>
-
-                <div class="result-section">
-                    <label class="section-label">Generated Prompt</label>
-                    <div id="result-display" class="result-display"></div>
-                    
-                    <div id="result-actions" class="result-actions hidden">
-                        <button onclick="copyPrompt()" class="btn-copy">Copy</button>
-                        <button onclick="resetAll()" class="btn-secondary">New Prompt</button>
-                    </div>
-                </div>
+            <!-- Step 2 Register -->
+            <div id="step-2-register" class="auth-step">
+                <h2>Create account</h2>
+                <input type="text" id="reg-firstname" placeholder="First name" class="auth-input">
+                <input type="text" id="reg-lastname" placeholder="Last name" class="auth-input">
+                <input type="password" id="reg-password" placeholder="Password (min 6 chars)" class="auth-input">
+                <button id="auth-register-btn" class="btn-primary full">Create Account</button>
+                <button onclick="showStep('step-1')" class="btn-secondary full">Back</button>
             </div>
         </div>
-    </main>
+    </div>
 
-    <!-- NEW PROMPT MODAL -->
+    <!-- Main App -->
+    <div id="app-container" class="app-hidden">
+        <div class="glass-header">
+            <div class="header-inner">
+                <img src="assets/favicon.svg" alt="tavio Logo" class="header-logo" onerror="this.style.display='none'">
+                <div class="header-text">
+                    <h1 class="tool-name">tavio</h1>
+                    <h2 class="tool-tagline">Categorized Prompt Library</h2>
+                </div>
+            </div>
+            <p class="tool-description">Organize your prompts, auto-detect variables, and generate filled prompts with typing animation.</p>
+        </div>
+
+        <main class="main-container">
+            <!-- LIBRARY VIEW -->
+            <div id="library-view" class="view active">
+                <div class="controls">
+                    <div class="search-container">
+                        <input type="text" id="search-input" placeholder="Search prompts..." onkeyup="filterPrompts()">
+                    </div>
+                    <button onclick="showNewPromptModal()" class="btn-primary">+ New Prompt</button>
+                </div>
+
+                <div class="categories">
+                    <button onclick="filterByCategory('all')" class="category-chip active" id="cat-all">All</button>
+                    <button onclick="filterByCategory('writing')" class="category-chip" id="cat-writing">Writing</button>
+                    <button onclick="filterByCategory('coding')" class="category-chip" id="cat-coding">Coding</button>
+                    <button onclick="filterByCategory('marketing')" class="category-chip" id="cat-marketing">Marketing</button>
+                    <button onclick="filterByCategory('business')" class="category-chip" id="cat-business">Business</button>
+                </div>
+
+                <div id="prompt-grid" class="prompt-grid">
+                    <!-- Populated by JS -->
+                </div>
+            </div>
+
+            <!-- EDITOR VIEW -->
+            <div id="editor-view" class="view">
+                <div class="editor-header">
+                    <button onclick="backToLibrary()" class="btn-secondary">← Back to Library</button>
+                    <div class="editor-title">
+                        <h3 id="current-prompt-title">Prompt Editor</h3>
+                    </div>
+                    <button onclick="saveCurrentPrompt()" class="btn-primary">Save</button>
+                </div>
+
+                <div class="editor-content">
+                    <div class="template-section">
+                        <label class="section-label">Prompt Template</label>
+                        <textarea id="template-textarea" placeholder="Use {{variable}} for placeholders..."></textarea>
+                    </div>
+
+                    <div class="variables-section">
+                        <label class="section-label">Variables</label>
+                        <div id="variables-container" class="variables-grid"></div>
+                        <button onclick="detectVariables()" class="btn-secondary small">Detect Variables</button>
+                    </div>
+
+                    <div class="generate-section">
+                        <button onclick="generatePrompt()" class="btn-generate">Generate Prompt</button>
+                    </div>
+
+                    <div class="result-section">
+                        <label class="section-label">Generated Prompt</label>
+                        <div id="result-display" class="result-display"></div>
+                        <div id="result-actions" class="result-actions hidden">
+                            <button onclick="copyPrompt()" class="btn-copy">Copy</button>
+                            <button onclick="resetAll()" class="btn-secondary">Reset</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </main>
+
+        <!-- Sidebar Component -->
+        <sidebar-component current-app="tavio">
+            <div slot="app-content">
+                <button id="new-prompt-sidebar" class="sidebar-item">New Prompt</button>
+            </div>
+        </sidebar-component>
+    </div>
+
+    <!-- New Prompt Modal -->
     <div id="new-prompt-modal" class="modal hidden">
         <div class="modal-content">
-            <h3>New Prompt Template</h3>
-            <input type="text" id="modal-title" placeholder="Prompt Title" class="modal-input">
+            <h3>New Prompt</h3>
+            <input type="text" id="modal-title" placeholder="Title" class="modal-input">
             <select id="modal-category" class="modal-input">
                 <option value="writing">Writing</option>
                 <option value="coding">Coding</option>
                 <option value="marketing">Marketing</option>
                 <option value="business">Business</option>
             </select>
-            <textarea id="modal-template" placeholder="Paste your prompt template..."></textarea>
+            <textarea id="modal-template" placeholder="Template with {{variables}}..." class="modal-input"></textarea>
             <div class="modal-actions">
                 <button onclick="hideNewPromptModal()" class="btn-secondary">Cancel</button>
-                <button onclick="createNewPrompt()" class="btn-primary">Add to Library</button>
+                <button onclick="createNewPrompt()" class="btn-primary">Add</button>
             </div>
         </div>
     </div>
 
     <footer class="footer">
         <div class="footer-signature">
-            <a href="https://arminsilatani.com/en/" 
-               target="_blank" 
-               rel="noopener noreferrer" 
-               title="Armin Silatani | Official Website">
+            <a href="https://arminsilatani.com/en/" target="_blank" rel="noopener noreferrer">
                 <span class="crafted">crafted by</span>
-                <img src="assets/ArminSilatani.svg" 
-                     alt="Armin Silatani" 
-                     class="signature">
+                <img src="assets/ArminSilatani.svg" alt="Armin Silatani" class="signature">
             </a>
         </div>
     </footer>
+
+    <!-- Scripts -->
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script type="module" src="https://arminsilatani.github.io/tools/assets/sidebar-component.js"></script>
+    <script src="assets/tavio.js" defer></script>
 </body>
 </html>
