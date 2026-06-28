@@ -4,21 +4,25 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>tavio • Prompt Library</title>
+    <!-- استایل اصلی -->
     <link rel="stylesheet" href="assets/tavio.css">
-    <!-- Sidebar CSS (before app styles for loading order) -->
+    <!-- استایل سایدبار (لود سراسری برای اطمینان) -->
     <link rel="stylesheet" href="https://arminsilatani.github.io/tools/assets/sidebar.css">
+    <!-- Supabase -->
     <script src="assets/supabase.min.js" defer></script>
+    <!-- کامپوننت سایدبار -->
     <script src="https://arminsilatani.github.io/tools/assets/sidebar-component.js" type="module" defer></script>
+    <!-- منطق اپلیکیشن -->
     <script src="assets/tavio.js" defer></script>
 </head>
 <body>
 
-<!-- Initial Loader -->
+<!-- لودر اولیه -->
 <div id="initial-loader" class="fullpage-loader" style="position:fixed;top:0;left:0;width:100%;height:100%;background:#0d0d0d;display:flex;align-items:center;justify-content:center;z-index:9999;color:#aaa;font-family:Kalameh,sans-serif;">
-    <span>Loading tavio...</span>
+    <span>Loading tavio…</span>
 </div>
 
-<!-- Auth Overlay -->
+<!-- Overlay احراز هویت -->
 <div id="auth-overlay" class="modal" style="display:none;">
     <div class="modal-content" style="max-width:420px; width:90%;">
         <!-- Step 1: Email -->
@@ -56,7 +60,7 @@
             </div>
         </div>
 
-        <!-- Step forgot -->
+        <!-- Forgot password -->
         <div id="step-forgot" class="auth-step hidden">
             <h3 style="color:var(--accent); margin-bottom:20px;">Reset Password</h3>
             <p style="font-size:13px;color:#888;margin-bottom:16px;">Enter your email to receive a reset link.</p>
@@ -70,8 +74,10 @@
     </div>
 </div>
 
-<!-- App Container (hidden until auth) -->
+<!-- کانتینر اصلی اپلیکیشن (مخفی تا زمان لاگین) -->
 <div id="app-container" class="app-hidden">
+
+    <!-- هدر -->
     <div class="glass-header">
         <div class="header-inner">
             <img src="assets/favicon.svg" alt="tavio Logo" class="header-logo" onerror="this.style.display='none'">
@@ -102,7 +108,7 @@
             </div>
 
             <div id="prompt-grid" class="prompt-grid">
-                <!-- Populated by JS -->
+                <!-- توسط JS پر می‌شود -->
             </div>
         </div>
 
@@ -125,7 +131,7 @@
                 <div class="variables-section">
                     <label class="section-label">Detected Variables</label>
                     <div id="variables-container" class="variables-grid">
-                        <!-- Dynamic fields populated by JS -->
+                        <!-- Dynamic fields -->
                     </div>
                     <button onclick="detectVariables()" class="btn-secondary small">Detect Variables</button>
                 </div>
@@ -149,7 +155,7 @@
         </div>
     </main>
 
-    <!-- NEW PROMPT MODAL -->
+    <!-- New Prompt Modal -->
     <div id="new-prompt-modal" class="modal hidden">
         <div class="modal-content">
             <h3>New Prompt Template</h3>
@@ -182,12 +188,18 @@
         </div>
     </footer>
 
-    <!-- Sidebar Component (outside main container but inside app-container) -->
-    <sidebar-component current-app="tavio">
+    <!-- کامپوننت سایدبار (متغیرهای CSS مستقیماً روی آن تنظیم شده‌اند) -->
+    <sidebar-component current-app="tavio" style="
+        --accent: #B0FFA5;
+        --bg: #0d0d0d;
+        --text: #f5f5f5;
+        --border: rgba(255,255,255,0.08);
+    ">
         <div slot="app-content">
-            <!-- You can add custom sidebar items here if needed -->
+            <!-- آیتم‌های سفارشی در سایدبار (در صورت نیاز) -->
         </div>
     </sidebar-component>
+
 </div>
 
 </body>
