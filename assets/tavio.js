@@ -893,46 +893,47 @@ async function restoreSessionAndSidebar() {
     btnCopyPrompt?.addEventListener('click', copyToClipboard);
     btnClearBuilder?.addEventListener('click', clearBuilder);
 
-/* =========================== INIT (نسخه نهایی مستقل از سایدبار) ============================ */
+/* =========================== INIT (مطابق معماری Ravlo) ============================ */
 async function initApp() {
+    console.log('🚀 [Tavio] شروع راه‌اندازی...');
+
+    const container = document.getElementById('app-container');
     const loader = document.getElementById('initial-loader');
-    console.log('🚀 [FINAL] راه‌اندازی مستقل Tavio...');
 
     try {
-        // ۱. بررسی نشست کاربر (بدون وابستگی به سایدبار)
+        // ۱. احراز هویت (مستقل از سایدبار)
         const { data: { session }, error } = await sbClient.auth.getSession();
-        if (error) console.warn('خطا در دریافت نشست:', error);
+        if (error) console.warn('⚠️ خطا در دریافت نشست:', error);
 
         if (session?.user) {
             currentUser = session.user;
-            console.log('🚀 کاربر وارد شد:', currentUser.id);
-            
-            // دریافت پروفایل
+            console.log('👤 کاربر وارد شد:', currentUser.email);
+
             currentProfile = await fetchProfile(session.user.id);
             currentUserRole = currentProfile?.role || 'recruit';
 
-            // ۲. تلاش برای اتصال به سایدبار (اختیاری - اگر خطا دهد، نادیده گرفته می‌شود)
+            console.log('📂 دریافت دسته‌بندی‌ها...');
+            await fetchTavioCategories();
+
+            console.log('📄 دریافت پرامپت‌ها...');
+            await fetchTavioPrompts();
+
+            console.log('📨 دریافت درخواست‌های اشتراک...');
+            await fetchSharedPrompts();
+
+            // اتصال به سایدبار (اختیاری)
             try {
                 const comp = getSidebarComponent();
                 if (comp && typeof comp.setUser === 'function') {
                     comp.setUser(currentUser, currentProfile);
-                    console.log('🚀 سایدبار با موفقیت به‌روز شد');
+                    console.log('✅ سایدبار به‌روز شد');
                 }
             } catch (e) {
-                console.warn('⚠️ سایدبار در دسترس نیست (مشکل غیر بحرانی):', e);
+                console.warn('⚠️ خطای غیربحرانی در سایدبار:', e);
             }
 
-            // ۳. دریافت دیتاهای اصلی (این‌ها باید حتماً اجرا شوند)
-            console.log('🚀 دریافت دسته‌بندی‌ها...');
-            await fetchTavioCategories();
-            console.log('🚀 دریافت پرامپت‌ها...');
-            await fetchTavioPrompts();
-            console.log('🚀 دریافت اشتراک‌ها...');
-            await fetchSharedPrompts();
-
         } else {
-            console.log('🚀 کاربر مهمان (بدون نشست)');
-            // ریست کردن state در حالت مهمان
+            console.log('👤 کاربر مهمان');
             currentUser = null;
             currentProfile = null;
             tavioPrompts = [];
@@ -941,18 +942,20 @@ async function initApp() {
         }
 
     } catch (e) {
-        console.error('🚨 خطای بحرانی در راه‌اندازی:', e);
+        console.error('❌ خطای بحرانی در راه‌اندازی:', e);
+    } finally {
+        // ۲. نمایش اپلیکیشن و مخفی کردن لودینگ
+        if (container) container.classList.remove('app-hidden');
+        if (loader) {
+            loader.classList.add('hidden');
+            loader.style.display = 'none';
+        }
+        renderAll();
+        console.log('✅ [Tavio] راه‌اندازی کامل شد.');
     }
-
-    // ۴. همیشه لیست پرامپت‌ها را رندر کن و لودینگ را مخفی کن (حتی اگر خطا باشد)
-    renderAll();
-    if (loader) {
-        loader.classList.add('hidden');
-        loader.style.display = 'none';
-    }
-    console.log('✅ [FINAL] Tavio با موفقیت راه‌اندازی شد.');
 }
 
+// اجرا در زمان مناسب
 if (document.readyState === 'loading') {
     document.addEventListener('DOMContentLoaded', initApp);
 } else {
