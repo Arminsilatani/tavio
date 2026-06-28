@@ -88,11 +88,11 @@ function syncSidebarComponent() {
     comp.setEvents([]);
     updateNotificationDot();
 
-    // Force sidebar nav to be visible
+    // Force sidebar nav visibility
     const nav = comp.shadowRoot?.getElementById('sidebar-nav');
     if (nav) nav.style.display = 'block';
 
-    // HIDE today/overdue lists completely (remove "No events today")
+    // Hide today/overdue lists completely
     const todayList = comp.shadowRoot?.getElementById('sidebar-today-list');
     if (todayList) todayList.style.display = 'none';
 
@@ -125,7 +125,7 @@ async function loadTavioSidebarNotifications() {
     if (!container) return;
 
     if (!currentUser) {
-        container.innerHTML = `<p class="sidebar-empty-msg">وارد شوید تا اعلان‌ها را ببینید</p>`;
+        container.innerHTML = '';
         return;
     }
 
@@ -138,15 +138,15 @@ async function loadTavioSidebarNotifications() {
             .limit(5);
 
         if (error || !data || data.length === 0) {
-            container.innerHTML = `<p class="sidebar-empty-msg">هیچ اعلانی ندارید</p>`;
+            container.innerHTML = '';
             return;
         }
 
         container.innerHTML = data.map(n => `
             <div class="tavio-notif-item" data-id="${n.id}" style="${n.is_read ? 'opacity:0.6;' : ''}">
-                <div class="notif-title">${n.title || 'اعلان'}</div>
+                <div class="notif-title">${n.title || 'Notification'}</div>
                 <div class="notif-body">${n.body || ''}</div>
-                <div class="notif-time">${new Date(n.created_at).toLocaleDateString('fa-IR')}</div>
+                <div class="notif-time">${new Date(n.created_at).toLocaleDateString('en-US')}</div>
             </div>
         `).join('');
 
@@ -162,8 +162,8 @@ async function loadTavioSidebarNotifications() {
         });
 
     } catch (e) {
-        console.error('خطا در بارگذاری اعلان‌ها:', e);
-        container.innerHTML = `<p class="sidebar-empty-msg">خطا در بارگذاری</p>`;
+        console.error('Error loading notifications:', e);
+        container.innerHTML = '';
     }
 }
 
