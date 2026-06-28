@@ -385,18 +385,17 @@ body {
 
 /* FOOTER */
 .footer {
-    padding: 40px 20px 32px;
+    padding: 30px 0;
     display: flex;
     justify-content: center;
     border-top: 1px solid var(--border);
-    margin-top: 80px;
 }
 
 .footer-signature {
     display: flex;
     align-items: center;
-    gap: 8px;
-    opacity: 0.75;
+    gap: 3px;
+    opacity: 0.7;
     transition: opacity 0.3s ease;
 }
 
@@ -405,16 +404,22 @@ body {
 }
 
 .crafted {
-    font-size: 11px;
-    color: #777;
-    letter-spacing: 0.5px;
-    text-transform: uppercase;
+    font-size: 10px;
+    color: #7a7a7a;
+    letter-spacing: 0.08em;
 }
 
 .signature {
-    height: 22px;
-    width: auto;
-    filter: brightness(0.95);
+    height: 20px;
+    transform: translateY(-2px);
+    opacity: 0.85;
+    filter: brightness(0.9) contrast(1.05);
+}
+
+.footer-signature a {
+    display: contents;
+    text-decoration: none;
+    color: inherit;
 }
 
 /* Auth steps */
