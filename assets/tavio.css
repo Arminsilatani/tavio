@@ -22,11 +22,7 @@
     --bg: #0d0d0d;
 }
 
-* {
-    margin: 0;
-    padding: 0;
-    box-sizing: border-box;
-}
+* { margin: 0; padding: 0; box-sizing: border-box; }
 
 body {
     font-family: "Kalameh", sans-serif;
@@ -36,7 +32,7 @@ body {
     overflow-x: hidden;
 }
 
-/* هدر - حذف z-index برای جلوگیری از پوشاندن دکمه سایدبار */
+/* Header */
 .glass-header {
     background: rgba(255,255,255,0.03);
     backdrop-filter: blur(10px);
@@ -44,9 +40,8 @@ body {
     padding: 24px 20px;
     position: sticky;
     top: 0;
-    z-index: auto;   /* دیگر z‑index بالا ندارد */
+    z-index: auto;
 }
-
 .header-inner {
     display: flex;
     align-items: center;
@@ -55,18 +50,12 @@ body {
     max-width: 800px;
     margin: 0 auto;
 }
-
-.header-logo {
-    height: 42px;
-    width: auto;
-}
-
+.header-logo { height: 42px; width: auto; }
 .header-text {
     display: flex;
     flex-direction: column;
     justify-content: center;
 }
-
 .tool-name {
     font-weight: 900;
     font-size: 22px;
@@ -74,14 +63,12 @@ body {
     margin-top: 7px;
     color: var(--text);
 }
-
 .tool-tagline {
     font-weight: 400;
     font-size: 13px;
     color: #a0a0a0;
     margin-top: 2px;
 }
-
 .tool-description {
     max-width: 800px;
     margin: 16px auto 0;
@@ -90,7 +77,7 @@ body {
     text-align: center;
 }
 
-/* MAIN */
+/* Main */
 .main-container {
     max-width: 860px;
     margin: 40px auto;
@@ -98,15 +85,10 @@ body {
     min-height: calc(100vh - 280px);
 }
 
-.view {
-    display: none;
-}
+.view { display: none; }
+.view.active { display: block; }
 
-.view.active {
-    display: block;
-}
-
-/* LIBRARY */
+/* Library */
 .controls {
     display: flex;
     justify-content: space-between;
@@ -115,12 +97,7 @@ body {
     flex-wrap: wrap;
     gap: 12px;
 }
-
-.search-container {
-    flex: 1;
-    min-width: 260px;
-}
-
+.search-container { flex: 1; min-width: 260px; }
 #search-input {
     width: 100%;
     background: rgba(255,255,255,0.05);
@@ -137,7 +114,6 @@ body {
     flex-wrap: wrap;
     margin-bottom: 28px;
 }
-
 .category-chip {
     background: rgba(255,255,255,0.04);
     border: 1px solid var(--border);
@@ -148,7 +124,6 @@ body {
     cursor: pointer;
     transition: all 0.2s ease;
 }
-
 .category-chip.active,
 .category-chip:hover {
     background: var(--accent);
@@ -161,7 +136,6 @@ body {
     grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
     gap: 18px;
 }
-
 .prompt-card {
     background: rgba(255,255,255,0.03);
     border: 1px solid var(--border);
@@ -170,18 +144,12 @@ body {
     cursor: pointer;
     transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
 }
-
 .prompt-card:hover {
     transform: translateY(-4px);
     border-color: var(--accent);
     box-shadow: 0 10px 30px rgba(176, 255, 165, 0.1);
 }
-
-.prompt-card h4 {
-    font-size: 17px;
-    margin-bottom: 8px;
-}
-
+.prompt-card h4 { font-size: 17px; margin-bottom: 8px; }
 .prompt-card .category {
     display: inline-block;
     font-size: 11px;
@@ -191,7 +159,6 @@ body {
     border-radius: 9999px;
     margin-bottom: 12px;
 }
-
 .prompt-card p {
     font-size: 14px;
     color: #aaa;
@@ -201,7 +168,7 @@ body {
     overflow: hidden;
 }
 
-/* EDITOR */
+/* Editor */
 .editor-header {
     display: flex;
     justify-content: space-between;
@@ -210,12 +177,7 @@ body {
     flex-wrap: wrap;
     gap: 12px;
 }
-
-.editor-content {
-    display: grid;
-    gap: 32px;
-}
-
+.editor-content { display: grid; gap: 32px; }
 .section-label {
     display: block;
     font-size: 13px;
@@ -223,7 +185,6 @@ body {
     margin-bottom: 8px;
     letter-spacing: 0.5px;
 }
-
 #template-textarea {
     width: 100%;
     min-height: 160px;
@@ -236,24 +197,13 @@ body {
     resize: vertical;
     font-family: inherit;
 }
-
 .variables-grid {
     display: grid;
     grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
     gap: 16px;
 }
-
-.variable-field {
-    display: flex;
-    flex-direction: column;
-}
-
-.variable-field label {
-    font-size: 13px;
-    margin-bottom: 6px;
-    color: #bbb;
-}
-
+.variable-field { display: flex; flex-direction: column; }
+.variable-field label { font-size: 13px; margin-bottom: 6px; color: #bbb; }
 .variable-field input {
     background: rgba(255,255,255,0.04);
     border: 1px solid var(--border);
@@ -263,6 +213,7 @@ body {
     font-size: 15px;
 }
 
+/* Buttons */
 .btn-primary, .btn-secondary, .btn-generate, .btn-copy {
     font-family: "Kalameh", sans-serif;
     font-weight: 700;
@@ -273,28 +224,14 @@ body {
     transition: all 0.2s ease;
     border: none;
 }
-
-.btn-primary {
-    background: var(--accent);
-    color: #111;
-}
-
-.btn-primary:hover {
-    background: #c8ffbe;
-    transform: translateY(-1px);
-}
-
+.btn-primary { background: var(--accent); color: #111; }
+.btn-primary:hover { background: #c8ffbe; transform: translateY(-1px); }
 .btn-secondary {
     background: transparent;
     color: #ccc;
     border: 1px solid var(--border);
 }
-
-.btn-secondary:hover {
-    border-color: #666;
-    color: var(--text);
-}
-
+.btn-secondary:hover { border-color: #666; color: var(--text); }
 .btn-generate {
     background: var(--accent);
     color: #111;
@@ -303,7 +240,6 @@ body {
     font-size: 16px;
     margin-top: 12px;
 }
-
 .btn-copy {
     background: transparent;
     border: 1px solid var(--accent);
@@ -323,27 +259,19 @@ body {
     overflow-y: auto;
     max-height: 340px;
 }
+.result-actions { display: flex; gap: 12px; margin-top: 16px; }
 
-.result-actions {
-    display: flex;
-    gap: 12px;
-    margin-top: 16px;
-}
-
-/* MODAL */
+/* Modal */
 .modal {
     position: fixed;
-    top: 0;
-    left: 0;
-    width: 100%;
-    height: 100%;
+    top: 0; left: 0;
+    width: 100%; height: 100%;
     background: rgba(0,0,0,0.85);
     display: flex;
     align-items: center;
     justify-content: center;
     z-index: 1000;
 }
-
 .modal-content {
     background: #171717;
     border: 1px solid var(--border);
@@ -352,7 +280,6 @@ body {
     max-width: 460px;
     padding: 28px;
 }
-
 .modal-input, #modal-template {
     width: 100%;
     margin-bottom: 16px;
@@ -362,35 +289,19 @@ body {
     padding: 12px 14px;
     border-radius: 8px;
 }
+#modal-template { min-height: 140px; resize: vertical; }
+.modal-actions { display: flex; gap: 12px; justify-content: flex-end; }
 
-#modal-template {
-    min-height: 140px;
-    resize: vertical;
-}
+.hidden { display: none !important; }
+.small { font-size: 13px; padding: 6px 14px; }
 
-.modal-actions {
-    display: flex;
-    gap: 12px;
-    justify-content: flex-end;
-}
-
-.hidden {
-    display: none !important;
-}
-
-.small {
-    font-size: 13px;
-    padding: 6px 14px;
-}
-
-/* FOOTER */
+/* Footer */
 .footer {
     padding: 30px 0;
     display: flex;
     justify-content: center;
     border-top: 1px solid var(--border);
 }
-
 .footer-signature {
     display: flex;
     align-items: center;
@@ -398,144 +309,25 @@ body {
     opacity: 0.7;
     transition: opacity 0.3s ease;
 }
-
-.footer-signature:hover {
-    opacity: 1;
-}
-
+.footer-signature:hover { opacity: 1; }
 .crafted {
     font-size: 10px;
     color: #7a7a7a;
     letter-spacing: 0.08em;
 }
-
 .signature {
     height: 20px;
     transform: translateY(-2px);
     opacity: 0.85;
     filter: brightness(0.9) contrast(1.05);
 }
-
 .footer-signature a {
     display: contents;
     text-decoration: none;
     color: inherit;
 }
 
-/* Auth steps */
-.auth-step {
-    display: none;
-}
-.auth-step.active {
-    display: block;
-}
-.app-hidden {
-    display: none !important;
-}
-
-/* ===== TAVIO SIDEBAR CUSTOM CONTENT ===== */
-#tavio-sidebar-content {
-    padding: 0 4px;
-}
-
-.sidebar-item {
-    display: flex;
-    align-items: center;
-    gap: 8px;
-    padding: 8px 12px;
-    border-radius: 6px;
-    cursor: pointer;
-    color: var(--text);
-    transition: background 0.2s;
-    margin-bottom: 4px;         /* فاصلهٔ کم از آیتم بعدی */
-}
-
-.sidebar-item:hover {
-    background: rgba(255,255,255,0.05);
-}
-
-.sidebar-item-icon {
-    width: 16px;
-    height: 16px;
-    opacity: 0.7;
-}
-.sidebar-item span {
-    font-size: 14px;
-    font-weight: 500;
-}
-
-/* استایل بخش اعلان‌ها (همانند قبل) */
-.sidebar-section-header {
-    font-size: 11px;
-    text-transform: uppercase;
-    color: #777;
-    letter-spacing: 0.5px;
-    margin: 16px 0 12px;
-    font-weight: 600;
-}
-.sidebar-notif-list {
-    display: flex;
-    flex-direction: column;
-    gap: 10px;
-}
-.sidebar-empty-msg {
-    color: #555;
-    font-size: 13px;
-    margin: 0;
-}
-
-/* هدر بخش اعلان‌ها */
-.sidebar-section-header {
-    font-size: 11px;
-    text-transform: uppercase;
-    color: #777;
-    letter-spacing: 0.5px;
-    margin-bottom: 12px;
-}
-
-/* لیست اعلان‌ها */
-.sidebar-notif-list {
-    display: flex;
-    flex-direction: column;
-    gap: 10px;
-}
-
-.sidebar-empty-msg {
-    color: #555;
-    font-size: 13px;
-    margin: 0;
-}
-
-/* هر آیتم اعلان */
-.tavio-notif-item {
-    background: rgba(255,255,255,0.03);
-    border: 1px solid rgba(255,255,255,0.06);
-    border-radius: 8px;
-    padding: 10px 12px;
-    font-size: 13px;
-    cursor: pointer;
-    transition: background 0.2s;
-}
-.tavio-notif-item:hover {
-    background: rgba(255,255,255,0.06);
-}
-.tavio-notif-item .notif-title {
-    font-weight: 600;
-    color: #ddd;
-    margin-bottom: 4px;
-}
-.tavio-notif-item .notif-body {
-    color: #aaa;
-    font-size: 12px;
-    line-height: 1.4;
-}
-.tavio-notif-item .notif-time {
-    font-size: 10px;
-    color: #666;
-    margin-top: 6px;
-}
-
-/* ---- Loader Overlay ---- */
+/* Loader */
 .fullpage-loader {
     position: fixed;
     inset: 0;
@@ -546,8 +338,6 @@ body {
     align-items: center;
     justify-content: center;
 }
-
-/* ---- 3×3 Grid ---- */
 .lds-grid {
     display: grid;
     grid-template-columns: repeat(3, 8px);
@@ -555,17 +345,14 @@ body {
     justify-content: center;
     align-items: center;
 }
-
 .lds-grid div {
     width: 8px;
     height: 8px;
     border-radius: 50%;
-    background: var(--accent, #ff6f91);
-    box-shadow: 0 0 4px var(--accent, #ff6f91);
+    background: var(--accent);
+    box-shadow: 0 0 4px var(--accent);
     animation: neonBlink 1.5s infinite ease-in-out;
 }
-
-/* ---- Staggered delays & varied durations (exactly as provided) ---- */
 .lds-grid div:nth-child(1) { animation-delay: 0.0s; animation-duration: 1.2s; }
 .lds-grid div:nth-child(2) { animation-delay: 0.3s; animation-duration: 1.4s; }
 .lds-grid div:nth-child(3) { animation-delay: 0.7s; animation-duration: 1.1s; }
@@ -576,225 +363,154 @@ body {
 .lds-grid div:nth-child(8) { animation-delay: 0.4s; animation-duration: 1.3s; }
 .lds-grid div:nth-child(9) { animation-delay: 0.6s; animation-duration: 1.1s; }
 
-/* ---- Keyframes for blinking ---- */
 @keyframes neonBlink {
-    0%, 100% { opacity: 0.2; box-shadow: 0 0 2px var(--accent, #ff6f91); }
-    50%      { opacity: 1;   box-shadow: 0 0 6px var(--accent, #ff6f91); }
+    0%, 100% { opacity: 0.2; box-shadow: 0 0 2px var(--accent); }
+    50%      { opacity: 1;   box-shadow: 0 0 6px var(--accent); }
 }
 
-/* ---- Utility to hide the loader ---- */
-.hidden {
-    display: none !important;
-}
-
-/* ===== AUTH OVERLAY (Tavio flavor) ===== */
+/* Auth Overlay */
 .auth-overlay {
-  position: fixed;
-  top: 0; left: 0;
-  width: 100%; height: 100%;
-  background: rgba(0,0,0,0.8);
-  backdrop-filter: blur(6px);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  z-index: 10000;
-}
-
-.auth-box {
-  background: rgba(255,255,255,0.05);
-  border: 1px solid rgba(255,255,255,0.12);
-  border-radius: 16px;
-  padding: 40px 32px;
-  width: 100%;
-  max-width: 380px;
-  text-align: center;
-  backdrop-filter: blur(12px);
-  box-shadow: 0 8px 32px rgba(0,0,0,0.4);
-  color: #fff;
-  font-family: "Kalameh", sans-serif; /* هماهنگ با فونت تاویو */
-}
-
-.auth-logo {
-  height: 36px;
-  margin-bottom: 12px;
-}
-
-.auth-box h1 {
-  font-size: 24px;
-  font-weight: 700;
-  margin: 0 0 4px 0;
-  color: var(--accent);        /* اکسنت سبز تاویو */
-}
-
-.auth-subtitle {
-  font-size: 14px;
-  color: #aaa;
-  margin: 0 0 24px 0;
-}
-
-/* Steps visibility */
-.auth-step {
-  display: none;
-  flex-direction: column;
-  gap: 12px;
-}
-.auth-step.active {
-  display: flex;
-}
-
-/* Input fields */
-.auth-field {
-  width: 100%;
-  background: rgba(255,255,255,0.06);
-  border: 1px solid rgba(255,255,255,0.15);
-  border-radius: 8px;
-  padding: 12px 14px;
-  font-size: 15px;
-  color: #fff;
-  transition: border 0.2s;
-  box-sizing: border-box;
-}
-.auth-field:focus {
-  border-color: var(--accent);
-  outline: none;
-}
-
-/* Password wrapper with toggle button */
-.password-field-wrapper {
-  position: relative;
-}
-.toggle-password-btn {
-  position: absolute;
-  right: 10px;
-  top: 50%;
-  transform: translateY(-50%);
-  background: none;
-  border: none;
-  cursor: pointer;
-  color: #777;
-  padding: 2px;
-}
-.toggle-password-btn:hover {
-  color: var(--accent);
-}
-
-/* Accent button */
-.accent-btn {
-  background: var(--accent);
-  color: #111;                 /* متن تیره روی پس‌زمینه سبز */
-  border: none;
-  border-radius: 8px;
-  padding: 12px 20px;
-  font-size: 15px;
-  font-weight: 600;
-  cursor: pointer;
-  transition: background 0.2s, transform 0.1s;
-}
-.accent-btn:hover {
-  background: #c8ffbe;         /* روشن‌تر شدن سبز */
-  transform: translateY(-1px);
-}
-
-/* Error and success messages */
-.auth-error {
-  font-size: 13px;
-  color: #ff5555;
-  margin: 4px 0 0 0;
-}
-.auth-success {
-  font-size: 13px;
-  color: var(--accent);
-  margin: 4px 0 0 0;
-}
-
-/* User email display */
-.auth-user-email {
-  font-size: 14px;
-  color: #ccc;
-  word-break: break-all;
-  margin: 0 0 8px 0;
-}
-
-/* Links */
-.auth-forgot-link {
-  font-size: 13px;
-  color: var(--accent);
-  text-decoration: none;
-}
-.auth-forgot-link:hover {
-  text-decoration: underline;
-}
-.auth-back-link {
-  background: none;
-  border: none;
-  color: #aaa;
-  font-size: 14px;
-  cursor: pointer;
-  padding: 0;
-  margin-top: 8px;
-}
-.auth-back-link:hover {
-  color: var(--accent);
-}
-
-/* Switch container (for Forgot password link) */
-.auth-switch {
-  text-align: right;
-  margin-top: 8px;
-}
-
-/* دکمه New Prompt در سایدبار */
-.sidebar-new-prompt-btn {
+    position: fixed;
+    top: 0; left: 0;
+    width: 100%; height: 100%;
+    background: rgba(0,0,0,0.8);
+    backdrop-filter: blur(6px);
     display: flex;
     align-items: center;
     justify-content: center;
-    gap: 8px;
+    z-index: 10000;
+}
+.auth-box {
+    background: rgba(255,255,255,0.05);
+    border: 1px solid rgba(255,255,255,0.12);
+    border-radius: 16px;
+    padding: 40px 32px;
     width: 100%;
-    padding: 12px 16px;
+    max-width: 380px;
+    text-align: center;
+    backdrop-filter: blur(12px);
+    box-shadow: 0 8px 32px rgba(0,0,0,0.4);
+    color: #fff;
+    font-family: "Kalameh", sans-serif;
+}
+.auth-logo { height: 36px; margin-bottom: 12px; }
+.auth-box h1 {
+    font-size: 24px;
+    font-weight: 700;
+    margin: 0 0 4px 0;
+    color: var(--accent);
+}
+.auth-subtitle { font-size: 14px; color: #aaa; margin: 0 0 24px 0; }
+
+.auth-step { display: none; flex-direction: column; gap: 12px; }
+.auth-step.active { display: flex; }
+
+.auth-field {
+    width: 100%;
+    background: rgba(255,255,255,0.06);
+    border: 1px solid rgba(255,255,255,0.15);
+    border-radius: 8px;
+    padding: 12px 14px;
+    font-size: 15px;
+    color: #fff;
+    transition: border 0.2s;
+    box-sizing: border-box;
+}
+.auth-field:focus { border-color: var(--accent); outline: none; }
+
+.password-field-wrapper { position: relative; }
+.toggle-password-btn {
+    position: absolute;
+    right: 10px; top: 50%;
+    transform: translateY(-50%);
+    background: none;
+    border: none;
+    cursor: pointer;
+    color: #777;
+    padding: 2px;
+}
+.toggle-password-btn:hover { color: var(--accent); }
+
+.accent-btn {
     background: var(--accent);
     color: #111;
     border: none;
-    border-radius: 10px;
-    font-family: "Kalameh", sans-serif;
-    font-weight: 700;
+    border-radius: 8px;
+    padding: 12px 20px;
     font-size: 15px;
+    font-weight: 600;
     cursor: pointer;
     transition: background 0.2s, transform 0.1s;
-    margin-bottom: 24px;
-    box-shadow: 0 4px 12px rgba(176, 255, 165, 0.2);
 }
-.sidebar-new-prompt-btn:hover {
-    background: #c8ffbe;
-    transform: translateY(-1px);
-}
-.sidebar-new-prompt-btn svg {
-    stroke: #111;
+.accent-btn:hover { background: #c8ffbe; transform: translateY(-1px); }
+
+.auth-full-width { width: 100%; margin-top: 12px; }
+.auth-error { font-size: 13px; color: #ff5555; margin: 4px 0 0 0; }
+.auth-success { font-size: 13px; color: var(--accent); margin: 4px 0 0 0; }
+
+.auth-user-email {
+    font-size: 14px;
+    color: #ccc;
+    word-break: break-all;
+    margin: 0 0 8px 0;
 }
 
-/* عنوان بخش */
+.auth-forgot-link {
+    font-size: 13px;
+    color: var(--accent);
+    text-decoration: none;
+}
+.auth-forgot-link:hover { text-decoration: underline; }
+
+.auth-back-link {
+    background: none;
+    border: none;
+    color: #aaa;
+    font-size: 14px;
+    cursor: pointer;
+    padding: 0;
+    margin-top: 8px;
+}
+.auth-back-link:hover { color: var(--accent); }
+
+.auth-switch { text-align: right; margin-top: 8px; }
+
+.forgot-description {
+    font-size: 13px;
+    color: #888;
+    margin-bottom: 12px;
+}
+
+/* Sidebar custom content */
+#tavio-sidebar-content { padding: 0 4px; }
+
+.sidebar-item {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 8px 12px;
+    border-radius: 6px;
+    cursor: pointer;
+    color: var(--text);
+    transition: background 0.2s;
+    margin-bottom: 4px;
+}
+.sidebar-item:hover { background: rgba(255,255,255,0.05); }
+.sidebar-item-icon { width: 16px; height: 16px; opacity: 0.7; }
+.sidebar-item span { font-size: 14px; font-weight: 500; }
+
 .sidebar-section-header {
     font-size: 11px;
     text-transform: uppercase;
     color: #777;
     letter-spacing: 0.5px;
-    margin-bottom: 12px;
+    margin: 16px 0 12px;
     font-weight: 600;
 }
 
-/* لیست نوتیفیکیشن‌ها */
-.sidebar-notif-list {
-    display: flex;
-    flex-direction: column;
-    gap: 10px;
-}
+.sidebar-notif-list { display: flex; flex-direction: column; gap: 10px; }
+.sidebar-empty-msg { color: #555; font-size: 13px; margin: 0; }
 
-.sidebar-empty-msg {
-    color: #555;
-    font-size: 13px;
-    margin: 0;
-}
-
-/* هر آیتم نوتیفیکیشن (برای استفاده در آینده) */
 .tavio-notif-item {
     background: rgba(255,255,255,0.03);
     border: 1px solid rgba(255,255,255,0.06);
@@ -804,21 +520,7 @@ body {
     cursor: pointer;
     transition: background 0.2s;
 }
-.tavio-notif-item:hover {
-    background: rgba(255,255,255,0.06);
-}
-.tavio-notif-item .notif-title {
-    font-weight: 600;
-    color: #ddd;
-    margin-bottom: 4px;
-}
-.tavio-notif-item .notif-body {
-    color: #aaa;
-    font-size: 12px;
-    line-height: 1.4;
-}
-.tavio-notif-item .notif-time {
-    font-size: 10px;
-    color: #666;
-    margin-top: 6px;
-}
+.tavio-notif-item:hover { background: rgba(255,255,255,0.06); }
+.tavio-notif-item .notif-title { font-weight: 600; color: #ddd; margin-bottom: 4px; }
+.tavio-notif-item .notif-body { color: #aaa; font-size: 12px; line-height: 1.4; }
+.tavio-notif-item .notif-time { font-size: 10px; color: #666; margin-top: 6px; }
