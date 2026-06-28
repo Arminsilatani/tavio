@@ -49,7 +49,6 @@ function getSidebarComponent() {
             sidebarComponent.addEventListener('logout-request', () => {
                 logout();
             });
-            // Other events can be added as needed
         }
     }
     return sidebarComponent;
@@ -79,18 +78,17 @@ function syncSidebarComponent() {
     const comp = getSidebarComponent();
     if (!comp || typeof comp.setUser !== 'function') return;
 
-    // تنظیم کاربر
+    // فقط در صورت وجود کاربر اطلاعات را ارسال کن (در غیر این صورت slot دست‌نخورده می‌ماند)
     if (currentUser) {
         comp.setUser(currentUser, currentProfile);
-    } else {
-        comp.clearUser();
     }
+    // حذف clearUser() تا محتوای slot پاک نشود
 
-    // پنهان کردن بخش Today/Overdue پیش‌فرض (اگر در کامپوننت وجود دارد)
+    // مخفی‌سازی بخش Today/Overdue پیش‌فرض (در صورت وجود)
     if (comp.shadowRoot) {
         const todayList = comp.shadowRoot.getElementById('sidebar-today-list');
         if (todayList) {
-            let section = todayList.closest('.sidebar-section') || todayList.parentElement;
+            const section = todayList.closest('.sidebar-section') || todayList.parentElement;
             if (section) section.style.display = 'none';
         }
     }
@@ -99,7 +97,6 @@ function syncSidebarComponent() {
     comp.setEvents([]);
     updateNotificationDot();
 
-    // بارگذاری اعلان‌های اختصاصی tavio (در صورت نیاز بعداً پیاده‌سازی می‌شود)
     if (typeof loadTavioSidebarNotifications === 'function') {
         loadTavioSidebarNotifications();
     }
@@ -127,7 +124,7 @@ async function logout() {
     currentUser = null;
     currentProfile = null;
     currentUserRole = 'public';
-    syncSidebarComponent();
+    syncSidebarComponent();   // حالا فقط در صورت لاگین بودن setUser می‌شود، slot حفظ می‌شود
 
     document.getElementById('app-container').classList.add('app-hidden');
     const authOverlay = document.getElementById('auth-overlay');
@@ -141,7 +138,6 @@ async function logout() {
 async function restoreSession() {
     showGlobalLoader();
 
-    // Handle tokens from email confirmation
     const urlParams = new URLSearchParams(window.location.search);
     const accessToken = urlParams.get('access_token');
     const refreshToken = urlParams.get('refresh_token');
@@ -160,7 +156,6 @@ async function restoreSession() {
         document.getElementById('app-container').classList.remove('app-hidden');
         closeModal(document.getElementById('auth-overlay'));
         syncSidebarComponent();
-        // Initialize Tavio UI
         renderPromptGrid(prompts);
         filterByCategory('all');
     } else {
@@ -263,27 +258,24 @@ function setupAuthListeners() {
     });
     document.getElementById('auth-back-to-login').addEventListener('click', () => showStep('step-2-login'));
 
-    // ---------- Password visibility toggle ----------
-document.querySelectorAll('.toggle-password-btn').forEach(btn => {
-    btn.addEventListener('click', () => {
-        const inputId = btn.getAttribute('data-target');
-        const input = document.getElementById(inputId);
-        if (!input) return;
+    // Password visibility toggle
+    document.querySelectorAll('.toggle-password-btn').forEach(btn => {
+        btn.addEventListener('click', () => {
+            const inputId = btn.getAttribute('data-target');
+            const input = document.getElementById(inputId);
+            if (!input) return;
 
-        const isPassword = input.type === 'password';
-        input.type = isPassword ? 'text' : 'password';
+            const isPassword = input.type === 'password';
+            input.type = isPassword ? 'text' : 'password';
 
-        // تعویض آیکون چشم (باز ↔ بسته)
-        const svg = btn.querySelector('svg');
-        if (isPassword) {
-            // چشم باز (نمایش رمز)
-            svg.innerHTML = '<path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/>';
-        } else {
-            // چشم بسته (مخفی)
-            svg.innerHTML = '<path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19m-6.72-1.07a3 3 0 1 1-4.24-4.24"/><line x1="1" y1="1" x2="23" y2="23"/>';
-        }
+            const svg = btn.querySelector('svg');
+            if (isPassword) {
+                svg.innerHTML = '<path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/>';
+            } else {
+                svg.innerHTML = '<path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19m-6.72-1.07a3 3 0 1 1-4.24-4.24"/><line x1="1" y1="1" x2="23" y2="23"/>';
+            }
+        });
     });
-});
 }
 
 // ================== TAVIO PROMPT LOGIC ==================
@@ -306,7 +298,7 @@ function renderPromptGrid(filteredPrompts) {
 
 function filterPrompts() {
     const searchTerm = document.getElementById('search-input').value.toLowerCase();
-    const activeCat = document.querySelector('.category-chip.active')?.id?.replace('cat-', '') || 'all';
+    const activeCat = document.querySelector('.category-chip.active')?.dataset.category || 'all';
     let filtered = prompts;
     if (searchTerm) {
         filtered = filtered.filter(p => p.title.toLowerCase().includes(searchTerm) || p.template.toLowerCase().includes(searchTerm));
@@ -319,7 +311,7 @@ function filterPrompts() {
 
 function filterByCategory(cat) {
     document.querySelectorAll('.category-chip').forEach(chip => {
-        chip.classList.toggle('active', chip.id === `cat-${cat}`);
+        chip.classList.toggle('active', chip.dataset.category === cat);
     });
     filterPrompts();
 }
@@ -447,18 +439,31 @@ function saveCurrentPrompt() {
 window.addEventListener('load', () => {
     setTimeout(() => {
         document.getElementById('initial-loader').classList.add('hidden');
-    }, 800); // small delay for effect
+    }, 800);
 });
 
 // ================== INIT ==================
 document.addEventListener('DOMContentLoaded', async () => {
     setupAuthListeners();
 
-    // Wait for sidebar component to be defined before interacting
-    customElements.whenDefined('sidebar-component').then(() => {
-        getSidebarComponent();       // attach listeners
-        syncSidebarComponent();      // show logged‑out state
-    });
+    // صبر کن تا کامپوننت sidebar تعریف شود
+    await customElements.whenDefined('sidebar-component');
+    getSidebarComponent();   // لیسنرهای login/logout
 
-    await restoreSession();         // check if already logged in
+    // ابتدا نشست را بازیابی کن (اگر کاربر لاگین باشد currentUser تنظیم می‌شود)
+    await restoreSession();
+
+    // حالا sidebar را فقط در صورت لاگین بودن همگام کن
+    if (currentUser) {
+        syncSidebarComponent();
+    }
+
+    // اتصال دکمه New Prompt در sidebar
+    const newPromptBtn = document.getElementById('tavio-new-prompt-item');
+    if (newPromptBtn) {
+        newPromptBtn.addEventListener('click', () => {
+            if (!currentUser) return;   // اگر کاربر لاگین نکرده باشد، هیچ اتفاقی نیفتد
+            showNewPromptModal();
+        });
+    }
 });
