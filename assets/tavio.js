@@ -91,12 +91,6 @@ async function buildCurrentProfile(user) {
     };
 }
 
-// ================== TAVIO NOTIFICATIONS ==================
-function loadTavioSidebarNotifications() {
-    // در صورت نیاز به نمایش نوتیفیکیشن در سایدبار، اینجا پیاده‌سازی کن
-}
-
-
 // ================== SYNC SIDEBAR ==================
 function syncSidebarComponent() {
     const comp = getSidebarComponent();
@@ -476,11 +470,12 @@ window.addEventListener('load', () => {
 document.addEventListener('DOMContentLoaded', async () => {
     setupAuthListeners();
 
+    // Wait for sidebar component to be defined before interacting
     customElements.whenDefined('sidebar-component').then(() => {
-        getSidebarComponent();
-        syncSidebarComponent();
-        attachTavioNewPromptListener();  // ← بلافاصله بعد از بارگذاری
+        getSidebarComponent();       // attach listeners
+        syncSidebarComponent();      // show logged‑out state
+        attachTavioNewPromptListener();
     });
 
-    await restoreSession();
+    await restoreSession();         // check if already logged in
 });
