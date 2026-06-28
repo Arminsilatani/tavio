@@ -1,6 +1,6 @@
 // ================== CONFIGURATION ==================
-const SUPABASE_URL = 'https://your-project.supabase.co'; // جایگزین کنید
-const SUPABASE_ANON_KEY = 'your-anon-key';               // جایگزین کنید
+const SUPABASE_URL = 'https://vzqicidepdmraygulrey.supabase.co';
+const SUPABASE_ANON_KEY = 'sb_publishable_kqRWgOmLISOE2EuLL1s8fw_WN6FJRTI';
 
 // ================== INIT SUPABASE ==================
 const sb = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
