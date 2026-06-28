@@ -19,6 +19,8 @@ let prompts = [
 
 let currentPrompt = null;
 let currentVariables = {};
+let shareTargetPromptId = null;
+let selectedShareUserId = null;
 
 // ================== PINNING ==================
 const PIN_STORAGE_KEY = 'tavio_pinned_prompts';
@@ -51,6 +53,179 @@ function togglePin(promptId) {
 
 function isPinned(promptId) {
     return getPinnedIds().includes(promptId);
+}
+
+// ================== SHARING ==================
+// Placeholder: fetch connected users from Supabase (must exist)
+async function fetchConnectedUsers() {
+    if (!currentUser) return [];
+    // Assuming 'connections' table with user_id and connected_user_id where status = 'accepted'
+    const { data, error } = await sb
+        .from('connections')
+        .select('connected_user_id')
+        .eq('user_id', currentUser.id)
+        .eq('status', 'accepted');
+    if (error) {
+        console.error('Error fetching connections:', error);
+        return [];
+    }
+    const ids = data.map(row => row.connected_user_id);
+    if (ids.length === 0) return [];
+    // Fetch profiles for those users
+    const { data: profiles, error: profError } = await sb
+        .from('profiles')
+        .select('id, first_name, last_name, username, photo_url')
+        .in('id', ids);
+    if (profError) return [];
+    return profiles;
+}
+
+async function openShareModal(promptId) {
+    shareTargetPromptId = promptId;
+    const modal = document.getElementById('share-modal');
+    const userList = document.getElementById('share-user-list');
+    const sendBtn = document.getElementById('share-send-btn');
+    selectedShareUserId = null;
+    sendBtn.disabled = true;
+
+    // Clear previous list
+    userList.innerHTML = '<div style="color:#666; padding:8px;">Loading connections...</div>';
+
+    const users = await fetchConnectedUsers();
+    if (users.length === 0) {
+        userList.innerHTML = '<div style="color:#666; padding:8px;">No connected users found.</div>';
+        modal.classList.remove('hidden');
+        return;
+    }
+
+    userList.innerHTML = '';
+    users.forEach(user => {
+        const label = user.username || `${user.first_name || ''} ${user.last_name || ''}`.trim() || user.id;
+        const div = document.createElement('div');
+        div.className = 'sidebar-item';
+        div.style.cursor = 'pointer';
+        div.style.margin = '0';
+        div.innerHTML = `
+            <span class="sidebar-icon" style="position:relative;">
+                ${user.photo_url ? `<img src="${user.photo_url}" width="20" height="20" style="border-radius:50%;">` : `<span style="display:inline-block;width:20px;height:20px;border-radius:50%;background:var(--accent);color:#111;text-align:center;line-height:20px;font-size:12px;font-weight:bold;">${label.charAt(0)}</span>`}
+            </span>
+            <span>${label}</span>
+        `;
+        div.dataset.userId = user.id;
+        div.addEventListener('click', () => {
+            // Deselect previous
+            userList.querySelectorAll('.sidebar-item').forEach(el => el.style.background = 'transparent');
+            div.style.background = 'rgba(255,255,255,0.08)';
+            selectedShareUserId = user.id;
+            sendBtn.disabled = false;
+        });
+        userList.appendChild(div);
+    });
+
+    modal.classList.remove('hidden');
+}
+
+function closeShareModal() {
+    document.getElementById('share-modal').classList.add('hidden');
+    selectedShareUserId = null;
+    shareTargetPromptId = null;
+}
+
+async function sendShareRequest() {
+    if (!shareTargetPromptId || !selectedShareUserId) return;
+    const prompt = prompts.find(p => p.id === shareTargetPromptId);
+    if (!prompt) return;
+
+    // Send notification to selected user
+    const { error } = await sb
+        .from('notifications')
+        .insert({
+            user_id: selectedShareUserId,
+            sender_id: currentUser.id,
+            type: 'share_prompt',
+            data: {
+                prompt_id: prompt.id,
+                prompt_title: prompt.title,
+                prompt_category: prompt.category,
+                prompt_template: prompt.template
+            },
+            is_read: false,
+            created_at: new Date().toISOString()
+        });
+
+    if (error) {
+        alert('Failed to send share request. Please try again.');
+        console.error(error);
+    } else {
+        alert('Prompt shared successfully!');
+        closeShareModal();
+    }
+}
+
+// ================== HANDLE INCOMING SHARE NOTIFICATIONS ==================
+// This function is called when a notification of type 'share_prompt' is clicked in the sidebar.
+// We'll add event listeners to notification items in loadTavioSidebarNotifications.
+function handleShareNotification(notification) {
+    const data = notification.data;
+    if (!data) return;
+    // Show preview modal
+    const modal = document.getElementById('prompt-preview-modal');
+    document.getElementById('preview-prompt-title').textContent = data.prompt_title || 'Shared Prompt';
+    document.getElementById('preview-prompt-category').textContent = data.prompt_category || 'General';
+    document.getElementById('preview-prompt-template').textContent = data.prompt_template || '(No template)';
+    modal.dataset.notificationId = notification.id;
+    modal.dataset.promptData = JSON.stringify(data);
+    modal.classList.remove('hidden');
+}
+
+async function acceptSharedPrompt() {
+    const modal = document.getElementById('prompt-preview-modal');
+    const notifId = modal.dataset.notificationId;
+    const promptData = JSON.parse(modal.dataset.promptData || '{}');
+    if (!promptData.prompt_title) return;
+
+    // Add prompt to current user's prompts
+    const newPrompt = {
+        id: Date.now() + Math.random(),
+        title: promptData.prompt_title,
+        category: promptData.prompt_category || 'general',
+        template: promptData.prompt_template
+    };
+    prompts.unshift(newPrompt);
+    filterPrompts();
+
+    // Mark notification as read and update status
+    await sb.from('notifications').update({ is_read: true }).eq('id', notifId);
+    // Optionally send acceptance notification back to sender
+    await sb.from('notifications').insert({
+        user_id: notification.sender_id, // need sender_id from notification
+        sender_id: currentUser.id,
+        type: 'share_accepted',
+        data: { prompt_id: promptData.prompt_id },
+        is_read: false
+    });
+
+    modal.classList.add('hidden');
+    loadTavioSidebarNotifications(); // refresh
+}
+
+async function rejectSharedPrompt() {
+    const modal = document.getElementById('prompt-preview-modal');
+    const notifId = modal.dataset.notificationId;
+    // Mark notification as read
+    await sb.from('notifications').update({ is_read: true }).eq('id', notifId);
+    // Send rejection notification back to sender
+    // (We need sender_id; we could store it in notification, but we'll assume it's there)
+    // For simplicity, we'll send a generic rejection
+    await sb.from('notifications').insert({
+        user_id: currentUser.id, // placeholder – should be sender_id
+        sender_id: currentUser.id,
+        type: 'share_rejected',
+        data: { prompt_id: JSON.parse(modal.dataset.promptData || '{}').prompt_id },
+        is_read: false
+    });
+    modal.classList.add('hidden');
+    loadTavioSidebarNotifications();
 }
 
 // ================== HELPERS ==================
@@ -162,39 +337,111 @@ async function loadTavioSidebarNotifications() {
     try {
         const { data, error } = await sb
             .from('notifications')
-            .select('id, title, body, created_at, is_read')
+            .select('*')
             .eq('user_id', currentUser.id)
             .order('created_at', { ascending: false })
-            .limit(5);
+            .limit(10);
 
         if (error || !data || data.length === 0) {
             container.innerHTML = '';
             return;
         }
 
-        container.innerHTML = data.map(n => `
-            <div class="tavio-notif-item" data-id="${n.id}" style="${n.is_read ? 'opacity:0.6;' : ''}">
-                <div class="notif-title">${n.title || 'Notification'}</div>
-                <div class="notif-body">${n.body || ''}</div>
-                <div class="notif-time">${new Date(n.created_at).toLocaleDateString('en-US')}</div>
-            </div>
-        `).join('');
+        container.innerHTML = data.map(n => {
+            let actionsHtml = '';
+            if (n.type === 'share_prompt' && !n.is_read) {
+                actionsHtml = `
+                    <div class="notif-actions">
+                        <button class="accept-btn" data-notif-id="${n.id}">Accept</button>
+                        <button class="reject-btn" data-notif-id="${n.id}">Reject</button>
+                    </div>
+                `;
+            }
+            return `
+                <div class="tavio-notif-item" data-id="${n.id}" data-type="${n.type}" style="${n.is_read ? 'opacity:0.6;' : ''}">
+                    <div class="notif-title">${n.type === 'share_prompt' ? '📨 Shared Prompt' : n.title || 'Notification'}</div>
+                    <div class="notif-body">${n.body || (n.type === 'share_prompt' ? 'Someone shared a prompt with you.' : '')}</div>
+                    <div class="notif-time">${new Date(n.created_at).toLocaleDateString('en-US')}</div>
+                    ${actionsHtml}
+                </div>
+            `;
+        }).join('');
 
+        // Handle click on notification (for share_prompt)
         container.querySelectorAll('.tavio-notif-item').forEach(item => {
-            item.addEventListener('click', async () => {
-                const id = item.dataset.id;
-                if (id) {
-                    await sb.from('notifications').update({ is_read: true }).eq('id', id);
+            const notifId = item.dataset.id;
+            const type = item.dataset.type;
+            // If it's a share_prompt and not yet read, clicking opens preview
+            if (type === 'share_prompt') {
+                const acceptBtn = item.querySelector('.accept-btn');
+                const rejectBtn = item.querySelector('.reject-btn');
+                if (acceptBtn) {
+                    acceptBtn.addEventListener('click', (e) => {
+                        e.stopPropagation();
+                        const notification = data.find(n => n.id == notifId);
+                        if (notification) {
+                            handleShareNotification(notification);
+                            // We'll handle accept inside the preview modal
+                        }
+                    });
+                }
+                if (rejectBtn) {
+                    rejectBtn.addEventListener('click', (e) => {
+                        e.stopPropagation();
+                        // Mark as read and send rejection
+                        rejectSharedPromptViaNotif(notifId);
+                    });
+                }
+                // Click on the item itself also opens preview
+                item.addEventListener('click', (e) => {
+                    if (e.target.closest('.notif-actions')) return;
+                    const notification = data.find(n => n.id == notifId);
+                    if (notification && !notification.is_read) {
+                        handleShareNotification(notification);
+                    } else {
+                        // Just mark as read if already read
+                        sb.from('notifications').update({ is_read: true }).eq('id', notifId);
+                        updateNotificationDot();
+                    }
+                });
+            } else {
+                // Other notification types: just mark as read on click
+                item.addEventListener('click', async () => {
+                    await sb.from('notifications').update({ is_read: true }).eq('id', notifId);
                     item.style.opacity = '0.6';
                     updateNotificationDot();
-                }
-            });
+                });
+            }
         });
 
     } catch (e) {
         console.error('Error loading notifications:', e);
         container.innerHTML = '';
     }
+}
+
+async function rejectSharedPromptViaNotif(notifId) {
+    // Fetch notification to get sender_id and data
+    const { data: notif, error } = await sb
+        .from('notifications')
+        .select('sender_id, data')
+        .eq('id', notifId)
+        .single();
+    if (error) return;
+    // Mark as read
+    await sb.from('notifications').update({ is_read: true }).eq('id', notifId);
+    // Send rejection notification back to sender
+    if (notif.sender_id) {
+        await sb.from('notifications').insert({
+            user_id: notif.sender_id,
+            sender_id: currentUser.id,
+            type: 'share_rejected',
+            data: notif.data,
+            is_read: false
+        });
+    }
+    loadTavioSidebarNotifications();
+    updateNotificationDot();
 }
 
 // ================== AUTH ==================
@@ -373,11 +620,18 @@ function renderPromptGrid(filteredPrompts) {
         const card = document.createElement('div');
         card.className = 'prompt-card' + (pinned ? ' pinned-card' : '');
         card.innerHTML = `
-            <button class="pin-btn ${pinned ? 'pinned' : ''}" data-id="${prompt.id}" onclick="event.stopPropagation(); togglePin(${prompt.id})">
-                <svg xmlns="http://www.w3.org/2000/svg" fill="${pinned ? 'currentColor' : 'none'}" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
-                    <path stroke-linecap="round" stroke-linejoin="round" d="M17.593 3.322c1.1.128 1.907 1.077 1.907 2.185V21L12 17.25 4.5 21V5.507c0-1.108.806-2.057 1.907-2.185a48.507 48.507 0 0 1 11.186 0Z" />
-                </svg>
-            </button>
+            <div class="action-buttons">
+                <button class="pin-btn ${pinned ? 'pinned' : ''}" data-id="${prompt.id}" onclick="event.stopPropagation(); togglePin(${prompt.id})">
+                    <svg xmlns="http://www.w3.org/2000/svg" fill="${pinned ? 'currentColor' : 'none'}" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M17.593 3.322c1.1.128 1.907 1.077 1.907 2.185V21L12 17.25 4.5 21V5.507c0-1.108.806-2.057 1.907-2.185a48.507 48.507 0 0 1 11.186 0Z" />
+                    </svg>
+                </button>
+                <button class="share-btn" data-id="${prompt.id}" onclick="event.stopPropagation(); openShareModal(${prompt.id})">
+                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M7.217 10.907a2.25 2.25 0 1 0 0 2.186m0-2.186c.18.324.283.696.283 1.093s-.103.77-.283 1.093m0-2.186 9.566-5.314m-9.566 7.5 9.566 5.314m0 0a2.25 2.25 0 1 0 3.935 2.186 2.25 2.25 0 0 0-3.935-2.186Zm0-12.814a2.25 2.25 0 1 0 3.935-2.186 2.25 2.25 0 0 0-3.935 2.186Z" />
+                    </svg>
+                </button>
+            </div>
             <span class="category">${prompt.category}</span>
             <h4>${prompt.title}</h4>
             <p>${prompt.template.substring(0, 110)}...</p>
@@ -556,6 +810,22 @@ function setupUIListeners() {
     if (sidebarNewPrompt) {
         sidebarNewPrompt.addEventListener('click', showNewPromptModal);
     }
+
+    // Share modal events
+    document.getElementById('share-cancel-btn').addEventListener('click', closeShareModal);
+    document.getElementById('share-send-btn').addEventListener('click', sendShareRequest);
+    document.getElementById('share-modal').addEventListener('click', (e) => {
+        if (e.target === e.currentTarget) closeShareModal();
+    });
+
+    // Preview modal events
+    document.getElementById('preview-accept-btn').addEventListener('click', acceptSharedPrompt);
+    document.getElementById('preview-reject-btn').addEventListener('click', rejectSharedPrompt);
+    document.getElementById('prompt-preview-modal').addEventListener('click', (e) => {
+        if (e.target === e.currentTarget) {
+            document.getElementById('prompt-preview-modal').classList.add('hidden');
+        }
+    });
 }
 
 // ================== INIT ==================
