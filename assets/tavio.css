@@ -429,38 +429,6 @@ body {
 }
 
 /* ===== TAVIO SIDEBAR CUSTOM CONTENT ===== */
-#tavio-sidebar-content {
-    padding: 0 4px;
-}
-
-/* دکمه داخل سایدبار */
-.sidebar-item-btn {
-    background: var(--accent);
-    color: #111;
-    width: 100%;
-    padding: 10px 14px;
-    border-radius: 8px;
-    font-weight: 700;
-    font-size: 14px;
-    cursor: pointer;
-    transition: background 0.2s;
-    margin-bottom: 20px;
-    border: none;
-    font-family: inherit;
-}
-.sidebar-item-btn:hover {
-    background: #c8ffbe;
-}
-
-/* هدر بخش اعلان‌ها */
-.sidebar-section-header {
-    font-size: 11px;
-    text-transform: uppercase;
-    color: #777;
-    letter-spacing: 0.5px;
-    margin-bottom: 12px;
-}
-
 /* لیست اعلان‌ها */
 .sidebar-notif-list {
     display: flex;
