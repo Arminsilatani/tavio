@@ -49,7 +49,6 @@ function getSidebarComponent() {
             sidebarComponent.addEventListener('logout-request', () => {
                 logout();
             });
-            // Other events can be added as needed
         }
     }
     return sidebarComponent;
@@ -79,21 +78,19 @@ function syncSidebarComponent() {
     const comp = getSidebarComponent();
     if (!comp || typeof comp.setUser !== 'function') return;
 
-    // ۱. وضعیت کاربر
     if (currentUser) {
         comp.setUser(currentUser, currentProfile);
     } else {
         comp.clearUser();
     }
 
-    // ۲. مخفی‌کردن بخش Today/Overdue (در صورت وجود)
+    // مخفی‌کردن بخش Today/Overdue
     if (comp.shadowRoot) {
         const todayList = comp.shadowRoot.getElementById('sidebar-today-list');
         if (todayList) {
             const section = todayList.closest('.sidebar-section') || todayList.parentElement;
             if (section) section.style.display = 'none';
         }
-        // در صورت نیاز برای Overdue هم همین کار را کنید
         const overdueList = comp.shadowRoot.getElementById('sidebar-overdue-list');
         if (overdueList) {
             const section = overdueList.closest('.sidebar-section') || overdueList.parentElement;
@@ -101,20 +98,12 @@ function syncSidebarComponent() {
         }
     }
 
-    // ۳. لیست‌های خالی
     comp.setTodayList([], []);
     comp.setEvents([]);
-
-    // ۴. به‌روزرسانی نقطه اعلان
     updateNotificationDot();
 
-    // ۵. بارگذاری اعلان‌های مخصوص Tavio (اگر تابع وجود دارد)
-    if (typeof loadTavioSidebarNotifications === 'function') {
-        loadTavioSidebarNotifications();
-    } else {
-        // در غیر این صورت، خطا ندهیم
-        console.warn('loadTavioSidebarNotifications تعریف نشده است');
-    }
+    // بارگذاری اعلان‌های مخصوص Tavio
+    loadTavioSidebarNotifications();
 }
 
 async function updateNotificationDot() {
@@ -131,6 +120,55 @@ async function updateNotificationDot() {
         if (data && data.length > 0) hasNotifications = true;
     }
     comp.setNotificationDot(hasNotifications);
+}
+
+// ================== NOTIFICATIONS SIDEBAR ==================
+async function loadTavioSidebarNotifications() {
+    const container = document.getElementById('tavio-notif-list');
+    if (!container) return;
+
+    if (!currentUser) {
+        container.innerHTML = `<p class="sidebar-empty-msg">وارد شوید تا اعلان‌ها را ببینید</p>`;
+        return;
+    }
+
+    try {
+        const { data, error } = await sb
+            .from('notifications')
+            .select('id, title, body, created_at, is_read')
+            .eq('user_id', currentUser.id)
+            .order('created_at', { ascending: false })
+            .limit(5);
+
+        if (error || !data || data.length === 0) {
+            container.innerHTML = `<p class="sidebar-empty-msg">هیچ اعلانی ندارید</p>`;
+            return;
+        }
+
+        container.innerHTML = data.map(n => `
+            <div class="tavio-notif-item" data-id="${n.id}" style="${n.is_read ? 'opacity:0.6;' : ''}">
+                <div class="notif-title">${n.title || 'اعلان'}</div>
+                <div class="notif-body">${n.body || ''}</div>
+                <div class="notif-time">${new Date(n.created_at).toLocaleDateString('fa-IR')}</div>
+            </div>
+        `).join('');
+
+        // کلیک روی اعلان برای علامت خوانده‌شده
+        container.querySelectorAll('.tavio-notif-item').forEach(item => {
+            item.addEventListener('click', async () => {
+                const id = item.dataset.id;
+                if (id) {
+                    await sb.from('notifications').update({ is_read: true }).eq('id', id);
+                    item.style.opacity = '0.6';
+                    updateNotificationDot();
+                }
+            });
+        });
+
+    } catch (e) {
+        console.error('خطا در بارگذاری اعلان‌ها:', e);
+        container.innerHTML = `<p class="sidebar-empty-msg">خطا در بارگذاری</p>`;
+    }
 }
 
 // ================== AUTH ==================
@@ -172,7 +210,6 @@ async function restoreSession() {
         document.getElementById('app-container').classList.remove('app-hidden');
         closeModal(document.getElementById('auth-overlay'));
         syncSidebarComponent();
-        // Initialize Tavio UI
         renderPromptGrid(prompts);
         filterByCategory('all');
     } else {
@@ -274,6 +311,23 @@ function setupAuthListeners() {
         }
     });
     document.getElementById('auth-back-to-login').addEventListener('click', () => showStep('step-2-login'));
+
+    // Toggle password visibility
+    document.querySelectorAll('.toggle-password-btn').forEach(btn => {
+        btn.addEventListener('click', () => {
+            const inputId = btn.getAttribute('data-target');
+            const input = document.getElementById(inputId);
+            if (!input) return;
+            const isPassword = input.type === 'password';
+            input.type = isPassword ? 'text' : 'password';
+            const svg = btn.querySelector('svg');
+            if (isPassword) {
+                svg.innerHTML = '<path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/>';
+            } else {
+                svg.innerHTML = '<path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19m-6.72-1.07a3 3 0 1 1-4.24-4.24"/><line x1="1" y1="1" x2="23" y2="23"/>';
+            }
+        });
+    });
 }
 
 // ================== TAVIO PROMPT LOGIC ==================
@@ -296,7 +350,7 @@ function renderPromptGrid(filteredPrompts) {
 
 function filterPrompts() {
     const searchTerm = document.getElementById('search-input').value.toLowerCase();
-    const activeCat = document.querySelector('.category-chip.active')?.id?.replace('cat-', '') || 'all';
+    const activeCat = document.querySelector('.category-chip.active')?.dataset.category || 'all';
     let filtered = prompts;
     if (searchTerm) {
         filtered = filtered.filter(p => p.title.toLowerCase().includes(searchTerm) || p.template.toLowerCase().includes(searchTerm));
@@ -309,7 +363,7 @@ function filterPrompts() {
 
 function filterByCategory(cat) {
     document.querySelectorAll('.category-chip').forEach(chip => {
-        chip.classList.toggle('active', chip.id === `cat-${cat}`);
+        chip.classList.toggle('active', chip.dataset.category === cat);
     });
     filterPrompts();
 }
@@ -434,21 +488,63 @@ function saveCurrentPrompt() {
     filterPrompts();
 }
 
-// Hide the loader
-document.getElementById('initial-loader').classList.add('hidden');
+// ================== UI EVENT LISTENERS ==================
+function setupUIListeners() {
+    // Search
+    document.getElementById('search-input').addEventListener('input', filterPrompts);
 
-// Show it again (if needed)
-document.getElementById('initial-loader').classList.remove('hidden');
+    // Category chips
+    document.querySelectorAll('.category-chip').forEach(chip => {
+        chip.addEventListener('click', () => {
+            const cat = chip.dataset.category;
+            filterByCategory(cat);
+        });
+    });
+
+    // New Prompt button (main)
+    document.getElementById('new-prompt-btn').addEventListener('click', showNewPromptModal);
+
+    // Modal actions
+    document.getElementById('cancel-modal-btn').addEventListener('click', hideNewPromptModal);
+    document.getElementById('add-prompt-btn').addEventListener('click', createNewPrompt);
+    // Close modal on overlay click
+    document.getElementById('new-prompt-modal').addEventListener('click', (e) => {
+        if (e.target === e.currentTarget) hideNewPromptModal();
+    });
+
+    // Back to library
+    document.getElementById('back-to-library-btn').addEventListener('click', backToLibrary);
+
+    // Detect variables button
+    document.getElementById('detect-variables-btn').addEventListener('click', detectVariables);
+
+    // Generate prompt
+    document.getElementById('generate-prompt-btn').addEventListener('click', generatePrompt);
+
+    // Copy and Reset
+    document.getElementById('copy-prompt-btn').addEventListener('click', copyPrompt);
+    document.getElementById('reset-btn').addEventListener('click', resetAll);
+
+    // Save prompt in editor
+    document.getElementById('save-prompt-btn').addEventListener('click', saveCurrentPrompt);
+
+    // Sidebar "New Prompt" item
+    const sidebarNewPrompt = document.getElementById('tavio-new-prompt-item');
+    if (sidebarNewPrompt) {
+        sidebarNewPrompt.addEventListener('click', showNewPromptModal);
+    }
+}
 
 // ================== INIT ==================
 document.addEventListener('DOMContentLoaded', async () => {
     setupAuthListeners();
+    setupUIListeners();
 
     // Wait for sidebar component to be defined before interacting
     customElements.whenDefined('sidebar-component').then(() => {
-        getSidebarComponent();       // attach listeners
-        syncSidebarComponent();      // show logged‑out state
+        getSidebarComponent();
+        syncSidebarComponent();
     });
 
-    await restoreSession();         // check if already logged in
+    await restoreSession();
 });
