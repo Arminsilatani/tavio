@@ -894,14 +894,22 @@ async function restoreSessionAndSidebar() {
     btnClearBuilder?.addEventListener('click', clearBuilder);
 
 /* =========================== INIT (مطابق معماری Ravlo) ============================ */
+/* =========================== INIT (نسخه نهایی با تضمین اجرا) ============================ */
 async function initApp() {
     console.log('🚀 [Tavio] شروع راه‌اندازی...');
 
     const container = document.getElementById('app-container');
     const loader = document.getElementById('initial-loader');
 
+    // اگر container وجود نداشته باشد، یعنی صفحه هنوز بارگذاری نشده، صبر کن
+    if (!container) {
+        console.warn('⏳ container پیدا نشد، صبر می‌کنم...');
+        setTimeout(initApp, 100);
+        return;
+    }
+
     try {
-        // ۱. احراز هویت (مستقل از سایدبار)
+        // ۱. احراز هویت
         const { data: { session }, error } = await sbClient.auth.getSession();
         if (error) console.warn('⚠️ خطا در دریافت نشست:', error);
 
@@ -945,7 +953,10 @@ async function initApp() {
         console.error('❌ خطای بحرانی در راه‌اندازی:', e);
     } finally {
         // ۲. نمایش اپلیکیشن و مخفی کردن لودینگ
-        if (container) container.classList.remove('app-hidden');
+        if (container) {
+            container.classList.remove('app-hidden');
+            console.log('✅ کلاس app-hidden حذف شد');
+        }
         if (loader) {
             loader.classList.add('hidden');
             loader.style.display = 'none';
@@ -955,10 +966,22 @@ async function initApp() {
     }
 }
 
-// اجرا در زمان مناسب
+// ======= تضمین اجرا در هر شرایطی =======
+console.log('🔄 [Tavio] راه‌اندازی برنامه...');
+
 if (document.readyState === 'loading') {
     document.addEventListener('DOMContentLoaded', initApp);
 } else {
+    // اگر DOM قبلاً آماده است، مستقیماً اجرا کن
     initApp();
 }
+
+// یک ضربه‌گیر امنیتی: اگر تا ۳ ثانیه دیگر اجرا نشد، مجدداً تلاش کن
+setTimeout(() => {
+    const container = document.getElementById('app-container');
+    if (container && container.classList.contains('app-hidden')) {
+        console.warn('⚠️ برنامه هنوز شروع نشده، اجرای مجدد...');
+        initApp();
+    }
+}, 3000);
 });
