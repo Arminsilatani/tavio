@@ -893,87 +893,69 @@ async function restoreSessionAndSidebar() {
     btnCopyPrompt?.addEventListener('click', copyToClipboard);
     btnClearBuilder?.addEventListener('click', clearBuilder);
 
-/* =========================== INIT (نسخه دیباگ) ============================ */
+/* =========================== INIT (نسخه نهایی مستقل از سایدبار) ============================ */
 async function initApp() {
     const loader = document.getElementById('initial-loader');
-    console.log('🔵 [1] initApp شروع شد');
-
-    // *** Kill Switch امنیتی: حداکثر ۴ ثانیه بعد، لودینگ را اجباری مخفی کن ***
-    const killTimer = setTimeout(() => {
-        console.warn('🟡 [KILL SWITCH] ۴ ثانیه گذشت، لودینگ را اجباری مخفی می‌کنم');
-        if (loader) loader.classList.add('hidden');
-    }, 4000);
+    console.log('🚀 [FINAL] راه‌اندازی مستقل Tavio...');
 
     try {
-        console.log('🔵 [2] در حال انتظار برای sidebar-component...');
-        await Promise.race([
-            customElements.whenDefined('sidebar-component'),
-            new Promise(resolve => {
-                console.log('🔵 [3] تایمر ۲ ثانیه برای سایدبار شروع شد');
-                setTimeout(resolve, 2000);
-            })
-        ]);
-        console.log('🔵 [4] انتظار سایدبار تمام شد');
-
-        console.log('🔵 [5] در حال بازیابی نشست (restoreSessionAndSidebar)...');
-        await restoreSessionAndSidebar();
-        console.log('🔵 [6] بازیابی نشست با موفقیت تمام شد');
-
-    } catch (e) {
-        console.error('🔴 [ERROR در initApp]:', e);
-    } finally {
-        console.log('🔵 [7] finally: در حال مخفی کردن لودینگ و فراخوانی renderAll');
-        clearTimeout(killTimer); // اگر زودتر تمام شد، تایمر را پاک کن
-        if (loader) loader.classList.add('hidden');
-        renderAll(); // حتی اگر خطا باشد، لیست را رندر کن (خالی یا پر)
-    }
-}
-
-/* =========================== SIDEBAR + SESSION (نسخه دیباگ) ============================ */
-async function restoreSessionAndSidebar() {
-    console.log('🔵 [A] restoreSessionAndSidebar شروع شد');
-    const comp = getSidebarComponent();
-
-    try {
-        console.log('🔵 [B] در حال دریافت session از Supabase...');
+        // ۱. بررسی نشست کاربر (بدون وابستگی به سایدبار)
         const { data: { session }, error } = await sbClient.auth.getSession();
-        if (error) console.error('🔴 خطا در getSession:', error);
-        console.log('🔵 [C] دریافت session:', session ? '✅ کاربر پیدا شد' : '❌ کاربری نیست');
+        if (error) console.warn('خطا در دریافت نشست:', error);
 
         if (session?.user) {
             currentUser = session.user;
-            console.log('🔵 [D] در حال دریافت پروفایل برای:', currentUser.id);
+            console.log('🚀 کاربر وارد شد:', currentUser.id);
+            
+            // دریافت پروفایل
             currentProfile = await fetchProfile(session.user.id);
-            console.log('🔵 [E] پروفایل دریافت شد:', currentProfile?.first_name || 'بدون نام');
             currentUserRole = currentProfile?.role || 'recruit';
 
-            if (comp && comp.setUser) {
-                comp.setUser(currentUser, currentProfile);
-                console.log('🔵 [F] کاربر به سایدبار داده شد');
+            // ۲. تلاش برای اتصال به سایدبار (اختیاری - اگر خطا دهد، نادیده گرفته می‌شود)
+            try {
+                const comp = getSidebarComponent();
+                if (comp && typeof comp.setUser === 'function') {
+                    comp.setUser(currentUser, currentProfile);
+                    console.log('🚀 سایدبار با موفقیت به‌روز شد');
+                }
+            } catch (e) {
+                console.warn('⚠️ سایدبار در دسترس نیست (مشکل غیر بحرانی):', e);
             }
 
-            console.log('🔵 [G] در حال دریافت دسته‌بندی‌ها (fetchTavioCategories)...');
+            // ۳. دریافت دیتاهای اصلی (این‌ها باید حتماً اجرا شوند)
+            console.log('🚀 دریافت دسته‌بندی‌ها...');
             await fetchTavioCategories();
-            console.log('🔵 [H] دسته‌بندی‌ها دریافت شدند');
-
-            console.log('🔵 [I] در حال دریافت پرامپت‌ها (fetchTavioPrompts)...');
+            console.log('🚀 دریافت پرامپت‌ها...');
             await fetchTavioPrompts();
-            console.log('🔵 [J] پرامپت‌ها دریافت شدند');
-
-            console.log('🔵 [K] در حال دریافت اشتراک‌ها (fetchSharedPrompts)...');
+            console.log('🚀 دریافت اشتراک‌ها...');
             await fetchSharedPrompts();
-            console.log('🔵 [L] اشتراک‌ها دریافت شدند');
 
-            console.log('🔵 [M] فراخوانی renderAll اولیه');
-            renderAll();
         } else {
-            console.log('🔵 [C2] هیچ نشستی وجود ندارد (کاربر مهمان)');
+            console.log('🚀 کاربر مهمان (بدون نشست)');
+            // ریست کردن state در حالت مهمان
+            currentUser = null;
+            currentProfile = null;
+            tavioPrompts = [];
+            tavioCategories = [];
+            tavioSharedPrompts = [];
         }
 
     } catch (e) {
-        console.error('🔴 [ERROR در restoreSessionAndSidebar]:', e);
+        console.error('🚨 خطای بحرانی در راه‌اندازی:', e);
     }
 
-    console.log('🔵 [Z] restoreSessionAndSidebar به پایان رسید');
+    // ۴. همیشه لیست پرامپت‌ها را رندر کن و لودینگ را مخفی کن (حتی اگر خطا باشد)
+    renderAll();
+    if (loader) {
+        loader.classList.add('hidden');
+        loader.style.display = 'none';
+    }
+    console.log('✅ [FINAL] Tavio با موفقیت راه‌اندازی شد.');
+}
+
+if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', initApp);
+} else {
+    initApp();
 }
 });
