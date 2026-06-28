@@ -84,26 +84,34 @@ function syncSidebarComponent() {
     } else {
         comp.clearUser();
     }
+    comp.setTodayList([], []);
+    function syncSidebarComponent() {
+    const comp = getSidebarComponent();
+    if (!comp || typeof comp.setUser !== 'function') return;
 
-    // مخفی کردن Today/Overdue پیش‌فرض (بدون توقف در صورت خطا)
-    try {
-        if (comp.shadowRoot) {
-            const todayList = comp.shadowRoot.getElementById('sidebar-today-list');
-            if (todayList) {
-                const section = todayList.closest('.sidebar-section') || todayList.parentElement;
-                if (section) section.style.display = 'none';
-            }
-        }
-    } catch (e) {
-        // از توقف ادامهٔ برنامه جلوگیری می‌کنیم
+    if (currentUser) {
+        comp.setUser(currentUser, currentProfile);
+    } else {
+        comp.clearUser();
     }
 
-    comp.setTodayList([], []);
+    // پنهان کردن Today/Overdue پیش‌فرض
+    if (comp.shadowRoot) {
+        const todayList = comp.shadowRoot.getElementById('sidebar-today-list');
+        if (todayList) {
+            // مخفی‌کردن کل بخش (بسته به ساختار کامپوننت، ممکن است والد یا جدِ بالاتر)
+            let section = todayList.closest('.sidebar-section') || todayList.parentElement;
+            if (section) section.style.display = 'none';
+        }
+    }
+
+    comp.setTodayList([], []);   // اختیاری؛ می‌توانید این خط را هم بردارید
     comp.setEvents([]);
     updateNotificationDot();
-
-    // بارگذاری اعلان‌های اختصاصی (فعلاً خالی نگه داشته می‌شود)
-    loadTavioSidebarNotifications();
+    loadTavioSidebarNotifications();   // ← بارگذاری اعلان‌های مخصوص Tavio
+}
+    comp.setEvents([]);
+    updateNotificationDot();
 }
 
 async function updateNotificationDot() {
@@ -120,11 +128,6 @@ async function updateNotificationDot() {
         if (data && data.length > 0) hasNotifications = true;
     }
     comp.setNotificationDot(hasNotifications);
-}
-
-function loadTavioSidebarNotifications() {
-    // TODO: هنگام دریافت نوتیفیکیشن‌های واقعی از Supabase، اینجا لیست را پر کنید.
-    // فعلاً خالی می‌ماند تا چیزی اضافی نمایش داده نشود.
 }
 
 // ================== AUTH ==================
