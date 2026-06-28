@@ -56,28 +56,54 @@ function isPinned(promptId) {
 }
 
 // ================== SHARING ==================
-// Placeholder: fetch connected users from Supabase (must exist)
 async function fetchConnectedUsers() {
     if (!currentUser) return [];
-    // Assuming 'connections' table with user_id and connected_user_id where status = 'accepted'
-    const { data, error } = await sb
-        .from('connections')
-        .select('connected_user_id')
-        .eq('user_id', currentUser.id)
-        .eq('status', 'accepted');
-    if (error) {
-        console.error('Error fetching connections:', error);
+    try {
+        // دریافت اتصالات accepted که کاربر فعلی در آن نقش دارد (چه فرستنده، چه گیرنده)
+        const { data, error } = await sb
+            .from('dashboard_connectionrequests')
+            .select('from_id, to_id')
+            .or(`from_id.eq.${currentUser.id},to_id.eq.${currentUser.id}`)
+            .eq('status', 'accepted');
+
+        if (error) {
+            console.error('Error fetching connections:', error);
+            return [];
+        }
+
+        if (!data || data.length === 0) return [];
+
+        // استخراج شناسه کاربران متصل (طرف مقابل)
+        const connectedIds = data.map(row => {
+            if (row.from_id === currentUser.id) {
+                return row.to_id;
+            } else if (row.to_id === currentUser.id) {
+                return row.from_id;
+            }
+            return null;
+        }).filter(id => id && id !== currentUser.id);
+
+        if (connectedIds.length === 0) return [];
+
+        // حذف تکراری‌ها
+        const uniqueIds = [...new Set(connectedIds)];
+
+        // دریافت پروفایل‌ها
+        const { data: profiles, error: profError } = await sb
+            .from('profiles')
+            .select('id, first_name, last_name, username, photo_url')
+            .in('id', uniqueIds);
+
+        if (profError) {
+            console.error('Error fetching profiles:', profError);
+            return [];
+        }
+
+        return profiles || [];
+    } catch (e) {
+        console.error('Error in fetchConnectedUsers:', e);
         return [];
     }
-    const ids = data.map(row => row.connected_user_id);
-    if (ids.length === 0) return [];
-    // Fetch profiles for those users
-    const { data: profiles, error: profError } = await sb
-        .from('profiles')
-        .select('id, first_name, last_name, username, photo_url')
-        .in('id', ids);
-    if (profError) return [];
-    return profiles;
 }
 
 async function openShareModal(promptId) {
