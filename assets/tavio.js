@@ -84,23 +84,36 @@ function syncSidebarComponent() {
     } else {
         comp.clearUser();
     }
+    comp.setTodayList([], []);
+    function syncSidebarComponent() {
+    const comp = getSidebarComponent();
+    if (!comp || typeof comp.setUser !== 'function') return;
 
-    // مخفی‌کردن بخش Today/Overdue پیش‌فرض (اگر وجود داشته باشه)
+    if (currentUser) {
+        comp.setUser(currentUser, currentProfile);
+    } else {
+        comp.clearUser();
+    }
+
+    // پنهان کردن Today/Overdue پیش‌فرض
     if (comp.shadowRoot) {
         const todayList = comp.shadowRoot.getElementById('sidebar-today-list');
         if (todayList) {
-            const section = todayList.closest('.sidebar-section') || todayList.parentElement;
+            // مخفی‌کردن کل بخش (بسته به ساختار کامپوننت، ممکن است والد یا جدِ بالاتر)
+            let section = todayList.closest('.sidebar-section') || todayList.parentElement;
             if (section) section.style.display = 'none';
         }
     }
 
-    comp.setTodayList([], []);
+    comp.setTodayList([], []);   // اختیاری؛ می‌توانید این خط را هم بردارید
     comp.setEvents([]);
     updateNotificationDot();
-
-    // اگه بعداً خواستی اعلان‌های اختصاصی لود بشن، می‌تونی تابع loadTavioSidebarNotifications رو بسازی
-    // و اینجا صدا بزنی: loadTavioSidebarNotifications();
+    loadTavioSidebarNotifications();   // ← بارگذاری اعلان‌های مخصوص Tavio
 }
+    comp.setEvents([]);
+    updateNotificationDot();
+}
+
 async function updateNotificationDot() {
     const comp = getSidebarComponent();
     if (!comp) return;
