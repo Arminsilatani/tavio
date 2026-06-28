@@ -869,34 +869,87 @@ async function restoreSessionAndSidebar() {
     btnCopyPrompt?.addEventListener('click', copyToClipboard);
     btnClearBuilder?.addEventListener('click', clearBuilder);
 
-/* =========================== INIT ============================ */
-/* =========================== INIT ============================ */
+/* =========================== INIT (نسخه دیباگ) ============================ */
 async function initApp() {
     const loader = document.getElementById('initial-loader');
+    console.log('🔵 [1] initApp شروع شد');
+
+    // *** Kill Switch امنیتی: حداکثر ۴ ثانیه بعد، لودینگ را اجباری مخفی کن ***
+    const killTimer = setTimeout(() => {
+        console.warn('🟡 [KILL SWITCH] ۴ ثانیه گذشت، لودینگ را اجباری مخفی می‌کنم');
+        if (loader) loader.classList.add('hidden');
+    }, 4000);
 
     try {
-        // با تایم‌اوت ۲ ثانیه منتظر بمان، اگر سایدبار لود نشد ادامه بده
+        console.log('🔵 [2] در حال انتظار برای sidebar-component...');
         await Promise.race([
             customElements.whenDefined('sidebar-component'),
-            new Promise(resolve => setTimeout(resolve, 2000))
+            new Promise(resolve => {
+                console.log('🔵 [3] تایمر ۲ ثانیه برای سایدبار شروع شد');
+                setTimeout(resolve, 2000);
+            })
         ]);
+        console.log('🔵 [4] انتظار سایدبار تمام شد');
 
+        console.log('🔵 [5] در حال بازیابی نشست (restoreSessionAndSidebar)...');
         await restoreSessionAndSidebar();
+        console.log('🔵 [6] بازیابی نشست با موفقیت تمام شد');
+
     } catch (e) {
-        console.warn('Init error (non-fatal):', e);
+        console.error('🔴 [ERROR در initApp]:', e);
+    } finally {
+        console.log('🔵 [7] finally: در حال مخفی کردن لودینگ و فراخوانی renderAll');
+        clearTimeout(killTimer); // اگر زودتر تمام شد، تایمر را پاک کن
+        if (loader) loader.classList.add('hidden');
+        renderAll(); // حتی اگر خطا باشد، لیست را رندر کن (خالی یا پر)
+    }
+}
+
+/* =========================== SIDEBAR + SESSION (نسخه دیباگ) ============================ */
+async function restoreSessionAndSidebar() {
+    console.log('🔵 [A] restoreSessionAndSidebar شروع شد');
+    const comp = getSidebarComponent();
+
+    try {
+        console.log('🔵 [B] در حال دریافت session از Supabase...');
+        const { data: { session }, error } = await sbClient.auth.getSession();
+        if (error) console.error('🔴 خطا در getSession:', error);
+        console.log('🔵 [C] دریافت session:', session ? '✅ کاربر پیدا شد' : '❌ کاربری نیست');
+
+        if (session?.user) {
+            currentUser = session.user;
+            console.log('🔵 [D] در حال دریافت پروفایل برای:', currentUser.id);
+            currentProfile = await fetchProfile(session.user.id);
+            console.log('🔵 [E] پروفایل دریافت شد:', currentProfile?.first_name || 'بدون نام');
+            currentUserRole = currentProfile?.role || 'recruit';
+
+            if (comp && comp.setUser) {
+                comp.setUser(currentUser, currentProfile);
+                console.log('🔵 [F] کاربر به سایدبار داده شد');
+            }
+
+            console.log('🔵 [G] در حال دریافت دسته‌بندی‌ها (fetchTavioCategories)...');
+            await fetchTavioCategories();
+            console.log('🔵 [H] دسته‌بندی‌ها دریافت شدند');
+
+            console.log('🔵 [I] در حال دریافت پرامپت‌ها (fetchTavioPrompts)...');
+            await fetchTavioPrompts();
+            console.log('🔵 [J] پرامپت‌ها دریافت شدند');
+
+            console.log('🔵 [K] در حال دریافت اشتراک‌ها (fetchSharedPrompts)...');
+            await fetchSharedPrompts();
+            console.log('🔵 [L] اشتراک‌ها دریافت شدند');
+
+            console.log('🔵 [M] فراخوانی renderAll اولیه');
+            renderAll();
+        } else {
+            console.log('🔵 [C2] هیچ نشستی وجود ندارد (کاربر مهمان)');
+        }
+
+    } catch (e) {
+        console.error('🔴 [ERROR در restoreSessionAndSidebar]:', e);
     }
 
-    // همواره لودینگ را مخفی کن (حتی اگر خطایی رخ داده باشد)
-    if (loader) loader.classList.add('hidden');
-
-    renderAll();
-
-    // ضمانت بیشتر برای حذف لودینگ بعد از ۳ ثانیه
-    setTimeout(() => {
-        if (loader && !loader.classList.contains('hidden')) {
-            loader.classList.add('hidden');
-        }
-    }, 3000);
+    console.log('🔵 [Z] restoreSessionAndSidebar به پایان رسید');
 }
-initApp();
 });
