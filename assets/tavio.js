@@ -79,30 +79,39 @@ function syncSidebarComponent() {
     const comp = getSidebarComponent();
     if (!comp || typeof comp.setUser !== 'function') return;
 
-    // تنظیم کاربر
+    if (currentUser) {
+        comp.setUser(currentUser, currentProfile);
+    } else {
+        comp.clearUser();
+    }
+    comp.setTodayList([], []);
+    function syncSidebarComponent() {
+    const comp = getSidebarComponent();
+    if (!comp || typeof comp.setUser !== 'function') return;
+
     if (currentUser) {
         comp.setUser(currentUser, currentProfile);
     } else {
         comp.clearUser();
     }
 
-    // پنهان کردن بخش Today/Overdue پیش‌فرض (اگر در کامپوننت وجود دارد)
+    // پنهان کردن Today/Overdue پیش‌فرض
     if (comp.shadowRoot) {
         const todayList = comp.shadowRoot.getElementById('sidebar-today-list');
         if (todayList) {
+            // مخفی‌کردن کل بخش (بسته به ساختار کامپوننت، ممکن است والد یا جدِ بالاتر)
             let section = todayList.closest('.sidebar-section') || todayList.parentElement;
             if (section) section.style.display = 'none';
         }
     }
 
-    comp.setTodayList([], []);
+    comp.setTodayList([], []);   // اختیاری؛ می‌توانید این خط را هم بردارید
     comp.setEvents([]);
     updateNotificationDot();
-
-    // بارگذاری اعلان‌های اختصاصی tavio (در صورت نیاز بعداً پیاده‌سازی می‌شود)
-    if (typeof loadTavioSidebarNotifications === 'function') {
-        loadTavioSidebarNotifications();
-    }
+    loadTavioSidebarNotifications();   // ← بارگذاری اعلان‌های مخصوص Tavio
+}
+    comp.setEvents([]);
+    updateNotificationDot();
 }
 
 async function updateNotificationDot() {
