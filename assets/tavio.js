@@ -614,23 +614,31 @@ document.addEventListener('DOMContentLoaded', () => {
         comp.addEventListener('logout-request', async () => await sbClient.auth.signOut());
     });
 
-    async function restoreSessionAndSidebar() {
-        const comp = getSidebarComponent();
-        if (!comp) return;
-        try {
-            const { data: { session } } = await sbClient.auth.getSession();
-            if (session?.user) {
-                currentUser = session.user;
-                currentProfile = await fetchProfile(session.user.id);
-                currentUserRole = currentProfile?.role || 'recruit';
-                if (comp.setUser) comp.setUser(currentUser, currentProfile);
-                await fetchTavioCategories();
-                await fetchTavioPrompts();
-                await fetchSharedPrompts();
-                renderAll();
+    /* =========================== SIDEBAR COMPONENT INTEGRATION ============================ */
+async function restoreSessionAndSidebar() {
+    const comp = getSidebarComponent(); // ممکن است null برگرداند
+
+    try {
+        const { data: { session } } = await sbClient.auth.getSession();
+        if (session?.user) {
+            currentUser = session.user;
+            currentProfile = await fetchProfile(session.user.id);
+            currentUserRole = currentProfile?.role || 'recruit';
+
+            // اگر کامپوننت موجود باشد، user را به آن بده
+            if (comp && comp.setUser) {
+                comp.setUser(currentUser, currentProfile);
             }
-        } catch (e) { console.warn('Session restore failed:', e); }
+
+            await fetchTavioCategories();
+            await fetchTavioPrompts();
+            await fetchSharedPrompts();
+            renderAll(); // رندر اولیه بعد از احراز هویت
+        }
+    } catch (e) {
+        console.warn('Session restore failed:', e);
     }
+}
 
     async function fetchProfile(userId) {
         try {
@@ -862,20 +870,28 @@ document.addEventListener('DOMContentLoaded', () => {
     btnClearBuilder?.addEventListener('click', clearBuilder);
 
 /* =========================== INIT ============================ */
+/* =========================== INIT ============================ */
 async function initApp() {
     const loader = document.getElementById('initial-loader');
 
     try {
-        await customElements.whenDefined('sidebar-component');
+        // با تایم‌اوت ۲ ثانیه منتظر بمان، اگر سایدبار لود نشد ادامه بده
+        await Promise.race([
+            customElements.whenDefined('sidebar-component'),
+            new Promise(resolve => setTimeout(resolve, 2000))
+        ]);
+
         await restoreSessionAndSidebar();
     } catch (e) {
         console.warn('Init error (non-fatal):', e);
     }
 
+    // همواره لودینگ را مخفی کن (حتی اگر خطایی رخ داده باشد)
     if (loader) loader.classList.add('hidden');
 
     renderAll();
 
+    // ضمانت بیشتر برای حذف لودینگ بعد از ۳ ثانیه
     setTimeout(() => {
         if (loader && !loader.classList.contains('hidden')) {
             loader.classList.add('hidden');
