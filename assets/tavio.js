@@ -894,7 +894,7 @@ async function restoreSessionAndSidebar() {
     btnClearBuilder?.addEventListener('click', clearBuilder);
 
 /* =========================== INIT (مطابق معماری Ravlo) ============================ */
-/* =========================== INIT (نسخه نهایی با لاگ‌های کامل) ============================ */
+/* =========================== INIT (نسخه نهایی با Timeout) ============================ */
 async function initApp() {
     console.log('🚀 [Tavio] شروع راه‌اندازی...');
 
@@ -917,13 +917,27 @@ async function initApp() {
         }
         console.log('✅ sbClient موجود است');
 
-        // ۱. احراز هویت
-        console.log('🔑 دریافت نشست از Supabase...');
-        const { data: { session }, error } = await sbClient.auth.getSession();
+        // ----- دریافت نشست با Timeout (۵ ثانیه) -----
+        console.log('🔑 دریافت نشست از Supabase (با تایم‌اوت ۵ ثانیه)...');
+
+        const sessionPromise = sbClient.auth.getSession();
+        const timeoutPromise = new Promise((_, reject) =>
+            setTimeout(() => reject(new Error('⏰ Timeout: Supabase پاسخ نداد')), 5000)
+        );
+
+        let session = null;
+        let error = null;
+        try {
+            const result = await Promise.race([sessionPromise, timeoutPromise]);
+            session = result.data?.session || null;
+            error = result.error || null;
+        } catch (timeoutError) {
+            console.warn('⚠️', timeoutError.message);
+            // در صورت Timeout، به عنوان کاربر مهمان ادامه می‌دهیم
+        }
+
         if (error) {
-            console.error('⚠️ خطا در دریافت نشست:', error);
-        } else {
-            console.log('✅ نشست دریافت شد، کاربر:', session?.user?.email || 'مهمان');
+            console.warn('⚠️ خطا در دریافت نشست:', error);
         }
 
         if (session?.user) {
@@ -931,21 +945,40 @@ async function initApp() {
             console.log('👤 کاربر وارد شد:', currentUser.email);
 
             console.log('👤 دریافت پروفایل...');
-            currentProfile = await fetchProfile(session.user.id);
-            currentUserRole = currentProfile?.role || 'recruit';
-            console.log('✅ پروفایل:', currentProfile?.first_name, currentProfile?.last_name);
+            try {
+                currentProfile = await fetchProfile(session.user.id);
+                currentUserRole = currentProfile?.role || 'recruit';
+                console.log('✅ پروفایل:', currentProfile?.first_name, currentProfile?.last_name);
+            } catch (profileError) {
+                console.warn('⚠️ خطا در دریافت پروفایل:', profileError);
+                currentProfile = { id: session.user.id, role: 'recruit', first_name: '', last_name: '' };
+                currentUserRole = 'recruit';
+            }
 
-            console.log('📂 دریافت دسته‌بندی‌ها...');
-            await fetchTavioCategories();
-            console.log('✅ تعداد دسته‌بندی‌ها:', tavioCategories.length);
+            // دریافت داده‌ها (با try/catch جداگانه برای هر کدام)
+            try {
+                console.log('📂 دریافت دسته‌بندی‌ها...');
+                await fetchTavioCategories();
+                console.log('✅ تعداد دسته‌بندی‌ها:', tavioCategories.length);
+            } catch (e) {
+                console.warn('⚠️ خطا در دریافت دسته‌بندی‌ها:', e);
+            }
 
-            console.log('📄 دریافت پرامپت‌ها...');
-            await fetchTavioPrompts();
-            console.log('✅ تعداد پرامپت‌ها:', tavioPrompts.length);
+            try {
+                console.log('📄 دریافت پرامپت‌ها...');
+                await fetchTavioPrompts();
+                console.log('✅ تعداد پرامپت‌ها:', tavioPrompts.length);
+            } catch (e) {
+                console.warn('⚠️ خطا در دریافت پرامپت‌ها:', e);
+            }
 
-            console.log('📨 دریافت درخواست‌های اشتراک...');
-            await fetchSharedPrompts();
-            console.log('✅ تعداد اشتراک‌ها:', tavioSharedPrompts.length);
+            try {
+                console.log('📨 دریافت درخواست‌های اشتراک...');
+                await fetchSharedPrompts();
+                console.log('✅ تعداد اشتراک‌ها:', tavioSharedPrompts.length);
+            } catch (e) {
+                console.warn('⚠️ خطا در دریافت اشتراک‌ها:', e);
+            }
 
             // اتصال به سایدبار (اختیاری)
             try {
@@ -953,15 +986,13 @@ async function initApp() {
                 if (comp && typeof comp.setUser === 'function') {
                     comp.setUser(currentUser, currentProfile);
                     console.log('✅ سایدبار به‌روز شد');
-                } else {
-                    console.log('ℹ️ سایدبار در دسترس نیست (اختیاری)');
                 }
             } catch (e) {
                 console.warn('⚠️ خطای غیربحرانی در سایدبار:', e);
             }
 
         } else {
-            console.log('👤 کاربر مهمان');
+            console.log('👤 کاربر مهمان (نشست وجود ندارد یا Timeout)');
             currentUser = null;
             currentProfile = null;
             tavioPrompts = [];
@@ -974,11 +1005,13 @@ async function initApp() {
         console.error('📋 جزئیات خطا:', e.stack);
     }
 
-    // ۲. نمایش اپلیکیشن و مخفی کردن لودینگ (حتی اگر خطا باشد)
+    // ===== مرحله نهایی: نمایش اپلیکیشن و مخفی کردن لودینگ (همیشه اجرا می‌شود) =====
     console.log('🔄 مرحله نهایی: نمایش اپلیکیشن');
     if (container) {
         container.classList.remove('app-hidden');
         console.log('✅ کلاس app-hidden حذف شد');
+    } else {
+        console.warn('⚠️ container وجود ندارد!');
     }
     if (loader) {
         loader.classList.add('hidden');
@@ -992,19 +1025,18 @@ async function initApp() {
 // ======= تضمین اجرا در هر شرایطی =======
 console.log('🔄 [Tavio] راه‌اندازی برنامه...');
 
-// اجرای مستقیم اگر DOM آماده باشد
 if (document.readyState === 'loading') {
     document.addEventListener('DOMContentLoaded', initApp);
 } else {
     initApp();
 }
 
-// ضربه‌گیر امنیتی برای مواقعی که initApp به هر دلیل اجرا نشود
+// ضربه‌گیر امنیتی نهایی (اگر به هر دلیل اجرا نشد)
 setTimeout(() => {
     const container = document.getElementById('app-container');
     if (container && container.classList.contains('app-hidden')) {
         console.warn('⚠️ برنامه هنوز شروع نشده، اجرای مجدد...');
         initApp();
     }
-}, 3000);
+}, 4000);
 });
