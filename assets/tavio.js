@@ -201,28 +201,24 @@ function setupAuthListeners() {
     });
 
     document.getElementById('auth-signin-btn').addEventListener('click', async () => {
-    const email = document.getElementById('auth-email').value.trim();
-    const password = document.getElementById('auth-password-login').value;
-    document.getElementById('auth-error-login').style.display = 'none';
-    
-    const { data, error } = await sb.auth.signInWithPassword({ email, password });
-    if (error) {
-        document.getElementById('auth-error-login').textContent = error.message;
-        document.getElementById('auth-error-login').style.display = 'block';
-        return;
-    }
-    
-    currentUser = data.user;
-    currentProfile = await buildCurrentProfile(data.user);
-    currentUserRole = currentProfile?.role || 'recruit';
-    closeModal(authOverlay);
-    document.getElementById('app-container').classList.remove('app-hidden');
-    syncSidebarComponent();
-    attachTavioNewPromptListener();  // ← بعد از لاگین
-    renderPromptGrid(prompts);
-    filterByCategory('all');
-});
-
+        const email = document.getElementById('auth-email').value.trim();
+        const password = document.getElementById('auth-password-login').value;
+        document.getElementById('auth-error-login').style.display = 'none';
+        const { data, error } = await sb.auth.signInWithPassword({ email, password });
+        if (error) {
+            document.getElementById('auth-error-login').textContent = error.message;
+            document.getElementById('auth-error-login').style.display = 'block';
+            return;
+        }
+        currentUser = data.user;
+        currentProfile = await buildCurrentProfile(data.user);
+        currentUserRole = currentProfile?.role || 'recruit';
+        closeModal(authOverlay);
+        document.getElementById('app-container').classList.remove('app-hidden');
+        syncSidebarComponent();
+        renderPromptGrid(prompts);
+        filterByCategory('all');
+    });
 
     document.getElementById('auth-register-btn').addEventListener('click', async () => {
         const email = document.getElementById('auth-email').value.trim();
