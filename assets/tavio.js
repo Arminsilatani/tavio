@@ -439,7 +439,6 @@ function saveCurrentPrompt() {
     filterPrompts();
 }
 
-// Event listeners for static buttons (replacing inline onclick)
 document.addEventListener('DOMContentLoaded', async () => {
     setupAuthListeners();
 
@@ -458,7 +457,6 @@ document.addEventListener('DOMContentLoaded', async () => {
         chip.addEventListener('click', () => filterByCategory(chip.dataset.category));
     });
 
-    // Sidebar new prompt item
     document.getElementById('tavio-new-prompt-item').addEventListener('click', showNewPromptModal);
 
     customElements.whenDefined('sidebar-component').then(() => {
