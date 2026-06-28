@@ -280,17 +280,34 @@ body {
     max-width: 460px;
     padding: 28px;
 }
-.modal-input, #modal-template {
+.modal-title {
+    color: var(--accent);
+    margin-bottom: 20px;
+    font-size: 20px;
+    font-weight: 700;
+}
+.modal-input,
+.modal-textarea {
     width: 100%;
-    margin-bottom: 16px;
     background: rgba(255,255,255,0.05);
     border: 1px solid var(--border);
     color: var(--text);
     padding: 12px 14px;
     border-radius: 8px;
+    font-family: inherit;
+    font-size: 15px;
 }
-#modal-template { min-height: 140px; resize: vertical; }
-.modal-actions { display: flex; gap: 12px; justify-content: flex-end; }
+.modal-input { margin-bottom: 16px; }
+.modal-textarea {
+    min-height: 140px;
+    resize: vertical;
+    margin-bottom: 16px;
+}
+.modal-actions {
+    display: flex;
+    gap: 12px;
+    justify-content: flex-end;
+}
 
 .hidden { display: none !important; }
 .small { font-size: 13px; padding: 6px 14px; }
