@@ -114,9 +114,8 @@ function syncSidebarComponent() {
     comp.setTodayList([], []);
     comp.setEvents([]);
     updateNotificationDot();
-    loadTavioSidebarNotifications();  // ← حالا خطا نمی‌ده
+    loadTavioSidebarNotifications();
 }
-
 
 async function updateNotificationDot() {
     const comp = getSidebarComponent();
