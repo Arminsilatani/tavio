@@ -79,39 +79,42 @@ function syncSidebarComponent() {
     const comp = getSidebarComponent();
     if (!comp || typeof comp.setUser !== 'function') return;
 
-    if (currentUser) {
-        comp.setUser(currentUser, currentProfile);
-    } else {
-        comp.clearUser();
-    }
-    comp.setTodayList([], []);
-    function syncSidebarComponent() {
-    const comp = getSidebarComponent();
-    if (!comp || typeof comp.setUser !== 'function') return;
-
+    // ۱. وضعیت کاربر
     if (currentUser) {
         comp.setUser(currentUser, currentProfile);
     } else {
         comp.clearUser();
     }
 
-    // پنهان کردن Today/Overdue پیش‌فرض
+    // ۲. مخفی‌کردن بخش Today/Overdue (در صورت وجود)
     if (comp.shadowRoot) {
         const todayList = comp.shadowRoot.getElementById('sidebar-today-list');
         if (todayList) {
-            // مخفی‌کردن کل بخش (بسته به ساختار کامپوننت، ممکن است والد یا جدِ بالاتر)
-            let section = todayList.closest('.sidebar-section') || todayList.parentElement;
+            const section = todayList.closest('.sidebar-section') || todayList.parentElement;
+            if (section) section.style.display = 'none';
+        }
+        // در صورت نیاز برای Overdue هم همین کار را کنید
+        const overdueList = comp.shadowRoot.getElementById('sidebar-overdue-list');
+        if (overdueList) {
+            const section = overdueList.closest('.sidebar-section') || overdueList.parentElement;
             if (section) section.style.display = 'none';
         }
     }
 
-    comp.setTodayList([], []);   // اختیاری؛ می‌توانید این خط را هم بردارید
+    // ۳. لیست‌های خالی
+    comp.setTodayList([], []);
     comp.setEvents([]);
+
+    // ۴. به‌روزرسانی نقطه اعلان
     updateNotificationDot();
-    loadTavioSidebarNotifications();   // ← بارگذاری اعلان‌های مخصوص Tavio
-}
-    comp.setEvents([]);
-    updateNotificationDot();
+
+    // ۵. بارگذاری اعلان‌های مخصوص Tavio (اگر تابع وجود دارد)
+    if (typeof loadTavioSidebarNotifications === 'function') {
+        loadTavioSidebarNotifications();
+    } else {
+        // در غیر این صورت، خطا ندهیم
+        console.warn('loadTavioSidebarNotifications تعریف نشده است');
+    }
 }
 
 async function updateNotificationDot() {
