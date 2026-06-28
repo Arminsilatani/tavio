@@ -161,6 +161,34 @@
         </div>
     </main>
 
+    <!-- Share Modal -->
+    <div id="share-modal" class="modal hidden">
+        <div class="modal-content">
+            <h3 class="modal-title">Share Prompt</h3>
+            <p style="color:#aaa; font-size:14px; margin-bottom:16px;">Select a connected user to share this prompt with:</p>
+            <div id="share-user-list" style="display:flex; flex-direction:column; gap:8px; max-height:200px; overflow-y:auto; margin-bottom:16px;"></div>
+            <div class="modal-actions">
+                <button id="share-cancel-btn" class="btn-secondary">Cancel</button>
+                <button id="share-send-btn" class="btn-primary" disabled>Send</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Prompt Preview Modal (for recipient) -->
+    <div id="prompt-preview-modal" class="modal hidden">
+        <div class="modal-content" style="max-width:560px;">
+            <h3 class="modal-title" id="preview-prompt-title">Prompt Preview</h3>
+            <div style="margin-bottom:12px;">
+                <span id="preview-prompt-category" class="category-chip" style="background:var(--accent);color:#111;border-color:var(--accent);"></span>
+            </div>
+            <p style="color:#ccc; font-size:15px; white-space:pre-wrap; background:rgba(255,255,255,0.04); padding:16px; border-radius:8px; margin-bottom:16px;" id="preview-prompt-template"></p>
+            <div style="display:flex; gap:12px; justify-content:flex-end;">
+                <button id="preview-reject-btn" class="btn-secondary">Reject</button>
+                <button id="preview-accept-btn" class="btn-primary">Accept</button>
+            </div>
+        </div>
+    </div>
+
     <div id="new-prompt-modal" class="modal hidden">
         <div class="modal-content">
             <h3 class="modal-title">New Prompt Template</h3>
