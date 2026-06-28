@@ -101,10 +101,6 @@ function syncSidebarComponent() {
     // اگه بعداً خواستی اعلان‌های اختصاصی لود بشن، می‌تونی تابع loadTavioSidebarNotifications رو بسازی
     // و اینجا صدا بزنی: loadTavioSidebarNotifications();
 }
-    comp.setEvents([]);
-    updateNotificationDot();
-}
-
 async function updateNotificationDot() {
     const comp = getSidebarComponent();
     if (!comp) return;
