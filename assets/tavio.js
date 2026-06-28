@@ -22,10 +22,12 @@ let currentVariables = {};
 
 // ================== HELPERS ==================
 function showGlobalLoader() {
-    document.getElementById('initial-loader').style.display = 'flex';
+    const loader = document.getElementById('initial-loader');
+    if (loader) loader.style.display = 'flex';
 }
 function hideGlobalLoader() {
-    document.getElementById('initial-loader').style.display = 'none';
+    const loader = document.getElementById('initial-loader');
+    if (loader) loader.style.display = 'none';
 }
 function openModal(modal) {
     modal.style.display = 'flex';
@@ -49,7 +51,6 @@ function getSidebarComponent() {
             sidebarComponent.addEventListener('logout-request', () => {
                 logout();
             });
-            // Other events can be added as needed
         }
     }
     return sidebarComponent;
@@ -57,47 +58,68 @@ function getSidebarComponent() {
 
 // ================== PROFILE ==================
 async function buildCurrentProfile(user) {
-    const { data: profileRow } = await sb
-        .from('profiles')
-        .select('*')
-        .eq('id', user.id)
-        .single();
+    try {
+        const { data: profileRow } = await sb
+            .from('profiles')
+            .select('*')
+            .eq('id', user.id)
+            .single();
 
-    const md = user.user_metadata || {};
-    return {
-        id: user.id,
-        first_name: profileRow?.first_name ?? md.first_name ?? '',
-        last_name: profileRow?.last_name ?? md.last_name ?? '',
-        photo_url: profileRow?.photo_url ?? md.photo_url ?? '',
-        username: profileRow?.username ?? md.username ?? '',
-        role: profileRow?.role ?? md.role ?? 'recruit'
-    };
+        const md = user.user_metadata || {};
+        return {
+            id: user.id,
+            first_name: profileRow?.first_name ?? md.first_name ?? '',
+            last_name: profileRow?.last_name ?? md.last_name ?? '',
+            photo_url: profileRow?.photo_url ?? md.photo_url ?? '',
+            username: profileRow?.username ?? md.username ?? '',
+            role: profileRow?.role ?? md.role ?? 'recruit'
+        };
+    } catch (e) {
+        console.warn('Profile fetch failed:', e);
+        return {
+            id: user.id,
+            first_name: user.user_metadata?.first_name ?? '',
+            last_name: user.user_metadata?.last_name ?? '',
+            photo_url: '',
+            username: '',
+            role: 'recruit'
+        };
+    }
 }
 
 // ================== SYNC SIDEBAR ==================
 function syncSidebarComponent() {
-    const comp = getSidebarComponent();
-    if (!comp || typeof comp.setUser !== 'function') return;
+    try {
+        const comp = getSidebarComponent();
+        if (!comp || typeof comp.setUser !== 'function') return;
 
-    if (currentUser) {
-        comp.setUser(currentUser, currentProfile);
-    } else {
-        comp.clearUser();
-    }
-
-    // مخفی‌کردن Today/Overdue پیش‌فرض (در صورت وجود)
-    if (comp.shadowRoot) {
-        const todayList = comp.shadowRoot.getElementById('sidebar-today-list');
-        if (todayList) {
-            let section = todayList.closest('.sidebar-section') || todayList.parentElement;
-            if (section) section.style.display = 'none';
+        if (currentUser) {
+            comp.setUser(currentUser, currentProfile);
+        } else {
+            comp.clearUser();
         }
-    }
 
-    comp.setTodayList([], []);
-    comp.setEvents([]);
-    updateNotificationDot();
-    loadTavioSidebarNotifications();   // بارگذاری اعلان‌های اختصاصی Tavio
+        // پنهان کردن Today/Overdue پیش‌فرض
+        if (comp.shadowRoot) {
+            const todayList = comp.shadowRoot.getElementById('sidebar-today-list');
+            if (todayList) {
+                let section = todayList.closest('.sidebar-section') || todayList.parentElement;
+                if (section) section.style.display = 'none';
+            }
+        }
+
+        comp.setTodayList([], []);
+        comp.setEvents([]);
+
+        // به‌روزرسانی نشان اعلان (بدون توقف در صورت خطا)
+        updateNotificationDot().catch(e => console.warn('Notification dot update error:', e));
+
+        // بارگذاری اعلان‌های اختصاصی (فعلاً خالی)
+        loadTavioSidebarNotifications();
+    } catch (e) {
+        console.error('syncSidebarComponent error:', e);
+        // از توقف ادامهٔ برنامه جلوگیری می‌کنیم
+    }
 }
 
 async function updateNotificationDot() {
@@ -105,15 +127,23 @@ async function updateNotificationDot() {
     if (!comp) return;
     let hasNotifications = false;
     if (currentUser) {
-        const { data } = await sb
-            .from('notifications')
-            .select('id')
-            .eq('user_id', currentUser.id)
-            .eq('is_read', false)
-            .limit(1);
-        if (data && data.length > 0) hasNotifications = true;
+        try {
+            const { data } = await sb
+                .from('notifications')
+                .select('id')
+                .eq('user_id', currentUser.id)
+                .eq('is_read', false)
+                .limit(1);
+            if (data && data.length > 0) hasNotifications = true;
+        } catch (e) {
+            console.warn('Failed to fetch notifications:', e);
+        }
     }
     comp.setNotificationDot(hasNotifications);
+}
+
+function loadTavioSidebarNotifications() {
+    // TODO: بارگذاری اعلان‌های اشتراک prompt
 }
 
 // ================== AUTH ==================
@@ -144,7 +174,9 @@ async function restoreSession() {
         try {
             await sb.auth.setSession({ access_token, refresh_token });
             window.history.replaceState({}, document.title, window.location.pathname);
-        } catch (e) {}
+        } catch (e) {
+            console.warn('Token exchange failed:', e);
+        }
     }
 
     const { data: { session } } = await sb.auth.getSession();
@@ -154,8 +186,15 @@ async function restoreSession() {
         currentUserRole = currentProfile?.role || 'recruit';
         document.getElementById('app-container').classList.remove('app-hidden');
         closeModal(document.getElementById('auth-overlay'));
-        syncSidebarComponent();
-        // Initialize Tavio UI
+        
+        // همگام‌سازی سایدبار (با محافظت از خطا)
+        try {
+            syncSidebarComponent();
+        } catch (e) {
+            console.error('syncSidebarComponent failed during restore:', e);
+        }
+
+        // رندر کتابخانه و اعمال فیلتر
         renderPromptGrid(prompts);
         filterByCategory('all');
     } else {
@@ -198,7 +237,13 @@ function setupAuthListeners() {
         currentUserRole = currentProfile?.role || 'recruit';
         closeModal(authOverlay);
         document.getElementById('app-container').classList.remove('app-hidden');
-        syncSidebarComponent();
+        
+        try {
+            syncSidebarComponent();
+        } catch (e) {
+            console.error('syncSidebarComponent failed during signin:', e);
+        }
+
         renderPromptGrid(prompts);
         filterByCategory('all');
     });
@@ -417,15 +462,16 @@ function saveCurrentPrompt() {
     filterPrompts();
 }
 
+// ================== LOADER HANDLING ==================
+// لودر را پس از بارگذاری کامل صفحه و اندکی تأخیر مخفی کن (فقط به‌عنوان پشتیبان)
 window.addEventListener('load', () => {
     setTimeout(() => {
-        document.getElementById('initial-loader').classList.add('hidden');
-    }, 800); // small delay for effect
+        const loader = document.getElementById('initial-loader');
+        if (loader && loader.style.display !== 'none') {
+            loader.classList.add('hidden');
+        }
+    }, 800);
 });
-
-function loadTavioSidebarNotifications() {
-    // TODO: بارگذاری اعلان‌های اشتراک prompt
-}
 
 // ================== INIT ==================
 document.addEventListener('DOMContentLoaded', async () => {
