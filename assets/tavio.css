@@ -39,7 +39,6 @@ body {
     overflow-x: hidden;
 }
 
-/* Branding wrapper – centers the branding block horizontally */
 .branding-wrapper {
     display: flex;
     justify-content: center;
@@ -76,7 +75,6 @@ body {
     margin: 0;
 }
 
-/* Main */
 .main-container {
     max-width: 860px;
     margin: 40px auto;
@@ -87,7 +85,6 @@ body {
 .view { display: none; }
 .view.active { display: block; }
 
-/* Library */
 .controls {
     display: flex;
     justify-content: space-between;
@@ -173,9 +170,9 @@ body {
     color: var(--accent);
 }
 .prompt-card .pin-btn svg {
-    width: 18px;
-    height: 18px;
-    stroke-width: 2;
+    width: 20px;
+    height: 20px;
+    stroke-width: 1.5;
 }
 .prompt-card .pin-btn.pinned svg {
     fill: var(--accent);
@@ -210,7 +207,6 @@ body {
     box-shadow: 0 0 20px rgba(176, 255, 165, 0.05);
 }
 
-/* Editor */
 .editor-header {
     display: flex;
     justify-content: space-between;
@@ -255,7 +251,6 @@ body {
     font-size: 15px;
 }
 
-/* Buttons */
 .btn-primary, .btn-secondary, .btn-generate, .btn-copy {
     font-family: "Kalameh", sans-serif;
     font-weight: 700;
@@ -303,7 +298,6 @@ body {
 }
 .result-actions { display: flex; gap: 12px; margin-top: 16px; }
 
-/* Modal */
 .modal {
     position: fixed;
     top: 0; left: 0;
@@ -354,7 +348,6 @@ body {
 .hidden { display: none !important; }
 .small { font-size: 13px; padding: 6px 14px; }
 
-/* Footer */
 .footer {
     padding: 30px 0;
     display: flex;
@@ -386,7 +379,6 @@ body {
     color: inherit;
 }
 
-/* Loader */
 .fullpage-loader {
     position: fixed;
     inset: 0;
@@ -427,7 +419,6 @@ body {
     50%      { opacity: 1;   box-shadow: 0 0 6px var(--accent); }
 }
 
-/* Auth Overlay */
 .auth-overlay {
     position: fixed;
     top: 0; left: 0;
@@ -540,7 +531,6 @@ body {
     margin-bottom: 12px;
 }
 
-/* Sidebar custom content */
 #tavio-sidebar-content { padding: 0 4px; }
 
 .sidebar-item {
@@ -558,7 +548,6 @@ body {
 .sidebar-item-icon { width: 16px; height: 16px; opacity: 0.7; }
 .sidebar-item span { font-size: 14px; font-weight: 500; }
 
-/* Custom adjustments for New Prompt button */
 #tavio-new-prompt-item {
     gap: 14px;
 }
