@@ -39,14 +39,21 @@ body {
     overflow-x: hidden;
 }
 
-/* Branding (logo + title) inside main container */
+/* Branding wrapper – centers the branding block horizontally */
+.branding-wrapper {
+    display: flex;
+    justify-content: center;
+    margin-bottom: 32px;
+}
+
+/* Branding block – left-aligned content inside the centered wrapper */
 .branding {
     display: flex;
     align-items: center;
     gap: 12px;
-    margin-bottom: 32px;
     padding: 0 4px;
 }
+
 .brand-logo {
     height: 48px;
     width: auto;
@@ -54,6 +61,7 @@ body {
 .brand-text {
     display: flex;
     flex-direction: column;
+    text-align: left;  /* ensures text stays left-aligned */
 }
 .brand-name {
     font-weight: 900;
