@@ -36,6 +36,7 @@ body {
     overflow-x: hidden;
 }
 
+/* HEADER */
 .glass-header {
     background: rgba(255,255,255,0.03);
     backdrop-filter: blur(10px);
@@ -89,10 +90,12 @@ body {
     text-align: center;
 }
 
+/* MAIN */
 .main-container {
     max-width: 860px;
     margin: 40px auto;
     padding: 0 20px;
+    min-height: calc(100vh - 280px);
 }
 
 .view {
@@ -103,6 +106,7 @@ body {
     display: block;
 }
 
+/* LIBRARY */
 .controls {
     display: flex;
     justify-content: space-between;
@@ -197,6 +201,7 @@ body {
     overflow: hidden;
 }
 
+/* EDITOR */
 .editor-header {
     display: flex;
     justify-content: space-between;
@@ -325,13 +330,14 @@ body {
     margin-top: 16px;
 }
 
+/* MODAL */
 .modal {
     position: fixed;
     top: 0;
     left: 0;
     width: 100%;
     height: 100%;
-    background: rgba(0,0,0,0.8);
+    background: rgba(0,0,0,0.85);
     display: flex;
     align-items: center;
     justify-content: center;
@@ -377,7 +383,41 @@ body {
     padding: 6px 14px;
 }
 
-/* Responsive */
+/* FOOTER - FIXED & IMPROVED */
+.footer {
+    padding: 40px 20px 32px;
+    display: flex;
+    justify-content: center;
+    border-top: 1px solid var(--border);
+    margin-top: 80px;
+}
+
+.footer-signature {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    opacity: 0.75;
+    transition: opacity 0.3s ease;
+}
+
+.footer-signature:hover {
+    opacity: 1;
+}
+
+.crafted {
+    font-size: 11px;
+    color: #777;
+    letter-spacing: 0.5px;
+    text-transform: uppercase;
+}
+
+.signature {
+    height: 22px;
+    width: auto;
+    filter: brightness(0.95);
+}
+
+/* RESPONSIVE */
 @media (max-width: 640px) {
     .prompt-grid {
         grid-template-columns: 1fr;
@@ -386,5 +426,9 @@ body {
     .header-inner {
         justify-content: center;
         text-align: center;
+    }
+    
+    .footer {
+        padding: 32px 20px 28px;
     }
 }
