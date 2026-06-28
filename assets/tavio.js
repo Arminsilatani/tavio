@@ -431,11 +431,12 @@ function saveCurrentPrompt() {
     filterPrompts();
 }
 
-// Hide the loader
-document.getElementById('initial-loader').classList.add('hidden');
+window.addEventListener('load', () => {
+    setTimeout(() => {
+        document.getElementById('initial-loader').classList.add('hidden');
+    }, 800); // small delay for effect
+});
 
-// Show it again (if needed)
-document.getElementById('initial-loader').classList.remove('hidden');
 // ================== INIT ==================
 document.addEventListener('DOMContentLoaded', async () => {
     setupAuthListeners();
