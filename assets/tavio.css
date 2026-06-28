@@ -383,7 +383,7 @@ body {
     padding: 6px 14px;
 }
 
-/* FOOTER - FIXED & IMPROVED */
+/* FOOTER */
 .footer {
     padding: 40px 20px 32px;
     display: flex;
@@ -415,4 +415,25 @@ body {
     height: 22px;
     width: auto;
     filter: brightness(0.95);
+}
+
+/* Auth related styles */
+.auth-step {
+    display: none;
+}
+
+.auth-step.active {
+    display: block;
+}
+
+.app-hidden {
+    display: none !important;
+}
+
+/* Override z-index for sidebar compatibility */
+#sidebar-overlay {
+    z-index: 9999;
+}
+#menu-toggle-btn {
+    z-index: 9998;
 }
