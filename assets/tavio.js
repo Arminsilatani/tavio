@@ -431,6 +431,12 @@ function saveCurrentPrompt() {
     filterPrompts();
 }
 
+window.addEventListener('load', () => {
+    setTimeout(() => {
+        document.getElementById('initial-loader').classList.add('hidden');
+    }, 800); // small delay for effect
+});
+
 // ================== INIT ==================
 document.addEventListener('DOMContentLoaded', async () => {
     setupAuthListeners();
