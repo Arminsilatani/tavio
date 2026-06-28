@@ -45,7 +45,6 @@ function togglePin(promptId) {
         pinned.push(promptId);
     }
     savePinnedIds(pinned);
-    // Re-render with current filter
     filterPrompts();
     return pinned;
 }
@@ -361,7 +360,6 @@ function renderPromptGrid(filteredPrompts) {
     if (!grid) return;
     grid.innerHTML = '';
 
-    // Sort pinned first
     const sorted = [...filteredPrompts].sort((a, b) => {
         const aPinned = isPinned(a.id);
         const bPinned = isPinned(b.id);
@@ -376,9 +374,8 @@ function renderPromptGrid(filteredPrompts) {
         card.className = 'prompt-card' + (pinned ? ' pinned-card' : '');
         card.innerHTML = `
             <button class="pin-btn ${pinned ? 'pinned' : ''}" data-id="${prompt.id}" onclick="event.stopPropagation(); togglePin(${prompt.id})">
-                <svg viewBox="0 0 24 24" fill="${pinned ? 'currentColor' : 'none'}" stroke="currentColor" stroke-width="2">
-                    <path d="M12 17v5M5 17h14M7 17l-1-4h12l-1 4M7 13l1-7h8l1 7"/>
-                    <circle cx="12" cy="6" r="1.5" ${pinned ? 'fill="currentColor"' : ''} stroke="none"/>
+                <svg xmlns="http://www.w3.org/2000/svg" fill="${pinned ? 'currentColor' : 'none'}" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M17.593 3.322c1.1.128 1.907 1.077 1.907 2.185V21L12 17.25 4.5 21V5.507c0-1.108.806-2.057 1.907-2.185a48.507 48.507 0 0 1 11.186 0Z" />
                 </svg>
             </button>
             <span class="category">${prompt.category}</span>
