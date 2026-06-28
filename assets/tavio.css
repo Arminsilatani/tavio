@@ -438,23 +438,20 @@ body {
     padding: 0 4px;
 }
 
-/* دکمه داخل سایدبار */
-.sidebar-item-btn {
-    background: var(--accent);
-    color: #111;
-    width: 100%;
-    padding: 10px 14px;
-    border-radius: 8px;
-    font-weight: 700;
-    font-size: 14px;
+.sidebar-item {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 8px 12px;
+    border-radius: 6px;
     cursor: pointer;
+    color: var(--text);
     transition: background 0.2s;
-    margin-bottom: 20px;
-    border: none;
-    font-family: inherit;
+    margin-bottom: 4px;         /* فاصلهٔ کم از آیتم بعدی */
 }
-.sidebar-item-btn:hover {
-    background: #c8ffbe;
+
+.sidebar-item:hover {
+    background: rgba(255,255,255,0.05);
 }
 
 /* هدر بخش اعلان‌ها */
