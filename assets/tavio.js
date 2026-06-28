@@ -75,37 +75,26 @@ async function buildCurrentProfile(user) {
 }
 
 // ================== SYNC SIDEBAR ==================
-async function updateNotificationDot() {
-    const comp = getSidebarComponent();
-    if (!comp) return;
-
-    let hasNotifications = false;
-    if (currentUser) {
-        const { data } = await sb
-            .from('notifications')
-            .select('id')
-            .eq('user_id', currentUser.id)
-            .eq('is_read', false)
-            .limit(1);
-        if (data && data.length > 0) hasNotifications = true;
-    }
-    comp.setNotificationDot(hasNotifications);
-}
 
 function syncSidebarComponent() {
     const comp = getSidebarComponent();
     if (!comp || typeof comp.setUser !== 'function') return;
 
-    // اگر کاربری وارد نشده، هیچ تغییری نده (منوی قبلی حفظ شود)
-    if (!currentUser) {
-        return;   // فقط برگرد، بدون clearUser()
+    if (currentUser) {
+        comp.setUser(currentUser, currentProfile);
+    } else {
+        comp.clearUser();
     }
 
-    comp.setUser(currentUser, currentProfile);
+    // مخفی شدن خودکار Today: آرایه خالی = بخش مخفی
     comp.setTodayList([], []);
     comp.setEvents([]);
     updateNotificationDot();
+
+    // اگر تابع مخصوص اعلان‌های Tavio دارید، بیرون از این تابع صدا بزنید
+    // loadTavioSidebarNotifications();
 }
+
 // اگر می‌خواهید کل Today را از DOM حذف کنید (فقط یک بار بعد از ready):
 customElements.whenDefined('sidebar-component').then(() => {
     const sidebar = document.querySelector('sidebar-component');
