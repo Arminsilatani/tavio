@@ -122,6 +122,11 @@ async function updateNotificationDot() {
     comp.setNotificationDot(hasNotifications);
 }
 
+function loadTavioSidebarNotifications() {
+    // TODO: هنگام دریافت نوتیفیکیشن‌های واقعی از Supabase، اینجا لیست را پر کنید.
+    // فعلاً خالی می‌ماند تا چیزی اضافی نمایش داده نشود.
+}
+
 // ================== AUTH ==================
 async function logout() {
     await sb.auth.signOut();
