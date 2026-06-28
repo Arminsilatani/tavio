@@ -4,30 +4,6 @@
  *  Version: 4.0.3 (Final fully working Tavio with shared sidebar)
  ****************************************************/
 
-// ======= 🚨 نیروی امداد برای حذف لودینگ (مستقل از هر چیزی) =======
-(function killLoaderNow() {
-    console.log('🔥🔥🔥 نیروی امداد لودینگ فعال شد');
-    const killLoader = () => {
-        const loader = document.getElementById('initial-loader');
-        if (loader) {
-            loader.classList.add('hidden');
-            loader.style.display = 'none';
-            console.log('🔥 لودینگ با زور و در کسری از ثانیه حذف شد');
-        } else {
-            console.warn('🔥 المنت لودینگ پیدا نشد، شاید هنوز DOM آماده نبوده');
-        }
-    };
-
-    // اگر DOM آماده باشد، مستقیم اجرا کن
-    if (document.readyState === 'loading') {
-        document.addEventListener('DOMContentLoaded', killLoader);
-    } else {
-        killLoader();
-    }
-
-    // باز هم یک ضربه‌گیر امنیتی با تایمر ۱ ثانیه
-    setTimeout(killLoader, 1000);
-})();
 /* =========================== SUPABASE CLIENT ============================ */
 const SUPABASE_URL = 'https://vzqicidepdmraygulrey.supabase.co';
 const SUPABASE_ANON_KEY = 'sb_publishable_kqRWgOmLISOE2EuLL1s8fw_WN6FJRTI';
@@ -638,31 +614,23 @@ document.addEventListener('DOMContentLoaded', () => {
         comp.addEventListener('logout-request', async () => await sbClient.auth.signOut());
     });
 
-    /* =========================== SIDEBAR COMPONENT INTEGRATION ============================ */
-async function restoreSessionAndSidebar() {
-    const comp = getSidebarComponent(); // ممکن است null برگرداند
-
-    try {
-        const { data: { session } } = await sbClient.auth.getSession();
-        if (session?.user) {
-            currentUser = session.user;
-            currentProfile = await fetchProfile(session.user.id);
-            currentUserRole = currentProfile?.role || 'recruit';
-
-            // اگر کامپوننت موجود باشد، user را به آن بده
-            if (comp && comp.setUser) {
-                comp.setUser(currentUser, currentProfile);
+    async function restoreSessionAndSidebar() {
+        const comp = getSidebarComponent();
+        if (!comp) return;
+        try {
+            const { data: { session } } = await sbClient.auth.getSession();
+            if (session?.user) {
+                currentUser = session.user;
+                currentProfile = await fetchProfile(session.user.id);
+                currentUserRole = currentProfile?.role || 'recruit';
+                if (comp.setUser) comp.setUser(currentUser, currentProfile);
+                await fetchTavioCategories();
+                await fetchTavioPrompts();
+                await fetchSharedPrompts();
+                renderAll();
             }
-
-            await fetchTavioCategories();
-            await fetchTavioPrompts();
-            await fetchSharedPrompts();
-            renderAll(); // رندر اولیه بعد از احراز هویت
-        }
-    } catch (e) {
-        console.warn('Session restore failed:', e);
+        } catch (e) { console.warn('Session restore failed:', e); }
     }
-}
 
     async function fetchProfile(userId) {
         try {
@@ -893,150 +861,26 @@ async function restoreSessionAndSidebar() {
     btnCopyPrompt?.addEventListener('click', copyToClipboard);
     btnClearBuilder?.addEventListener('click', clearBuilder);
 
-/* =========================== INIT (مطابق معماری Ravlo) ============================ */
-/* =========================== INIT (نسخه نهایی با Timeout) ============================ */
+/* =========================== INIT ============================ */
 async function initApp() {
-    console.log('🚀 [Tavio] شروع راه‌اندازی...');
-
-    const container = document.getElementById('app-container');
     const loader = document.getElementById('initial-loader');
 
-    if (!container) {
-        console.error('❌ container با id "app-container" پیدا نشد!');
-        return;
-    }
-
-    console.log('📦 container پیدا شد، کلاس فعلی:', container.className);
-
     try {
-        // بررسی sbClient
-        console.log('🔍 بررسی sbClient...');
-        if (!sbClient) {
-            console.error('❌ sbClient تعریف نشده است!');
-            throw new Error('sbClient is null');
-        }
-        console.log('✅ sbClient موجود است');
-
-        // ----- دریافت نشست با Timeout (۵ ثانیه) -----
-        console.log('🔑 دریافت نشست از Supabase (با تایم‌اوت ۵ ثانیه)...');
-
-        const sessionPromise = sbClient.auth.getSession();
-        const timeoutPromise = new Promise((_, reject) =>
-            setTimeout(() => reject(new Error('⏰ Timeout: Supabase پاسخ نداد')), 5000)
-        );
-
-        let session = null;
-        let error = null;
-        try {
-            const result = await Promise.race([sessionPromise, timeoutPromise]);
-            session = result.data?.session || null;
-            error = result.error || null;
-        } catch (timeoutError) {
-            console.warn('⚠️', timeoutError.message);
-            // در صورت Timeout، به عنوان کاربر مهمان ادامه می‌دهیم
-        }
-
-        if (error) {
-            console.warn('⚠️ خطا در دریافت نشست:', error);
-        }
-
-        if (session?.user) {
-            currentUser = session.user;
-            console.log('👤 کاربر وارد شد:', currentUser.email);
-
-            console.log('👤 دریافت پروفایل...');
-            try {
-                currentProfile = await fetchProfile(session.user.id);
-                currentUserRole = currentProfile?.role || 'recruit';
-                console.log('✅ پروفایل:', currentProfile?.first_name, currentProfile?.last_name);
-            } catch (profileError) {
-                console.warn('⚠️ خطا در دریافت پروفایل:', profileError);
-                currentProfile = { id: session.user.id, role: 'recruit', first_name: '', last_name: '' };
-                currentUserRole = 'recruit';
-            }
-
-            // دریافت داده‌ها (با try/catch جداگانه برای هر کدام)
-            try {
-                console.log('📂 دریافت دسته‌بندی‌ها...');
-                await fetchTavioCategories();
-                console.log('✅ تعداد دسته‌بندی‌ها:', tavioCategories.length);
-            } catch (e) {
-                console.warn('⚠️ خطا در دریافت دسته‌بندی‌ها:', e);
-            }
-
-            try {
-                console.log('📄 دریافت پرامپت‌ها...');
-                await fetchTavioPrompts();
-                console.log('✅ تعداد پرامپت‌ها:', tavioPrompts.length);
-            } catch (e) {
-                console.warn('⚠️ خطا در دریافت پرامپت‌ها:', e);
-            }
-
-            try {
-                console.log('📨 دریافت درخواست‌های اشتراک...');
-                await fetchSharedPrompts();
-                console.log('✅ تعداد اشتراک‌ها:', tavioSharedPrompts.length);
-            } catch (e) {
-                console.warn('⚠️ خطا در دریافت اشتراک‌ها:', e);
-            }
-
-            // اتصال به سایدبار (اختیاری)
-            try {
-                const comp = getSidebarComponent();
-                if (comp && typeof comp.setUser === 'function') {
-                    comp.setUser(currentUser, currentProfile);
-                    console.log('✅ سایدبار به‌روز شد');
-                }
-            } catch (e) {
-                console.warn('⚠️ خطای غیربحرانی در سایدبار:', e);
-            }
-
-        } else {
-            console.log('👤 کاربر مهمان (نشست وجود ندارد یا Timeout)');
-            currentUser = null;
-            currentProfile = null;
-            tavioPrompts = [];
-            tavioCategories = [];
-            tavioSharedPrompts = [];
-        }
-
+        await customElements.whenDefined('sidebar-component');
+        await restoreSessionAndSidebar();
     } catch (e) {
-        console.error('❌ خطای بحرانی در راه‌اندازی:', e);
-        console.error('📋 جزئیات خطا:', e.stack);
+        console.warn('Init error (non-fatal):', e);
     }
 
-    // ===== مرحله نهایی: نمایش اپلیکیشن و مخفی کردن لودینگ (همیشه اجرا می‌شود) =====
-    console.log('🔄 مرحله نهایی: نمایش اپلیکیشن');
-    if (container) {
-        container.classList.remove('app-hidden');
-        console.log('✅ کلاس app-hidden حذف شد');
-    } else {
-        console.warn('⚠️ container وجود ندارد!');
-    }
-    if (loader) {
-        loader.classList.add('hidden');
-        loader.style.display = 'none';
-        console.log('✅ لودینگ مخفی شد');
-    }
+    if (loader) loader.classList.add('hidden');
+
     renderAll();
-    console.log('✅ [Tavio] راه‌اندازی کامل شد.');
+
+    setTimeout(() => {
+        if (loader && !loader.classList.contains('hidden')) {
+            loader.classList.add('hidden');
+        }
+    }, 3000);
 }
-
-// ======= تضمین اجرا در هر شرایطی =======
-console.log('🔄 [Tavio] راه‌اندازی برنامه...');
-
-if (document.readyState === 'loading') {
-    document.addEventListener('DOMContentLoaded', initApp);
-} else {
-    initApp();
-}
-
-// ضربه‌گیر امنیتی نهایی (اگر به هر دلیل اجرا نشد)
-setTimeout(() => {
-    const container = document.getElementById('app-container');
-    if (container && container.classList.contains('app-hidden')) {
-        console.warn('⚠️ برنامه هنوز شروع نشده، اجرای مجدد...');
-        initApp();
-    }
-}, 4000);
+initApp();
 });
