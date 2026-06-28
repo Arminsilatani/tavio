@@ -1,12 +1,15 @@
+// ================== CONFIG ==================
 const SUPABASE_URL = 'https://vzqicidepdmraygulrey.supabase.co';
 const SUPABASE_ANON_KEY = 'sb_publishable_kqRWgOmLISOE2EuLL1s8fw_WN6FJRTI';
 const sb = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
+// ================== STATE ==================
 let currentUser = null;
 let currentProfile = null;
 let currentUserRole = 'public';
 let sidebarComponent = null;
 
+// Original prompts
 let prompts = [
     { id: 1, title: "Story Writer", category: "writing", template: "Write an engaging short story about {{character}} who lives in {{setting}}. The main conflict involves {{conflict}}." },
     { id: 2, title: "Code Explainer", category: "coding", template: "Explain this {{language}} code snippet in simple terms: {{code}}" },
@@ -17,6 +20,7 @@ let prompts = [
 let currentPrompt = null;
 let currentVariables = {};
 
+// ================== HELPERS ==================
 function showGlobalLoader() {
     document.getElementById('initial-loader').style.display = 'flex';
 }
@@ -34,46 +38,43 @@ function showStep(stepId) {
     document.getElementById(stepId).classList.add('active');
 }
 
+// ================== SIDEBAR ==================
 function getSidebarComponent() {
     if (!sidebarComponent) {
         sidebarComponent = document.querySelector('sidebar-component');
         if (sidebarComponent) {
-            sidebarComponent.addEventListener('login-request', () => openModal(document.getElementById('auth-overlay')));
-            sidebarComponent.addEventListener('logout-request', () => logout());
+            sidebarComponent.addEventListener('login-request', () => {
+                openModal(document.getElementById('auth-overlay'));
+            });
+            sidebarComponent.addEventListener('logout-request', () => {
+                logout();
+            });
+            // Other events can be added as needed
         }
     }
     return sidebarComponent;
 }
 
+// ================== PROFILE ==================
 async function buildCurrentProfile(user) {
-    try {
-        const { data: profileRow } = await sb
-            .from('profiles')
-            .select('*')
-            .eq('id', user.id)
-            .single();
-        const md = user.user_metadata || {};
-        return {
-            id: user.id,
-            first_name: profileRow?.first_name ?? md.first_name ?? '',
-            last_name: profileRow?.last_name ?? md.last_name ?? '',
-            photo_url: profileRow?.photo_url ?? md.photo_url ?? '',
-            username: profileRow?.username ?? md.username ?? '',
-            role: profileRow?.role ?? md.role ?? 'recruit'
-        };
-    } catch (e) {
-        console.warn('Profile fetch failed:', e);
-        return {
-            id: user.id,
-            first_name: user.user_metadata?.first_name ?? '',
-            last_name: user.user_metadata?.last_name ?? '',
-            photo_url: '',
-            username: '',
-            role: 'recruit'
-        };
-    }
+    const { data: profileRow } = await sb
+        .from('profiles')
+        .select('*')
+        .eq('id', user.id)
+        .single();
+
+    const md = user.user_metadata || {};
+    return {
+        id: user.id,
+        first_name: profileRow?.first_name ?? md.first_name ?? '',
+        last_name: profileRow?.last_name ?? md.last_name ?? '',
+        photo_url: profileRow?.photo_url ?? md.photo_url ?? '',
+        username: profileRow?.username ?? md.username ?? '',
+        role: profileRow?.role ?? md.role ?? 'recruit'
+    };
 }
 
+// ================== SYNC SIDEBAR ==================
 function syncSidebarComponent() {
     const comp = getSidebarComponent();
     if (!comp || typeof comp.setUser !== 'function') return;
@@ -83,21 +84,34 @@ function syncSidebarComponent() {
     } else {
         comp.clearUser();
     }
-
-    try {
-        if (comp.shadowRoot) {
-            const todayList = comp.shadowRoot.getElementById('sidebar-today-list');
-            if (todayList) {
-                const section = todayList.closest('.sidebar-section') || todayList.parentElement;
-                if (section) section.style.display = 'none';
-            }
-        }
-    } catch (e) {}
-
     comp.setTodayList([], []);
+    function syncSidebarComponent() {
+    const comp = getSidebarComponent();
+    if (!comp || typeof comp.setUser !== 'function') return;
+
+    if (currentUser) {
+        comp.setUser(currentUser, currentProfile);
+    } else {
+        comp.clearUser();
+    }
+
+    // پنهان کردن Today/Overdue پیش‌فرض
+    if (comp.shadowRoot) {
+        const todayList = comp.shadowRoot.getElementById('sidebar-today-list');
+        if (todayList) {
+            // مخفی‌کردن کل بخش (بسته به ساختار کامپوننت، ممکن است والد یا جدِ بالاتر)
+            let section = todayList.closest('.sidebar-section') || todayList.parentElement;
+            if (section) section.style.display = 'none';
+        }
+    }
+
+    comp.setTodayList([], []);   // اختیاری؛ می‌توانید این خط را هم بردارید
     comp.setEvents([]);
     updateNotificationDot();
-    loadTavioSidebarNotifications();
+    loadTavioSidebarNotifications();   // ← بارگذاری اعلان‌های مخصوص Tavio
+}
+    comp.setEvents([]);
+    updateNotificationDot();
 }
 
 async function updateNotificationDot() {
@@ -105,26 +119,18 @@ async function updateNotificationDot() {
     if (!comp) return;
     let hasNotifications = false;
     if (currentUser) {
-        try {
-            const { data } = await sb
-                .from('notifications')
-                .select('id')
-                .eq('user_id', currentUser.id)
-                .eq('is_read', false)
-                .limit(1);
-            if (data && data.length > 0) hasNotifications = true;
-        } catch (e) {}
+        const { data } = await sb
+            .from('notifications')
+            .select('id')
+            .eq('user_id', currentUser.id)
+            .eq('is_read', false)
+            .limit(1);
+        if (data && data.length > 0) hasNotifications = true;
     }
     comp.setNotificationDot(hasNotifications);
 }
 
-function loadTavioSidebarNotifications() {
-    const list = document.getElementById('tavio-notif-list');
-    if (!list) return;
-    // TODO: fetch real notifications
-    list.innerHTML = '<p class="sidebar-empty-msg">No shared prompts yet</p>';
-}
-
+// ================== AUTH ==================
 async function logout() {
     await sb.auth.signOut();
     currentUser = null;
@@ -144,6 +150,7 @@ async function logout() {
 async function restoreSession() {
     showGlobalLoader();
 
+    // Handle tokens from email confirmation
     const urlParams = new URLSearchParams(window.location.search);
     const accessToken = urlParams.get('access_token');
     const refreshToken = urlParams.get('refresh_token');
@@ -162,6 +169,7 @@ async function restoreSession() {
         document.getElementById('app-container').classList.remove('app-hidden');
         closeModal(document.getElementById('auth-overlay'));
         syncSidebarComponent();
+        // Initialize Tavio UI
         renderPromptGrid(prompts);
         filterByCategory('all');
     } else {
@@ -172,30 +180,31 @@ async function restoreSession() {
     hideGlobalLoader();
 }
 
+// ================== AUTH LISTENERS ==================
 function setupAuthListeners() {
     const authOverlay = document.getElementById('auth-overlay');
 
     document.getElementById('auth-continue-btn').addEventListener('click', () => {
         const email = document.getElementById('auth-email').value.trim();
         if (!email) {
+            document.getElementById('auth-error-1').style.display = 'block';
             document.getElementById('auth-error-1').textContent = 'Please enter your email.';
-            document.getElementById('auth-error-1').classList.remove('hidden');
             return;
         }
         document.getElementById('login-email-display').textContent = email;
         document.getElementById('register-email-display').textContent = email;
         showStep('step-2-login');
-        document.getElementById('auth-error-1').classList.add('hidden');
+        document.getElementById('auth-error-1').style.display = 'none';
     });
 
     document.getElementById('auth-signin-btn').addEventListener('click', async () => {
         const email = document.getElementById('auth-email').value.trim();
         const password = document.getElementById('auth-password-login').value;
-        document.getElementById('auth-error-login').classList.add('hidden');
+        document.getElementById('auth-error-login').style.display = 'none';
         const { data, error } = await sb.auth.signInWithPassword({ email, password });
         if (error) {
             document.getElementById('auth-error-login').textContent = error.message;
-            document.getElementById('auth-error-login').classList.remove('hidden');
+            document.getElementById('auth-error-login').style.display = 'block';
             return;
         }
         currentUser = data.user;
@@ -213,10 +222,10 @@ function setupAuthListeners() {
         const password = document.getElementById('auth-password-register').value;
         const firstName = document.getElementById('auth-first-name').value.trim();
         const lastName = document.getElementById('auth-last-name').value.trim();
-        document.getElementById('auth-error-register').classList.add('hidden');
+        document.getElementById('auth-error-register').style.display = 'none';
         if (password.length < 6) {
             document.getElementById('auth-error-register').textContent = 'Password must be at least 6 characters.';
-            document.getElementById('auth-error-register').classList.remove('hidden');
+            document.getElementById('auth-error-register').style.display = 'block';
             return;
         }
         const { error } = await sb.auth.signUp({
@@ -229,7 +238,7 @@ function setupAuthListeners() {
         });
         if (error) {
             document.getElementById('auth-error-register').textContent = error.message;
-            document.getElementById('auth-error-register').classList.remove('hidden');
+            document.getElementById('auth-error-register').style.display = 'block';
             return;
         }
         alert('Registration successful! Please check your email to confirm your account.');
@@ -252,7 +261,7 @@ function setupAuthListeners() {
             redirectTo: window.location.origin + window.location.pathname
         });
         const msg = document.getElementById('forgot-message');
-        msg.classList.remove('hidden');
+        msg.style.display = 'block';
         if (error) {
             msg.textContent = error.message;
             msg.style.color = '#ff5555';
@@ -263,24 +272,30 @@ function setupAuthListeners() {
     });
     document.getElementById('auth-back-to-login').addEventListener('click', () => showStep('step-2-login'));
 
-    // Password toggle
-    document.querySelectorAll('.toggle-password-btn').forEach(btn => {
-        btn.addEventListener('click', () => {
-            const input = document.getElementById(btn.getAttribute('data-target'));
-            if (!input) return;
-            const isPassword = input.type === 'password';
-            input.type = isPassword ? 'text' : 'password';
-            const svg = btn.querySelector('svg');
-            if (isPassword) {
-                svg.innerHTML = '<path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/>';
-            } else {
-                svg.innerHTML = '<path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19m-6.72-1.07a3 3 0 1 1-4.24-4.24"/><line x1="1" y1="1" x2="23" y2="23"/>';
-            }
-        });
+    // ---------- Password visibility toggle ----------
+document.querySelectorAll('.toggle-password-btn').forEach(btn => {
+    btn.addEventListener('click', () => {
+        const inputId = btn.getAttribute('data-target');
+        const input = document.getElementById(inputId);
+        if (!input) return;
+
+        const isPassword = input.type === 'password';
+        input.type = isPassword ? 'text' : 'password';
+
+        // تعویض آیکون چشم (باز ↔ بسته)
+        const svg = btn.querySelector('svg');
+        if (isPassword) {
+            // چشم باز (نمایش رمز)
+            svg.innerHTML = '<path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/>';
+        } else {
+            // چشم بسته (مخفی)
+            svg.innerHTML = '<path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19m-6.72-1.07a3 3 0 1 1-4.24-4.24"/><line x1="1" y1="1" x2="23" y2="23"/>';
+        }
     });
+});
 }
 
-// ---- Prompt logic ----
+// ================== TAVIO PROMPT LOGIC ==================
 function renderPromptGrid(filteredPrompts) {
     const grid = document.getElementById('prompt-grid');
     if (!grid) return;
@@ -300,7 +315,7 @@ function renderPromptGrid(filteredPrompts) {
 
 function filterPrompts() {
     const searchTerm = document.getElementById('search-input').value.toLowerCase();
-    const activeCat = document.querySelector('.category-chip.active')?.dataset.category || 'all';
+    const activeCat = document.querySelector('.category-chip.active')?.id?.replace('cat-', '') || 'all';
     let filtered = prompts;
     if (searchTerm) {
         filtered = filtered.filter(p => p.title.toLowerCase().includes(searchTerm) || p.template.toLowerCase().includes(searchTerm));
@@ -313,13 +328,13 @@ function filterPrompts() {
 
 function filterByCategory(cat) {
     document.querySelectorAll('.category-chip').forEach(chip => {
-        chip.classList.toggle('active', chip.dataset.category === cat);
+        chip.classList.toggle('active', chip.id === `cat-${cat}`);
     });
     filterPrompts();
 }
 
 function loadPromptIntoEditor(prompt) {
-    currentPrompt = { ...prompt };
+    currentPrompt = {...prompt};
     document.getElementById('library-view').classList.remove('active');
     document.getElementById('editor-view').classList.add('active');
     document.getElementById('current-prompt-title').textContent = prompt.title;
@@ -345,7 +360,7 @@ function detectVariables() {
     const container = document.getElementById('variables-container');
     container.innerHTML = '';
     if (vars.size === 0) {
-        container.innerHTML = '<p style="color:#666; grid-column:1/-1;">No {{variables}} detected. Add some to your template.</p>';
+        container.innerHTML = `<p style="color:#666; grid-column:1/-1;">No {{variables}} detected. Add some to your template.</p>`;
         return;
     }
     vars.forEach(v => {
@@ -354,9 +369,8 @@ function detectVariables() {
         div.className = 'variable-field';
         div.innerHTML = `
             <label>${v}</label>
-            <input type="text" id="var-${v}" placeholder="Enter ${v}" value="">
+            <input type="text" id="var-${v}" placeholder="Enter ${v}" oninput="updateVar('${v}', this.value)">
         `;
-        div.querySelector('input').addEventListener('input', (e) => updateVar(v, e.target.value));
         container.appendChild(div);
     });
 }
@@ -390,7 +404,7 @@ function generatePrompt() {
 function copyPrompt() {
     const text = document.getElementById('result-display').textContent;
     navigator.clipboard.writeText(text).then(() => {
-        const btn = document.getElementById('copy-prompt-btn');
+        const btn = document.querySelector('.btn-copy');
         const original = btn.textContent;
         btn.textContent = 'Copied!';
         setTimeout(() => btn.textContent = original, 1800);
@@ -439,36 +453,21 @@ function saveCurrentPrompt() {
     filterPrompts();
 }
 
-document.addEventListener('DOMContentLoaded', async () => {
-    setupAuthListeners();
-
-    document.getElementById('new-prompt-btn').addEventListener('click', showNewPromptModal);
-    document.getElementById('back-to-library-btn').addEventListener('click', backToLibrary);
-    document.getElementById('save-prompt-btn').addEventListener('click', saveCurrentPrompt);
-    document.getElementById('detect-variables-btn').addEventListener('click', detectVariables);
-    document.getElementById('generate-prompt-btn').addEventListener('click', generatePrompt);
-    document.getElementById('copy-prompt-btn').addEventListener('click', copyPrompt);
-    document.getElementById('reset-btn').addEventListener('click', resetAll);
-    document.getElementById('cancel-modal-btn').addEventListener('click', hideNewPromptModal);
-    document.getElementById('add-prompt-btn').addEventListener('click', createNewPrompt);
-    document.getElementById('search-input').addEventListener('keyup', filterPrompts);
-
-    document.querySelectorAll('.category-chip').forEach(chip => {
-        chip.addEventListener('click', () => filterByCategory(chip.dataset.category));
-    });
-
-    document.getElementById('tavio-new-prompt-item').addEventListener('click', showNewPromptModal);
-
-    customElements.whenDefined('sidebar-component').then(() => {
-        getSidebarComponent();
-        syncSidebarComponent();
-    });
-
-    await restoreSession();
-});
-
 window.addEventListener('load', () => {
     setTimeout(() => {
         document.getElementById('initial-loader').classList.add('hidden');
-    }, 800);
+    }, 800); // small delay for effect
+});
+
+// ================== INIT ==================
+document.addEventListener('DOMContentLoaded', async () => {
+    setupAuthListeners();
+
+    // Wait for sidebar component to be defined before interacting
+    customElements.whenDefined('sidebar-component').then(() => {
+        getSidebarComponent();       // attach listeners
+        syncSidebarComponent();      // show logged‑out state
+    });
+
+    await restoreSession();         // check if already logged in
 });
