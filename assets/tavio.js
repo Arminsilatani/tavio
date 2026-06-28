@@ -55,41 +55,6 @@ function getSidebarComponent() {
     return sidebarComponent;
 }
 
-function getSidebarComponent() {
-    if (!sidebarComponent) {
-        sidebarComponent = document.querySelector('sidebar-component');
-        if (sidebarComponent) {
-            sidebarComponent.addEventListener('login-request', () => {
-                openModal(document.getElementById('auth-overlay'));
-            });
-            sidebarComponent.addEventListener('logout-request', () => {
-                logout();
-            });
-            
-            // 🔹 اضافه کردن listener برای New Prompt
-            attachTavioNewPromptListener();
-        }
-    }
-    return sidebarComponent;
-}
-
-// 🔹 تابع جدید برای اتصال دکمه New Prompt
-function attachTavioNewPromptListener() {
-    const comp = getSidebarComponent();
-    if (!comp || !comp.shadowRoot) return;
-
-    const slotContent = document.getElementById('tavio-sidebar-content');
-    if (!slotContent) return;
-
-    const newPromptBtn = slotContent.querySelector('#tavio-new-prompt-item');
-    if (newPromptBtn && !newPromptBtn.dataset.attached) {
-        newPromptBtn.addEventListener('click', () => {
-            showNewPromptModal();
-        });
-        newPromptBtn.dataset.attached = 'true'; // جلوگیری از اتصال چندباره
-    }
-}
-
 // ================== PROFILE ==================
 async function buildCurrentProfile(user) {
     const { data: profileRow } = await sb
@@ -119,20 +84,34 @@ function syncSidebarComponent() {
     } else {
         comp.clearUser();
     }
+    comp.setTodayList([], []);
+    function syncSidebarComponent() {
+    const comp = getSidebarComponent();
+    if (!comp || typeof comp.setUser !== 'function') return;
 
-    // مخفی کردن بخش Today/Overdue
+    if (currentUser) {
+        comp.setUser(currentUser, currentProfile);
+    } else {
+        comp.clearUser();
+    }
+
+    // پنهان کردن Today/Overdue پیش‌فرض
     if (comp.shadowRoot) {
         const todayList = comp.shadowRoot.getElementById('sidebar-today-list');
         if (todayList) {
+            // مخفی‌کردن کل بخش (بسته به ساختار کامپوننت، ممکن است والد یا جدِ بالاتر)
             let section = todayList.closest('.sidebar-section') || todayList.parentElement;
             if (section) section.style.display = 'none';
         }
     }
 
-    comp.setTodayList([], []);
+    comp.setTodayList([], []);   // اختیاری؛ می‌توانید این خط را هم بردارید
     comp.setEvents([]);
     updateNotificationDot();
-    loadTavioSidebarNotifications();
+    loadTavioSidebarNotifications();   // ← بارگذاری اعلان‌های مخصوص Tavio
+}
+    comp.setEvents([]);
+    updateNotificationDot();
 }
 
 async function updateNotificationDot() {
@@ -190,7 +169,6 @@ async function restoreSession() {
         document.getElementById('app-container').classList.remove('app-hidden');
         closeModal(document.getElementById('auth-overlay'));
         syncSidebarComponent();
-        attachTavioNewPromptListener();
         // Initialize Tavio UI
         renderPromptGrid(prompts);
         filterByCategory('all');
@@ -489,7 +467,6 @@ document.addEventListener('DOMContentLoaded', async () => {
     customElements.whenDefined('sidebar-component').then(() => {
         getSidebarComponent();       // attach listeners
         syncSidebarComponent();      // show logged‑out state
-        attachTavioNewPromptListener();
     });
 
     await restoreSession();         // check if already logged in
