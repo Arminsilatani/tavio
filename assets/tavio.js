@@ -55,24 +55,6 @@ function getSidebarComponent() {
     return sidebarComponent;
 }
 
-function getSidebarComponent() {
-    if (!sidebarComponent) {
-        sidebarComponent = document.querySelector('sidebar-component');
-        if (sidebarComponent) {
-            sidebarComponent.addEventListener('login-request', () => {
-                openModal(document.getElementById('auth-overlay'));
-            });
-            sidebarComponent.addEventListener('logout-request', () => {
-                logout();
-            });
-            
-            // 🔹 اضافه کردن listener برای New Prompt
-            attachTavioNewPromptListener();
-        }
-    }
-    return sidebarComponent;
-}
-
 // 🔹 تابع جدید برای اتصال دکمه New Prompt
 function attachTavioNewPromptListener() {
     const comp = getSidebarComponent();
