@@ -431,6 +431,11 @@ function saveCurrentPrompt() {
     filterPrompts();
 }
 
+// Hide the loader
+document.getElementById('initial-loader').classList.add('hidden');
+
+// Show it again (if needed)
+document.getElementById('initial-loader').classList.remove('hidden');
 // ================== INIT ==================
 document.addEventListener('DOMContentLoaded', async () => {
     setupAuthListeners();
