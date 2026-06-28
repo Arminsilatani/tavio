@@ -196,13 +196,10 @@ function createNewPrompt() {
     prompts.unshift(newPrompt);
     hideNewPromptModal();
     
-    // Reset modal
     document.getElementById('modal-title').value = '';
     document.getElementById('modal-template').value = '';
     
     filterPrompts();
-    
-    // Load the new prompt
     loadPromptIntoEditor(newPrompt);
 }
 
@@ -214,7 +211,6 @@ function saveCurrentPrompt() {
     
     currentPrompt.template = template;
     
-    // Update in array
     const index = prompts.findIndex(p => p.id === currentPrompt.id);
     if (index !== -1) {
         prompts[index] = currentPrompt;
