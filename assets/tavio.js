@@ -866,21 +866,34 @@ async function initApp() {
     const loader = document.getElementById('initial-loader');
 
     try {
-        await customElements.whenDefined('sidebar-component');
+        const sidebarDefined = customElements.get('sidebar-component') 
+            ? Promise.resolve() 
+            : customElements.whenDefined('sidebar-component');
+
+        await Promise.race([
+            sidebarDefined,
+            new Promise((_, reject) => 
+                setTimeout(() => reject(new Error('Sidebar component timed out')), 4000)
+            )
+        ]);
+    } catch (e) {
+        console.warn('Sidebar component not loaded, proceeding without it:', e.message);
+    }
+
+    try {
         await restoreSessionAndSidebar();
     } catch (e) {
         console.warn('Init error (non-fatal):', e);
     }
 
     if (loader) loader.classList.add('hidden');
-
     renderAll();
 
     setTimeout(() => {
         if (loader && !loader.classList.contains('hidden')) {
             loader.classList.add('hidden');
         }
-    }, 3000);
+    }, 5000);
 }
 initApp();
 });
