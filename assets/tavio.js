@@ -102,13 +102,12 @@ function syncSidebarComponent() {
         comp.clearUser();
     }
 
-    // مخفی شدن خودکار Today: آرایه خالی = بخش مخفی
+    // بخش Today/Overdue را خالی و مخفی کن
     comp.setTodayList([], []);
     comp.setEvents([]);
+    
+    // نقطه اعلان را به‌روز کن
     updateNotificationDot();
-
-    // اگر تابع مخصوص اعلان‌های Tavio دارید، بیرون از این تابع صدا بزنید
-    // loadTavioSidebarNotifications();
 }
 
 // اگر می‌خواهید کل Today را از DOM حذف کنید (فقط یک بار بعد از ready):
