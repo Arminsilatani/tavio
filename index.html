@@ -3,9 +3,9 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>tavio — Categorized Prompt Library</title>
+    <title>tavio - Categorized Prompt Library</title>
     <link rel="stylesheet" href="assets/tavio.css">
-    <link rel="icon" type="image/svg+xml" href="/assets/favicon.svg">
+    <script src="assets/tavio.js" defer></script>
 </head>
 <body>
     <div class="glass-header">
@@ -19,25 +19,43 @@
                 <h2 class="tool-tagline">Categorized Prompt Library</h2>
             </div>
         </div>
-        <p class="tool-description">Store templates, auto‑detect fields, and generate prompts with a fluid typing effect.</p>
+        <p class="tool-description">Create, manage, and instantly generate dynamic prompts by converting your template variables into interactive fields.</p>
     </div>
 
-    <main class="container">
-        <div class="library-panel">
-            <div class="categories" id="categoryList"></div>
-            <div class="template-list" id="templateList"></div>
-        </div>
-        <div class="work-area" id="workArea">
-            <div class="template-preview" id="templatePreview"></div>
-            <div class="form-section" id="formSection"></div>
-            <div class="output-section" id="outputSection">
-                <div class="output-display" id="outputDisplay"></div>
-                <div class="output-actions" id="outputActions">
-                    <button class="btn-copy" id="copyBtn" aria-label="Copy prompt">Copy</button>
-                    <button class="btn-clear" id="clearBtn" aria-label="Clear all">Clear</button>
-                </div>
+    <main class="app-container">
+        <section class="panel template-panel">
+            <div class="panel-header">
+                <h3>Template Prompt</h3>
+                <span class="badge">Step 1</span>
             </div>
-        </div>
+            <p class="helper-text">Define variables using brackets like <strong>[variable]</strong> or <strong>{variable}</strong>.</p>
+            <textarea id="template-input" placeholder="e.g. Write a [tone] email to [target_audience] about {topic}..."></textarea>
+        </section>
+
+        <section class="panel fields-panel" id="fields-section" style="display: none;">
+            <div class="panel-header">
+                <h3>Fill Variables</h3>
+                <span class="badge">Step 2</span>
+            </div>
+            <div id="fields-container" class="fields-grid">
+                <!-- Dynamically generated fields will appear here -->
+            </div>
+            <button id="generate-btn" class="btn primary-btn">Generate Prompt</button>
+        </section>
+
+        <section class="panel output-panel" id="output-section" style="display: none;">
+            <div class="panel-header">
+                <h3>Generated Output</h3>
+                <span class="badge">Step 3</span>
+            </div>
+            <div class="output-box">
+                <span id="output-text"></span><span id="type-cursor" class="cursor">|</span>
+            </div>
+            <div class="actions" id="action-buttons" style="display: none;">
+                <button id="copy-btn" class="btn primary-btn">Copy Prompt</button>
+                <button id="reset-btn" class="btn secondary-btn">Clear & Reset</button>
+            </div>
+        </section>
     </main>
 
     <footer class="footer">
@@ -53,7 +71,5 @@
             </a>
         </div>
     </footer>
-
-    <script src="assets/tavio.js" defer></script>
 </body>
 </html>
