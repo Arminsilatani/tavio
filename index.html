@@ -5,9 +5,73 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>tavio • Prompt Library</title>
     <link rel="stylesheet" href="assets/tavio.css">
+    <!-- Sidebar CSS (before app styles for loading order) -->
+    <link rel="stylesheet" href="https://arminsilatani.github.io/tools/assets/sidebar.css">
+    <script src="assets/supabase.min.js" defer></script>
+    <script src="https://arminsilatani.github.io/tools/assets/sidebar-component.js" type="module" defer></script>
     <script src="assets/tavio.js" defer></script>
 </head>
 <body>
+
+<!-- Initial Loader -->
+<div id="initial-loader" class="fullpage-loader" style="position:fixed;top:0;left:0;width:100%;height:100%;background:#0d0d0d;display:flex;align-items:center;justify-content:center;z-index:9999;color:#aaa;font-family:Kalameh,sans-serif;">
+    <span>Loading tavio...</span>
+</div>
+
+<!-- Auth Overlay -->
+<div id="auth-overlay" class="modal" style="display:none;">
+    <div class="modal-content" style="max-width:420px; width:90%;">
+        <!-- Step 1: Email -->
+        <div id="step-1" class="auth-step active">
+            <h3 style="color:var(--accent); margin-bottom:20px;">Sign In / Register</h3>
+            <input type="email" id="auth-email" class="modal-input" placeholder="Your email" autocomplete="email">
+            <p id="auth-error-1" style="color:#ff5555;font-size:13px;margin-top:8px;display:none;"></p>
+            <button id="auth-continue-btn" class="btn-primary" style="width:100%; margin-top:12px;">Continue</button>
+        </div>
+
+        <!-- Step 2: Login -->
+        <div id="step-2-login" class="auth-step hidden">
+            <h3 style="color:var(--accent); margin-bottom:8px;">Welcome back</h3>
+            <p style="font-size:13px;color:#888;margin-bottom:20px;" id="login-email-display"></p>
+            <input type="password" id="auth-password-login" class="modal-input" placeholder="Password" autocomplete="current-password">
+            <p id="auth-error-login" style="color:#ff5555;font-size:13px;margin-top:8px;display:none;"></p>
+            <div style="display:flex; justify-content:space-between; margin-top:12px;">
+                <button id="auth-back-to-email" class="btn-secondary small">Back</button>
+                <button id="auth-signin-btn" class="btn-primary">Sign In</button>
+            </div>
+            <p style="margin-top:16px; font-size:13px; color:#888;">Forgot password? <a href="#" id="forgot-link" style="color:var(--accent);text-decoration:none;">Reset</a></p>
+        </div>
+
+        <!-- Step 2: Register -->
+        <div id="step-2-register" class="auth-step hidden">
+            <h3 style="color:var(--accent); margin-bottom:8px;">Create Account</h3>
+            <p style="font-size:13px;color:#888;margin-bottom:20px;" id="register-email-display"></p>
+            <input type="text" id="auth-first-name" class="modal-input" placeholder="First Name" style="margin-bottom:12px;">
+            <input type="text" id="auth-last-name" class="modal-input" placeholder="Last Name" style="margin-bottom:12px;">
+            <input type="password" id="auth-password-register" class="modal-input" placeholder="Choose password (min 6 char)" autocomplete="new-password">
+            <p id="auth-error-register" style="color:#ff5555;font-size:13px;margin-top:8px;display:none;"></p>
+            <div style="display:flex; justify-content:space-between; margin-top:12px;">
+                <button id="auth-back-to-email-2" class="btn-secondary small">Back</button>
+                <button id="auth-register-btn" class="btn-primary">Register</button>
+            </div>
+        </div>
+
+        <!-- Step forgot -->
+        <div id="step-forgot" class="auth-step hidden">
+            <h3 style="color:var(--accent); margin-bottom:20px;">Reset Password</h3>
+            <p style="font-size:13px;color:#888;margin-bottom:16px;">Enter your email to receive a reset link.</p>
+            <input type="email" id="forgot-email" class="modal-input" placeholder="Your email">
+            <p id="forgot-message" style="color:#aaa;font-size:13px;margin-top:12px;display:none;"></p>
+            <div style="display:flex; justify-content:space-between; margin-top:12px;">
+                <button id="auth-back-to-login" class="btn-secondary small">Back</button>
+                <button id="auth-reset-btn" class="btn-primary">Send Reset Link</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- App Container (hidden until auth) -->
+<div id="app-container" class="app-hidden">
     <div class="glass-header">
         <div class="header-inner">
             <img src="assets/favicon.svg" alt="tavio Logo" class="header-logo" onerror="this.style.display='none'">
@@ -117,5 +181,14 @@
             </a>
         </div>
     </footer>
+
+    <!-- Sidebar Component (outside main container but inside app-container) -->
+    <sidebar-component current-app="tavio">
+        <div slot="app-content">
+            <!-- You can add custom sidebar items here if needed -->
+        </div>
+    </sidebar-component>
+</div>
+
 </body>
 </html>
