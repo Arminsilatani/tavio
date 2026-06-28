@@ -188,14 +188,8 @@
         </div>
     </footer>
 
-    <!-- کامپوننت سایدبار (متغیرهای CSS مستقیماً روی آن تنظیم شده‌اند) -->
-    <sidebar-component current-app="tavio" style="
-        --accent: #B0FFA5;
-        --bg: #0d0d0d;
-        --text: #f5f5f5;
-        --border: rgba(255,255,255,0.08);
-    ">
-        <sidebar-component current-app="tavio" style="--accent:#B0FFA5;--bg:#0d0d0d;--text:#f5f5f5;--border:rgba(255,255,255,0.08);">
+<!-- کامپوننت سایدبار (فقط یک تگ، بدون تکرار) -->
+<sidebar-component current-app="tavio" style="--accent:#B0FFA5;--bg:#0d0d0d;--text:#f5f5f5;--border:rgba(255,255,255,0.08);">
     <div slot="app-content" id="tavio-sidebar-content">
         <!-- دکمه New Prompt -->
         <button id="tavio-new-prompt-btn" class="sidebar-item sidebar-item-btn">
