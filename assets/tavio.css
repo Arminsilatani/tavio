@@ -528,7 +528,7 @@ body {
     gap: 14px; /* فاصله بیشتر بین آیکون و متن */
 }
 #tavio-new-prompt-item span {
-    margin-top: 2px; /* فقط متن را ۲px پایین می‌برد */
+    margin-top: 3px; /* فقط متن را ۲px پایین می‌برد */
 }
 
 .sidebar-section-header {
