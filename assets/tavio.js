@@ -441,3 +441,14 @@ document.addEventListener('DOMContentLoaded', async () => {
 
     await restoreSession();         // check if already logged in
 });
+// ================== SIDEBAR ITEM LISTENERS ==================
+function setupSidebarListeners() {
+    const newPromptItem = document.getElementById('tavio-new-prompt-item');
+    if (newPromptItem) {
+        newPromptItem.addEventListener('click', () => {
+            showNewPromptModal();
+            // اختیاری: بستن سایدبار اگر موبایل باشه
+            // getSidebarComponent()?.toggle?.();
+        });
+    }
+}
