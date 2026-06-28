@@ -91,6 +91,12 @@ async function buildCurrentProfile(user) {
     };
 }
 
+// ================== TAVIO NOTIFICATIONS ==================
+function loadTavioSidebarNotifications() {
+    // در صورت نیاز به نمایش نوتیفیکیشن در سایدبار، اینجا پیاده‌سازی کن
+}
+
+
 // ================== SYNC SIDEBAR ==================
 function syncSidebarComponent() {
     const comp = getSidebarComponent();
