@@ -560,11 +560,7 @@ body {
     display: none !important;
 }
 
-:root {
-  --accent: #ff6f91;   /* pink accent, change as needed */
-}
-
-/* Overlay background */
+/* ===== AUTH OVERLAY (Tavio flavor) ===== */
 .auth-overlay {
   position: fixed;
   top: 0; left: 0;
@@ -577,7 +573,6 @@ body {
   z-index: 10000;
 }
 
-/* Glassmorphism card */
 .auth-box {
   background: rgba(255,255,255,0.05);
   border: 1px solid rgba(255,255,255,0.12);
@@ -589,7 +584,7 @@ body {
   backdrop-filter: blur(12px);
   box-shadow: 0 8px 32px rgba(0,0,0,0.4);
   color: #fff;
-  font-family: 'Inter', sans-serif;   /* change to your font */
+  font-family: "Kalameh", sans-serif; /* هماهنگ با فونت تاویو */
 }
 
 .auth-logo {
@@ -601,7 +596,7 @@ body {
   font-size: 24px;
   font-weight: 700;
   margin: 0 0 4px 0;
-  color: var(--accent);
+  color: var(--accent);        /* اکسنت سبز تاویو */
 }
 
 .auth-subtitle {
@@ -659,7 +654,7 @@ body {
 /* Accent button */
 .accent-btn {
   background: var(--accent);
-  color: #fff;
+  color: #111;                 /* متن تیره روی پس‌زمینه سبز */
   border: none;
   border-radius: 8px;
   padding: 12px 20px;
@@ -669,7 +664,7 @@ body {
   transition: background 0.2s, transform 0.1s;
 }
 .accent-btn:hover {
-  background: color-mix(in srgb, var(--accent) 90%, white);
+  background: #c8ffbe;         /* روشن‌تر شدن سبز */
   transform: translateY(-1px);
 }
 
