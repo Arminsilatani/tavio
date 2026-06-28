@@ -24,7 +24,7 @@
     </div>
 </div>
 
-<!-- AUTH OVERLAY (Tavio version) -->
+<!-- AUTH OVERLAY (Tavio version – matched with existing JS) -->
 <div id="auth-overlay" class="auth-overlay">
   <div class="auth-box">
     <!-- Tavio Logo & branding -->
@@ -86,7 +86,7 @@
       <button id="auth-register-btn" class="accent-btn" style="width:100%; margin-top:12px;">Create Account</button>
       <button id="auth-back-to-email-2" class="auth-back-link">← Back</button>
 
-      <!-- Success after sign‑up -->
+      <!-- Success after sign‑up (static message, shown by JS) -->
       <div id="auth-register-success" class="auth-success" style="display:none;">
         <p>Account created! Please check your email.</p>
         <button id="reg-to-login-btn" class="accent-btn" style="margin-top:12px;">Go to Sign In</button>
@@ -97,9 +97,10 @@
     <div id="step-forgot" class="auth-step">
       <p style="font-size:13px; color:#888; margin-bottom:12px;">Enter your email to receive a reset link.</p>
       <input type="email" id="forgot-email" class="auth-field" placeholder="Your email" />
+      <!-- فقط از forgot-message استفاده می‌کنیم (هم برای خطا هم موفقیت) -->
       <p id="forgot-message" class="auth-success" style="display:none;"></p>
-      <p id="forgot-error" class="auth-error" style="display:none;"></p>
-      <button id="auth-send-reset-btn" class="accent-btn" style="width:100%; margin-top:12px;">Send Reset Link</button>
+      <!-- دکمه با id قبلی -->
+      <button id="auth-reset-btn" class="accent-btn" style="width:100%; margin-top:12px;">Send Reset Link</button>
       <button id="auth-back-to-login" class="auth-back-link">← Back to login</button>
     </div>
   </div>
