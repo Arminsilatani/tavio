@@ -20,6 +20,40 @@ let prompts = [
 let currentPrompt = null;
 let currentVariables = {};
 
+// ================== PINNING ==================
+const PIN_STORAGE_KEY = 'tavio_pinned_prompts';
+
+function getPinnedIds() {
+    try {
+        const stored = localStorage.getItem(PIN_STORAGE_KEY);
+        return stored ? JSON.parse(stored) : [];
+    } catch {
+        return [];
+    }
+}
+
+function savePinnedIds(ids) {
+    localStorage.setItem(PIN_STORAGE_KEY, JSON.stringify(ids));
+}
+
+function togglePin(promptId) {
+    let pinned = getPinnedIds();
+    const index = pinned.indexOf(promptId);
+    if (index > -1) {
+        pinned.splice(index, 1);
+    } else {
+        pinned.push(promptId);
+    }
+    savePinnedIds(pinned);
+    // Re-render with current filter
+    filterPrompts();
+    return pinned;
+}
+
+function isPinned(promptId) {
+    return getPinnedIds().includes(promptId);
+}
+
 // ================== HELPERS ==================
 function showGlobalLoader() {
     document.getElementById('initial-loader').style.display = 'flex';
@@ -88,18 +122,15 @@ function syncSidebarComponent() {
     comp.setEvents([]);
     updateNotificationDot();
 
-    // Force sidebar nav visibility
     const nav = comp.shadowRoot?.getElementById('sidebar-nav');
     if (nav) nav.style.display = 'block';
 
-    // Hide today/overdue lists completely
     const todayList = comp.shadowRoot?.getElementById('sidebar-today-list');
     if (todayList) todayList.style.display = 'none';
 
     const overdueList = comp.shadowRoot?.getElementById('sidebar-overdue-list');
     if (overdueList) overdueList.style.display = 'none';
 
-    // Load Tavio notifications
     loadTavioSidebarNotifications();
 }
 
@@ -329,10 +360,27 @@ function renderPromptGrid(filteredPrompts) {
     const grid = document.getElementById('prompt-grid');
     if (!grid) return;
     grid.innerHTML = '';
-    filteredPrompts.forEach(prompt => {
+
+    // Sort pinned first
+    const sorted = [...filteredPrompts].sort((a, b) => {
+        const aPinned = isPinned(a.id);
+        const bPinned = isPinned(b.id);
+        if (aPinned && !bPinned) return -1;
+        if (!aPinned && bPinned) return 1;
+        return 0;
+    });
+
+    sorted.forEach(prompt => {
+        const pinned = isPinned(prompt.id);
         const card = document.createElement('div');
-        card.className = 'prompt-card';
+        card.className = 'prompt-card' + (pinned ? ' pinned-card' : '');
         card.innerHTML = `
+            <button class="pin-btn ${pinned ? 'pinned' : ''}" data-id="${prompt.id}" onclick="event.stopPropagation(); togglePin(${prompt.id})">
+                <svg viewBox="0 0 24 24" fill="${pinned ? 'currentColor' : 'none'}" stroke="currentColor" stroke-width="2">
+                    <path d="M12 17v5M5 17h14M7 17l-1-4h12l-1 4M7 13l1-7h8l1 7"/>
+                    <circle cx="12" cy="6" r="1.5" ${pinned ? 'fill="currentColor"' : ''} stroke="none"/>
+                </svg>
+            </button>
             <span class="category">${prompt.category}</span>
             <h4>${prompt.title}</h4>
             <p>${prompt.template.substring(0, 110)}...</p>
