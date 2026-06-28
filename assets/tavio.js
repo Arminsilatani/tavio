@@ -1,297 +1,146 @@
-(function() {
-    'use strict';
+document.addEventListener('DOMContentLoaded', () => {
+    const templateInput = document.getElementById('template-input');
+    const fieldsSection = document.getElementById('fields-section');
+    const fieldsContainer = document.getElementById('fields-container');
+    const generateBtn = document.getElementById('generate-btn');
+    
+    const outputSection = document.getElementById('output-section');
+    const outputText = document.getElementById('output-text');
+    const typeCursor = document.getElementById('type-cursor');
+    const actionButtons = document.getElementById('action-buttons');
+    const copyBtn = document.getElementById('copy-btn');
+    const resetBtn = document.getElementById('reset-btn');
 
-    // ---------- DATA: Categorized prompt templates ----------
-    const library = [
-        {
-            category: 'Marketing',
-            templates: [
-                {
-                    name: 'Ad Copy',
-                    text: 'Write a catchy ad for {product} targeting {audience} that highlights {benefit}.'
-                },
-                {
-                    name: 'Email Subject',
-                    text: 'Create 5 email subject lines about {topic} for a {brand} audience.'
-                },
-                {
-                    name: 'Social Post',
-                    text: 'Generate a {platform} post about {event} using a {tone} tone.'
-                }
-            ]
-        },
-        {
-            category: 'Coding',
-            templates: [
-                {
-                    name: 'Function Skeleton',
-                    text: 'Write a {language} function named {function_name} that {description}. Include error handling.'
-                },
-                {
-                    name: 'Code Review',
-                    text: 'Review the following {language} code for {focus_area}:\n```\n{code_snippet}\n```'
-                },
-                {
-                    name: 'Unit Test',
-                    text: 'Generate unit tests for the {function_name} function in {framework}.'
-                }
-            ]
-        },
-        {
-            category: 'Creative',
-            templates: [
-                {
-                    name: 'Story Starter',
-                    text: 'Begin a {genre} story set in {setting} with a character who {character_trait}.'
-                },
-                {
-                    name: 'Poem Prompt',
-                    text: 'Write a {poem_type} about {theme} inspired by {inspiration}.'
-                }
-            ]
-        }
-    ];
-
-    // ---------- DOM elements ----------
-    const categoryList = document.getElementById('categoryList');
-    const templateList = document.getElementById('templateList');
-    const templatePreview = document.getElementById('templatePreview');
-    const formSection = document.getElementById('formSection');
-    const outputDisplay = document.getElementById('outputDisplay');
-    const outputActions = document.getElementById('outputActions');
-    const copyBtn = document.getElementById('copyBtn');
-    const clearBtn = document.getElementById('clearBtn');
-
-    // ---------- State ----------
-    let currentCategoryIndex = 0;
-    let selectedTemplate = null;        // template object from library
-    let placeholderFields = [];         // { name, inputElement }
+    let variables = [];
+    let finalPrompt = "";
     let isTyping = false;
-    let typingInterval = null;
-    let generatedText = '';
+    let typingTimeout;
 
-    // ---------- Helpers ----------
-    function extractPlaceholders(templateText) {
-        const regex = /\{([^}]+)\}/g;
-        const names = [];
-        let match;
-        while ((match = regex.exec(templateText)) !== null) {
-            if (!names.includes(match[1])) names.push(match[1]);
-        }
-        return names;
-    }
+    // Regex to match [variable] or {variable}
+    const varRegex = /\[([^\]]+)\]|\{([^}]+)\}/g;
 
-    function highlightPlaceholders(text) {
-        return text.replace(/\{([^}]+)\}/g, '<span class="placeholder-highlight">$1</span>');
-    }
+    templateInput.addEventListener('input', handleTemplateInput);
+    generateBtn.addEventListener('click', generatePrompt);
+    copyBtn.addEventListener('click', copyToClipboard);
+    resetBtn.addEventListener('click', resetTool);
 
-    function buildFinalPrompt(templateText, fieldMap) {
-        return templateText.replace(/\{([^}]+)\}/g, (match, name) => {
-            const value = fieldMap[name] || '';
-            return value;
-        });
-    }
+    function handleTemplateInput() {
+        const text = templateInput.value;
+        const matches = [...text.matchAll(varRegex)];
+        
+        // Extract unique variable names, removing brackets/braces
+        const foundVars = [...new Set(matches.map(m => m[1] || m[2]))];
 
-    function resetUI(keepTemplate = false) {
-        stopTyping();
-        outputDisplay.textContent = '';
-        outputDisplay.classList.remove('typing-cursor');
-        outputActions.classList.remove('visible');
-        generatedText = '';
-
-        if (!keepTemplate) {
-            selectedTemplate = null;
-            placeholderFields = [];
-            formSection.innerHTML = '';
-            templatePreview.innerHTML = '';
-            templateList.querySelectorAll('.template-item').forEach(el => el.classList.remove('selected'));
+        if (foundVars.length > 0) {
+            if (JSON.stringify(variables) !== JSON.stringify(foundVars)) {
+                variables = foundVars;
+                renderFields();
+            }
+            fieldsSection.style.display = 'block';
         } else {
-            // keep template but clear input values and output
-            if (placeholderFields.length) {
-                placeholderFields.forEach(f => {
-                    if (f.inputElement) f.inputElement.value = '';
-                });
-                updateGenerateButton();
-            }
+            variables = [];
+            fieldsContainer.innerHTML = '';
+            fieldsSection.style.display = 'none';
         }
     }
 
-    function stopTyping() {
-        if (typingInterval) {
-            clearInterval(typingInterval);
-            typingInterval = null;
-        }
-        isTyping = false;
-    }
-
-    function typewriterEffect(text, targetElement, onComplete) {
-        stopTyping();
-        targetElement.textContent = '';
-        targetElement.classList.add('typing-cursor');
-        let index = 0;
-        isTyping = true;
-
-        typingInterval = setInterval(() => {
-            if (index < text.length) {
-                targetElement.textContent += text.charAt(index);
-                index++;
-            } else {
-                clearInterval(typingInterval);
-                typingInterval = null;
-                isTyping = false;
-                targetElement.classList.remove('typing-cursor');
-                if (onComplete) onComplete();
-            }
-        }, 25);
-    }
-
-    function updateGenerateButton() {
-        const btn = document.getElementById('generateBtn');
-        if (!btn) return;
-        const allFilled = placeholderFields.every(f => f.inputElement && f.inputElement.value.trim() !== '');
-        btn.disabled = !allFilled;
-    }
-
-    // ---------- Render categories ----------
-    function renderCategories() {
-        categoryList.innerHTML = '';
-        library.forEach((cat, idx) => {
-            const btn = document.createElement('button');
-            btn.className = 'category-btn' + (idx === currentCategoryIndex ? ' active' : '');
-            btn.textContent = cat.category;
-            btn.addEventListener('click', () => {
-                if (isTyping) return;
-                currentCategoryIndex = idx;
-                renderCategories();
-                renderTemplates();
-                resetUI(false);
-            });
-            categoryList.appendChild(btn);
-        });
-    }
-
-    // ---------- Render templates for current category ----------
-    function renderTemplates() {
-        templateList.innerHTML = '';
-        const cat = library[currentCategoryIndex];
-        cat.templates.forEach((tmpl, idx) => {
-            const item = document.createElement('div');
-            item.className = 'template-item';
-            item.textContent = tmpl.name;
-            item.addEventListener('click', () => {
-                if (isTyping) return;
-                selectTemplate(tmpl, item);
-            });
-            if (selectedTemplate === tmpl) {
-                item.classList.add('selected');
-            }
-            templateList.appendChild(item);
-        });
-    }
-
-    // ---------- Select template ----------
-    function selectTemplate(tmpl, element) {
-        stopTyping();
-        resetUI(false);
-        selectedTemplate = tmpl;
-
-        // highlight in list
-        templateList.querySelectorAll('.template-item').forEach(el => el.classList.remove('selected'));
-        if (element) element.classList.add('selected');
-
-        // show preview with highlighted placeholders
-        templatePreview.innerHTML = highlightPlaceholders(tmpl.text);
-
-        // build form fields
-        const placeholders = extractPlaceholders(tmpl.text);
-        placeholderFields = [];
-        formSection.innerHTML = '';
-
-        placeholders.forEach(name => {
+    function renderFields() {
+        fieldsContainer.innerHTML = '';
+        variables.forEach(v => {
             const group = document.createElement('div');
-            group.className = 'input-group';
-
+            group.className = 'field-group';
+            
             const label = document.createElement('label');
-            label.textContent = name.replace(/_/g, ' ');
-            label.setAttribute('for', 'field_' + name);
+            label.textContent = v.replace(/[_]/g, ' ');
+            label.setAttribute('for', `field-${v}`);
 
             const input = document.createElement('input');
             input.type = 'text';
-            input.id = 'field_' + name;
-            input.placeholder = 'Enter ' + name.replace(/_/g, ' ');
-            input.addEventListener('input', updateGenerateButton);
+            input.id = `field-${v}`;
+            input.placeholder = `Enter ${v.replace(/[_]/g, ' ')}...`;
+            input.dataset.varName = v;
 
             group.appendChild(label);
             group.appendChild(input);
-            formSection.appendChild(group);
-
-            placeholderFields.push({ name, inputElement: input });
-        });
-
-        // generate button
-        const generateBtn = document.createElement('button');
-        generateBtn.className = 'btn-generate';
-        generateBtn.id = 'generateBtn';
-        generateBtn.textContent = 'Generate Prompt';
-        generateBtn.disabled = true;
-        generateBtn.addEventListener('click', handleGenerate);
-        formSection.appendChild(generateBtn);
-
-        updateGenerateButton();
-        // clear output
-        outputDisplay.textContent = '';
-        outputActions.classList.remove('visible');
-    }
-
-    // ---------- Handle generate ----------
-    function handleGenerate() {
-        if (!selectedTemplate || isTyping) return;
-        const fieldMap = {};
-        placeholderFields.forEach(f => {
-            fieldMap[f.name] = f.inputElement ? f.inputElement.value.trim() : '';
-        });
-
-        const finalPrompt = buildFinalPrompt(selectedTemplate.text, fieldMap);
-        generatedText = finalPrompt;
-
-        // hide actions while typing
-        outputActions.classList.remove('visible');
-        typewriterEffect(finalPrompt, outputDisplay, () => {
-            // typing finished, show copy & clear
-            outputActions.classList.add('visible');
+            fieldsContainer.appendChild(group);
         });
     }
 
-    // ---------- Copy ----------
-    copyBtn.addEventListener('click', async () => {
-        if (!generatedText) return;
-        try {
-            await navigator.clipboard.writeText(generatedText);
-            copyBtn.textContent = 'Copied!';
-            setTimeout(() => { copyBtn.textContent = 'Copy'; }, 1800);
-        } catch (err) {
-            // fallback
-            const ta = document.createElement('textarea');
-            ta.value = generatedText;
-            document.body.appendChild(ta);
-            ta.select();
-            document.execCommand('copy');
-            document.body.removeChild(ta);
-            copyBtn.textContent = 'Copied!';
-            setTimeout(() => { copyBtn.textContent = 'Copy'; }, 1800);
+    function generatePrompt() {
+        if (isTyping) return;
+
+        let promptTemplate = templateInput.value;
+        
+        // Replace all variables with user input
+        variables.forEach(v => {
+            const inputEl = document.getElementById(`field-${v}`);
+            const val = inputEl && inputEl.value.trim() !== '' ? inputEl.value : `[${v}]`;
+            
+            // Replace globally for this specific variable
+            const specificRegex = new RegExp(`\\[${v}\\]|\\{${v}\\}`, 'g');
+            promptTemplate = promptTemplate.replace(specificRegex, val);
+        });
+
+        finalPrompt = promptTemplate;
+        
+        // Setup UI for typing
+        outputSection.style.display = 'block';
+        actionButtons.style.display = 'none';
+        outputText.textContent = '';
+        typeCursor.style.display = 'inline-block';
+        
+        // Scroll to output
+        outputSection.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+
+        typeWriterEffect(finalPrompt, 0);
+    }
+
+    function typeWriterEffect(text, index) {
+        isTyping = true;
+        if (index < text.length) {
+            outputText.textContent += text.charAt(index);
+            // Randomize typing speed slightly for realism (10ms to 30ms)
+            const speed = Math.floor(Math.random() * 20) + 10;
+            typingTimeout = setTimeout(() => typeWriterEffect(text, index + 1), speed);
+        } else {
+            isTyping = false;
+            typeCursor.style.display = 'none';
+            actionButtons.style.display = 'flex';
         }
-    });
+    }
 
-    // ---------- Clear ----------
-    clearBtn.addEventListener('click', () => {
-        resetUI(true); // keep selected template, clear fields & output
-        // re-focus first input if exists
-        const firstInput = document.querySelector('.input-group input');
-        if (firstInput) firstInput.focus();
-    });
+    function copyToClipboard() {
+        navigator.clipboard.writeText(finalPrompt).then(() => {
+            const originalText = copyBtn.textContent;
+            copyBtn.textContent = 'Copied!';
+            copyBtn.style.background = '#fff';
+            setTimeout(() => {
+                copyBtn.textContent = originalText;
+                copyBtn.style.background = 'var(--accent)';
+            }, 2000);
+        });
+    }
 
-    // ---------- Init ----------
-    renderCategories();
-    renderTemplates();
-    resetUI(false);
-})();
+    function resetTool() {
+        // Clear all dynamic inputs
+        const inputs = fieldsContainer.querySelectorAll('input');
+        inputs.forEach(input => input.value = '');
+
+        // Hide output section
+        outputSection.style.display = 'none';
+        outputText.textContent = '';
+        actionButtons.style.display = 'none';
+        
+        // Clear timeouts if any
+        clearTimeout(typingTimeout);
+        isTyping = false;
+
+        // Scroll back to fields
+        fieldsSection.scrollIntoView({ behavior: 'smooth', block: 'center' });
+        
+        // Focus first input
+        if (inputs.length > 0) {
+            inputs[0].focus();
+        }
+    }
+});
