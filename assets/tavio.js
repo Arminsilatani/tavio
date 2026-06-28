@@ -4,6 +4,30 @@
  *  Version: 4.0.3 (Final fully working Tavio with shared sidebar)
  ****************************************************/
 
+// ======= 🚨 نیروی امداد برای حذف لودینگ (مستقل از هر چیزی) =======
+(function killLoaderNow() {
+    console.log('🔥🔥🔥 نیروی امداد لودینگ فعال شد');
+    const killLoader = () => {
+        const loader = document.getElementById('initial-loader');
+        if (loader) {
+            loader.classList.add('hidden');
+            loader.style.display = 'none';
+            console.log('🔥 لودینگ با زور و در کسری از ثانیه حذف شد');
+        } else {
+            console.warn('🔥 المنت لودینگ پیدا نشد، شاید هنوز DOM آماده نبوده');
+        }
+    };
+
+    // اگر DOM آماده باشد، مستقیم اجرا کن
+    if (document.readyState === 'loading') {
+        document.addEventListener('DOMContentLoaded', killLoader);
+    } else {
+        killLoader();
+    }
+
+    // باز هم یک ضربه‌گیر امنیتی با تایمر ۱ ثانیه
+    setTimeout(killLoader, 1000);
+})();
 /* =========================== SUPABASE CLIENT ============================ */
 const SUPABASE_URL = 'https://vzqicidepdmraygulrey.supabase.co';
 const SUPABASE_ANON_KEY = 'sb_publishable_kqRWgOmLISOE2EuLL1s8fw_WN6FJRTI';
