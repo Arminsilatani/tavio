@@ -49,7 +49,6 @@ function getSidebarComponent() {
             sidebarComponent.addEventListener('logout-request', () => {
                 logout();
             });
-            // Other events can be added as needed
         }
     }
     return sidebarComponent;
@@ -84,34 +83,20 @@ function syncSidebarComponent() {
     } else {
         comp.clearUser();
     }
-    comp.setTodayList([], []);
-    function syncSidebarComponent() {
-    const comp = getSidebarComponent();
-    if (!comp || typeof comp.setUser !== 'function') return;
 
-    if (currentUser) {
-        comp.setUser(currentUser, currentProfile);
-    } else {
-        comp.clearUser();
-    }
-
-    // پنهان کردن Today/Overdue پیش‌فرض
+    // مخفی‌کردن بخش Today/Overdue پیش‌فرض کامپوننت سایدبار
     if (comp.shadowRoot) {
         const todayList = comp.shadowRoot.getElementById('sidebar-today-list');
         if (todayList) {
-            // مخفی‌کردن کل بخش (بسته به ساختار کامپوننت، ممکن است والد یا جدِ بالاتر)
             let section = todayList.closest('.sidebar-section') || todayList.parentElement;
             if (section) section.style.display = 'none';
         }
     }
 
-    comp.setTodayList([], []);   // اختیاری؛ می‌توانید این خط را هم بردارید
+    comp.setTodayList([], []);
     comp.setEvents([]);
     updateNotificationDot();
-    loadTavioSidebarNotifications();   // ← بارگذاری اعلان‌های مخصوص Tavio
-}
-    comp.setEvents([]);
-    updateNotificationDot();
+    loadTavioSidebarNotifications();   // بارگذاری اعلان‌های مخصوص Tavio
 }
 
 async function updateNotificationDot() {
@@ -168,8 +153,11 @@ async function restoreSession() {
         currentUserRole = currentProfile?.role || 'recruit';
         document.getElementById('app-container').classList.remove('app-hidden');
         closeModal(document.getElementById('auth-overlay'));
+
+        // صبر می‌کنیم تا کامپوننت سایدبار کامل تعریف شود
+        await customElements.whenDefined('sidebar-component');
         syncSidebarComponent();
-        // Initialize Tavio UI
+
         renderPromptGrid(prompts);
         filterByCategory('all');
     } else {
@@ -212,7 +200,10 @@ function setupAuthListeners() {
         currentUserRole = currentProfile?.role || 'recruit';
         closeModal(authOverlay);
         document.getElementById('app-container').classList.remove('app-hidden');
+
+        await customElements.whenDefined('sidebar-component');
         syncSidebarComponent();
+
         renderPromptGrid(prompts);
         filterByCategory('all');
     });
@@ -271,6 +262,63 @@ function setupAuthListeners() {
         }
     });
     document.getElementById('auth-back-to-login').addEventListener('click', () => showStep('step-2-login'));
+}
+
+// ================== TAVIO SIDEBAR NOTIFICATIONS ==================
+function escapeHtml(text) {
+    const div = document.createElement('div');
+    div.textContent = text;
+    return div.innerHTML;
+}
+
+async function loadTavioSidebarNotifications() {
+    if (!currentUser) return;
+    const listContainer = document.getElementById('tavio-notif-list');
+    if (!listContainer) return;
+
+    const { data, error } = await sb
+        .from('notifications')
+        .select('id, title, body, created_at, is_read')
+        .eq('user_id', currentUser.id)
+        .eq('type', 'prompt_share')
+        .order('created_at', { ascending: false })
+        .limit(10);
+
+    if (error) {
+        console.error('Failed to load Tavio notifications:', error);
+        return;
+    }
+
+    if (!data || data.length === 0) {
+        listContainer.innerHTML = '<p class="sidebar-empty-msg">No shared prompts yet</p>';
+        return;
+    }
+
+    listContainer.innerHTML = data.map(notif => {
+        const time = new Date(notif.created_at).toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
+        return `
+            <div class="tavio-notif-item" data-notif-id="${notif.id}">
+                <div class="notif-title">${escapeHtml(notif.title) || 'Shared Prompt'}</div>
+                <div class="notif-body">${escapeHtml(notif.body) || ''}</div>
+                <div class="notif-time">${time}</div>
+            </div>
+        `;
+    }).join('');
+
+    // می‌توانید روی هر اعلان کلیک کرده و prompt را باز کنید (نیاز به prompt_id در جدول)
+    document.querySelectorAll('.tavio-notif-item').forEach(item => {
+        item.addEventListener('click', async () => {
+            const notifId = item.dataset.notifId;
+            // TODO: بارگذاری prompt مرتبط از طریق یک ستون prompt_id
+            console.log('Notification clicked:', notifId);
+            // بستن سایدبار
+            const sidebar = document.querySelector('sidebar-component');
+            if (sidebar && sidebar.shadowRoot) {
+                const overlay = sidebar.shadowRoot.getElementById('sidebar-overlay');
+                if (overlay) overlay.click();
+            }
+        });
+    });
 }
 
 // ================== TAVIO PROMPT LOGIC ==================
@@ -431,21 +479,31 @@ function saveCurrentPrompt() {
     filterPrompts();
 }
 
+// بستن سایدبار از بیرون (کمکی)
+window.ravloCloseSidebar = function() {
+    const sidebar = document.querySelector('sidebar-component');
+    if (sidebar?.shadowRoot) {
+        const overlay = sidebar.shadowRoot.getElementById('sidebar-overlay');
+        if (overlay) overlay.click();
+    }
+};
+
 // ================== INIT ==================
 document.addEventListener('DOMContentLoaded', async () => {
     setupAuthListeners();
-    document.getElementById('tavio-new-prompt-btn').addEventListener('click', (e) => {
-    e.stopPropagation(); // جلوگیری از بسته شدن سایدبار
-    showNewPromptModal();
-    // بستن سایدبار بعد از کلیک (اختیاری)
-    if (window.ravloCloseSidebar) window.ravloCloseSidebar();
-});
 
-    // Wait for sidebar component to be defined before interacting
-    customElements.whenDefined('sidebar-component').then(() => {
-        getSidebarComponent();       // attach listeners
-        syncSidebarComponent();      // show logged‑out state
+    // دکمه New Prompt داخل سایدبار
+    document.getElementById('tavio-new-prompt-btn').addEventListener('click', (e) => {
+        e.stopPropagation();
+        showNewPromptModal();
+        window.ravloCloseSidebar();
     });
 
-    await restoreSession();         // check if already logged in
+    // منتظر تعریف کامل کامپوننت می‌مانیم
+    customElements.whenDefined('sidebar-component').then(() => {
+        getSidebarComponent();       // اتصال listenerها
+        syncSidebarComponent();      // نمایش وضعیت اولیه
+    });
+
+    await restoreSession();         // بازیابی نشست (در صورت وجود)
 });
