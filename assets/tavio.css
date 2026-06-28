@@ -37,20 +37,17 @@ body {
     color: var(--text);
     line-height: 1.5;
     overflow-x: hidden;
-    padding-top: 80px; /* فضای خالی برای هدر ثابت */
 }
 
-/* Header - fixed at top */
+/* Header - stays fixed at top */
 .glass-header {
-    position: fixed;
-    top: 0;
-    left: 0;
-    right: 0;
-    z-index: 100;
     background: rgba(255,255,255,0.03);
     backdrop-filter: blur(10px);
     border-bottom: 1px solid rgba(255,255,255,0.05);
     padding: 16px 20px;
+    position: sticky;
+    top: 0;
+    z-index: auto;
 }
 .header-inner {
     display: flex;
