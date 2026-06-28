@@ -434,6 +434,12 @@ function saveCurrentPrompt() {
 // ================== INIT ==================
 document.addEventListener('DOMContentLoaded', async () => {
     setupAuthListeners();
+    document.getElementById('tavio-new-prompt-btn').addEventListener('click', (e) => {
+    e.stopPropagation(); // جلوگیری از بسته شدن سایدبار
+    showNewPromptModal();
+    // بستن سایدبار بعد از کلیک (اختیاری)
+    if (window.ravloCloseSidebar) window.ravloCloseSidebar();
+});
 
     // Wait for sidebar component to be defined before interacting
     customElements.whenDefined('sidebar-component').then(() => {
