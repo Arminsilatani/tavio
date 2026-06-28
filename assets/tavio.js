@@ -96,20 +96,16 @@ function syncSidebarComponent() {
     const comp = getSidebarComponent();
     if (!comp || typeof comp.setUser !== 'function') return;
 
-    if (currentUser) {
-        comp.setUser(currentUser, currentProfile);
-    } else {
-        comp.clearUser();
+    // اگر کاربری وارد نشده، هیچ تغییری نده (منوی قبلی حفظ شود)
+    if (!currentUser) {
+        return;   // فقط برگرد، بدون clearUser()
     }
 
-    // بخش Today/Overdue را خالی و مخفی کن
+    comp.setUser(currentUser, currentProfile);
     comp.setTodayList([], []);
     comp.setEvents([]);
-    
-    // نقطه اعلان را به‌روز کن
     updateNotificationDot();
 }
-
 // اگر می‌خواهید کل Today را از DOM حذف کنید (فقط یک بار بعد از ready):
 customElements.whenDefined('sidebar-component').then(() => {
     const sidebar = document.querySelector('sidebar-component');
