@@ -1536,7 +1536,7 @@ function updateCategoryChipsUI() {
 }
 
 function loadPromptIntoEditor(prompt) {
-    currentPrompt = {...prompt};
+    currentPrompt = { ...prompt };
     document.getElementById('library-view').classList.remove('active');
     document.getElementById('editor-view').classList.add('active');
     document.getElementById('current-prompt-title').textContent = prompt.title;
@@ -1547,13 +1547,16 @@ function loadPromptIntoEditor(prompt) {
     // مخفی نگه داشتن template (فقط برای استفاده داخلی)
     document.getElementById('template-textarea').value = prompt.template || '';
 
-    // مقداردهی fieldDefinitions و ساخت فیلدهای ورودی
-    fieldDefinitions = prompt.field_definitions ? JSON.parse(JSON.stringify(prompt.field_definitions)) : [];
-    // اطمینان از اینکه هر فیلد یک خاصیت value دارد
+    // مقداردهی fieldDefinitions از داده‌های ذخیره‌شده، و در صورت خالی بودن، فیلدها را از قالب استخراج کن
+    fieldDefinitions = prompt.field_definitions && prompt.field_definitions.length > 0
+        ? JSON.parse(JSON.stringify(prompt.field_definitions))
+        : parsePromptFields(prompt.template);   // ← این خط جدید
+
+    // اطمینان از وجود خاصیت value
     fieldDefinitions.forEach(f => { if (f.value === undefined) f.value = ''; });
+
     renderPromptInputFields();
 
-    // AI Models (بدون تغییر)
     selectedAIModels = prompt.ai_models || [];
     renderAIModels();
 }
