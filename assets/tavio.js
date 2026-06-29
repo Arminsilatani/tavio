@@ -125,9 +125,7 @@ function renderFieldEditors() {
 }
 
 function updateFieldName(index, value) {
-    if (fieldDefinitions[index]) {
-        fieldDefinitions[index].name = value;
-    }
+    if (fieldDefinitions[index]) fieldDefinitions[index].name = value;
 }
 
 function updateFieldType(index, value) {
@@ -141,9 +139,7 @@ function updateFieldType(index, value) {
 }
 
 function updateFieldDescription(index, value) {
-    if (fieldDefinitions[index]) {
-        fieldDefinitions[index].description = value;
-    }
+    if (fieldDefinitions[index]) fieldDefinitions[index].description = value;
 }
 
 function addOption(index) {
@@ -244,9 +240,7 @@ function renderModalAIModels() {
         }
         tag.dataset.model = model;
         tag.textContent = model.replace(/-/g, ' ');
-        tag.addEventListener('click', () => {
-            toggleModalAIModel(model);
-        });
+        tag.addEventListener('click', () => toggleModalAIModel(model));
         container.appendChild(tag);
     });
 
@@ -256,21 +250,16 @@ function renderModalAIModels() {
             tag.className = 'ai-model-tag selected';
             tag.dataset.model = model;
             tag.textContent = model;
-            tag.addEventListener('click', () => {
-                toggleModalAIModel(model);
-            });
+            tag.addEventListener('click', () => toggleModalAIModel(model));
             container.appendChild(tag);
         }
     });
 }
 
 function toggleModalAIModel(model) {
-    const index = modalSelectedAIModels.indexOf(model);
-    if (index > -1) {
-        modalSelectedAIModels.splice(index, 1);
-    } else {
-        modalSelectedAIModels.push(model);
-    }
+    const idx = modalSelectedAIModels.indexOf(model);
+    if (idx > -1) modalSelectedAIModels.splice(idx, 1);
+    else modalSelectedAIModels.push(model);
     renderModalAIModels();
 }
 
@@ -293,18 +282,13 @@ function renderModalCategories() {
     ALL_CATEGORIES.forEach(cat => {
         const chip = document.createElement('div');
         chip.className = 'category-chip';
-        if (modalSelectedCategories.includes(cat.id)) {
-            chip.classList.add('active');
-        }
+        if (modalSelectedCategories.includes(cat.id)) chip.classList.add('active');
         chip.textContent = cat.label;
         chip.dataset.category = cat.id;
         chip.addEventListener('click', () => {
             const idx = modalSelectedCategories.indexOf(cat.id);
-            if (idx > -1) {
-                modalSelectedCategories.splice(idx, 1);
-            } else {
-                modalSelectedCategories.push(cat.id);
-            }
+            if (idx > -1) modalSelectedCategories.splice(idx, 1);
+            else modalSelectedCategories.push(cat.id);
             renderModalCategories();
         });
         container.appendChild(chip);
@@ -319,7 +303,7 @@ async function toggleBookmark(promptId) {
     }
     const prompt = prompts.find(p => p.id === promptId);
     if (!prompt) return;
-    
+
     const newPinned = !prompt.pinned;
     const { error } = await sb
         .from('tavio_prompts')
@@ -376,12 +360,13 @@ async function fetchPromptsWithAuthors() {
             });
         }
 
+        // نگاشت داده‌ها به فرمت داخلی
         return promptsData.map(p => ({
             id: p.id,
             title: p.title,
             description: p.description || '',
             categories: parseCategoryArray(p.category_id),
-            template: p.template || '',
+            template: p.content || '',            // ستون content به‌عنوان قالب استفاده می‌شود
             user_id: p.user_id,
             pinned: p.pinned || false,
             created_at: p.created_at,
@@ -413,7 +398,6 @@ async function fetchConnectedUsers() {
             .eq('status', 'accepted');
 
         if (error) return [];
-
         if (!data || data.length === 0) return [];
 
         const connectedIds = data.map(row => {
@@ -527,7 +511,7 @@ function handleShareNotification(notification) {
     if (!data) return;
     const modal = document.getElementById('prompt-preview-modal');
     document.getElementById('preview-prompt-title').textContent = data.prompt_title || 'Shared Prompt';
-    // Show categories as chips
+
     const catsContainer = document.getElementById('preview-prompt-categories');
     catsContainer.innerHTML = '';
     const categoriesArray = parseCategoryArray(data.prompt_category);
@@ -540,7 +524,7 @@ function handleShareNotification(notification) {
         chip.style.marginRight = '4px';
         catsContainer.appendChild(chip);
     });
-    // Show description if present
+
     let templateHtml = data.prompt_template || '(No template)';
     if (data.prompt_description) {
         templateHtml = `<em>${data.prompt_description}</em><br><br>` + templateHtml;
@@ -575,8 +559,8 @@ async function acceptSharedPrompt() {
         .insert({
             title: newPrompt.title,
             description: newPrompt.description,
+            content: newPrompt.template,
             category_id: JSON.stringify(newPrompt.categories),
-            template: newPrompt.template,
             user_id: newPrompt.user_id,
             pinned: newPrompt.pinned,
             field_definitions: newPrompt.field_definitions,
@@ -1043,13 +1027,11 @@ function renderPromptGrid(filteredPrompts) {
     sorted.forEach(prompt => {
         const card = document.createElement('div');
         card.className = 'prompt-card' + (prompt.pinned ? ' pinned-card' : '');
-        // Build category chips
         const categoryChips = (prompt.categories || []).map(catId => {
             const label = ALL_CATEGORIES.find(c => c.id === catId)?.label || catId;
             return `<span class="category-chip" style="pointer-events:none; margin-right:4px;">${label}</span>`;
         }).join('');
-        // Description line
-        const descHtml = prompt.description ? `<p class="prompt-desc" style="font-size:13px; color:#aaa; margin:4px 0 8px; line-height:1.3; max-height:2.6em; overflow:hidden;">${prompt.description}</p>` : '';
+        const descHtml = prompt.description ? `<p style="font-size:13px; color:#aaa; margin:4px 0 8px;">${prompt.description}</p>` : '';
         card.innerHTML = `
             <div class="action-buttons">
                 <button class="pin-btn ${prompt.pinned ? 'pinned' : ''}" onclick="event.stopPropagation(); toggleBookmark(${prompt.id})">
@@ -1095,11 +1077,8 @@ function setCategoryFilter(category) {
         activeCategoryFilters = [];
     } else {
         const idx = activeCategoryFilters.indexOf(category);
-        if (idx > -1) {
-            activeCategoryFilters.splice(idx, 1);
-        } else {
-            activeCategoryFilters.push(category);
-        }
+        if (idx > -1) activeCategoryFilters.splice(idx, 1);
+        else activeCategoryFilters.push(category);
     }
     updateCategoryChipsUI();
     filterPrompts();
@@ -1272,8 +1251,8 @@ async function createNewPrompt() {
         .insert({
             title: newPrompt.title,
             description: newPrompt.description,
+            content: newPrompt.template,
             category_id: JSON.stringify(modalSelectedCategories),
-            template: newPrompt.template,
             user_id: newPrompt.user_id,
             pinned: newPrompt.pinned,
             field_definitions: newPrompt.field_definitions,
@@ -1314,7 +1293,7 @@ async function saveCurrentPrompt() {
         .from('tavio_prompts')
         .update({
             description: description,
-            template: template,
+            content: template,
             field_definitions: fieldDefinitions,
             ai_models: selectedAIModels
         })
@@ -1337,7 +1316,6 @@ async function saveCurrentPrompt() {
 function setupUIListeners() {
     document.getElementById('search-input').addEventListener('input', filterPrompts);
 
-    // Category filter chips (multi-select)
     document.querySelectorAll('#category-filters .category-chip').forEach(chip => {
         chip.addEventListener('click', () => {
             setCategoryFilter(chip.dataset.category);
@@ -1351,7 +1329,6 @@ function setupUIListeners() {
         if (e.target === e.currentTarget) hideNewPromptModal();
     });
 
-    // Modal AI model listeners
     document.getElementById('modal-add-ai-model-btn').addEventListener('click', addCustomModalAIModel);
     document.getElementById('modal-ai-model-input').addEventListener('keypress', (e) => {
         if (e.key === 'Enter') addCustomModalAIModel();
