@@ -1157,7 +1157,7 @@ body {
 .capsule-scroll-row {
     display: flex;
     align-items: center;
-    gap: 4px;
+    gap: 6px;
 }
 
 .capsule-scroll-inner {
