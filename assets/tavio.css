@@ -1118,3 +1118,39 @@ body {
     height: 20px;
     vertical-align: middle;
 }
+/* ---------- اسکرول افقی کپسول‌ها (بدون اسکرول‌بار) ---------- */
+.capsule-scroll-row {
+    display: flex;
+    align-items: center;
+    gap: 4px;
+}
+
+.capsule-scroll-inner {
+    flex: 1;
+    overflow-x: auto;
+    white-space: nowrap;
+    scrollbar-width: none;          /* Firefox */
+    -ms-overflow-style: none;       /* IE/Edge */
+    padding: 2px 0;                 /* فاصله کوچک برای زیبایی */
+}
+.capsule-scroll-inner::-webkit-scrollbar {
+    display: none;                  /* Chrome/Safari */
+}
+
+/* فلش‌های اسکرول */
+.scroll-arrow {
+    background: none;
+    border: none;
+    color: var(--accent);
+    cursor: pointer;
+    padding: 2px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    opacity: 0.7;
+    transition: opacity 0.2s;
+    flex-shrink: 0;
+}
+.scroll-arrow:hover {
+    opacity: 1;
+}
