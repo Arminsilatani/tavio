@@ -471,24 +471,31 @@ function toggleAIDropdown() {
 
     if (aiDropdownOpen) {
         dropdown.classList.remove('hidden');
-        // دکمه را نامرئی کن
+        requestAnimationFrame(() => {
+            dropdown.classList.add('open');
+        });
+
         if (button) button.classList.add('invisible');
 
-        // بستن فیلترها
         aiFilterAreaVisible = false;
         const filterArea = document.getElementById('ai-filter-area');
         if (filterArea) filterArea.classList.add('hidden');
         const toggleBtn = document.getElementById('ai-filter-toggle-btn');
         if (toggleBtn) toggleBtn.classList.remove('active');
 
-        dropdown.style.maxHeight = '340px';
         renderModalAIDropdown();
         const searchInput = document.getElementById('ai-search-input');
-        if (searchInput) searchInput.focus();
+        if (searchInput) setTimeout(() => searchInput.focus(), 50);
     } else {
-        dropdown.classList.add('hidden');
-        // دکمه را دوباره نمایان کن
+        dropdown.classList.remove('open');
         if (button) button.classList.remove('invisible');
+        
+        dropdown.addEventListener('transitionend', function onTransitionEnd() {
+            if (!aiDropdownOpen) {  // فقط وقتی واقعاً بسته است
+                dropdown.classList.add('hidden');
+            }
+            dropdown.removeEventListener('transitionend', onTransitionEnd);
+        }, { once: true });
     }
 }
 
