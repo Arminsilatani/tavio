@@ -464,21 +464,29 @@ function renderModalAIDropdown() {
 
 function toggleAIDropdown() {
     const dropdown = document.getElementById('ai-select-dropdown');
+    const button = document.getElementById('ai-select-button');
     if (!dropdown) return;
+    
     aiDropdownOpen = !aiDropdownOpen;
+    
     if (aiDropdownOpen) {
         dropdown.classList.remove('hidden');
+        button?.classList.add('active');
+        
+        // بستن فیلترها (همیشه با بسته شروع می‌شود)
         aiFilterAreaVisible = false;
         const filterArea = document.getElementById('ai-filter-area');
         if (filterArea) filterArea.classList.add('hidden');
         const toggleBtn = document.getElementById('ai-filter-toggle-btn');
         if (toggleBtn) toggleBtn.classList.remove('active');
-        dropdown.style.maxHeight = '320px';
+        
+        dropdown.style.maxHeight = '320px';   // ارتفاع پیش‌فرض
         renderModalAIDropdown();
         const searchInput = document.getElementById('ai-search-input');
         if (searchInput) searchInput.focus();
     } else {
         dropdown.classList.add('hidden');
+        button?.classList.remove('active');
     }
 }
 
