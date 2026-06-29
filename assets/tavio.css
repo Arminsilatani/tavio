@@ -972,6 +972,20 @@ body {
     flex-direction: column;
     box-sizing: border-box;
 }
+.ai-select-dropdown::-webkit-scrollbar {
+    width: 6px;
+}
+.ai-select-dropdown::-webkit-scrollbar-track {
+    background: transparent;
+}
+.ai-select-dropdown::-webkit-scrollbar-thumb {
+    background: var(--accent);
+    border-radius: 3px;
+}
+.ai-select-dropdown {
+    scrollbar-width: thin;
+    scrollbar-color: var(--accent) transparent;
+}
 .ai-select-button.invisible {
     visibility: hidden;
 }
