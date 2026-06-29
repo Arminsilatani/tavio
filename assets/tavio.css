@@ -208,6 +208,13 @@ body {
     border-color: var(--accent);
     box-shadow: 0 0 20px rgba(176, 255, 165, 0.05);
 }
+.prompt-card .prompt-author {
+    font-size: 12px;
+    color: #666;
+    margin-top: 12px;
+    padding-top: 8px;
+    border-top: 1px solid var(--border);
+}
 
 .editor-header {
     display: flex;
@@ -237,20 +244,169 @@ body {
     resize: vertical;
     font-family: inherit;
 }
-.variables-grid {
-    display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
+
+/* Fields Editor */
+.fields-container {
+    display: flex;
+    flex-direction: column;
     gap: 16px;
 }
-.variable-field { display: flex; flex-direction: column; }
-.variable-field label { font-size: 13px; margin-bottom: 6px; color: #bbb; }
-.variable-field input {
-    background: rgba(255,255,255,0.04);
+.field-editor {
+    background: rgba(255,255,255,0.03);
     border: 1px solid var(--border);
     border-radius: 8px;
-    padding: 12px 14px;
+    padding: 16px;
+}
+.field-editor .field-row {
+    display: flex;
+    gap: 12px;
+    flex-wrap: wrap;
+    align-items: center;
+}
+.field-editor .field-row label {
+    font-size: 13px;
+    color: #aaa;
+    min-width: 80px;
+}
+.field-editor .field-row input,
+.field-editor .field-row select {
+    background: rgba(255,255,255,0.05);
+    border: 1px solid var(--border);
+    border-radius: 6px;
     color: var(--text);
-    font-size: 15px;
+    padding: 6px 10px;
+    font-size: 14px;
+    flex: 1;
+    min-width: 120px;
+}
+.field-editor .field-row input:focus,
+.field-editor .field-row select:focus {
+    border-color: var(--accent);
+    outline: none;
+}
+.field-editor .field-options {
+    display: flex;
+    gap: 6px;
+    flex-wrap: wrap;
+    margin-top: 8px;
+    padding: 8px;
+    background: rgba(255,255,255,0.02);
+    border-radius: 6px;
+}
+.field-editor .field-options .option-tag {
+    background: rgba(255,255,255,0.06);
+    border: 1px solid var(--border);
+    border-radius: 4px;
+    padding: 2px 8px;
+    font-size: 12px;
+    color: #aaa;
+    display: flex;
+    align-items: center;
+    gap: 4px;
+}
+.field-editor .field-options .option-tag button {
+    background: none;
+    border: none;
+    color: #666;
+    cursor: pointer;
+    font-size: 12px;
+}
+.field-editor .field-options .option-tag button:hover {
+    color: #ff5555;
+}
+.field-editor .field-options .add-option-input {
+    background: rgba(255,255,255,0.05);
+    border: 1px solid var(--border);
+    border-radius: 4px;
+    color: var(--text);
+    padding: 2px 8px;
+    font-size: 12px;
+    width: 100px;
+}
+.field-editor .field-options .add-option-btn {
+    background: var(--accent);
+    border: none;
+    border-radius: 4px;
+    color: #111;
+    cursor: pointer;
+    padding: 2px 8px;
+    font-size: 12px;
+}
+.field-editor .field-options .add-option-btn:hover {
+    background: #c8ffbe;
+}
+.field-editor .field-description {
+    margin-top: 8px;
+}
+.field-editor .field-description textarea {
+    width: 100%;
+    background: rgba(255,255,255,0.04);
+    border: 1px solid var(--border);
+    border-radius: 4px;
+    color: var(--text);
+    padding: 6px 10px;
+    font-size: 13px;
+    resize: vertical;
+    min-height: 40px;
+    font-family: inherit;
+}
+.field-editor .field-description textarea:focus {
+    border-color: var(--accent);
+    outline: none;
+}
+.field-editor .remove-field-btn {
+    background: none;
+    border: none;
+    color: #666;
+    cursor: pointer;
+    font-size: 13px;
+    padding: 4px 8px;
+    border-radius: 4px;
+}
+.field-editor .remove-field-btn:hover {
+    color: #ff5555;
+    background: rgba(255,85,85,0.1);
+}
+
+/* AI Models */
+.ai-models-container {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    align-items: center;
+}
+.ai-model-tag {
+    background: rgba(176, 255, 165, 0.1);
+    border: 1px solid rgba(176, 255, 165, 0.2);
+    border-radius: 9999px;
+    padding: 4px 14px;
+    font-size: 13px;
+    color: var(--accent);
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+.ai-model-tag:hover {
+    background: rgba(176, 255, 165, 0.2);
+    border-color: var(--accent);
+}
+.ai-model-tag.selected {
+    background: var(--accent);
+    color: #111;
+    border-color: var(--accent);
+}
+.ai-model-input {
+    background: rgba(255,255,255,0.05);
+    border: 1px solid var(--border);
+    border-radius: 9999px;
+    color: var(--text);
+    padding: 4px 14px;
+    font-size: 13px;
+    flex: 1;
+    min-width: 120px;
+}
+.ai-model-input:focus {
+    border-color: var(--accent);
+    outline: none;
 }
 
 .btn-primary, .btn-secondary, .btn-generate, .btn-copy {
@@ -283,6 +439,14 @@ body {
     background: transparent;
     border: 1px solid var(--accent);
     color: var(--accent);
+}
+.btn-danger {
+    background: transparent;
+    color: #ff5555;
+    border: 1px solid #ff5555;
+}
+.btn-danger:hover {
+    background: rgba(255,85,85,0.1);
 }
 
 .result-display {
@@ -555,15 +719,6 @@ body {
 }
 #tavio-new-prompt-item span {
     margin-top: 2px;
-}
-
-.sidebar-section-header {
-    font-size: 11px;
-    text-transform: uppercase;
-    color: #777;
-    letter-spacing: 0.5px;
-    margin: 16px 0 12px;
-    font-weight: 600;
 }
 
 .sidebar-notif-list { display: flex; flex-direction: column; gap: 10px; }
