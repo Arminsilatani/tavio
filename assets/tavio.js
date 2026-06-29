@@ -633,23 +633,32 @@ function renderPricingCapsules() {
 
 // ================== MODAL CATEGORIES ==================
 function renderModalCategories() {
-    const container = document.getElementById('modal-categories-container');
-    if (!container) return;
-    container.innerHTML = '';
-    ALL_CATEGORIES.forEach(cat => {
-        const chip = document.createElement('div');
-        chip.className = 'category-chip';
-        if (modalSelectedCategories.includes(cat.id)) chip.classList.add('active');
-        chip.dataset.category = cat.id;
-        chip.innerHTML = `<span class="chip-icon">${cat.icon}</span><span>${cat.label}</span>`;
-        chip.addEventListener('click', () => {
+    const row = document.getElementById('modal-categories-text-row');
+    if (!row) return;
+    row.innerHTML = '';
+    ALL_CATEGORIES.forEach((cat, index) => {
+        if (index > 0) {
+            const sep = document.createElement('span');
+            sep.className = 'filter-text-separator';
+            sep.textContent = '|';
+            row.appendChild(sep);
+        }
+        const item = document.createElement('span');
+        item.className = 'filter-text-item' + (modalSelectedCategories.includes(cat.id) ? ' active' : '');
+        item.textContent = cat.label;
+        item.addEventListener('click', (e) => {
+            e.stopPropagation();
             const idx = modalSelectedCategories.indexOf(cat.id);
             if (idx > -1) modalSelectedCategories.splice(idx, 1);
             else modalSelectedCategories.push(cat.id);
             renderModalCategories();
+            // به‌روزرسانی فلش‌ها
+            setTimeout(() => updateRowArrows('modal-categories-scroll-inner'), 10);
         });
-        container.appendChild(chip);
+        row.appendChild(item);
     });
+    // به‌روزرسانی وضعیت فلش‌ها
+    setTimeout(() => updateRowArrows('modal-categories-scroll-inner'), 10);
 }
 // ================== BOOKMARK ==================
 async function toggleBookmark(promptId) {
@@ -1715,7 +1724,8 @@ function scrollRow(targetId, direction) {
 function setupFilterScrollArrows() {
     const rows = [
         { innerId: 'modality-scroll-inner', leftId: 'modality-arrow-left', rightId: 'modality-arrow-right' },
-        { innerId: 'pricing-scroll-inner', leftId: 'pricing-arrow-left', rightId: 'pricing-arrow-right' }
+        { innerId: 'pricing-scroll-inner', leftId: 'pricing-arrow-left', rightId: 'pricing-arrow-right' },
+        { innerId: 'modal-categories-scroll-inner', leftId: 'modal-cat-scroll-left', rightId: 'modal-cat-scroll-right' }
     ];
 
     rows.forEach(row => {
@@ -1746,10 +1756,10 @@ function setupUIListeners() {
     });
 
     document.getElementById('modal-cat-scroll-left').addEventListener('click', () => {
-        document.getElementById('modal-categories-container').scrollBy({ left: -200, behavior: 'smooth' });
+        document.getElementById('modal-categories-scroll-inner').scrollBy({ left: -200, behavior: 'smooth' });
     });
     document.getElementById('modal-cat-scroll-right').addEventListener('click', () => {
-        document.getElementById('modal-categories-container').scrollBy({ left: 200, behavior: 'smooth' });
+        document.getElementById('modal-categories-scroll-inner').scrollBy({ left: 200, behavior: 'smooth' });
     });
 
     document.getElementById('new-prompt-btn').addEventListener('click', showNewPromptModal);
