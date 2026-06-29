@@ -474,7 +474,7 @@ body {
 /* Buttons */
 .btn-primary, .btn-secondary, .btn-generate, .btn-copy {
     font-family: "Kalameh", sans-serif;
-    font-weight: 700;
+    font-weight: 400;
     padding: 10px 22px;
     border-radius: 8px;
     font-size: 14px;
