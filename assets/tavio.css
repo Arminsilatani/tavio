@@ -960,6 +960,12 @@ body {
 #add-prompt-btn {
     flex: 7 0 0;               /* 70% عرض با احتساب gap */
 }
+#cancel-modal-btn {
+    flex: 3 0 0;               /* 30% عرض با احتساب gap */
+    border: none;              /* حذف حاشیه‌ی پیش‌فرض */
+    color: #ccc;               /* رنگ متن ثابت */
+    background: transparent;
+}
 /* در فایل tavio.css، سلکتور زیر را پیدا کنید یا اضافه کنید */
 #ai-select-placeholder {
   font-size: 12px;      /* این خط مستقیماً سایز را تنظیم می‌کند */
