@@ -213,6 +213,17 @@
                 <option value="business">Business</option>
             </select>
             <textarea id="modal-template" class="modal-textarea" placeholder="Paste your prompt template..."></textarea>
+            <!-- بخش AI Models -->
+<div class="modal-ai-section">
+    <label class="modal-ai-label">Recommended AI Models</label>
+    <div id="modal-ai-models-container" class="ai-models-container" style="flex-wrap: wrap; gap: 6px;">
+        <!-- اینجا با JS پر می‌شه -->
+    </div>
+    <div style="display: flex; gap: 6px; margin-top: 8px;">
+        <input type="text" id="modal-ai-model-input" placeholder="Add custom model..." class="ai-model-input" style="flex:1;">
+        <button id="modal-add-ai-model-btn" class="btn-secondary small">Add</button>
+    </div>
+</div>
             <div class="modal-actions">
                 <button id="cancel-modal-btn" class="btn-secondary">Cancel</button>
                 <button id="add-prompt-btn" class="btn-primary">Add to Library</button>
