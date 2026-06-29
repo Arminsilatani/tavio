@@ -199,6 +199,7 @@ const PRICING_CAPSULES = ["free","freemium","paid"];
 let modalAIModalityFilters = [];
 let modalAIPricingFilters = [];
 let aiDropdownOpen = false;
+let aiFilterAreaVisible = false;
 let aiCompanyExpanded = {};
 
 function parsePromptFields(template) {
@@ -467,11 +468,36 @@ function toggleAIDropdown() {
     aiDropdownOpen = !aiDropdownOpen;
     if (aiDropdownOpen) {
         dropdown.classList.remove('hidden');
+        aiFilterAreaVisible = false;
+        const filterArea = document.getElementById('ai-filter-area');
+        if (filterArea) filterArea.classList.add('hidden');
+        const toggleBtn = document.getElementById('ai-filter-toggle-btn');
+        if (toggleBtn) toggleBtn.classList.remove('active');
+        dropdown.style.maxHeight = '320px';
         renderModalAIDropdown();
         const searchInput = document.getElementById('ai-search-input');
         if (searchInput) searchInput.focus();
     } else {
         dropdown.classList.add('hidden');
+    }
+}
+
+function toggleAIFilterArea() {
+    aiFilterAreaVisible = !aiFilterAreaVisible;
+    const filterArea = document.getElementById('ai-filter-area');
+    const toggleBtn = document.getElementById('ai-filter-toggle-btn');
+    if (filterArea) {
+        if (aiFilterAreaVisible) {
+            filterArea.classList.remove('hidden');
+            toggleBtn?.classList.add('active');
+            renderModalityCapsules();
+            renderPricingCapsules();
+        } else {
+            filterArea.classList.add('hidden');
+            toggleBtn?.classList.remove('active');
+        }
+        const dropdown = document.getElementById('ai-select-dropdown');
+        if (dropdown) dropdown.style.maxHeight = aiFilterAreaVisible ? '400px' : '320px';
     }
 }
 
@@ -486,7 +512,7 @@ function updateSelectedCountDisplay() {
 }
 
 function renderModalityCapsules() {
-    const row = document.getElementById('modality-capsules');
+    const row = document.getElementById('dropdown-modality-capsules');
     if (!row) return;
     row.innerHTML = '';
     MODALITY_CAPSULES.forEach((mod, index) => {
@@ -510,7 +536,7 @@ function renderModalityCapsules() {
 }
 
 function renderPricingCapsules() {
-    const row = document.getElementById('pricing-capsules');
+    const row = document.getElementById('dropdown-pricing-capsules');
     if (!row) return;
     row.innerHTML = '';
     PRICING_CAPSULES.forEach((price, index) => {
@@ -532,8 +558,6 @@ function renderPricingCapsules() {
         row.appendChild(chip);
     });
 }
-
-// Remove old modal AI functions that are no longer used: renderModalAIModels, toggleModalAIModel, addCustomModalAIModel
 
 // ================== MODAL CATEGORIES ==================
 function renderModalCategories() {
@@ -564,7 +588,7 @@ async function toggleBookmark(promptId) {
     }
     const prompt = prompts.find(p => p.id === promptId);
     if (!prompt) return;
-
+    
     const newPinned = !prompt.pinned;
     const { error } = await sb
         .from('tavio_prompts')
@@ -658,6 +682,7 @@ async function fetchConnectedUsers() {
             .eq('status', 'accepted');
 
         if (error) return [];
+
         if (!data || data.length === 0) return [];
 
         const connectedIds = data.map(row => {
@@ -1476,9 +1501,13 @@ function showNewPromptModal() {
     updateSelectedCountDisplay();
     document.getElementById('ai-select-dropdown')?.classList.add('hidden');
     aiDropdownOpen = false;
+    aiFilterAreaVisible = false;
+    const filterArea = document.getElementById('ai-filter-area');
+    if (filterArea) filterArea.classList.add('hidden');
+    const toggleBtn = document.getElementById('ai-filter-toggle-btn');
+    if (toggleBtn) toggleBtn.classList.remove('active');
     renderModalCategories();
-    renderModalityCapsules();
-    renderPricingCapsules();
+    // No need to render outside capsules anymore
 }
 
 function hideNewPromptModal() {
@@ -1610,21 +1639,26 @@ function setupUIListeners() {
         if (e.target === e.currentTarget) hideNewPromptModal();
     });
 
-    // AI Models dropdown listeners
+    // AI dropdown
     const aiSelectBtn = document.getElementById('ai-select-button');
-    if (aiSelectBtn) {
-        aiSelectBtn.addEventListener('click', toggleAIDropdown);
-    }
+    if (aiSelectBtn) aiSelectBtn.addEventListener('click', toggleAIDropdown);
     const aiSearchInput = document.getElementById('ai-search-input');
-    if (aiSearchInput) {
-        aiSearchInput.addEventListener('input', renderModalAIDropdown);
-    }
+    if (aiSearchInput) aiSearchInput.addEventListener('input', renderModalAIDropdown);
     document.addEventListener('click', (e) => {
         const wrapper = document.querySelector('.ai-select-wrapper');
         if (wrapper && !wrapper.contains(e.target) && aiDropdownOpen) {
             toggleAIDropdown();
         }
     });
+
+    // Filter toggle inside dropdown
+    const filterToggleBtn = document.getElementById('ai-filter-toggle-btn');
+    if (filterToggleBtn) {
+        filterToggleBtn.addEventListener('click', (e) => {
+            e.stopPropagation();
+            toggleAIFilterArea();
+        });
+    }
 
     document.getElementById('back-to-library-btn').addEventListener('click', backToLibrary);
     document.getElementById('detect-variables-btn').addEventListener('click', detectFields);
