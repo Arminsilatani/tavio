@@ -538,15 +538,18 @@ function renderModalityCapsules() {
     if (!row) return;
     row.innerHTML = '';
     MODALITY_CAPSULES.forEach((mod, index) => {
+        // جداکننده
         if (index > 0) {
-            const divider = document.createElement('span');
-            divider.className = 'capsule-divider';
-            row.appendChild(divider);
+            const sep = document.createElement('span');
+            sep.className = 'filter-text-separator';
+            sep.textContent = '|';
+            row.appendChild(sep);
         }
-        const chip = document.createElement('div');
-        chip.className = 'capsule-chip' + (modalAIModalityFilters.includes(mod) ? ' active' : '');
-        chip.textContent = mod;
-        chip.addEventListener('click', (e) => {
+        // آیتم متنی
+        const item = document.createElement('span');
+        item.className = 'filter-text-item' + (modalAIModalityFilters.includes(mod) ? ' active' : '');
+        item.textContent = mod;
+        item.addEventListener('click', (e) => {
             e.stopPropagation();
             const idx = modalAIModalityFilters.indexOf(mod);
             if (idx > -1) modalAIModalityFilters.splice(idx, 1);
@@ -554,9 +557,8 @@ function renderModalityCapsules() {
             renderModalityCapsules();
             if (aiDropdownOpen) renderModalAIDropdown();
         });
-        row.appendChild(chip);
+        row.appendChild(item);
     });
-    // به‌روزرسانی وضعیت فلش‌ها
     setTimeout(() => updateRowArrows('modality-scroll-inner'), 10);
 }
 
@@ -566,14 +568,15 @@ function renderPricingCapsules() {
     row.innerHTML = '';
     PRICING_CAPSULES.forEach((price, index) => {
         if (index > 0) {
-            const divider = document.createElement('span');
-            divider.className = 'capsule-divider';
-            row.appendChild(divider);
+            const sep = document.createElement('span');
+            sep.className = 'filter-text-separator';
+            sep.textContent = '|';
+            row.appendChild(sep);
         }
-        const chip = document.createElement('div');
-        chip.className = 'capsule-chip' + (modalAIPricingFilters.includes(price) ? ' active' : '');
-        chip.textContent = price;
-        chip.addEventListener('click', (e) => {
+        const item = document.createElement('span');
+        item.className = 'filter-text-item' + (modalAIPricingFilters.includes(price) ? ' active' : '');
+        item.textContent = price;
+        item.addEventListener('click', (e) => {
             e.stopPropagation();
             const idx = modalAIPricingFilters.indexOf(price);
             if (idx > -1) modalAIPricingFilters.splice(idx, 1);
@@ -581,9 +584,8 @@ function renderPricingCapsules() {
             renderPricingCapsules();
             if (aiDropdownOpen) renderModalAIDropdown();
         });
-        row.appendChild(chip);
+        row.appendChild(item);
     });
-    // به‌روزرسانی وضعیت فلش‌ها
     setTimeout(() => updateRowArrows('pricing-scroll-inner'), 10);
 }
 
