@@ -505,10 +505,11 @@ function hideGlobalLoader() {
     document.getElementById('initial-loader').style.display = 'none';
 }
 function openModal(modal) {
+    modal.classList.remove('hidden');
     modal.style.display = 'flex';
 }
 function closeModal(modal) {
-    modal.style.display = 'none';
+    modal.classList.add('hidden');
 }
 function showStep(stepId) {
     document.querySelectorAll('.auth-step').forEach(s => s.classList.remove('active'));
