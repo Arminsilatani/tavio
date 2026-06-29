@@ -1193,7 +1193,7 @@ body {
 .filter-text-row {
     display: flex;
     align-items: center;
-    gap: 3px;
+    gap: 32px;
     white-space: nowrap;
 }
 .filter-text-item {
