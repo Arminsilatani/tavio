@@ -570,7 +570,7 @@ body {
 .modal-textarea {
     min-height: 140px;
     resize: vertical;
-    margin-bottom: 5px;
+    margin-bottom: 1px;
 }
 .modal-actions {
     display: flex;
