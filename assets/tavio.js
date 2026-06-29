@@ -441,14 +441,37 @@ let selectedAIModels = [];
 function renderAIModels() {
     const container = document.getElementById('ai-models-container');
     if (!container) return;
-    const tags = container.querySelectorAll('.ai-model-tag');
-    tags.forEach(tag => {
-        const model = tag.dataset.model;
-        if (selectedAIModels.includes(model)) {
-            tag.classList.add('selected');
-        } else {
-            tag.classList.remove('selected');
-        }
+
+    container.innerHTML = '';
+
+    if (!selectedAIModels || selectedAIModels.length === 0) {
+        container.innerHTML = '<p style="color:#666; font-size:13px;">No AI models selected.</p>';
+        return;
+    }
+
+    selectedAIModels.forEach(modelId => {
+        // پیدا کردن اطلاعات مدل از ALL_AI_MODELS
+        const modelInfo = ALL_AI_MODELS.find(m => m.id === modelId);
+        const companyName = modelInfo ? modelInfo.company : 'Unknown';
+        const displayName = modelInfo ? modelInfo.name : modelId;
+
+        const tag = document.createElement('div');
+        tag.className = 'ai-model-tag';
+
+        // لوگوی شرکت
+        const logo = document.createElement('img');
+        logo.src = getCompanyLogo(companyName);   // همان تابعی که در مودال استفاده می‌کنیم
+        logo.alt = companyName;
+        logo.className = 'model-logo';
+        logo.onerror = function() { this.style.display = 'none'; };
+        tag.appendChild(logo);
+
+        // نام مدل
+        const nameSpan = document.createElement('span');
+        nameSpan.textContent = displayName;
+        tag.appendChild(nameSpan);
+
+        container.appendChild(tag);
     });
 }
 
