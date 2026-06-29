@@ -934,3 +934,113 @@ body {
 #modal-categories-container .chip-icon {
     transform: translateY(-2px);
 }
+/* ---------- AI Select Dropdown ---------- */
+.ai-select-wrapper {
+    position: relative;
+    margin-bottom: 8px;
+}
+.ai-select-button {
+    background: rgba(255,255,255,0.05);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 10px 14px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    cursor: pointer;
+    font-size: 14px;
+    color: var(--text);
+}
+.ai-select-placeholder { opacity: 0.7; }
+.ai-select-dropdown {
+    position: absolute;
+    top: calc(100% + 4px);
+    left: 0;
+    right: 0;
+    background: #1e1e1e;
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    z-index: 1100;
+    max-height: 320px;
+    overflow-y: auto;
+}
+.ai-search-container {
+    padding: 8px;
+    border-bottom: 1px solid var(--border);
+}
+.ai-search-input {
+    width: 100%;
+    background: rgba(255,255,255,0.05);
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    padding: 6px 10px;
+    color: var(--text);
+    font-size: 13px;
+    font-family: inherit;
+}
+.ai-company-group {
+    margin-bottom: 4px;
+}
+.ai-company-header {
+    padding: 8px 12px;
+    font-weight: 600;
+    font-size: 13px;
+    color: var(--accent);
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    cursor: default;
+}
+.ai-model-checkbox {
+    display: flex;
+    align-items: center;
+    padding: 6px 12px;
+    gap: 8px;
+    font-size: 13px;
+    color: #ccc;
+}
+.ai-model-checkbox input[type="checkbox"] {
+    accent-color: var(--accent);
+}
+.show-more-btn {
+    font-size: 11px;
+    color: var(--accent);
+    background: none;
+    border: none;
+    padding: 4px 12px;
+    cursor: pointer;
+}
+/* ---------- Capsule Filters ---------- */
+.ai-filter-capsules {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+.capsule-row {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px;
+}
+.capsule-chip {
+    background: rgba(255,255,255,0.04);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 4px 12px;
+    font-size: 12px;
+    color: #aaa;
+    cursor: pointer;
+    transition: all 0.2s;
+}
+.capsule-chip.active {
+    background: var(--accent);
+    color: #111;
+    border-color: var(--accent);
+}
+.capsule-divider {
+    width: 1px;
+    background: var(--border);
+    margin: 0 4px;
+    display: inline-block;
+    height: 20px;
+    vertical-align: middle;
+}
