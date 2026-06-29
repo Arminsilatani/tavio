@@ -893,12 +893,13 @@ body {
 .tavio-notif-item .notif-actions .reject-btn:hover {
     border-color: #666;
 }
+
 /* ---------- Modal category scroll wrapper ---------- */
 .modal-category-scroll-wrapper {
     display: flex;
     align-items: center;
     gap: 4px;
-    margin-bottom: 16px;   /* هماهنگ با modal-textarea */
+    margin-bottom: 16px;
 }
 
 #modal-categories-container {
@@ -917,11 +918,11 @@ body {
     display: none;
 }
 
-/* دکمه‌های اسکرول (از کلاس scroll-btn که قبلاً تعریف کردید استفاده می‌کنیم) */
 .scroll-btn-left,
 .scroll-btn-right {
     flex-shrink: 0;
 }
+
 .category-chip {
     display: inline-flex;
     align-items: center;
@@ -934,6 +935,7 @@ body {
 #modal-categories-container .chip-icon {
     transform: translateY(-2px);
 }
+
 /* ---------- AI Select Dropdown ---------- */
 .ai-select-wrapper {
     position: relative;
@@ -965,11 +967,14 @@ body {
     overflow-y: auto;
 }
 .ai-search-container {
+    display: flex;
+    align-items: center;
+    gap: 6px;
     padding: 8px;
     border-bottom: 1px solid var(--border);
 }
 .ai-search-input {
-    width: 100%;
+    flex: 1;
     background: rgba(255,255,255,0.05);
     border: 1px solid var(--border);
     border-radius: 6px;
@@ -977,6 +982,34 @@ body {
     color: var(--text);
     font-size: 13px;
     font-family: inherit;
+}
+.ai-filter-toggle-btn {
+    background: none;
+    border: 1px solid transparent;
+    color: #777;
+    cursor: pointer;
+    padding: 4px;
+    border-radius: 4px;
+    display: flex;
+    align-items: center;
+    transition: all 0.2s;
+    flex-shrink: 0;
+}
+.ai-filter-toggle-btn:hover,
+.ai-filter-toggle-btn.active {
+    color: var(--accent);
+    border-color: var(--border);
+}
+.ai-filter-area {
+    padding: 8px 12px;
+    border-bottom: 1px solid var(--border);
+    background: rgba(255,255,255,0.02);
+}
+.ai-filter-area .capsule-row {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px;
+    align-items: center;
 }
 .ai-company-group {
     margin-bottom: 4px;
@@ -1010,12 +1043,8 @@ body {
     padding: 4px 12px;
     cursor: pointer;
 }
-/* ---------- Capsule Filters ---------- */
-.ai-filter-capsules {
-    display: flex;
-    flex-direction: column;
-    gap: 8px;
-}
+
+/* ---------- Capsule Filters (inside dropdown) ---------- */
 .capsule-row {
     display: flex;
     flex-wrap: wrap;
