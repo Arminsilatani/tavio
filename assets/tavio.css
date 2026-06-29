@@ -579,7 +579,7 @@ body {
 }
 .modal-input::placeholder,
 .modal-textarea::placeholder {
-    font-size: 13px;
+    font-size: 19px;
 }
 /* Specific modal sections */
 .share-modal-desc {
