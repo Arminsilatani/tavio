@@ -38,7 +38,6 @@ function parsePromptFields(template) {
             name = options.join('_');
         }
 
-        // Check if field already exists in definitions
         const existing = fieldDefinitions.find(f => f.name === name && f.type === type);
         if (!existing) {
             fields.push({
@@ -49,7 +48,6 @@ function parsePromptFields(template) {
                 raw: match[1]
             });
         } else {
-            // Update options if changed
             existing.options = options;
         }
     }
@@ -158,7 +156,6 @@ function removeField(index) {
 function detectFields() {
     const template = document.getElementById('template-textarea').value;
     const detected = parsePromptFields(template);
-    // Merge with existing definitions (preserve descriptions)
     detected.forEach(d => {
         const existing = fieldDefinitions.find(f => f.name === d.name && f.type === d.type);
         if (existing) {
@@ -202,7 +199,6 @@ function addCustomAIModel() {
     if (!model) return;
     if (!selectedAIModels.includes(model)) {
         selectedAIModels.push(model);
-        // Add tag to container
         const container = document.getElementById('ai-models-container');
         const tag = document.createElement('div');
         tag.className = 'ai-model-tag selected';
@@ -753,95 +749,165 @@ async function restoreSession() {
 
 // ================== AUTH LISTENERS ==================
 function setupAuthListeners() {
+    console.log('🔄 Setting up auth listeners...');
     const authOverlay = document.getElementById('auth-overlay');
 
-    document.getElementById('auth-continue-btn').addEventListener('click', () => {
-        const email = document.getElementById('auth-email').value.trim();
-        if (!email) {
-            document.getElementById('auth-error-1').style.display = 'block';
-            document.getElementById('auth-error-1').textContent = 'Please enter your email.';
-            return;
-        }
-        document.getElementById('login-email-display').textContent = email;
-        document.getElementById('register-email-display').textContent = email;
-        showStep('step-2-login');
-        document.getElementById('auth-error-1').style.display = 'none';
-    });
+    // Continue button
+    const continueBtn = document.getElementById('auth-continue-btn');
+    if (continueBtn) {
+        continueBtn.addEventListener('click', () => {
+            const email = document.getElementById('auth-email').value.trim();
+            if (!email) {
+                document.getElementById('auth-error-1').style.display = 'block';
+                document.getElementById('auth-error-1').textContent = 'Please enter your email.';
+                return;
+            }
+            document.getElementById('login-email-display').textContent = email;
+            document.getElementById('register-email-display').textContent = email;
+            showStep('step-2-login');
+            document.getElementById('auth-error-1').style.display = 'none';
+        });
+    } else {
+        console.warn('⚠️ auth-continue-btn not found');
+    }
 
-    document.getElementById('auth-signin-btn').addEventListener('click', async () => {
-        const email = document.getElementById('auth-email').value.trim();
-        const password = document.getElementById('auth-password-login').value;
-        document.getElementById('auth-error-login').style.display = 'none';
-        const { data, error } = await sb.auth.signInWithPassword({ email, password });
-        if (error) {
-            document.getElementById('auth-error-login').textContent = error.message;
-            document.getElementById('auth-error-login').style.display = 'block';
-            return;
-        }
-        currentUser = data.user;
-        currentProfile = await buildCurrentProfile(data.user);
-        currentUserRole = currentProfile?.role || 'recruit';
-        closeModal(authOverlay);
-        document.getElementById('app-container').classList.remove('app-hidden');
-        syncSidebarComponent();
-        await syncPrompts();
-    });
+    // Sign In button
+    const signinBtn = document.getElementById('auth-signin-btn');
+    if (signinBtn) {
+        // Remove any existing listeners to avoid duplicates
+        const newBtn = signinBtn.cloneNode(true);
+        signinBtn.parentNode.replaceChild(newBtn, signinBtn);
+        
+        newBtn.addEventListener('click', async function(e) {
+            console.log('🟢 Sign In button clicked');
+            try {
+                const emailInput = document.getElementById('auth-email');
+                const passwordInput = document.getElementById('auth-password-login');
+                const errorDisplay = document.getElementById('auth-error-login');
 
-    document.getElementById('auth-register-btn').addEventListener('click', async () => {
-        const email = document.getElementById('auth-email').value.trim();
-        const password = document.getElementById('auth-password-register').value;
-        const firstName = document.getElementById('auth-first-name').value.trim();
-        const lastName = document.getElementById('auth-last-name').value.trim();
-        document.getElementById('auth-error-register').style.display = 'none';
-        if (password.length < 6) {
-            document.getElementById('auth-error-register').textContent = 'Password must be at least 6 characters.';
-            document.getElementById('auth-error-register').style.display = 'block';
-            return;
-        }
-        const { error } = await sb.auth.signUp({
-            email,
-            password,
-            options: {
-                data: { first_name: firstName, last_name: lastName },
-                emailRedirectTo: window.location.origin + window.location.pathname
+                if (!emailInput || !passwordInput) {
+                    console.error('❌ Email or password input not found in DOM');
+                    return;
+                }
+
+                const email = emailInput.value.trim();
+                const password = passwordInput.value;
+                console.log('📧 Email:', email);
+                console.log('🔑 Password length:', password.length);
+
+                if (!email || !password) {
+                    errorDisplay.textContent = 'Please enter email and password.';
+                    errorDisplay.style.display = 'block';
+                    return;
+                }
+
+                errorDisplay.style.display = 'none';
+                console.log('⏳ Attempting sign in...');
+                const { data, error } = await sb.auth.signInWithPassword({ email, password });
+                console.log('✅ Sign in response received:', data, error);
+
+                if (error) {
+                    console.error('❌ Sign in error:', error);
+                    errorDisplay.textContent = error.message;
+                    errorDisplay.style.display = 'block';
+                    return;
+                }
+
+                console.log('👤 User signed in:', data.user);
+                currentUser = data.user;
+                currentProfile = await buildCurrentProfile(data.user);
+                currentUserRole = currentProfile?.role || 'recruit';
+
+                const overlay = document.getElementById('auth-overlay');
+                if (overlay) closeModal(overlay);
+
+                document.getElementById('app-container').classList.remove('app-hidden');
+                syncSidebarComponent();
+                await syncPrompts();
+                console.log('🎉 Sign in complete!');
+            } catch (err) {
+                console.error('💥 Unhandled sign in error:', err);
+                alert('An error occurred during sign in. Check console for details.');
             }
         });
-        if (error) {
-            document.getElementById('auth-error-register').textContent = error.message;
-            document.getElementById('auth-error-register').style.display = 'block';
-            return;
-        }
-        alert('Registration successful! Please check your email to confirm your account.');
-        closeModal(authOverlay);
-    });
+    } else {
+        console.warn('⚠️ auth-signin-btn not found');
+    }
 
-    document.getElementById('auth-back-to-email').addEventListener('click', () => showStep('step-1'));
-    document.getElementById('auth-back-to-email-2').addEventListener('click', () => showStep('step-2-register'));
-
-    document.getElementById('forgot-link').addEventListener('click', (e) => {
-        e.preventDefault();
-        showStep('step-forgot');
-        document.getElementById('forgot-email').value = document.getElementById('auth-email').value.trim();
-    });
-
-    document.getElementById('auth-reset-btn').addEventListener('click', async () => {
-        const email = document.getElementById('forgot-email').value.trim();
-        if (!email) return;
-        const { error } = await sb.auth.resetPasswordForEmail(email, {
-            redirectTo: window.location.origin + window.location.pathname
+    // Register button
+    const registerBtn = document.getElementById('auth-register-btn');
+    if (registerBtn) {
+        registerBtn.addEventListener('click', async () => {
+            const email = document.getElementById('auth-email').value.trim();
+            const password = document.getElementById('auth-password-register').value;
+            const firstName = document.getElementById('auth-first-name').value.trim();
+            const lastName = document.getElementById('auth-last-name').value.trim();
+            document.getElementById('auth-error-register').style.display = 'none';
+            if (password.length < 6) {
+                document.getElementById('auth-error-register').textContent = 'Password must be at least 6 characters.';
+                document.getElementById('auth-error-register').style.display = 'block';
+                return;
+            }
+            const { error } = await sb.auth.signUp({
+                email,
+                password,
+                options: {
+                    data: { first_name: firstName, last_name: lastName },
+                    emailRedirectTo: window.location.origin + window.location.pathname
+                }
+            });
+            if (error) {
+                document.getElementById('auth-error-register').textContent = error.message;
+                document.getElementById('auth-error-register').style.display = 'block';
+                return;
+            }
+            alert('Registration successful! Please check your email to confirm your account.');
+            closeModal(authOverlay);
         });
-        const msg = document.getElementById('forgot-message');
-        msg.style.display = 'block';
-        if (error) {
-            msg.textContent = error.message;
-            msg.style.color = '#ff5555';
-        } else {
-            msg.textContent = 'Reset link sent! Check your email.';
-            msg.style.color = 'var(--accent)';
-        }
-    });
-    document.getElementById('auth-back-to-login').addEventListener('click', () => showStep('step-2-login'));
+    } else {
+        console.warn('⚠️ auth-register-btn not found');
+    }
 
+    // Back buttons
+    const back1 = document.getElementById('auth-back-to-email');
+    if (back1) back1.addEventListener('click', () => showStep('step-1'));
+    const back2 = document.getElementById('auth-back-to-email-2');
+    if (back2) back2.addEventListener('click', () => showStep('step-2-register'));
+
+    // Forgot password
+    const forgotLink = document.getElementById('forgot-link');
+    if (forgotLink) {
+        forgotLink.addEventListener('click', (e) => {
+            e.preventDefault();
+            showStep('step-forgot');
+            document.getElementById('forgot-email').value = document.getElementById('auth-email').value.trim();
+        });
+    }
+
+    const resetBtn = document.getElementById('auth-reset-btn');
+    if (resetBtn) {
+        resetBtn.addEventListener('click', async () => {
+            const email = document.getElementById('forgot-email').value.trim();
+            if (!email) return;
+            const { error } = await sb.auth.resetPasswordForEmail(email, {
+                redirectTo: window.location.origin + window.location.pathname
+            });
+            const msg = document.getElementById('forgot-message');
+            msg.style.display = 'block';
+            if (error) {
+                msg.textContent = error.message;
+                msg.style.color = '#ff5555';
+            } else {
+                msg.textContent = 'Reset link sent! Check your email.';
+                msg.style.color = 'var(--accent)';
+            }
+        });
+    }
+
+    const backToLogin = document.getElementById('auth-back-to-login');
+    if (backToLogin) backToLogin.addEventListener('click', () => showStep('step-2-login'));
+
+    // Toggle password visibility
     document.querySelectorAll('.toggle-password-btn').forEach(btn => {
         btn.addEventListener('click', () => {
             const inputId = btn.getAttribute('data-target');
@@ -937,7 +1003,6 @@ function backToLibrary() {
 }
 
 function detectVariables() {
-    // Legacy variable detection for {{variable}} pattern
     const template = document.getElementById('template-textarea').value;
     const regex = /\{\{([^}]+)\}\}/g;
     let match;
@@ -946,7 +1011,6 @@ function detectVariables() {
         vars.add(match[1].trim());
     }
     currentVariables = {};
-    // Also parse field definitions from { } pattern
     detectFields();
     const container = document.getElementById('variables-container');
     if (container) {
@@ -974,12 +1038,10 @@ function updateVar(key, value) {
 
 function generatePrompt() {
     let filled = document.getElementById('template-textarea').value;
-    // Replace {{variable}} patterns
     Object.keys(currentVariables).forEach(key => {
         const val = currentVariables[key] || `[${key}]`;
         filled = filled.replace(new RegExp(`\\{\\{${key}\\}\\}`, 'g'), val);
     });
-    // Replace {field} patterns with values from field definitions
     fieldDefinitions.forEach(field => {
         const regex = new RegExp(`\\{${field.raw || field.name}\\}`, 'g');
         let value = field.value || `[${field.name}]`;
@@ -1045,7 +1107,6 @@ async function createNewPrompt() {
         return;
     }
 
-    // Parse fields from template
     const fields = parsePromptFields(template);
     fieldDefinitions = fields;
 
@@ -1151,7 +1212,6 @@ function setupUIListeners() {
         if (e.key === 'Enter') addCustomAIModel();
     });
 
-    // AI model tag clicks (static ones)
     document.querySelectorAll('.ai-model-tag').forEach(tag => {
         tag.addEventListener('click', () => {
             const model = tag.dataset.model;
@@ -1181,10 +1241,12 @@ function setupUIListeners() {
 
 // ================== INIT ==================
 document.addEventListener('DOMContentLoaded', async () => {
+    console.log('🚀 DOM loaded, initializing...');
     setupAuthListeners();
     setupUIListeners();
 
     customElements.whenDefined('sidebar-component').then(() => {
+        console.log('✅ Sidebar component defined');
         getSidebarComponent();
         syncSidebarComponent();
     });
