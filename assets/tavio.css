@@ -568,7 +568,7 @@ body {
 }
 .modal-input { margin-bottom: 16px; }
 .modal-textarea {
-    min-height: 140px;
+    min-height: 100px;
     resize: vertical;
     margin-bottom: 8px;
 }
