@@ -18,8 +18,23 @@ let selectedShareUserId = null;
 // ================== FIELD DEFINITIONS ==================
 let fieldDefinitions = [];
 
-// New state for modal AI models
+// Modal states
 let modalSelectedAIModels = [];
+let modalSelectedCategories = [];
+
+// Filter state
+let activeCategoryFilters = [];
+
+const ALL_CATEGORIES = [
+    { id: 'writing', label: 'Writing' },
+    { id: 'coding', label: 'Coding' },
+    { id: 'marketing', label: 'Marketing' },
+    { id: 'analysis', label: 'Analysis' },
+    { id: 'education', label: 'Education / Learning' },
+    { id: 'productivity', label: 'Productivity' },
+    { id: 'creative', label: 'Creative' },
+    { id: 'image_media', label: 'Image / Media' }
+];
 
 function parsePromptFields(template) {
     const fields = [];
@@ -235,7 +250,6 @@ function renderModalAIModels() {
         container.appendChild(tag);
     });
 
-    // Add any custom models already selected
     modalSelectedAIModels.forEach(model => {
         if (!defaultModels.includes(model)) {
             const tag = document.createElement('div');
@@ -271,6 +285,32 @@ function addCustomModalAIModel() {
     input.value = '';
 }
 
+// ================== MODAL CATEGORIES ==================
+function renderModalCategories() {
+    const container = document.getElementById('modal-categories-container');
+    if (!container) return;
+    container.innerHTML = '';
+    ALL_CATEGORIES.forEach(cat => {
+        const chip = document.createElement('div');
+        chip.className = 'category-chip';
+        if (modalSelectedCategories.includes(cat.id)) {
+            chip.classList.add('active');
+        }
+        chip.textContent = cat.label;
+        chip.dataset.category = cat.id;
+        chip.addEventListener('click', () => {
+            const idx = modalSelectedCategories.indexOf(cat.id);
+            if (idx > -1) {
+                modalSelectedCategories.splice(idx, 1);
+            } else {
+                modalSelectedCategories.push(cat.id);
+            }
+            renderModalCategories();
+        });
+        container.appendChild(chip);
+    });
+}
+
 // ================== BOOKMARK ==================
 async function toggleBookmark(promptId) {
     if (!currentUser) {
@@ -292,11 +332,20 @@ async function toggleBookmark(promptId) {
         alert('Failed to update bookmark. Please try again.');
     } else {
         prompt.pinned = newPinned;
-        filterPrompts();
+        applyCategoryFilters();
     }
 }
 
 // ================== FETCH PROMPTS ==================
+function parseCategoryArray(category_id) {
+    if (!category_id) return [];
+    try {
+        if (typeof category_id === 'string') return JSON.parse(category_id);
+        if (Array.isArray(category_id)) return category_id;
+    } catch (e) {}
+    return [];
+}
+
 async function fetchPromptsWithAuthors() {
     if (!currentUser) return [];
     try {
@@ -330,7 +379,7 @@ async function fetchPromptsWithAuthors() {
         return promptsData.map(p => ({
             id: p.id,
             title: p.title,
-            category: p.category_id || 'general',
+            categories: parseCategoryArray(p.category_id),
             template: p.template || '',
             user_id: p.user_id,
             pinned: p.pinned || false,
@@ -349,8 +398,7 @@ async function fetchPromptsWithAuthors() {
 async function syncPrompts() {
     const fetched = await fetchPromptsWithAuthors();
     prompts = fetched.length > 0 ? fetched : [];
-    renderPromptGrid(prompts);
-    filterByCategory('all');
+    applyCategoryFilters();
 }
 
 // ================== SHARING ==================
@@ -451,7 +499,7 @@ async function sendShareRequest() {
             data: {
                 prompt_id: prompt.id,
                 prompt_title: prompt.title,
-                prompt_category: prompt.category,
+                prompt_category: JSON.stringify(prompt.categories),
                 prompt_template: prompt.template,
                 author_id: prompt.user_id,
                 author_name: prompt.author_name,
@@ -477,7 +525,19 @@ function handleShareNotification(notification) {
     if (!data) return;
     const modal = document.getElementById('prompt-preview-modal');
     document.getElementById('preview-prompt-title').textContent = data.prompt_title || 'Shared Prompt';
-    document.getElementById('preview-prompt-category').textContent = data.prompt_category || 'General';
+    // Show categories as chips
+    const catsContainer = document.getElementById('preview-prompt-categories');
+    catsContainer.innerHTML = '';
+    const categoriesArray = parseCategoryArray(data.prompt_category);
+    categoriesArray.forEach(catId => {
+        const label = ALL_CATEGORIES.find(c => c.id === catId)?.label || catId;
+        const chip = document.createElement('span');
+        chip.className = 'category-chip';
+        chip.textContent = label;
+        chip.style.pointerEvents = 'none';
+        chip.style.marginRight = '4px';
+        catsContainer.appendChild(chip);
+    });
     document.getElementById('preview-prompt-template').textContent = data.prompt_template || '(No template)';
     modal.dataset.notificationId = notification.id;
     modal.dataset.promptData = JSON.stringify(data);
@@ -490,9 +550,10 @@ async function acceptSharedPrompt() {
     const promptData = JSON.parse(modal.dataset.promptData || '{}');
     if (!promptData.prompt_title) return;
 
+    const categoriesArray = parseCategoryArray(promptData.prompt_category);
     const newPrompt = {
         title: promptData.prompt_title,
-        category: promptData.prompt_category || 'general',
+        categories: categoriesArray,
         template: promptData.prompt_template,
         user_id: currentUser.id,
         pinned: false,
@@ -505,7 +566,7 @@ async function acceptSharedPrompt() {
         .from('tavio_prompts')
         .insert({
             title: newPrompt.title,
-            category_id: newPrompt.category,
+            category_id: JSON.stringify(newPrompt.categories),
             template: newPrompt.template,
             user_id: newPrompt.user_id,
             pinned: newPrompt.pinned,
@@ -525,7 +586,7 @@ async function acceptSharedPrompt() {
     newPrompt.created_at = data.created_at;
     newPrompt.updated_at = data.updated_at;
     prompts.unshift(newPrompt);
-    filterPrompts();
+    applyCategoryFilters();
 
     await sb.from('notifications').update({ is_read: true }).eq('id', notifId);
     await sb.from('notifications').insert({
@@ -973,6 +1034,11 @@ function renderPromptGrid(filteredPrompts) {
     sorted.forEach(prompt => {
         const card = document.createElement('div');
         card.className = 'prompt-card' + (prompt.pinned ? ' pinned-card' : '');
+        // Build category chips
+        const categoryChips = (prompt.categories || []).map(catId => {
+            const label = ALL_CATEGORIES.find(c => c.id === catId)?.label || catId;
+            return `<span class="category-chip" style="pointer-events:none; margin-right:4px;">${label}</span>`;
+        }).join('');
         card.innerHTML = `
             <div class="action-buttons">
                 <button class="pin-btn ${prompt.pinned ? 'pinned' : ''}" onclick="event.stopPropagation(); toggleBookmark(${prompt.id})">
@@ -986,7 +1052,7 @@ function renderPromptGrid(filteredPrompts) {
                     </svg>
                 </button>
             </div>
-            <span class="category">${prompt.category}</span>
+            <div style="display:flex; gap:4px; flex-wrap:wrap; margin-bottom:8px;">${categoryChips}</div>
             <h4>${prompt.title}</h4>
             <p>${prompt.template ? prompt.template.substring(0, 110) : ''}...</p>
             <div class="prompt-author">by ${prompt.author_name || 'Unknown'}</div>
@@ -996,24 +1062,46 @@ function renderPromptGrid(filteredPrompts) {
     });
 }
 
-function filterPrompts() {
+function applyCategoryFilters() {
     const searchTerm = document.getElementById('search-input').value.toLowerCase();
-    const activeCat = document.querySelector('.category-chip.active')?.dataset.category || 'all';
     let filtered = prompts;
     if (searchTerm) {
         filtered = filtered.filter(p => p.title.toLowerCase().includes(searchTerm) || (p.template && p.template.toLowerCase().includes(searchTerm)));
     }
-    if (activeCat !== 'all') {
-        filtered = filtered.filter(p => p.category === activeCat);
+    if (activeCategoryFilters.length > 0) {
+        filtered = filtered.filter(p => p.categories.some(cat => activeCategoryFilters.includes(cat)));
     }
     renderPromptGrid(filtered);
 }
 
-function filterByCategory(cat) {
-    document.querySelectorAll('.category-chip').forEach(chip => {
-        chip.classList.toggle('active', chip.dataset.category === cat);
-    });
+function filterPrompts() {
+    applyCategoryFilters();
+}
+
+function setCategoryFilter(category) {
+    if (category === 'all') {
+        activeCategoryFilters = [];
+    } else {
+        const idx = activeCategoryFilters.indexOf(category);
+        if (idx > -1) {
+            activeCategoryFilters.splice(idx, 1);
+        } else {
+            activeCategoryFilters.push(category);
+        }
+    }
+    updateCategoryChipsUI();
     filterPrompts();
+}
+
+function updateCategoryChipsUI() {
+    document.querySelectorAll('#category-filters .category-chip').forEach(chip => {
+        const cat = chip.dataset.category;
+        if (cat === 'all') {
+            chip.classList.toggle('active', activeCategoryFilters.length === 0);
+        } else {
+            chip.classList.toggle('active', activeCategoryFilters.includes(cat));
+        }
+    });
 }
 
 function loadPromptIntoEditor(prompt) {
@@ -1128,7 +1216,9 @@ function showNewPromptModal() {
     document.getElementById('new-prompt-modal').classList.remove('hidden');
     document.getElementById('modal-title').focus();
     modalSelectedAIModels = [];
+    modalSelectedCategories = [];
     renderModalAIModels();
+    renderModalCategories();
 }
 
 function hideNewPromptModal() {
@@ -1137,10 +1227,13 @@ function hideNewPromptModal() {
 
 async function createNewPrompt() {
     const title = document.getElementById('modal-title').value.trim();
-    const category = document.getElementById('modal-category').value;
     const template = document.getElementById('modal-template').value.trim();
     if (!title || !template) {
         alert("Title and template are required.");
+        return;
+    }
+    if (modalSelectedCategories.length === 0) {
+        alert("Please select at least one category.");
         return;
     }
 
@@ -1149,20 +1242,20 @@ async function createNewPrompt() {
 
     const newPrompt = {
         title: title,
-        category: category,
+        categories: modalSelectedCategories,
         template: template,
         user_id: currentUser.id,
         pinned: false,
         author_name: currentProfile ? (currentProfile.first_name + ' ' + currentProfile.last_name).trim() || currentProfile.username || 'Unknown' : 'Unknown',
         field_definitions: fieldDefinitions,
-        ai_models: modalSelectedAIModels  // Now from modal selection
+        ai_models: modalSelectedAIModels
     };
 
     const { data, error } = await sb
         .from('tavio_prompts')
         .insert({
             title: newPrompt.title,
-            category_id: newPrompt.category,
+            category_id: JSON.stringify(modalSelectedCategories),
             template: newPrompt.template,
             user_id: newPrompt.user_id,
             pinned: newPrompt.pinned,
@@ -1185,7 +1278,7 @@ async function createNewPrompt() {
     hideNewPromptModal();
     document.getElementById('modal-title').value = '';
     document.getElementById('modal-template').value = '';
-    filterPrompts();
+    applyCategoryFilters();
     loadPromptIntoEditor(newPrompt);
 }
 
@@ -1216,17 +1309,17 @@ async function saveCurrentPrompt() {
     const index = prompts.findIndex(p => p.id === currentPrompt.id);
     if (index !== -1) prompts[index] = {...currentPrompt};
     alert("Prompt saved to library!");
-    filterPrompts();
+    applyCategoryFilters();
 }
 
 // ================== UI EVENT LISTENERS ==================
 function setupUIListeners() {
     document.getElementById('search-input').addEventListener('input', filterPrompts);
 
-    document.querySelectorAll('.category-chip').forEach(chip => {
+    // Category filter chips (multi-select)
+    document.querySelectorAll('#category-filters .category-chip').forEach(chip => {
         chip.addEventListener('click', () => {
-            const cat = chip.dataset.category;
-            filterByCategory(cat);
+            setCategoryFilter(chip.dataset.category);
         });
     });
 
