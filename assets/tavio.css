@@ -959,17 +959,23 @@ body {
 }
 .ai-select-dropdown {
     position: absolute;
-    bottom: 100%;                    /* باز شدن به سمت بالا */
-    top: auto;
+    bottom: calc(100% + 4px);    /* باز شدن به سمت بالا */
     left: 0;
     right: 0;
     background: #1e1e1e;
     border: 1px solid var(--border);
-    border-bottom: none;             /* فاصله بین دراپ‌داون و دکمه را حذف می‌کند */
-    border-radius: 8px 8px 0 0;     /* گوشه‌های بالا گرد، پایین صاف */
+    border-radius: 8px 8px 0 0;
     z-index: 1100;
-    max-height: 320px;
-    overflow-y: auto;
+    max-height: 360px;
+    display: flex;
+    flex-direction: column;
+    box-sizing: border-box;
+}
+.ai-companies-list {
+    flex: 1;
+    overflow-y: auto;           /* فقط این بخش اسکرول می‌خورد */
+    padding: 4px 0;
+    min-height: 0;              /* مهم برای flex child */
 }
 .ai-select-button.active {
     border-radius: 0 0 8px 8px;     /* گوشه‌های بالا صاف، پایین گرد */
@@ -980,8 +986,9 @@ body {
     align-items: center;
     gap: 6px;
     padding: 8px;
-    border-top: 1px solid var(--border);   /* یک خط جداکننده بالای جستجو */
+    border-top: 1px solid var(--border);
     background: #1e1e1e;
+    flex-shrink: 0;             /* هرگز کوچک نشود */
 }
 .ai-search-input {
     flex: 1;
