@@ -1007,7 +1007,7 @@ body {
     border-top: 1px solid var(--border);
     background: #1e1e1e;
     flex-shrink: 0;
-    border-radius: 10px 10px 0px 0px;
+    border-radius: 0 0 10px 10px;
 }
 .ai-search-input {
     flex: 1;
