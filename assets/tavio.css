@@ -958,6 +958,10 @@ body {
     opacity: 0.7;
     font-size: 12px;
 }
+/* در فایل tavio.css، سلکتور زیر را پیدا کنید یا اضافه کنید */
+#ai-select-placeholder {
+  font-size: 12px;      /* این خط مستقیماً سایز را تنظیم می‌کند */
+}
 .ai-select-dropdown {
     position: absolute;
     top: 43;
