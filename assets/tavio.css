@@ -959,18 +959,26 @@ body {
 }
 .ai-select-dropdown {
     position: absolute;
-    top: 43px;                      /* از بالای دکمه شروع شود */
+    top: 0;
     left: 0;
     right: 0;
-    transform: translateY(-100%); /* به‌اندازه‌ی ارتفاع خودش به بالا منتقل شود */
+    transform: translateY(-100%);
     background: #1e1e1e;
     border: 1px solid var(--border);
-    border-radius: 10px;
-    z-index: 1100;
-    max-height: 340px;
+    border-radius: 8px;
+    z-index: 5;
     display: flex;
     flex-direction: column;
     box-sizing: border-box;
+    max-height: 0;
+    opacity: 0;
+    overflow: hidden;
+    transition: max-height 0.3s ease, opacity 0.3s ease;
+}
+.ai-select-dropdown.open {
+    max-height: 340px;
+    opacity: 1;
+    overflow-y: auto;
 }
 .ai-select-dropdown::-webkit-scrollbar {
     width: 6px;
