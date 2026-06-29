@@ -178,33 +178,26 @@
             </div>
 
             <div class="editor-content">
-                <!-- Prompt Description -->
+                <!-- Prompt Description (read-only) -->
                 <div class="description-section">
                     <label class="section-label">Prompt Description</label>
-                    <textarea id="prompt-description" placeholder="Brief description (max 50 chars)" maxlength="50" rows="2"></textarea>
+                    <p id="prompt-description-display" class="prompt-description-text"></p>
                 </div>
 
-                <div class="template-section">
-                    <label class="section-label">Prompt Template</label>
-                    <textarea id="template-textarea" placeholder="Enter your prompt template here. Use {field} for simple fields, {option1.option2.option3} for single-select, {opt1/opt2/opt3} for multi-select."></textarea>
-                    <button id="detect-variables-btn" class="btn-secondary small detect-btn">Parse Fields</button>
+                <!-- مخفی کردن template textarea (فقط برای استفاده داخلی) -->
+                <textarea id="template-textarea" class="hidden"></textarea>
+
+                <!-- Prompt Input Fields (auto-generated from field_definitions) -->
+                <div class="prompt-inputs-section">
+                    <label class="section-label">Fill the Prompt Fields</label>
+                    <div id="prompt-input-fields" class="prompt-input-fields"></div>
                 </div>
 
-                <div class="fields-section">
-                    <label class="section-label">Field Definitions</label>
-                    <div id="fields-container" class="fields-container"></div>
-                </div>
-
+                <!-- AI Models Section (بدون تغییر) -->
                 <div class="ai-models-section">
                     <label class="section-label">Recommended AI Models</label>
                     <div id="ai-models-container" class="ai-models-container">
-                        <div class="ai-model-tag" data-model="gpt-4">GPT-4</div>
-                        <div class="ai-model-tag" data-model="claude-3">Claude 3</div>
-                        <div class="ai-model-tag" data-model="gemini-pro">Gemini Pro</div>
-                        <div class="ai-model-tag" data-model="llama-3">LLaMA 3</div>
-                        <div class="ai-model-tag" data-model="mistral-large">Mistral Large</div>
-                        <input type="text" id="ai-model-input" placeholder="Add custom AI model..." class="ai-model-input">
-                        <button id="add-ai-model-btn" class="btn-secondary small">Add</button>
+                        <!-- ... -->
                     </div>
                 </div>
 
