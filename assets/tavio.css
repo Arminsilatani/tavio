@@ -1072,6 +1072,12 @@ body {
     gap: 6px;
     cursor: default;
 }
+.ai-company-name {
+    color: #f5f5f5;
+    transform: translateY(1px);
+    display: inline-block;
+    line-height: 1;
+}
 .ai-company-logo {
     width: 18px;
     height: 18px;
