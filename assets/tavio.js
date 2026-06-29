@@ -509,6 +509,11 @@ function toggleAIFilterArea() {
             toggleBtn?.classList.add('active');
             renderModalityCapsules();
             renderPricingCapsules();
+            // بعد از رندر، فلش‌ها را به‌روز کن
+            setTimeout(() => {
+                updateRowArrows('modality-scroll-inner');
+                updateRowArrows('pricing-scroll-inner');
+            }, 50);
         } else {
             filterArea.classList.add('hidden');
             toggleBtn?.classList.remove('active');
@@ -542,7 +547,7 @@ function renderModalityCapsules() {
         chip.className = 'capsule-chip' + (modalAIModalityFilters.includes(mod) ? ' active' : '');
         chip.textContent = mod;
         chip.addEventListener('click', (e) => {
-            e.stopPropagation();               // ⬅️ جلوگیری از بسته شدن
+            e.stopPropagation();
             const idx = modalAIModalityFilters.indexOf(mod);
             if (idx > -1) modalAIModalityFilters.splice(idx, 1);
             else modalAIModalityFilters.push(mod);
@@ -551,6 +556,8 @@ function renderModalityCapsules() {
         });
         row.appendChild(chip);
     });
+    // به‌روزرسانی وضعیت فلش‌ها
+    setTimeout(() => updateRowArrows('modality-scroll-inner'), 10);
 }
 
 function renderPricingCapsules() {
@@ -567,7 +574,7 @@ function renderPricingCapsules() {
         chip.className = 'capsule-chip' + (modalAIPricingFilters.includes(price) ? ' active' : '');
         chip.textContent = price;
         chip.addEventListener('click', (e) => {
-            e.stopPropagation();               // ⬅️ جلوگیری از بسته شدن
+            e.stopPropagation();
             const idx = modalAIPricingFilters.indexOf(price);
             if (idx > -1) modalAIPricingFilters.splice(idx, 1);
             else modalAIPricingFilters.push(price);
@@ -576,6 +583,8 @@ function renderPricingCapsules() {
         });
         row.appendChild(chip);
     });
+    // به‌روزرسانی وضعیت فلش‌ها
+    setTimeout(() => updateRowArrows('pricing-scroll-inner'), 10);
 }
 
 // ================== MODAL CATEGORIES ==================
@@ -1640,15 +1649,43 @@ async function saveCurrentPrompt() {
 // بروزرسانی وضعیت نمایش فلش‌ها برای یک ردیف مشخص
 function updateRowArrows(rowId) {
     const inner = document.getElementById(rowId);
+    if (!inner) return;
     const leftArrow = document.getElementById(rowId.replace('scroll-inner', 'arrow-left'));
     const rightArrow = document.getElementById(rowId.replace('scroll-inner', 'arrow-right'));
-    if (!inner || !leftArrow || !rightArrow) return;
+    if (!leftArrow || !rightArrow) return;
 
     const canScrollLeft = inner.scrollLeft > 0;
     const canScrollRight = inner.scrollLeft + inner.clientWidth < inner.scrollWidth - 1;
 
     leftArrow.classList.toggle('hidden', !canScrollLeft);
     rightArrow.classList.toggle('hidden', !canScrollRight);
+}
+
+function scrollRow(targetId, direction) {
+    const inner = document.getElementById(targetId);
+    if (!inner) return;
+    const scrollAmount = 120;
+    inner.scrollBy({
+        left: direction === 'left' ? -scrollAmount : scrollAmount,
+        behavior: 'smooth'
+    });
+}
+
+function setupFilterScrollArrows() {
+    const rows = [
+        { innerId: 'modality-scroll-inner', leftId: 'modality-arrow-left', rightId: 'modality-arrow-right' },
+        { innerId: 'pricing-scroll-inner', leftId: 'pricing-arrow-left', rightId: 'pricing-arrow-right' }
+    ];
+
+    rows.forEach(row => {
+        const inner = document.getElementById(row.innerId);
+        if (!inner) return;
+
+        inner.addEventListener('scroll', () => updateRowArrows(row.innerId));
+
+        document.getElementById(row.leftId)?.addEventListener('click', () => scrollRow(row.innerId, 'left'));
+        document.getElementById(row.rightId)?.addEventListener('click', () => scrollRow(row.innerId, 'right'));
+    });
 }
 
 // اسکرول با کلیک روی فلش‌ها
@@ -1767,6 +1804,9 @@ function setupUIListeners() {
             document.getElementById('prompt-preview-modal').classList.add('hidden');
         }
     });
+
+    // راه‌اندازی فلش‌های اسکرول افقی فیلترها
+    setupFilterScrollArrows();
 }
 
 // ================== INIT ==================
