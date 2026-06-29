@@ -969,6 +969,10 @@ body {
     color: #ff6b6b;
     border: 1px solid #ff6b6b;
 }
+#add-prompt-btn:hover {
+    background: var(--accent); /* رنگ پس‌زمینه ثابت بماند */
+    transform: none;           /* جابه‌جایی رخ ندهد */
+}
 /* در فایل tavio.css، سلکتور زیر را پیدا کنید یا اضافه کنید */
 #ai-select-placeholder {
   font-size: 12px;      /* این خط مستقیماً سایز را تنظیم می‌کند */
