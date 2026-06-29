@@ -931,3 +931,6 @@ body {
     display: flex;
     align-items: center;
 }
+#modal-categories-container .chip-icon {
+    transform: translateY(-2px);
+}
