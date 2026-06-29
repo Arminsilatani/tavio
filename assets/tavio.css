@@ -1157,3 +1157,35 @@ body {
 .scroll-arrow:hover {
     opacity: 1;
 }
+/* حذف استایل‌های کپسول برای فیلترهای متنی */
+.filter-text-row {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    white-space: nowrap;
+}
+.filter-text-item {
+    color: #aaa;
+    font-size: 12px;
+    cursor: pointer;
+    transition: color 0.2s;
+    user-select: none;
+}
+.filter-text-item.active {
+    color: var(--accent);
+}
+.filter-text-item:hover {
+    color: var(--accent);
+}
+.filter-text-separator {
+    color: #555;
+    font-size: 12px;
+    user-select: none;
+}
+
+.filter-label {
+    color: #777;
+    font-size: 12px;
+    white-space: nowrap;
+    margin-right: 4px;
+}
