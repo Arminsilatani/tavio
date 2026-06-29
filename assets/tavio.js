@@ -1950,11 +1950,10 @@ Now, generate the output for the prompt provided above.`,
         category_id: JSON.stringify(referencePrompt.categories),
         user_id: referencePrompt.user_id,
         pinned: false,
-        field_definitions: [],
+        field_definitions: referencePrompt.field_definitions,
         ai_models: referencePrompt.ai_models
     });
 
-    // دوباره لیست پرامپت‌ها را بارگیری کن
     await syncPrompts();
 }
 
