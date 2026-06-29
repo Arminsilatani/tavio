@@ -1516,15 +1516,22 @@ function showNewPromptModal() {
     aiCompanyExpanded = {};
     document.getElementById('modal-description').value = '';
     updateSelectedCountDisplay();
-    document.getElementById('ai-select-dropdown')?.classList.add('hidden');
+
+    const dropdown = document.getElementById('ai-select-dropdown');
+    const button = document.getElementById('ai-select-button');
+    if (dropdown) {
+        dropdown.classList.remove('open');
+        dropdown.classList.add('hidden');
+    }
+    if (button) button.classList.remove('invisible');
     aiDropdownOpen = false;
     aiFilterAreaVisible = false;
     const filterArea = document.getElementById('ai-filter-area');
     if (filterArea) filterArea.classList.add('hidden');
     const toggleBtn = document.getElementById('ai-filter-toggle-btn');
     if (toggleBtn) toggleBtn.classList.remove('active');
+    
     renderModalCategories();
-    // No need to render outside capsules anymore
 }
 
 function hideNewPromptModal() {
