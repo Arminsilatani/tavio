@@ -1120,6 +1120,9 @@ body {
     padding: 4px 12px;
     cursor: pointer;
 }
+.modal-categories-section {
+    margin-bottom: 16px;   /* فاصله قبل از textarea */
+}
 
 /* ---------- Capsule Filters (inside dropdown) ---------- */
 .capsule-row {
