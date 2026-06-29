@@ -952,33 +952,36 @@ body {
     cursor: pointer;
     font-size: 14px;
     color: var(--text);
+    transition: border-radius 0.1s;
 }
 .ai-select-placeholder {
     opacity: 0.7;
 }
 .ai-select-dropdown {
     position: absolute;
-    top: 100%;              /* درست از لبه‌ی پایین دکمه شروع شود */
+    bottom: 100%;                    /* باز شدن به سمت بالا */
+    top: auto;
     left: 0;
     right: 0;
     background: #1e1e1e;
     border: 1px solid var(--border);
-    border-top: none;       /* فاصله‌ای بین دکمه و دراپ‌داون نباشد */
-    border-radius: 0 0 8px 8px;
+    border-bottom: none;             /* فاصله بین دراپ‌داون و دکمه را حذف می‌کند */
+    border-radius: 8px 8px 0 0;     /* گوشه‌های بالا گرد، پایین صاف */
     z-index: 1100;
     max-height: 320px;
     overflow-y: auto;
 }
 .ai-select-button.active {
-    border-radius: 8px 8px 0 0;
-    border-bottom: none;
+    border-radius: 0 0 8px 8px;     /* گوشه‌های بالا صاف، پایین گرد */
+    border-top: none;
 }
 .ai-search-container {
     display: flex;
     align-items: center;
     gap: 6px;
     padding: 8px;
-    border-bottom: 1px solid var(--border);
+    border-top: 1px solid var(--border);   /* یک خط جداکننده بالای جستجو */
+    background: #1e1e1e;
 }
 .ai-search-input {
     flex: 1;
