@@ -360,13 +360,12 @@ async function fetchPromptsWithAuthors() {
             });
         }
 
-        // نگاشت داده‌ها به فرمت داخلی
         return promptsData.map(p => ({
             id: p.id,
             title: p.title,
             description: p.description || '',
             categories: parseCategoryArray(p.category_id),
-            template: p.content || '',            // ستون content به‌عنوان قالب استفاده می‌شود
+            template: p.content || '',
             user_id: p.user_id,
             pinned: p.pinned || false,
             created_at: p.created_at,
@@ -1029,9 +1028,9 @@ function renderPromptGrid(filteredPrompts) {
         card.className = 'prompt-card' + (prompt.pinned ? ' pinned-card' : '');
         const categoryChips = (prompt.categories || []).map(catId => {
             const label = ALL_CATEGORIES.find(c => c.id === catId)?.label || catId;
-            return `<span class="category-chip" style="pointer-events:none; margin-right:4px;">${label}</span>`;
+            return `<span class="category-chip" style="pointer-events:none;">${label}</span>`;
         }).join('');
-        const descHtml = prompt.description ? `<p style="font-size:13px; color:#aaa; margin:4px 0 8px;">${prompt.description}</p>` : '';
+        const descHtml = prompt.description ? `<p class="prompt-desc">${prompt.description}</p>` : '';
         card.innerHTML = `
             <div class="action-buttons">
                 <button class="pin-btn ${prompt.pinned ? 'pinned' : ''}" onclick="event.stopPropagation(); toggleBookmark(${prompt.id})">
@@ -1045,10 +1044,10 @@ function renderPromptGrid(filteredPrompts) {
                     </svg>
                 </button>
             </div>
-            <div style="display:flex; gap:4px; flex-wrap:wrap; margin-bottom:8px;">${categoryChips}</div>
+            <div class="category-chips-inline">${categoryChips}</div>
             <h4>${prompt.title}</h4>
             ${descHtml}
-            <p style="font-size:14px; color:#aaa; display:-webkit-box; -webkit-line-clamp:3; -webkit-box-orient:vertical; overflow:hidden;">${prompt.template ? prompt.template.substring(0, 110) : ''}...</p>
+            <p class="prompt-snippet">${prompt.template ? prompt.template.substring(0, 110) : ''}...</p>
             <div class="prompt-author">by ${prompt.author_name || 'Unknown'}</div>
         `;
         card.onclick = () => loadPromptIntoEditor(prompt);
@@ -1316,10 +1315,19 @@ async function saveCurrentPrompt() {
 function setupUIListeners() {
     document.getElementById('search-input').addEventListener('input', filterPrompts);
 
+    // Category filter chips inside the scrollable container
     document.querySelectorAll('#category-filters .category-chip').forEach(chip => {
         chip.addEventListener('click', () => {
             setCategoryFilter(chip.dataset.category);
         });
+    });
+
+    // Scroll buttons
+    document.getElementById('cat-scroll-left').addEventListener('click', () => {
+        document.getElementById('category-filters').scrollBy({ left: -200, behavior: 'smooth' });
+    });
+    document.getElementById('cat-scroll-right').addEventListener('click', () => {
+        document.getElementById('category-filters').scrollBy({ left: 200, behavior: 'smooth' });
     });
 
     document.getElementById('new-prompt-btn').addEventListener('click', showNewPromptModal);
