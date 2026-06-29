@@ -257,14 +257,17 @@
             <textarea id="modal-description" class="modal-textarea" placeholder="Short description (max 50 chars)" maxlength="50" rows="2"></textarea>
 
             <div class="modal-categories-section">
-                <div class="modal-category-scroll-wrapper">
-                    <button type="button" class="scroll-btn scroll-btn-left" id="modal-cat-scroll-left" aria-label="Scroll left">
+                <div class="capsule-scroll-row" id="modal-categories-scroll-row">
+                    <span class="filter-label">categories:</span>
+                    <button class="scroll-arrow scroll-arrow-left hidden" id="modal-cat-scroll-left" data-target="modal-categories-scroll-inner">
                         <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                             <polyline points="15 18 9 12 15 6"></polyline>
                         </svg>
                     </button>
-                    <div id="modal-categories-container" class="modal-categories-container"></div>
-                    <button type="button" class="scroll-btn scroll-btn-right" id="modal-cat-scroll-right" aria-label="Scroll right">
+                    <div class="capsule-scroll-inner" id="modal-categories-scroll-inner">
+                        <div class="filter-text-row" id="modal-categories-text-row"></div>
+                    </div>
+                    <button class="scroll-arrow scroll-arrow-right hidden" id="modal-cat-scroll-right" data-target="modal-categories-scroll-inner">
                         <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                             <polyline points="9 18 15 12 9 6"></polyline>
                         </svg>
