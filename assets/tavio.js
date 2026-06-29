@@ -318,7 +318,7 @@ function renderModalCategories() {
         chip.className = 'category-chip';
         if (modalSelectedCategories.includes(cat.id)) chip.classList.add('active');
         chip.dataset.category = cat.id;
-        chip.innerHTML = `${cat.icon}<span>${cat.label}</span>`;
+        chip.innerHTML = `<span class="chip-icon">${cat.icon}</span><span>${cat.label}</span>`;
         chip.addEventListener('click', () => {
             const idx = modalSelectedCategories.indexOf(cat.id);
             if (idx > -1) modalSelectedCategories.splice(idx, 1);
