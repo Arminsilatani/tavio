@@ -142,7 +142,7 @@
                 <!-- فیلد توضیح پرامپت -->
                 <div class="description-section" style="margin-bottom:20px;">
                     <label class="section-label">Prompt Description</label>
-                    <input type="text" id="prompt-description" class="auth-field" placeholder="Brief description (max 50 chars)" maxlength="50" style="width:100%;">
+                    <textarea id="prompt-description" class="auth-field" placeholder="Brief description (max 50 chars)" maxlength="50" rows="2" style="width:100%; min-height:48px; resize:vertical;"></textarea>
                 </div>
 
                 <div class="template-section">
@@ -215,7 +215,7 @@
             <input type="text" id="modal-title" class="modal-input" placeholder="Prompt Title">
 
             <!-- توضیح پرامپت -->
-            <input type="text" id="modal-description" class="modal-input" placeholder="Short description (max 50 chars)" maxlength="50">
+            <textarea id="modal-description" class="modal-textarea" placeholder="Short description (max 50 chars)" maxlength="50" rows="2"></textarea>
 
             <div class="modal-categories-section">
                 <label class="modal-ai-label" style="margin-bottom:8px; display:block;">Categories</label>
