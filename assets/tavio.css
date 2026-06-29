@@ -531,12 +531,19 @@ body {
     position: fixed;
     top: 0; left: 0;
     width: 100%; height: 100%;
-    background: rgba(0,0,0,0.75);      /* opacity کمی کمتر برای دیده شدن blur */
-    backdrop-filter: blur(8px);        /* ← این خط را اضافه کنید */
+    background: rgba(0,0,0,0.75);
+    backdrop-filter: blur(0px);            /* شروع بدون blur */
+    opacity: 0;                            /* شروع شفاف */
+    transition: opacity 0.35s ease, backdrop-filter 0.35s ease;
     display: flex;
     align-items: center;
     justify-content: center;
     z-index: 1000;
+}
+
+.modal:not(.hidden) {
+    opacity: 1;
+    backdrop-filter: blur(8px);
 }
 .modal-content {
     background: #171717;
