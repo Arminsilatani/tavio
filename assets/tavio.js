@@ -1725,7 +1725,9 @@ function setupFilterScrollArrows() {
     const rows = [
         { innerId: 'modality-scroll-inner', leftId: 'modality-arrow-left', rightId: 'modality-arrow-right' },
         { innerId: 'pricing-scroll-inner', leftId: 'pricing-arrow-left', rightId: 'pricing-arrow-right' },
-        { innerId: 'modal-categories-scroll-inner', leftId: 'modal-cat-scroll-left', rightId: 'modal-cat-scroll-right' }
+            { innerId: 'modality-scroll-inner', leftId: 'modality-arrow-left', rightId: 'modality-arrow-right' },
+    { innerId: 'pricing-scroll-inner', leftId: 'pricing-arrow-left', rightId: 'pricing-arrow-right' },
+    { innerId: 'modal-categories-scroll-inner', leftId: 'modal-categories-scroll-arrow-left', rightId: 'modal-categories-scroll-arrow-right' }
     ];
 
     rows.forEach(row => {
@@ -1755,10 +1757,10 @@ function setupUIListeners() {
         document.getElementById('category-filters').scrollBy({ left: 200, behavior: 'smooth' });
     });
 
-    document.getElementById('modal-cat-scroll-left').addEventListener('click', () => {
+    document.getElementById('modal-categories-scroll-arrow-left').addEventListener('click', () => {
         document.getElementById('modal-categories-scroll-inner').scrollBy({ left: -200, behavior: 'smooth' });
     });
-    document.getElementById('modal-cat-scroll-right').addEventListener('click', () => {
+    document.getElementById('modal-categories-scroll-arrow-right').addEventListener('click', () => {
         document.getElementById('modal-categories-scroll-inner').scrollBy({ left: 200, behavior: 'smooth' });
     });
 
