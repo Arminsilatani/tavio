@@ -750,9 +750,7 @@ async function restoreSession() {
 // ================== AUTH LISTENERS ==================
 function setupAuthListeners() {
     console.log('🔄 Setting up auth listeners...');
-    const authOverlay = document.getElementById('auth-overlay');
 
-    // Continue button
     const continueBtn = document.getElementById('auth-continue-btn');
     if (continueBtn) {
         continueBtn.addEventListener('click', () => {
@@ -771,14 +769,9 @@ function setupAuthListeners() {
         console.warn('⚠️ auth-continue-btn not found');
     }
 
-    // Sign In button - با listener مستقیم بدون clone
     const signinBtn = document.getElementById('auth-signin-btn');
     if (signinBtn) {
-        // حذف listenerهای قبلی با استفاده از replace
-        const newSigninBtn = signinBtn.cloneNode(true);
-        signinBtn.parentNode.replaceChild(newSigninBtn, signinBtn);
-        // اکنون listener را روی دکمه جدید می‌گذاریم
-        newSigninBtn.addEventListener('click', async function(e) {
+        signinBtn.addEventListener('click', async function(e) {
             console.log('🟢 Sign In button clicked');
             try {
                 const emailInput = document.getElementById('auth-email');
@@ -834,7 +827,6 @@ function setupAuthListeners() {
         console.warn('⚠️ auth-signin-btn not found');
     }
 
-    // Register button
     const registerBtn = document.getElementById('auth-register-btn');
     if (registerBtn) {
         registerBtn.addEventListener('click', async () => {
@@ -868,13 +860,11 @@ function setupAuthListeners() {
         console.warn('⚠️ auth-register-btn not found');
     }
 
-    // Back buttons
     const back1 = document.getElementById('auth-back-to-email');
     if (back1) back1.addEventListener('click', () => showStep('step-1'));
     const back2 = document.getElementById('auth-back-to-email-2');
     if (back2) back2.addEventListener('click', () => showStep('step-2-register'));
 
-    // Forgot password
     const forgotLink = document.getElementById('forgot-link');
     if (forgotLink) {
         forgotLink.addEventListener('click', (e) => {
@@ -907,7 +897,6 @@ function setupAuthListeners() {
     const backToLogin = document.getElementById('auth-back-to-login');
     if (backToLogin) backToLogin.addEventListener('click', () => showStep('step-2-login'));
 
-    // Toggle password visibility
     document.querySelectorAll('.toggle-password-btn').forEach(btn => {
         btn.addEventListener('click', () => {
             const inputId = btn.getAttribute('data-target');
