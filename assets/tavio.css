@@ -893,32 +893,3 @@ body {
 .tavio-notif-item .notif-actions .reject-btn:hover {
     border-color: #666;
 }
-/* ---------- Modal category scroll wrapper ---------- */
-.modal-category-scroll-wrapper {
-    display: flex;
-    align-items: center;
-    gap: 4px;
-    margin-bottom: 16px;   /* هماهنگ با modal-textarea */
-}
-
-#modal-categories-container {
-    flex: 1;
-    flex-wrap: nowrap !important;
-    overflow-x: auto;
-    overflow-y: hidden;
-    white-space: nowrap;
-    scrollbar-width: none;
-    -ms-overflow-style: none;
-    display: flex;
-    gap: 6px;
-    padding: 2px 0;
-}
-#modal-categories-container::-webkit-scrollbar {
-    display: none;
-}
-
-/* دکمه‌های اسکرول (از کلاس scroll-btn که قبلاً تعریف کردید استفاده می‌کنیم) */
-.scroll-btn-left,
-.scroll-btn-right {
-    flex-shrink: 0;
-}
