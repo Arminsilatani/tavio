@@ -356,6 +356,13 @@ function renderPromptInputFields() {
         return;
     }
 
+    // کلمات کلیدی که نشان می‌دهند فیلد احتمالاً متن بلندی خواهد داشت
+    const longTextKeywords = [
+        'prompt', 'content', 'description', 'story', 'code',
+        'script', 'template', 'essay', 'article', 'message',
+        'text', 'body', 'instruction', 'task'
+    ];
+
     fieldDefinitions.forEach((field, index) => {
         const wrapper = document.createElement('div');
         wrapper.className = 'prompt-field-item';
@@ -365,6 +372,7 @@ function renderPromptInputFields() {
         wrapper.appendChild(label);
 
         let input;
+
         if (field.type === 'single-select' && field.options && field.options.length > 0) {
             input = document.createElement('select');
             field.options.forEach(opt => {
@@ -375,7 +383,6 @@ function renderPromptInputFields() {
                 input.appendChild(option);
             });
         } else if (field.type === 'multi-select' && field.options && field.options.length > 0) {
-            // برای سادگی، multi-select را هم با یک select multiple پیاده می‌کنیم (یا می‌توان چند چک‌باکس ساخت)
             input = document.createElement('select');
             input.multiple = true;
             input.style.minHeight = '60px';
@@ -387,10 +394,23 @@ function renderPromptInputFields() {
                 input.appendChild(option);
             });
         } else {
-            input = document.createElement('input');
-            input.type = 'text';
-            input.placeholder = 'Enter ' + (field.name || 'value');
-            if (field.value) input.value = field.value;
+            // تشخیص متن بلند با بررسی نام فیلد
+            const fieldName = (field.name || '').toLowerCase();
+            const isLongText = longTextKeywords.some(keyword => fieldName.includes(keyword));
+
+            if (isLongText) {
+                input = document.createElement('textarea');
+                input.rows = 4;                     // ارتفاع پیش‌فرض بیشتر
+                input.placeholder = 'Enter your ' + (field.name || 'text') + ' here…';
+                input.style.width = '100%';
+                input.style.resize = 'vertical';    // کاربر بتواند اندازه را تغییر دهد
+                if (field.value) input.value = field.value;
+            } else {
+                input = document.createElement('input');
+                input.type = 'text';
+                input.placeholder = 'Enter ' + (field.name || 'value');
+                if (field.value) input.value = field.value;
+            }
         }
 
         input.addEventListener('change', (e) => {
