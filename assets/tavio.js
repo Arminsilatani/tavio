@@ -1974,10 +1974,10 @@ function setupUIListeners() {
         document.getElementById('category-filters').scrollBy({ left: 200, behavior: 'smooth' });
     });
 
-    document.getElementById('modal-categories-arrow-left').addEventListener('click', () => {
+    document.getElementById('modal-categories-arrow-left')?.addEventListener('click', () => {
         document.getElementById('modal-categories-scroll-inner').scrollBy({ left: -200, behavior: 'smooth' });
     });
-    document.getElementById('modal-categories-arrow-right').addEventListener('click', () => {
+    document.getElementById('modal-categories-arrow-right')?.addEventListener('click', () => {
         document.getElementById('modal-categories-scroll-inner').scrollBy({ left: 200, behavior: 'smooth' });
     });
 
