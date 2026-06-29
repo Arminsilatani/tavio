@@ -1121,7 +1121,7 @@ body {
     cursor: pointer;
 }
 .modal-categories-section {
-    margin-bottom: 16px;   /* فاصله قبل از textarea */
+    margin-bottom: 8px;   /* فاصله قبل از textarea */
 }
 
 /* ---------- Capsule Filters (inside dropdown) ---------- */
