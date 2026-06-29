@@ -1281,9 +1281,6 @@ body {
     line-height: 1.5;
     margin-bottom: 5px;
     padding: 8px 12px;
-    background: rgba(255,255,255,0.03);
-    border-radius: 8px;
-    border: 1px solid var(--border);
 }
 
 /* کانتینر فیلدهای ورودی */
