@@ -9,15 +9,213 @@ let currentProfile = null;
 let currentUserRole = 'public';
 let sidebarComponent = null;
 
-// Original prompts (with author info)
 let prompts = [];
-
 let currentPrompt = null;
 let currentVariables = {};
 let shareTargetPromptId = null;
 let selectedShareUserId = null;
 
-// ================== BOOKMARK (pinned column) ==================
+// ================== FIELD DEFINITIONS ==================
+let fieldDefinitions = []; // Array of { name, type, options, description }
+
+function parsePromptFields(template) {
+    const fields = [];
+    const regex = /\{([^}]+)\}/g;
+    let match;
+    while ((match = regex.exec(template)) !== null) {
+        const content = match[1].trim();
+        let type = 'text';
+        let options = [];
+        let name = content;
+
+        if (content.includes('.')) {
+            type = 'single-select';
+            options = content.split('.').map(s => s.trim()).filter(s => s);
+            name = options.join('_');
+        } else if (content.includes('/')) {
+            type = 'multi-select';
+            options = content.split('/').map(s => s.trim()).filter(s => s);
+            name = options.join('_');
+        }
+
+        // Check if field already exists in definitions
+        const existing = fieldDefinitions.find(f => f.name === name && f.type === type);
+        if (!existing) {
+            fields.push({
+                name: name,
+                type: type,
+                options: options,
+                description: '',
+                raw: match[1]
+            });
+        } else {
+            // Update options if changed
+            existing.options = options;
+        }
+    }
+    return fields;
+}
+
+function renderFieldEditors() {
+    const container = document.getElementById('fields-container');
+    if (!container) return;
+    container.innerHTML = '';
+
+    if (fieldDefinitions.length === 0) {
+        container.innerHTML = `<p style="color:#666; grid-column:1/-1;">No fields detected. Use {field} in your template.</p>`;
+        return;
+    }
+
+    fieldDefinitions.forEach((field, index) => {
+        const div = document.createElement('div');
+        div.className = 'field-editor';
+        div.dataset.index = index;
+
+        let optionsHtml = '';
+        if (field.type === 'single-select' || field.type === 'multi-select') {
+            optionsHtml = `
+                <div class="field-options">
+                    ${field.options.map(opt => `
+                        <span class="option-tag">
+                            ${opt}
+                            <button onclick="removeOption(${index}, '${opt}')">✕</button>
+                        </span>
+                    `).join('')}
+                    <input type="text" class="add-option-input" id="option-input-${index}" placeholder="Add option...">
+                    <button class="add-option-btn" onclick="addOption(${index})">+</button>
+                </div>
+            `;
+        }
+
+        div.innerHTML = `
+            <div class="field-row">
+                <label>Name</label>
+                <input type="text" value="${field.name}" onchange="updateFieldName(${index}, this.value)" placeholder="Field name">
+                <label>Type</label>
+                <select onchange="updateFieldType(${index}, this.value)">
+                    <option value="text" ${field.type === 'text' ? 'selected' : ''}>Text</option>
+                    <option value="single-select" ${field.type === 'single-select' ? 'selected' : ''}>Single Select</option>
+                    <option value="multi-select" ${field.type === 'multi-select' ? 'selected' : ''}>Multi Select</option>
+                </select>
+                <button class="remove-field-btn" onclick="removeField(${index})">✕ Remove</button>
+            </div>
+            ${optionsHtml}
+            <div class="field-description">
+                <textarea placeholder="Field description (optional)" onchange="updateFieldDescription(${index}, this.value)">${field.description || ''}</textarea>
+            </div>
+        `;
+        container.appendChild(div);
+    });
+}
+
+function updateFieldName(index, value) {
+    if (fieldDefinitions[index]) {
+        fieldDefinitions[index].name = value;
+    }
+}
+
+function updateFieldType(index, value) {
+    if (fieldDefinitions[index]) {
+        fieldDefinitions[index].type = value;
+        if (value === 'text') {
+            fieldDefinitions[index].options = [];
+        }
+        renderFieldEditors();
+    }
+}
+
+function updateFieldDescription(index, value) {
+    if (fieldDefinitions[index]) {
+        fieldDefinitions[index].description = value;
+    }
+}
+
+function addOption(index) {
+    const input = document.getElementById(`option-input-${index}`);
+    if (!input) return;
+    const value = input.value.trim();
+    if (!value) return;
+    if (fieldDefinitions[index]) {
+        if (!fieldDefinitions[index].options) fieldDefinitions[index].options = [];
+        fieldDefinitions[index].options.push(value);
+        input.value = '';
+        renderFieldEditors();
+    }
+}
+
+function removeOption(index, option) {
+    if (fieldDefinitions[index]) {
+        fieldDefinitions[index].options = fieldDefinitions[index].options.filter(o => o !== option);
+        renderFieldEditors();
+    }
+}
+
+function removeField(index) {
+    fieldDefinitions.splice(index, 1);
+    renderFieldEditors();
+}
+
+function detectFields() {
+    const template = document.getElementById('template-textarea').value;
+    const detected = parsePromptFields(template);
+    // Merge with existing definitions (preserve descriptions)
+    detected.forEach(d => {
+        const existing = fieldDefinitions.find(f => f.name === d.name && f.type === d.type);
+        if (existing) {
+            d.description = existing.description || d.description;
+        }
+    });
+    fieldDefinitions = detected;
+    renderFieldEditors();
+}
+
+// ================== AI MODELS ==================
+let selectedAIModels = [];
+
+function renderAIModels() {
+    const container = document.getElementById('ai-models-container');
+    if (!container) return;
+    const tags = container.querySelectorAll('.ai-model-tag');
+    tags.forEach(tag => {
+        const model = tag.dataset.model;
+        if (selectedAIModels.includes(model)) {
+            tag.classList.add('selected');
+        } else {
+            tag.classList.remove('selected');
+        }
+    });
+}
+
+function toggleAIModel(model) {
+    const index = selectedAIModels.indexOf(model);
+    if (index > -1) {
+        selectedAIModels.splice(index, 1);
+    } else {
+        selectedAIModels.push(model);
+    }
+    renderAIModels();
+}
+
+function addCustomAIModel() {
+    const input = document.getElementById('ai-model-input');
+    const model = input.value.trim();
+    if (!model) return;
+    if (!selectedAIModels.includes(model)) {
+        selectedAIModels.push(model);
+        // Add tag to container
+        const container = document.getElementById('ai-models-container');
+        const tag = document.createElement('div');
+        tag.className = 'ai-model-tag selected';
+        tag.dataset.model = model;
+        tag.textContent = model;
+        tag.onclick = () => toggleAIModel(model);
+        container.insertBefore(tag, input);
+        renderAIModels();
+    }
+    input.value = '';
+}
+
+// ================== BOOKMARK ==================
 async function toggleBookmark(promptId) {
     if (!currentUser) {
         alert('Please sign in to bookmark prompts.');
@@ -27,7 +225,6 @@ async function toggleBookmark(promptId) {
     if (!prompt) return;
     
     const newPinned = !prompt.pinned;
-    // Update in database
     const { error } = await sb
         .from('tavio_prompts')
         .update({ pinned: newPinned })
@@ -43,11 +240,10 @@ async function toggleBookmark(promptId) {
     }
 }
 
-// ================== FETCH PROMPTS WITH AUTHOR NAMES ==================
+// ================== FETCH PROMPTS ==================
 async function fetchPromptsWithAuthors() {
     if (!currentUser) return [];
     try {
-        // 1. Fetch prompts for current user
         const { data: promptsData, error: promptsError } = await sb
             .from('tavio_prompts')
             .select('*')
@@ -59,23 +255,14 @@ async function fetchPromptsWithAuthors() {
             return [];
         }
 
-        if (!promptsData || promptsData.length === 0) {
-            return [];
-        }
+        if (!promptsData || promptsData.length === 0) return [];
 
-        // 2. Get unique user_ids from prompts to fetch profiles
         const userIds = [...new Set(promptsData.map(p => p.user_id))];
-        const { data: profilesData, error: profilesError } = await sb
+        const { data: profilesData } = await sb
             .from('profiles')
             .select('id, first_name, last_name, username')
             .in('id', userIds);
 
-        if (profilesError) {
-            console.error('Error fetching profiles:', profilesError);
-            // Continue with default author names
-        }
-
-        // 3. Create a map of user_id -> author name
         const authorMap = {};
         if (profilesData) {
             profilesData.forEach(prof => {
@@ -84,7 +271,6 @@ async function fetchPromptsWithAuthors() {
             });
         }
 
-        // 4. Combine data
         return promptsData.map(p => ({
             id: p.id,
             title: p.title,
@@ -94,7 +280,9 @@ async function fetchPromptsWithAuthors() {
             pinned: p.pinned || false,
             created_at: p.created_at,
             updated_at: p.updated_at,
-            author_name: authorMap[p.user_id] || 'Unknown'
+            author_name: authorMap[p.user_id] || 'Unknown',
+            field_definitions: p.field_definitions || [],
+            ai_models: p.ai_models || []
         }));
     } catch (e) {
         console.error('Error in fetchPromptsWithAuthors:', e);
@@ -102,14 +290,9 @@ async function fetchPromptsWithAuthors() {
     }
 }
 
-// ================== SYNC PROMPTS ==================
 async function syncPrompts() {
     const fetched = await fetchPromptsWithAuthors();
-    if (fetched.length > 0) {
-        prompts = fetched;
-    } else {
-        prompts = [];
-    }
+    prompts = fetched.length > 0 ? fetched : [];
     renderPromptGrid(prompts);
     filterByCategory('all');
 }
@@ -124,10 +307,7 @@ async function fetchConnectedUsers() {
             .or(`from_id.eq.${currentUser.id},to_id.eq.${currentUser.id}`)
             .eq('status', 'accepted');
 
-        if (error) {
-            console.error('Error fetching connections:', error);
-            return [];
-        }
+        if (error) return [];
 
         if (!data || data.length === 0) return [];
 
@@ -140,13 +320,10 @@ async function fetchConnectedUsers() {
         if (connectedIds.length === 0) return [];
 
         const uniqueIds = [...new Set(connectedIds)];
-
-        const { data: profiles, error: profError } = await sb
+        const { data: profiles } = await sb
             .from('profiles')
             .select('id, first_name, last_name, username, photo_url')
             .in('id', uniqueIds);
-
-        if (profError) return [];
 
         return profiles || [];
     } catch (e) {
@@ -180,7 +357,7 @@ async function openShareModal(promptId) {
         div.style.cursor = 'pointer';
         div.style.margin = '0';
         div.innerHTML = `
-            <span class="sidebar-icon" style="position:relative;">
+            <span class="sidebar-icon">
                 ${user.photo_url ? `<img src="${user.photo_url}" width="20" height="20" style="border-radius:50%;">` : `<span style="display:inline-block;width:20px;height:20px;border-radius:50%;background:var(--accent);color:#111;text-align:center;line-height:20px;font-size:12px;font-weight:bold;">${label.charAt(0)}</span>`}
             </span>
             <span>${label}</span>
@@ -221,7 +398,9 @@ async function sendShareRequest() {
                 prompt_category: prompt.category,
                 prompt_template: prompt.template,
                 author_id: prompt.user_id,
-                author_name: prompt.author_name
+                author_name: prompt.author_name,
+                field_definitions: prompt.field_definitions || [],
+                ai_models: prompt.ai_models || []
             },
             is_read: false,
             created_at: new Date().toISOString()
@@ -236,7 +415,7 @@ async function sendShareRequest() {
     }
 }
 
-// ================== HANDLE INCOMING SHARE NOTIFICATIONS ==================
+// ================== HANDLE SHARE NOTIFICATIONS ==================
 function handleShareNotification(notification) {
     const data = notification.data;
     if (!data) return;
@@ -244,7 +423,6 @@ function handleShareNotification(notification) {
     document.getElementById('preview-prompt-title').textContent = data.prompt_title || 'Shared Prompt';
     document.getElementById('preview-prompt-category').textContent = data.prompt_category || 'General';
     document.getElementById('preview-prompt-template').textContent = data.prompt_template || '(No template)';
-    document.getElementById('preview-prompt-author').textContent = data.author_name || 'Unknown';
     modal.dataset.notificationId = notification.id;
     modal.dataset.promptData = JSON.stringify(data);
     modal.classList.remove('hidden');
@@ -256,17 +434,17 @@ async function acceptSharedPrompt() {
     const promptData = JSON.parse(modal.dataset.promptData || '{}');
     if (!promptData.prompt_title) return;
 
-    // Add prompt to current user's prompts
     const newPrompt = {
         title: promptData.prompt_title,
         category: promptData.prompt_category || 'general',
         template: promptData.prompt_template,
         user_id: currentUser.id,
         pinned: false,
-        author_name: promptData.author_name || 'Unknown'
+        author_name: promptData.author_name || 'Unknown',
+        field_definitions: promptData.field_definitions || [],
+        ai_models: promptData.ai_models || []
     };
 
-    // Save to database
     const { data, error } = await sb
         .from('tavio_prompts')
         .insert({
@@ -274,7 +452,9 @@ async function acceptSharedPrompt() {
             category_id: newPrompt.category,
             template: newPrompt.template,
             user_id: newPrompt.user_id,
-            pinned: newPrompt.pinned
+            pinned: newPrompt.pinned,
+            field_definitions: newPrompt.field_definitions,
+            ai_models: newPrompt.ai_models
         })
         .select('id, created_at, updated_at')
         .single();
@@ -291,12 +471,9 @@ async function acceptSharedPrompt() {
     prompts.unshift(newPrompt);
     filterPrompts();
 
-    // Mark notification as read
     await sb.from('notifications').update({ is_read: true }).eq('id', notifId);
-    
-    // Send acceptance notification back to sender
     await sb.from('notifications').insert({
-        user_id: notification.sender_id, // need sender_id from notification
+        user_id: notification.sender_id,
         sender_id: currentUser.id,
         type: 'share_accepted',
         data: { prompt_id: promptData.prompt_id },
@@ -312,9 +489,8 @@ async function rejectSharedPrompt() {
     const modal = document.getElementById('prompt-preview-modal');
     const notifId = modal.dataset.notificationId;
     await sb.from('notifications').update({ is_read: true }).eq('id', notifId);
-    // Send rejection notification back to sender
     await sb.from('notifications').insert({
-        user_id: currentUser.id, // placeholder – should be sender_id
+        user_id: currentUser.id,
         sender_id: currentUser.id,
         type: 'share_rejected',
         data: { prompt_id: JSON.parse(modal.dataset.promptData || '{}').prompt_id },
@@ -474,9 +650,7 @@ async function loadTavioSidebarNotifications() {
                     acceptBtn.addEventListener('click', (e) => {
                         e.stopPropagation();
                         const notification = data.find(n => n.id == notifId);
-                        if (notification) {
-                            handleShareNotification(notification);
-                        }
+                        if (notification) handleShareNotification(notification);
                     });
                 }
                 if (rejectBtn) {
@@ -511,14 +685,13 @@ async function loadTavioSidebarNotifications() {
 }
 
 async function rejectSharedPromptViaNotif(notifId) {
-    const { data: notif, error } = await sb
+    const { data: notif } = await sb
         .from('notifications')
         .select('sender_id, data')
         .eq('id', notifId)
         .single();
-    if (error) return;
     await sb.from('notifications').update({ is_read: true }).eq('id', notifId);
-    if (notif.sender_id) {
+    if (notif?.sender_id) {
         await sb.from('notifications').insert({
             user_id: notif.sender_id,
             sender_id: currentUser.id,
@@ -750,6 +923,10 @@ function loadPromptIntoEditor(prompt) {
     document.getElementById('editor-view').classList.add('active');
     document.getElementById('current-prompt-title').textContent = prompt.title;
     document.getElementById('template-textarea').value = prompt.template || '';
+    fieldDefinitions = prompt.field_definitions || [];
+    selectedAIModels = prompt.ai_models || [];
+    renderFieldEditors();
+    renderAIModels();
     detectVariables();
 }
 
@@ -760,6 +937,7 @@ function backToLibrary() {
 }
 
 function detectVariables() {
+    // Legacy variable detection for {{variable}} pattern
     const template = document.getElementById('template-textarea').value;
     const regex = /\{\{([^}]+)\}\}/g;
     let match;
@@ -768,22 +946,26 @@ function detectVariables() {
         vars.add(match[1].trim());
     }
     currentVariables = {};
+    // Also parse field definitions from { } pattern
+    detectFields();
     const container = document.getElementById('variables-container');
-    container.innerHTML = '';
-    if (vars.size === 0) {
-        container.innerHTML = `<p style="color:#666; grid-column:1/-1;">No {{variables}} detected. Add some to your template.</p>`;
-        return;
+    if (container) {
+        container.innerHTML = '';
+        if (vars.size === 0 && fieldDefinitions.length === 0) {
+            container.innerHTML = `<p style="color:#666; grid-column:1/-1;">No fields detected. Use {field} or {{variable}} in your template.</p>`;
+            return;
+        }
+        vars.forEach(v => {
+            currentVariables[v] = '';
+            const div = document.createElement('div');
+            div.className = 'variable-field';
+            div.innerHTML = `
+                <label>${v}</label>
+                <input type="text" id="var-${v}" placeholder="Enter ${v}" oninput="updateVar('${v}', this.value)">
+            `;
+            container.appendChild(div);
+        });
     }
-    vars.forEach(v => {
-        currentVariables[v] = '';
-        const div = document.createElement('div');
-        div.className = 'variable-field';
-        div.innerHTML = `
-            <label>${v}</label>
-            <input type="text" id="var-${v}" placeholder="Enter ${v}" oninput="updateVar('${v}', this.value)">
-        `;
-        container.appendChild(div);
-    });
 }
 
 function updateVar(key, value) {
@@ -792,9 +974,23 @@ function updateVar(key, value) {
 
 function generatePrompt() {
     let filled = document.getElementById('template-textarea').value;
+    // Replace {{variable}} patterns
     Object.keys(currentVariables).forEach(key => {
         const val = currentVariables[key] || `[${key}]`;
         filled = filled.replace(new RegExp(`\\{\\{${key}\\}\\}`, 'g'), val);
+    });
+    // Replace {field} patterns with values from field definitions
+    fieldDefinitions.forEach(field => {
+        const regex = new RegExp(`\\{${field.raw || field.name}\\}`, 'g');
+        let value = field.value || `[${field.name}]`;
+        if (field.type === 'single-select' && field.options.length > 0) {
+            value = field.value || field.options[0] || `[${field.name}]`;
+        }
+        if (field.type === 'multi-select' && field.options.length > 0) {
+            const selected = field.value || [];
+            value = selected.length > 0 ? selected.join(', ') : `[${field.name}]`;
+        }
+        filled = filled.replace(regex, value);
     });
     const display = document.getElementById('result-display');
     display.textContent = '';
@@ -827,6 +1023,10 @@ function resetAll() {
     document.getElementById('result-actions').classList.add('hidden');
     document.getElementById('variables-container').innerHTML = '';
     currentVariables = {};
+    fieldDefinitions = [];
+    selectedAIModels = [];
+    renderFieldEditors();
+    renderAIModels();
 }
 
 function showNewPromptModal() {
@@ -845,13 +1045,19 @@ async function createNewPrompt() {
         return;
     }
 
+    // Parse fields from template
+    const fields = parsePromptFields(template);
+    fieldDefinitions = fields;
+
     const newPrompt = {
         title: title,
         category: category,
         template: template,
         user_id: currentUser.id,
         pinned: false,
-        author_name: currentProfile ? (currentProfile.first_name + ' ' + currentProfile.last_name).trim() || currentProfile.username || 'Unknown' : 'Unknown'
+        author_name: currentProfile ? (currentProfile.first_name + ' ' + currentProfile.last_name).trim() || currentProfile.username || 'Unknown' : 'Unknown',
+        field_definitions: fieldDefinitions,
+        ai_models: []
     };
 
     const { data, error } = await sb
@@ -861,7 +1067,9 @@ async function createNewPrompt() {
             category_id: newPrompt.category,
             template: newPrompt.template,
             user_id: newPrompt.user_id,
-            pinned: newPrompt.pinned
+            pinned: newPrompt.pinned,
+            field_definitions: newPrompt.field_definitions,
+            ai_models: []
         })
         .select('id, created_at, updated_at')
         .single();
@@ -882,15 +1090,22 @@ async function createNewPrompt() {
     filterPrompts();
     loadPromptIntoEditor(newPrompt);
 }
+
 async function saveCurrentPrompt() {
     if (!currentPrompt) return;
     const template = document.getElementById('template-textarea').value.trim();
     if (!template) return;
     currentPrompt.template = template;
+    currentPrompt.field_definitions = fieldDefinitions;
+    currentPrompt.ai_models = selectedAIModels;
 
     const { error } = await sb
         .from('tavio_prompts')
-        .update({ template: template })
+        .update({
+            template: template,
+            field_definitions: fieldDefinitions,
+            ai_models: selectedAIModels
+        })
         .eq('id', currentPrompt.id)
         .eq('user_id', currentUser.id);
 
@@ -901,8 +1116,7 @@ async function saveCurrentPrompt() {
     }
 
     const index = prompts.findIndex(p => p.id === currentPrompt.id);
-    if (index !== -1) prompts[index] = currentPrompt;
-    else prompts.unshift(currentPrompt);
+    if (index !== -1) prompts[index] = {...currentPrompt};
     alert("Prompt saved to library!");
     filterPrompts();
 }
@@ -926,11 +1140,24 @@ function setupUIListeners() {
     });
 
     document.getElementById('back-to-library-btn').addEventListener('click', backToLibrary);
-    document.getElementById('detect-variables-btn').addEventListener('click', detectVariables);
+    document.getElementById('detect-variables-btn').addEventListener('click', detectFields);
     document.getElementById('generate-prompt-btn').addEventListener('click', generatePrompt);
     document.getElementById('copy-prompt-btn').addEventListener('click', copyPrompt);
     document.getElementById('reset-btn').addEventListener('click', resetAll);
     document.getElementById('save-prompt-btn').addEventListener('click', saveCurrentPrompt);
+
+    document.getElementById('add-ai-model-btn').addEventListener('click', addCustomAIModel);
+    document.getElementById('ai-model-input').addEventListener('keypress', (e) => {
+        if (e.key === 'Enter') addCustomAIModel();
+    });
+
+    // AI model tag clicks (static ones)
+    document.querySelectorAll('.ai-model-tag').forEach(tag => {
+        tag.addEventListener('click', () => {
+            const model = tag.dataset.model;
+            toggleAIModel(model);
+        });
+    });
 
     const sidebarNewPrompt = document.getElementById('tavio-new-prompt-item');
     if (sidebarNewPrompt) {
