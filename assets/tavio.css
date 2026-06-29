@@ -1069,6 +1069,7 @@ body {
 }
 .ai-company-group + .ai-company-group {
     margin-top: 20px;
+    margin-bottom: 10px;
 }
 .ai-company-header {
     padding: 8px 12px;
