@@ -953,16 +953,18 @@ body {
     font-size: 14px;
     color: var(--text);
 }
-.ai-select-placeholder { opacity: 0.7; }
+.ai-select-placeholder {
+    opacity: 0.7;
+}
 .ai-select-dropdown {
     position: absolute;
-    bottom: calc(100% + 4px);   /* باز شدن به سمت بالا */
-    top: auto;                  /* top را غیرفعال کن */
+    top: 100%;              /* درست از لبه‌ی پایین دکمه شروع شود */
     left: 0;
     right: 0;
     background: #1e1e1e;
     border: 1px solid var(--border);
-    border-radius: 8px;
+    border-top: none;       /* فاصله‌ای بین دکمه و دراپ‌داون نباشد */
+    border-radius: 0 0 8px 8px;
     z-index: 1100;
     max-height: 320px;
     overflow-y: auto;
