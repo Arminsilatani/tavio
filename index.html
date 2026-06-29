@@ -21,6 +21,7 @@
 </div>
 
 <div id="auth-overlay" class="auth-overlay hidden">
+    <!-- محتوای auth بدون تغییر -->
     <div class="auth-box">
         <img src="assets/favicon.svg" alt="tavio" class="auth-logo">
         <h1>tavio</h1>
@@ -113,7 +114,6 @@
                 <button id="new-prompt-btn" class="btn-primary">+ New Prompt</button>
             </div>
 
-            <!-- کتگوری فیلترهای چند انتخابی -->
             <div class="categories" id="category-filters">
                 <button class="category-chip active" data-category="all">All</button>
                 <button class="category-chip" data-category="writing">Writing</button>
@@ -139,19 +139,23 @@
             </div>
 
             <div class="editor-content">
+                <!-- فیلد توضیح پرامپت -->
+                <div class="description-section" style="margin-bottom:20px;">
+                    <label class="section-label">Prompt Description</label>
+                    <input type="text" id="prompt-description" class="auth-field" placeholder="Brief description (max 50 chars)" maxlength="50" style="width:100%;">
+                </div>
+
                 <div class="template-section">
                     <label class="section-label">Prompt Template</label>
                     <textarea id="template-textarea" placeholder="Enter your prompt template here. Use {field} for simple fields, {option1.option2.option3} for single-select, {opt1/opt2/opt3} for multi-select."></textarea>
                     <button id="detect-variables-btn" class="btn-secondary small" style="margin-top:8px;">Parse Fields</button>
                 </div>
 
-                <!-- Field Definitions Editor -->
                 <div class="fields-section">
                     <label class="section-label">Field Definitions</label>
                     <div id="fields-container" class="fields-container"></div>
                 </div>
 
-                <!-- AI Models Section -->
                 <div class="ai-models-section">
                     <label class="section-label">Recommended AI Models</label>
                     <div id="ai-models-container" class="ai-models-container">
@@ -196,9 +200,7 @@
     <div id="prompt-preview-modal" class="modal hidden">
         <div class="modal-content" style="max-width:560px;">
             <h3 class="modal-title" id="preview-prompt-title">Prompt Preview</h3>
-            <div style="margin-bottom:12px;">
-                <span id="preview-prompt-category" class="category-chip" style="background:var(--accent);color:#111;border-color:var(--accent);"></span>
-            </div>
+            <div style="margin-bottom:12px;" id="preview-prompt-categories"></div>
             <p style="color:#ccc; font-size:15px; white-space:pre-wrap; background:rgba(255,255,255,0.04); padding:16px; border-radius:8px; margin-bottom:16px;" id="preview-prompt-template"></p>
             <div style="display:flex; gap:12px; justify-content:flex-end;">
                 <button id="preview-reject-btn" class="btn-secondary">Reject</button>
@@ -211,16 +213,17 @@
         <div class="modal-content">
             <h3 class="modal-title">New Prompt Template</h3>
             <input type="text" id="modal-title" class="modal-input" placeholder="Prompt Title">
-            
-            <!-- کتگوری های چند انتخابی -->
+
+            <!-- توضیح پرامپت -->
+            <input type="text" id="modal-description" class="modal-input" placeholder="Short description (max 50 chars)" maxlength="50">
+
             <div class="modal-categories-section">
                 <label class="modal-ai-label" style="margin-bottom:8px; display:block;">Categories</label>
                 <div id="modal-categories-container" class="ai-models-container" style="flex-wrap: wrap; gap: 6px;"></div>
             </div>
 
             <textarea id="modal-template" class="modal-textarea" placeholder="Paste your prompt template..."></textarea>
-            
-            <!-- بخش AI Models -->
+
             <div class="modal-ai-section">
                 <label class="modal-ai-label">Recommended AI Models</label>
                 <div id="modal-ai-models-container" class="ai-models-container" style="flex-wrap: wrap; gap: 6px;"></div>
