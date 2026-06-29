@@ -761,3 +761,12 @@ body {
 .tavio-notif-item .notif-actions .reject-btn:hover {
     border-color: #666;
 }
+.modal-ai-section {
+    margin-bottom: 16px;
+}
+.modal-ai-label {
+    font-size: 13px;
+    color: #777;
+    margin-bottom: 8px;
+    display: block;
+}
