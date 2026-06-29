@@ -231,7 +231,19 @@
 
             <div class="modal-categories-section">
                 <label class="modal-section-label">Categories</label>
-                <div id="modal-categories-container" class="modal-categories-container"></div>
+                <div class="modal-category-scroll-wrapper">
+                    <button type="button" class="scroll-btn scroll-btn-left" id="modal-cat-scroll-left" aria-label="Scroll left">
+                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <polyline points="15 18 9 12 15 6"></polyline>
+                        </svg>
+                    </button>
+                    <div id="modal-categories-container" class="modal-categories-container"></div>
+                    <button type="button" class="scroll-btn scroll-btn-right" id="modal-cat-scroll-right" aria-label="Scroll right">
+                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <polyline points="9 18 15 12 9 6"></polyline>
+                        </svg>
+                    </button>
+                </div>
             </div>
 
             <textarea id="modal-template" class="modal-textarea" placeholder="Paste your prompt template..."></textarea>
