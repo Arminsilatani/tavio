@@ -204,7 +204,7 @@ let aiCompanyExpanded = {};
 
 function parsePromptFields(template) {
     const fields = [];
-    const regex = /\{([^}]+)\}/g;
+    const regex = /\{\{(.+?)\}\}/g;   // فقط {{...}} را می‌گیرد
     let match;
     while ((match = regex.exec(template)) !== null) {
         const content = match[1].trim();
@@ -1647,9 +1647,9 @@ function updateVar(key, value) {
 function generatePrompt() {
     let filled = document.getElementById('template-textarea').value;
     
-    // جایگزینی فیلدهای تعریف‌شده
+    // جایگزینی فیلدهای تعریف‌شده (الگوی {{...}})
     fieldDefinitions.forEach(field => {
-        const regex = new RegExp(`\\{${field.raw || field.name}\\}`, 'g');
+        const regex = new RegExp(`\\{\\{${field.raw || field.name}\\}\\}`, 'g');
         let value = field.value || `[${field.name}]`;
         if (field.type === 'multi-select' && Array.isArray(field.value)) {
             value = field.value.length > 0 ? field.value.join(', ') : `[${field.name}]`;
@@ -1657,7 +1657,7 @@ function generatePrompt() {
         filled = filled.replace(regex, value);
     });
 
-    // اگر هنوز {{variable}} باقی مانده باشد (برای پشتیبانی از قالب‌های قدیمی)
+    // پشتیبانی از {{variable}} قدیمی
     Object.keys(currentVariables).forEach(key => {
         const val = currentVariables[key] || `[${key}]`;
         filled = filled.replace(new RegExp(`\\{\\{${key}\\}\\}`, 'g'), val);
@@ -1847,7 +1847,7 @@ Your task is to create a new prompt entry based on the following user-submitted 
 
 ## INPUT (User’s Core Prompt)
 \`\`\`
-{user_prompt}
+{{user_prompt}}
 \`\`\`
 
 ---
