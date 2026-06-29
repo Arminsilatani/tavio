@@ -191,27 +191,6 @@ const ALL_AI_MODELS = [
     { id: "stable-diffusion-3", name: "Stable Diffusion 3", company: "Stability AI", tags: ["image","free"], modality:["image"], pricing:"free" },
     { id: "stable-audio-2.0", name: "Stable Audio 2.0", company: "Stability AI", tags: ["audio","free"], modality:["audio"], pricing:"free" }
 ];
-const COMPANY_LOGOS = {
-    "OpenAI": "openai.png",
-    "Anthropic": "anthropic.png",
-    "Meta": "meta.png",
-    "Google": "google.png",
-    "Microsoft": "microsoft.png",
-    "xAI": "xAI.png",
-    "Mistral": "mistral.png",
-    "DeepSeek": "deepseek.png",
-    "Qwen / Alibaba": "qwen.png",
-    "Baidu": "ernie.png",
-    "Zhipu": "Zhipu.png",
-    "Cohere": "cohere.png",
-    "Perplexity": "Perplexity.png",
-    "Stability AI": "Stability-AI.png"
-};
-
-function getCompanyLogo(company) {
-    const filename = COMPANY_LOGOS[company] || "default.png"; // fallback
-    return `assets/logo/${filename}`;
-}
 
 const MODALITY_CAPSULES = ["image","voice","video","coding","reasoning","multimodal","general","search","audio"];
 const PRICING_CAPSULES = ["free","freemium","paid"];
