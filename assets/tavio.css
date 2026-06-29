@@ -551,7 +551,7 @@ body {
 }
 .modal-title {
     color: var(--accent);
-    margin-bottom: 20px;
+    margin-bottom: 10px;
     font-size: 20px;
     font-weight: 400;
 }
