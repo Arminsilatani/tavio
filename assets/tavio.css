@@ -1320,3 +1320,58 @@ body {
     border-color: var(--accent);
     outline: none;
 }
+/* ---------- Prompt Input Fields ---------- */
+.prompt-inputs-section {
+    margin-bottom: 24px;
+}
+
+.prompt-input-fields {
+    display: flex;
+    flex-direction: column;
+    gap: 18px;
+}
+
+.prompt-field-item {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+}
+
+.prompt-field-item label {
+    font-size: 13px;
+    color: #aaa;
+    font-weight: 500;
+    letter-spacing: 0.3px;
+}
+
+.prompt-field-item input,
+.prompt-field-item textarea,
+.prompt-field-item select {
+    background: rgba(255, 255, 255, 0.05);
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    color: var(--text);
+    padding: 8px 12px;
+    font-size: 14px;
+    font-family: "Kalameh", sans-serif;
+    transition: border-color 0.2s;
+    outline: none;
+}
+
+.prompt-field-item input:focus,
+.prompt-field-item textarea:focus,
+.prompt-field-item select:focus {
+    border-color: var(--accent);
+}
+
+/* تنظیمات خاص textarea (برای فیلدهای بلند) */
+.prompt-field-item textarea {
+    min-height: 100px;
+    resize: vertical;
+    line-height: 1.6;
+}
+
+/* برای multi-select کمی ارتفاع بیشتر */
+.prompt-field-item select[multiple] {
+    min-height: 80px;
+}
