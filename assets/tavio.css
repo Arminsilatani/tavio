@@ -974,6 +974,8 @@ body {
     opacity: 0;
     overflow: hidden;
     transition: max-height 0.3s ease, opacity 0.3s ease;
+    scrollbar-width: thin;
+    scrollbar-color: var(--accent) transparent;
 }
 .ai-select-dropdown.open {
     max-height: 340px;
