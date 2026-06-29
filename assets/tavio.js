@@ -1645,8 +1645,7 @@ function setupUIListeners() {
     const aiSearchInput = document.getElementById('ai-search-input');
     if (aiSearchInput) aiSearchInput.addEventListener('input', renderModalAIDropdown);
     document.addEventListener('click', (e) => {
-        const wrapper = document.querySelector('.ai-select-wrapper');
-        if (wrapper && !wrapper.contains(e.target) && aiDropdownOpen) {
+        if (!e.target.closest('.ai-select-wrapper') && aiDropdownOpen) {
             toggleAIDropdown();
         }
     });
