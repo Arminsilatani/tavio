@@ -1224,6 +1224,7 @@ async function restoreSession() {
         closeModal(document.getElementById('auth-overlay'));
         syncSidebarComponent();
         await syncPrompts();
+        await maybeAddReferencePrompt();   // این خط را اضافه کن
     } else {
         document.getElementById('app-container').classList.add('app-hidden');
         openModal(document.getElementById('auth-overlay'));
@@ -1698,6 +1699,140 @@ async function saveCurrentPrompt() {
     if (index !== -1) prompts[index] = {...currentPrompt};
     alert("Prompt saved to library!");
     applyCategoryFilters();
+}
+
+// ================== REFERENCE PROMPT (auto-add) ==================
+async function maybeAddReferencePrompt() {
+    if (!currentUser) return;
+
+    const { data, error } = await sb
+        .from('tavio_prompts')
+        .select('id')
+        .eq('user_id', currentUser.id)
+        .limit(1);
+
+    if (error || (data && data.length > 0)) return; // already has prompts
+
+    const referencePrompt = {
+        title: "Prompt Architect",
+        description: "Generate title, description, categories & AI models",
+        categories: ["productivity", "writing"],
+        template: `You are a Prompt Architect for the **tavio** prompt library.  
+Your task is to create a new prompt entry based on the following user-submitted **core prompt template**.
+
+---
+
+## INPUT (User’s Core Prompt)
+\`\`\`
+{user_prompt}
+\`\`\`
+
+---
+
+## INSTRUCTIONS
+
+1. **Title:**  
+   Give the prompt a professional, job-title-like name (e.g., “Senior React Debugger”, “Creative Storyteller”, “SEO Blog Post Writer”).  
+   The title should be concise, catchy, and clearly reflect the prompt’s purpose.
+
+2. **Description:**  
+   Write a short description (40–50 characters, including spaces) that summarises what the prompt does.  
+   Example: “Generate clean Next.js component code with TypeScript”.
+
+3. **Categories:**  
+   Choose the most relevant categories from the list below. You may select more than one.  
+   Available categories:  
+   \`writing\`, \`coding\`, \`marketing\`, \`analysis\`, \`education\`, \`productivity\`, \`creative\`, \`image_media\`  
+   (Note: \`image_media\` = “Image / Media”)
+
+4. **AI Models:**  
+   From the full list of available AI models (grouped by company, see below), select the **best 3–6 models** that would be most suitable for executing this prompt.  
+   Consider the prompt’s modality (text, image, audio, etc.) and complexity.  
+   Return the model **IDs** exactly as shown (e.g., \`"gpt-5.1-pro"\`).
+
+---
+
+## AVAILABLE AI MODELS (by company)
+
+### OpenAI
+\`gpt-5.4\` (agentic), \`gpt-5.5-instant\` (fast), \`gpt-5.1-thinking\` (reasoning), \`gpt-5.1-pro\` (advanced), \`gpt-5.1-instant\` (general), \`gpt-5\` (general), \`gpt-5-thinking\` (reasoning), \`gpt-5-instant\` (fast), \`o3-pro\` (reasoning), \`o3-mini\` (fast), \`gpt-oss-120b\` (open), \`gpt-oss-20b\` (open), \`gpt-oss-safeguard-120b\` (safety), \`gpt-oss-safeguard-20b\` (safety), \`gpt-image-2\` (image), \`gpt-realtime-2\` (voice), \`gpt-realtime-mini\` (voice)
+
+### Anthropic
+\`claude-fable-5\` (limited), \`claude-mythos-5\` (limited), \`claude-opus-4.8\` (reasoning), \`claude-opus-4.7\` (coding), \`claude-opus-4.6\` (general), \`claude-sonnet-4.6\` (practical), \`claude-sonnet-4.5\` (general), \`claude-haiku-4.5\` (fast), \`claude-3.5-sonnet\` (general), \`claude-3.5-haiku\` (fast)
+
+### Meta
+\`llama-4-scout\` (light), \`llama-4-maverick\` (general), \`llama-4-behemoth\` (large), \`llama-3.3\` (general), \`llama-3.2\` (multimodal), \`llama-3.1\` (general)
+
+### Google
+\`gemini-3.1-pro-preview\` (reasoning), \`gemini-3.1-flash\` (fast), \`gemini-3.1-flash-lite\` (economical), \`gemini-3-pro-image\` (image), \`gemini-3.1-flash-image\` (image), \`gemini-3.5-flash\` (general), \`gemini-3-pro\` (advanced), \`gemini-2.5-pro\` (reasoning), \`gemini-2.5-flash\` (fast), \`gemini-2.5-flash-lite\` (economical), \`gemma-4\` (open), \`gemma-3\` (open), \`veo-3.1-lite-preview\` (video)
+
+### Microsoft
+\`mai-voice-1\` (voice), \`mai-image-1\` (image), \`phi-4\` (reasoning), \`phi-4-mini\` (light), \`phi-4-multimodal\` (multimodal), \`phi-3.5\` (general)
+
+### xAI
+\`grok-4\` (reasoning), \`grok-4-fast\` (fast), \`grok-3\` (general), \`grok-3-mini\` (economical)
+
+### Mistral
+\`mistral-large\` (general), \`mistral-medium\` (practical), \`mistral-small\` (fast), \`mistral-nemo\` (light), \`mistral-code\` (coding), \`mixtral-8x22b\` (reasoning), \`mixtral-8x7b\` (general), \`pixtral\` (multimodal)
+
+### DeepSeek
+\`deepseek-v4\` (general), \`deepseek-r1\` (reasoning), \`deepseek-v3\` (general), \`deepseek-coder-v2\` (coding), \`deepseek-vl\` (multimodal)
+
+### Qwen / Alibaba
+\`qwen-3.6-plus\` (coding), \`qwen-3\` (general), \`qwen-2.5-max\` (reasoning), \`qwen-2.5-plus\` (general), \`qwen-2.5-coder\` (coding), \`qwen-vl\` (multimodal)
+
+### Baidu
+\`ernie-4.5\` (general), \`ernie-4.0\` (reasoning), \`ernie-speed\` (fast)
+
+### Zhipu
+\`glm-5.1\` (general), \`glm-5v-turbo\` (multimodal), \`glm-4.6\` (general), \`glm-4.5\` (practical)
+
+### Cohere
+\`command-a\` (general), \`command-r\` (retrieval), \`command-r-plus\` (advanced)
+
+### Perplexity
+\`sonar\` (search), \`sonar-pro\` (advanced), \`sonar-reasoner\` (reasoning)
+
+### Stability AI
+\`stable-diffusion-3.5\` (image), \`stable-diffusion-3\` (image), \`stable-audio-2.0\` (audio)
+
+---
+
+## OUTPUT FORMAT
+
+Return **only** a valid JSON object with the following keys (no extra text, no markdown fences):
+
+\`\`\`json
+{
+  "title": "Job‑Style Title Here",
+  "description": "40–50 character description",
+  "categories": ["writing", "coding", ...],
+  "ai_models": ["gpt-5.1-pro", "claude-opus-4.7", ...]
+}
+\`\`\`
+
+---
+
+Now, generate the output for the prompt provided above.`,
+        user_id: currentUser.id,
+        pinned: false,
+        field_definitions: [],
+        ai_models: ["gpt-5.1-pro", "claude-sonnet-4.6", "gemini-3-pro", "command-r-plus"]
+    };
+
+    await sb.from('tavio_prompts').insert({
+        title: referencePrompt.title,
+        description: referencePrompt.description,
+        content: referencePrompt.template,
+        category_id: JSON.stringify(referencePrompt.categories),
+        user_id: referencePrompt.user_id,
+        pinned: false,
+        field_definitions: [],
+        ai_models: referencePrompt.ai_models
+    });
+
+    // دوباره لیست پرامپت‌ها را بارگیری کن
+    await syncPrompts();
 }
 
 // ================== UI EVENT LISTENERS ==================
