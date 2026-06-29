@@ -1972,17 +1972,25 @@ function setupUIListeners() {
         document.getElementById('category-filters').scrollBy({ left: 200, behavior: 'smooth' });
     });
 
-    document.getElementById('modal-categories-arrow-left')?.addEventListener('click', () => {
+    // فلش‌های اسکرول کتگوری‌ها
+    const modalCatLeft = document.getElementById('modal-categories-arrow-left');
+    if (modalCatLeft) modalCatLeft.addEventListener('click', () => {
         document.getElementById('modal-categories-scroll-inner').scrollBy({ left: -200, behavior: 'smooth' });
     });
-    document.getElementById('modal-categories-arrow-right')?.addEventListener('click', () => {
+    const modalCatRight = document.getElementById('modal-categories-arrow-right');
+    if (modalCatRight) modalCatRight.addEventListener('click', () => {
         document.getElementById('modal-categories-scroll-inner').scrollBy({ left: 200, behavior: 'smooth' });
     });
 
     document.getElementById('new-prompt-btn').addEventListener('click', showNewPromptModal);
-    document.getElementById('cancel-modal-btn').addEventListener('click', hideNewPromptModal);
-    document.getElementById('add-prompt-btn').addEventListener('click', createNewPrompt);
-    document.getElementById('new-prompt-modal').addEventListener('click', (e) => {
+
+    // دکمه‌های مودال (Cancel, Add to Library)
+    const cancelBtn = document.getElementById('cancel-modal-btn');
+    if (cancelBtn) cancelBtn.addEventListener('click', hideNewPromptModal);
+    const addBtn = document.getElementById('add-prompt-btn');
+    if (addBtn) addBtn.addEventListener('click', createNewPrompt);
+    const newPromptModal = document.getElementById('new-prompt-modal');
+    if (newPromptModal) newPromptModal.addEventListener('click', (e) => {
         if (e.target === e.currentTarget) hideNewPromptModal();
     });
 
@@ -1998,7 +2006,8 @@ function setupUIListeners() {
     });
 
     // Close dropdown button
-    document.getElementById('ai-close-dropdown-btn')?.addEventListener('click', toggleAIDropdown);
+    const closeDropdownBtn = document.getElementById('ai-close-dropdown-btn');
+    if (closeDropdownBtn) closeDropdownBtn.addEventListener('click', toggleAIDropdown);
 
     // Filter toggle inside dropdown
     const filterToggleBtn = document.getElementById('ai-filter-toggle-btn');
@@ -2009,38 +2018,53 @@ function setupUIListeners() {
         });
     }
 
-    document.getElementById('back-to-library-btn').addEventListener('click', backToLibrary);
-    document.getElementById('generate-prompt-btn').addEventListener('click', generatePrompt);
-    document.getElementById('copy-prompt-btn').addEventListener('click', copyPrompt);
-    document.getElementById('reset-btn').addEventListener('click', resetAll);
-    document.getElementById('save-prompt-btn').addEventListener('click', saveCurrentPrompt);
+    // دکمه‌های ویرایشگر
+    const backBtn = document.getElementById('back-to-library-btn');
+    if (backBtn) backBtn.addEventListener('click', backToLibrary);
+    const genBtn = document.getElementById('generate-prompt-btn');
+    if (genBtn) genBtn.addEventListener('click', generatePrompt);
+    const copyBtn = document.getElementById('copy-prompt-btn');
+    if (copyBtn) copyBtn.addEventListener('click', copyPrompt);
+    const resetBtn = document.getElementById('reset-btn');
+    if (resetBtn) resetBtn.addEventListener('click', resetAll);
+    const saveBtn = document.getElementById('save-prompt-btn');
+    if (saveBtn) saveBtn.addEventListener('click', saveCurrentPrompt);
 
-    document.getElementById('add-ai-model-btn').addEventListener('click', addCustomAIModel);
-    document.getElementById('ai-model-input').addEventListener('keypress', (e) => {
-        if (e.key === 'Enter') addCustomAIModel();
-    });
+    // ===== این بخش‌ها حذف یا کامنت شوند =====
+    // const addAIBtn = document.getElementById('add-ai-model-btn');
+    // if (addAIBtn) addAIBtn.addEventListener('click', addCustomAIModel);
+    // const aiModelInput = document.getElementById('ai-model-input');
+    // if (aiModelInput) aiModelInput.addEventListener('keypress', (e) => {
+    //     if (e.key === 'Enter') addCustomAIModel();
+    // });
 
-    document.querySelectorAll('.ai-model-tag').forEach(tag => {
-        tag.addEventListener('click', () => {
-            const model = tag.dataset.model;
-            toggleAIModel(model);
-        });
-    });
+    // document.querySelectorAll('.ai-model-tag').forEach(tag => {
+    //     tag.addEventListener('click', () => {
+    //         const model = tag.dataset.model;
+    //         toggleAIModel(model);
+    //     });
+    // });
 
     const sidebarNewPrompt = document.getElementById('tavio-new-prompt-item');
-    if (sidebarNewPrompt) {
-        sidebarNewPrompt.addEventListener('click', showNewPromptModal);
-    }
+    if (sidebarNewPrompt) sidebarNewPrompt.addEventListener('click', showNewPromptModal);
 
-    document.getElementById('share-cancel-btn').addEventListener('click', closeShareModal);
-    document.getElementById('share-send-btn').addEventListener('click', sendShareRequest);
-    document.getElementById('share-modal').addEventListener('click', (e) => {
+    // Share modal
+    const shareCancel = document.getElementById('share-cancel-btn');
+    if (shareCancel) shareCancel.addEventListener('click', closeShareModal);
+    const shareSend = document.getElementById('share-send-btn');
+    if (shareSend) shareSend.addEventListener('click', sendShareRequest);
+    const shareModal = document.getElementById('share-modal');
+    if (shareModal) shareModal.addEventListener('click', (e) => {
         if (e.target === e.currentTarget) closeShareModal();
     });
 
-    document.getElementById('preview-accept-btn').addEventListener('click', acceptSharedPrompt);
-    document.getElementById('preview-reject-btn').addEventListener('click', rejectSharedPrompt);
-    document.getElementById('prompt-preview-modal').addEventListener('click', (e) => {
+    // Preview modal
+    const previewAccept = document.getElementById('preview-accept-btn');
+    if (previewAccept) previewAccept.addEventListener('click', acceptSharedPrompt);
+    const previewReject = document.getElementById('preview-reject-btn');
+    if (previewReject) previewReject.addEventListener('click', rejectSharedPrompt);
+    const previewModal = document.getElementById('prompt-preview-modal');
+    if (previewModal) previewModal.addEventListener('click', (e) => {
         if (e.target === e.currentTarget) {
             document.getElementById('prompt-preview-modal').classList.add('hidden');
         }
