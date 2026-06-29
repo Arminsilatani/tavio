@@ -922,3 +922,12 @@ body {
 .scroll-btn-right {
     flex-shrink: 0;
 }
+.category-chip {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+}
+.chip-icon {
+    display: flex;
+    align-items: center;
+}
