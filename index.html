@@ -275,13 +275,35 @@
             <textarea id="modal-template" class="modal-textarea" placeholder="Paste your prompt template..."></textarea>
 
             <div class="modal-ai-section">
-                <label class="modal-section-label">Recommended AI Models</label>
-                <div id="modal-ai-models-container" class="modal-ai-models-container"></div>
-                <div class="modal-ai-input-row">
-                    <input type="text" id="modal-ai-model-input" placeholder="Add custom model..." class="ai-model-input">
-                    <button id="modal-add-ai-model-btn" class="btn-secondary small">Add</button>
-                </div>
+    <label class="modal-section-label">Recommended AI Models</label>
+    <!-- دکمه‌ی باز شدن دراپ‌داون -->
+    <div class="ai-select-wrapper">
+        <div class="ai-select-button" id="ai-select-button">
+            <span id="ai-select-placeholder">Select AI models</span>
+            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <polyline points="6 9 12 15 18 9"></polyline>
+            </svg>
+        </div>
+        <!-- دراپ‌داون -->
+        <div class="ai-select-dropdown hidden" id="ai-select-dropdown">
+            <div class="ai-search-container">
+                <input type="text" id="ai-search-input" class="ai-search-input" placeholder="Search models...">
             </div>
+            <div class="ai-companies-list" id="ai-companies-list">
+                <!-- محتوای شرکت‌ها و چک‌باکس‌ها توسط JS ساخته می‌شود -->
+            </div>
+        </div>
+    </div>
+    <!-- فیلترهای کپسولی -->
+    <div class="ai-filter-capsules">
+        <div class="capsule-row" id="modality-capsules">
+            <!-- کپسول‌های modality توسط JS ساخته می‌شود -->
+        </div>
+        <div class="capsule-row" id="pricing-capsules">
+            <!-- کپسول‌های pricing توسط JS ساخته می‌شود -->
+        </div>
+    </div>
+</div>
 
             <div class="modal-actions">
                 <button id="cancel-modal-btn" class="btn-secondary">Cancel</button>
