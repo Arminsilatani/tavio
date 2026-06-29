@@ -1056,6 +1056,9 @@ body {
     gap: 6px;
     align-items: center;
 }
+.capsule-scroll-inner .capsule-row {
+    flex-wrap: nowrap !important;
+}
 .ai-company-group {
     margin-bottom: 4px;
 }
