@@ -1098,7 +1098,7 @@ body {
     accent-color: var(--accent);
 }
 .ai-model-checkbox {
-    margin-left: 15px;
+    margin-left: 20px;
 }
 .show-more-btn {
     font-size: 11px;
