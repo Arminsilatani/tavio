@@ -21,7 +21,6 @@
 </div>
 
 <div id="auth-overlay" class="auth-overlay hidden">
-    <!-- محتوای auth بدون تغییر -->
     <div class="auth-box">
         <img src="assets/favicon.svg" alt="tavio" class="auth-logo">
         <h1>tavio</h1>
@@ -114,16 +113,29 @@
                 <button id="new-prompt-btn" class="btn-primary">+ New Prompt</button>
             </div>
 
-            <div class="categories" id="category-filters">
-                <button class="category-chip active" data-category="all">All</button>
-                <button class="category-chip" data-category="writing">Writing</button>
-                <button class="category-chip" data-category="coding">Coding</button>
-                <button class="category-chip" data-category="marketing">Marketing</button>
-                <button class="category-chip" data-category="analysis">Analysis</button>
-                <button class="category-chip" data-category="education">Education / Learning</button>
-                <button class="category-chip" data-category="productivity">Productivity</button>
-                <button class="category-chip" data-category="creative">Creative</button>
-                <button class="category-chip" data-category="image_media">Image / Media</button>
+            <!-- Category filters with scroll arrows -->
+            <div class="category-scroll-wrapper">
+                <button type="button" class="scroll-btn scroll-btn-left" id="cat-scroll-left" aria-label="Scroll left">
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <polyline points="15 18 9 12 15 6"></polyline>
+                    </svg>
+                </button>
+                <div class="categories" id="category-filters">
+                    <button class="category-chip active" data-category="all">All</button>
+                    <button class="category-chip" data-category="writing">Writing</button>
+                    <button class="category-chip" data-category="coding">Coding</button>
+                    <button class="category-chip" data-category="marketing">Marketing</button>
+                    <button class="category-chip" data-category="analysis">Analysis</button>
+                    <button class="category-chip" data-category="education">Education / Learning</button>
+                    <button class="category-chip" data-category="productivity">Productivity</button>
+                    <button class="category-chip" data-category="creative">Creative</button>
+                    <button class="category-chip" data-category="image_media">Image / Media</button>
+                </div>
+                <button type="button" class="scroll-btn scroll-btn-right" id="cat-scroll-right" aria-label="Scroll right">
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <polyline points="9 18 15 12 9 6"></polyline>
+                    </svg>
+                </button>
             </div>
 
             <div id="prompt-grid" class="prompt-grid"></div>
@@ -139,16 +151,16 @@
             </div>
 
             <div class="editor-content">
-                <!-- فیلد توضیح پرامپت -->
-                <div class="description-section" style="margin-bottom:20px;">
+                <!-- Prompt Description -->
+                <div class="description-section">
                     <label class="section-label">Prompt Description</label>
-                    <textarea id="prompt-description" class="auth-field" placeholder="Brief description (max 50 chars)" maxlength="50" rows="2" style="width:100%; min-height:48px; resize:vertical;"></textarea>
+                    <textarea id="prompt-description" placeholder="Brief description (max 50 chars)" maxlength="50" rows="2"></textarea>
                 </div>
 
                 <div class="template-section">
                     <label class="section-label">Prompt Template</label>
                     <textarea id="template-textarea" placeholder="Enter your prompt template here. Use {field} for simple fields, {option1.option2.option3} for single-select, {opt1/opt2/opt3} for multi-select."></textarea>
-                    <button id="detect-variables-btn" class="btn-secondary small" style="margin-top:8px;">Parse Fields</button>
+                    <button id="detect-variables-btn" class="btn-secondary small detect-btn">Parse Fields</button>
                 </div>
 
                 <div class="fields-section">
@@ -188,8 +200,8 @@
     <div id="share-modal" class="modal hidden">
         <div class="modal-content">
             <h3 class="modal-title">Share Prompt</h3>
-            <p style="color:#aaa; font-size:14px; margin-bottom:16px;">Select a connected user to share this prompt with:</p>
-            <div id="share-user-list" style="display:flex; flex-direction:column; gap:8px; max-height:200px; overflow-y:auto; margin-bottom:16px;"></div>
+            <p class="share-modal-desc">Select a connected user to share this prompt with:</p>
+            <div id="share-user-list" class="share-user-list"></div>
             <div class="modal-actions">
                 <button id="share-cancel-btn" class="btn-secondary">Cancel</button>
                 <button id="share-send-btn" class="btn-primary" disabled>Send</button>
@@ -198,11 +210,11 @@
     </div>
 
     <div id="prompt-preview-modal" class="modal hidden">
-        <div class="modal-content" style="max-width:560px;">
+        <div class="modal-content modal-content-wide">
             <h3 class="modal-title" id="preview-prompt-title">Prompt Preview</h3>
-            <div style="margin-bottom:12px;" id="preview-prompt-categories"></div>
-            <p style="color:#ccc; font-size:15px; white-space:pre-wrap; background:rgba(255,255,255,0.04); padding:16px; border-radius:8px; margin-bottom:16px;" id="preview-prompt-template"></p>
-            <div style="display:flex; gap:12px; justify-content:flex-end;">
+            <div id="preview-prompt-categories" class="preview-categories"></div>
+            <p id="preview-prompt-template" class="preview-template-text"></p>
+            <div class="preview-actions">
                 <button id="preview-reject-btn" class="btn-secondary">Reject</button>
                 <button id="preview-accept-btn" class="btn-primary">Accept</button>
             </div>
@@ -214,21 +226,21 @@
             <h3 class="modal-title">New Prompt Template</h3>
             <input type="text" id="modal-title" class="modal-input" placeholder="Prompt Title">
 
-            <!-- توضیح پرامپت -->
+            <!-- Prompt Description -->
             <textarea id="modal-description" class="modal-textarea" placeholder="Short description (max 50 chars)" maxlength="50" rows="2"></textarea>
 
             <div class="modal-categories-section">
-                <label class="modal-ai-label" style="margin-bottom:8px; display:block;">Categories</label>
-                <div id="modal-categories-container" class="ai-models-container" style="flex-wrap: wrap; gap: 6px;"></div>
+                <label class="modal-section-label">Categories</label>
+                <div id="modal-categories-container" class="modal-categories-container"></div>
             </div>
 
             <textarea id="modal-template" class="modal-textarea" placeholder="Paste your prompt template..."></textarea>
 
             <div class="modal-ai-section">
-                <label class="modal-ai-label">Recommended AI Models</label>
-                <div id="modal-ai-models-container" class="ai-models-container" style="flex-wrap: wrap; gap: 6px;"></div>
-                <div style="display: flex; gap: 6px; margin-top: 8px;">
-                    <input type="text" id="modal-ai-model-input" placeholder="Add custom model..." class="ai-model-input" style="flex:1;">
+                <label class="modal-section-label">Recommended AI Models</label>
+                <div id="modal-ai-models-container" class="modal-ai-models-container"></div>
+                <div class="modal-ai-input-row">
+                    <input type="text" id="modal-ai-model-input" placeholder="Add custom model..." class="ai-model-input">
                     <button id="modal-add-ai-model-btn" class="btn-secondary small">Add</button>
                 </div>
             </div>
