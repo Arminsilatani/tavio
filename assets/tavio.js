@@ -1471,13 +1471,22 @@ function loadPromptIntoEditor(prompt) {
     document.getElementById('library-view').classList.remove('active');
     document.getElementById('editor-view').classList.add('active');
     document.getElementById('current-prompt-title').textContent = prompt.title;
-    document.getElementById('prompt-description').value = prompt.description || '';
+
+    // نمایش توضیح به‌جای textarea
+    document.getElementById('prompt-description-display').textContent = prompt.description || 'No description provided.';
+
+    // مخفی نگه داشتن template (فقط برای استفاده داخلی)
     document.getElementById('template-textarea').value = prompt.template || '';
-    fieldDefinitions = prompt.field_definitions || [];
+
+    // مقداردهی fieldDefinitions و ساخت فیلدهای ورودی
+    fieldDefinitions = prompt.field_definitions ? JSON.parse(JSON.stringify(prompt.field_definitions)) : [];
+    // اطمینان از اینکه هر فیلد یک خاصیت value دارد
+    fieldDefinitions.forEach(f => { if (f.value === undefined) f.value = ''; });
+    renderPromptInputFields();
+
+    // AI Models (بدون تغییر)
     selectedAIModels = prompt.ai_models || [];
-    renderFieldEditors();
     renderAIModels();
-    detectVariables();
 }
 
 function backToLibrary() {
