@@ -995,12 +995,17 @@ body {
 .ai-select-button.invisible {
     visibility: hidden;
 }
+.ai-bottom-fixed {
+    flex-shrink: 0;                /* هرگز کوچک نشود، ثابت پایین */
+    border-top: 1px solid var(--border);  /* جداکننده از لیست */
+}
 .ai-companies-list {
     flex: 1;
-    overflow-y: auto;           /* فقط این بخش اسکرول می‌خورد */
+    overflow-y: auto;
     padding: 4px 0;
-    min-height: 0;              /* مهم برای flex child */
+    min-height: 0;
 }
+
 .ai-select-button.active {
     border-radius: 0 0 8px 8px;     /* گوشه‌های بالا صاف، پایین گرد */
     border-top: none;
@@ -1010,9 +1015,7 @@ body {
     align-items: center;
     gap: 6px;
     padding: 8px;
-    border-top: 1px solid var(--border);
     background: #1e1e1e;
-    flex-shrink: 0;
     border-radius: 0 0 10px 10px;
 }
 .ai-search-input {
