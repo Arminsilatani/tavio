@@ -456,7 +456,6 @@ function renderModalAIDropdown() {
         const nameSpan = document.createElement('span');
             nameSpan.className = 'ai-company-name';
             nameSpan.textContent = company;
-            header.appendChild(logo);
             header.appendChild(nameSpan);
         groupDiv.appendChild(header);
 
@@ -1725,9 +1724,7 @@ function setupFilterScrollArrows() {
     const rows = [
         { innerId: 'modality-scroll-inner', leftId: 'modality-arrow-left', rightId: 'modality-arrow-right' },
         { innerId: 'pricing-scroll-inner', leftId: 'pricing-arrow-left', rightId: 'pricing-arrow-right' },
-            { innerId: 'modality-scroll-inner', leftId: 'modality-arrow-left', rightId: 'modality-arrow-right' },
-    { innerId: 'pricing-scroll-inner', leftId: 'pricing-arrow-left', rightId: 'pricing-arrow-right' },
-    { innerId: 'modal-categories-scroll-inner', leftId: 'modal-categories-scroll-arrow-left', rightId: 'modal-categories-scroll-arrow-right' }
+        { innerId: 'modal-categories-scroll-inner', leftId: 'modal-categories-arrow-left', rightId: 'modal-categories-arrow-right' }
     ];
 
     rows.forEach(row => {
@@ -1757,10 +1754,10 @@ function setupUIListeners() {
         document.getElementById('category-filters').scrollBy({ left: 200, behavior: 'smooth' });
     });
 
-    document.getElementById('modal-categories-scroll-arrow-left').addEventListener('click', () => {
+    document.getElementById('modal-categories-arrow-left').addEventListener('click', () => {
         document.getElementById('modal-categories-scroll-inner').scrollBy({ left: -200, behavior: 'smooth' });
     });
-    document.getElementById('modal-categories-scroll-arrow-right').addEventListener('click', () => {
+    document.getElementById('modal-categories-arrow-right').addEventListener('click', () => {
         document.getElementById('modal-categories-scroll-inner').scrollBy({ left: 200, behavior: 'smooth' });
     });
 
