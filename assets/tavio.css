@@ -561,7 +561,7 @@ body {
     background: rgba(255,255,255,0.05);
     border: 1px solid var(--border);
     color: var(--text);
-    padding: 8px 12px;
+    padding: 8px 1px;
     border-radius: 8px;
     font-family: inherit;
     font-size: 12px;
@@ -577,7 +577,10 @@ body {
     gap: 12px;
     justify-content: flex-end;
 }
-
+.modal-input::placeholder,
+.modal-textarea::placeholder {
+    font-size: 13px;
+}
 /* Specific modal sections */
 .share-modal-desc {
     color: #aaa;
