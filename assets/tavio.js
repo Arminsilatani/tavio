@@ -10,44 +10,7 @@ let currentUserRole = 'public';
 let sidebarComponent = null;
 
 // Original prompts (with author info)
-let prompts = [
-    { 
-        id: 1, 
-        title: "Story Writer", 
-        category: "writing", 
-        template: "Write an engaging short story about {{character}} who lives in {{setting}}. The main conflict involves {{conflict}}.",
-        user_id: 'user_1',
-        pinned: false,
-        author_name: 'John Doe'
-    },
-    { 
-        id: 2, 
-        title: "Code Explainer", 
-        category: "coding", 
-        template: "Explain this {{language}} code snippet in simple terms: {{code}}",
-        user_id: 'user_1',
-        pinned: true,
-        author_name: 'John Doe'
-    },
-    { 
-        id: 3, 
-        title: "Email Marketer", 
-        category: "marketing", 
-        template: "Write a cold outreach email for {{product}} targeting {{audience}}. Highlight the key benefit: {{benefit}}.",
-        user_id: 'user_2',
-        pinned: false,
-        author_name: 'Jane Smith'
-    },
-    { 
-        id: 4, 
-        title: "Business Idea Validator", 
-        category: "business", 
-        template: "Evaluate this business idea: {{idea}}. Provide pros, cons, and market potential.",
-        user_id: 'user_1',
-        pinned: false,
-        author_name: 'John Doe'
-    }
-];
+let prompts = [];
 
 let currentPrompt = null;
 let currentVariables = {};
@@ -69,15 +32,14 @@ async function toggleBookmark(promptId) {
         .from('tavio_prompts')
         .update({ pinned: newPinned })
         .eq('id', promptId)
-        .eq('user_id', currentUser.id); // Security: only owner can modify
+        .eq('user_id', currentUser.id);
 
     if (error) {
         console.error('Error toggling bookmark:', error);
         alert('Failed to update bookmark. Please try again.');
     } else {
-        // Update local array
         prompt.pinned = newPinned;
-        filterPrompts(); // Re-render
+        filterPrompts();
     }
 }
 
@@ -85,33 +47,45 @@ async function toggleBookmark(promptId) {
 async function fetchPromptsWithAuthors() {
     if (!currentUser) return [];
     try {
-        const { data, error } = await sb
+        // 1. Fetch prompts for current user
+        const { data: promptsData, error: promptsError } = await sb
             .from('tavio_prompts')
-            .select(`
-                id,
-                title,
-                category_id,
-                template,
-                user_id,
-                pinned,
-                created_at,
-                updated_at,
-                profiles:user_id (
-                    first_name,
-                    last_name,
-                    username
-                )
-            `)
+            .select('*')
             .eq('user_id', currentUser.id)
             .order('created_at', { ascending: false });
 
-        if (error) {
-            console.error('Error fetching prompts:', error);
+        if (promptsError) {
+            console.error('Error fetching prompts:', promptsError);
             return [];
         }
 
-        // Format data with author name
-        return data.map(p => ({
+        if (!promptsData || promptsData.length === 0) {
+            return [];
+        }
+
+        // 2. Get unique user_ids from prompts to fetch profiles
+        const userIds = [...new Set(promptsData.map(p => p.user_id))];
+        const { data: profilesData, error: profilesError } = await sb
+            .from('profiles')
+            .select('id, first_name, last_name, username')
+            .in('id', userIds);
+
+        if (profilesError) {
+            console.error('Error fetching profiles:', profilesError);
+            // Continue with default author names
+        }
+
+        // 3. Create a map of user_id -> author name
+        const authorMap = {};
+        if (profilesData) {
+            profilesData.forEach(prof => {
+                const name = `${prof.first_name || ''} ${prof.last_name || ''}`.trim() || prof.username || 'Unknown';
+                authorMap[prof.id] = name;
+            });
+        }
+
+        // 4. Combine data
+        return promptsData.map(p => ({
             id: p.id,
             title: p.title,
             category: p.category_id || 'general',
@@ -120,9 +94,7 @@ async function fetchPromptsWithAuthors() {
             pinned: p.pinned || false,
             created_at: p.created_at,
             updated_at: p.updated_at,
-            author_name: p.profiles 
-                ? (p.profiles.first_name || '') + ' ' + (p.profiles.last_name || '') || p.profiles.username || 'Unknown'
-                : 'Unknown'
+            author_name: authorMap[p.user_id] || 'Unknown'
         }));
     } catch (e) {
         console.error('Error in fetchPromptsWithAuthors:', e);
@@ -135,6 +107,8 @@ async function syncPrompts() {
     const fetched = await fetchPromptsWithAuthors();
     if (fetched.length > 0) {
         prompts = fetched;
+    } else {
+        prompts = [];
     }
     renderPromptGrid(prompts);
     filterByCategory('all');
@@ -339,7 +313,6 @@ async function rejectSharedPrompt() {
     const notifId = modal.dataset.notificationId;
     await sb.from('notifications').update({ is_read: true }).eq('id', notifId);
     // Send rejection notification back to sender
-    // For simplicity, we'll send a generic rejection
     await sb.from('notifications').insert({
         user_id: currentUser.id, // placeholder – should be sender_id
         sender_id: currentUser.id,
@@ -596,7 +569,7 @@ async function restoreSession() {
         document.getElementById('app-container').classList.remove('app-hidden');
         closeModal(document.getElementById('auth-overlay'));
         syncSidebarComponent();
-        await syncPrompts(); // Load prompts with author names
+        await syncPrompts();
     } else {
         document.getElementById('app-container').classList.add('app-hidden');
         openModal(document.getElementById('auth-overlay'));
@@ -743,7 +716,7 @@ function renderPromptGrid(filteredPrompts) {
             </div>
             <span class="category">${prompt.category}</span>
             <h4>${prompt.title}</h4>
-            <p>${prompt.template.substring(0, 110)}...</p>
+            <p>${prompt.template ? prompt.template.substring(0, 110) : ''}...</p>
             <div class="prompt-author">by ${prompt.author_name || 'Unknown'}</div>
         `;
         card.onclick = () => loadPromptIntoEditor(prompt);
@@ -756,7 +729,7 @@ function filterPrompts() {
     const activeCat = document.querySelector('.category-chip.active')?.dataset.category || 'all';
     let filtered = prompts;
     if (searchTerm) {
-        filtered = filtered.filter(p => p.title.toLowerCase().includes(searchTerm) || p.template.toLowerCase().includes(searchTerm));
+        filtered = filtered.filter(p => p.title.toLowerCase().includes(searchTerm) || (p.template && p.template.toLowerCase().includes(searchTerm)));
     }
     if (activeCat !== 'all') {
         filtered = filtered.filter(p => p.category === activeCat);
@@ -776,7 +749,7 @@ function loadPromptIntoEditor(prompt) {
     document.getElementById('library-view').classList.remove('active');
     document.getElementById('editor-view').classList.add('active');
     document.getElementById('current-prompt-title').textContent = prompt.title;
-    document.getElementById('template-textarea').value = prompt.template;
+    document.getElementById('template-textarea').value = prompt.template || '';
     detectVariables();
 }
 
