@@ -1749,10 +1749,8 @@ async function createNewPrompt() {
 
 async function saveCurrentPrompt() {
     if (!currentPrompt) return;
-    const description = document.getElementById('prompt-description').value.trim().substring(0, 50);
     const template = document.getElementById('template-textarea').value.trim();
     if (!template) return;
-    currentPrompt.description = description;
     currentPrompt.template = template;
     currentPrompt.field_definitions = fieldDefinitions;
     currentPrompt.ai_models = selectedAIModels;
@@ -1760,7 +1758,7 @@ async function saveCurrentPrompt() {
     const { error } = await sb
         .from('tavio_prompts')
         .update({
-            description: description,
+            description: currentPrompt.description,  // از currentPrompt می‌خوانیم
             content: template,
             field_definitions: fieldDefinitions,
             ai_models: selectedAIModels
