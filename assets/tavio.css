@@ -1060,7 +1060,7 @@ body {
     flex-wrap: nowrap !important;
 }
 .ai-company-group {
-    border-top: 1px solid var(--border);
+    border-top: 5px solid var(--border);
     margin-bottom: 4px;
 }
 .ai-company-group:first-child {
