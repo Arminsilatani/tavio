@@ -1274,3 +1274,49 @@ body {
     color: var(--accent);
     border-color: var(--border);
 }
+/* توضیح پرامپت به‌صورت متن ساده */
+.prompt-description-text {
+    color: #ccc;
+    font-size: 14px;
+    line-height: 1.5;
+    margin-bottom: 20px;
+    padding: 8px 12px;
+    background: rgba(255,255,255,0.03);
+    border-radius: 8px;
+    border: 1px solid var(--border);
+}
+
+/* کانتینر فیلدهای ورودی */
+.prompt-input-fields {
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+    margin-bottom: 24px;
+}
+
+/* هر فیلد */
+.prompt-field-item {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+}
+.prompt-field-item label {
+    font-size: 13px;
+    color: #aaa;
+    font-weight: 500;
+}
+.prompt-field-item input,
+.prompt-field-item select {
+    background: rgba(255,255,255,0.05);
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    color: var(--text);
+    padding: 8px 12px;
+    font-size: 14px;
+    font-family: inherit;
+}
+.prompt-field-item input:focus,
+.prompt-field-item select:focus {
+    border-color: var(--accent);
+    outline: none;
+}
