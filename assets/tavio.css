@@ -1078,6 +1078,7 @@ body {
 }
 .ai-company-name {
     color: #f5f5f5;
+    font-weight: 400;
     transform: translateY(3px);
     display: inline-block;
     line-height: 1;
