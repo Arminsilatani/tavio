@@ -1006,7 +1006,11 @@ body {
     padding: 8px;
     border-top: 1px solid var(--border);
     background: #1e1e1e;
-    flex-shrink: 0;             /* هرگز کوچک نشود */
+    flex-shrink: 0;
+    border-top: 1px solid var(--border);   /* خط جداکننده از بالا */
+    border-left: 1px solid var(--border);
+    border-right: 1px solid var(--border);
+    border-bottom: 1px solid var(--border);
 }
 .ai-search-input {
     flex: 1;
