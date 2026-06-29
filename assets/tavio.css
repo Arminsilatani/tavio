@@ -1072,6 +1072,14 @@ body {
     gap: 6px;
     cursor: default;
 }
+.ai-company-logo {
+    width: 18px;
+    height: 18px;
+    border-radius: 4px;
+    object-fit: contain;
+    margin-right: 6px;
+    flex-shrink: 0;
+}
 .ai-model-checkbox {
     display: flex;
     align-items: center;
