@@ -598,13 +598,11 @@ function renderModalCategories() {
         if (modalSelectedCategories.includes(cat.id)) chip.classList.add('active');
         chip.dataset.category = cat.id;
         chip.innerHTML = `<span class="chip-icon">${cat.icon}</span><span>${cat.label}</span>`;
-        chip.addEventListener('click', (e) => {
-            e.stopPropagation(); 
-            const idx = modalAIModalityFilters.indexOf(mod);
-            if (idx > -1) modalAIModalityFilters.splice(idx, 1);
-            else modalAIModalityFilters.push(mod);
-            renderModalityCapsules();
-            if (aiDropdownOpen) renderModalAIDropdown();
+        chip.addEventListener('click', () => {
+            const idx = modalSelectedCategories.indexOf(cat.id);
+            if (idx > -1) modalSelectedCategories.splice(idx, 1);
+            else modalSelectedCategories.push(cat.id);
+            renderModalCategories();
         });
         container.appendChild(chip);
     });
@@ -1671,35 +1669,6 @@ function scrollRow(targetId, direction) {
     });
 }
 
-function setupFilterScrollArrows() {
-    const rows = [
-        { innerId: 'modality-scroll-inner', leftId: 'modality-arrow-left', rightId: 'modality-arrow-right' },
-        { innerId: 'pricing-scroll-inner', leftId: 'pricing-arrow-left', rightId: 'pricing-arrow-right' }
-    ];
-
-    rows.forEach(row => {
-        const inner = document.getElementById(row.innerId);
-        if (!inner) return;
-
-        inner.addEventListener('scroll', () => updateRowArrows(row.innerId));
-
-        document.getElementById(row.leftId)?.addEventListener('click', () => scrollRow(row.innerId, 'left'));
-        document.getElementById(row.rightId)?.addEventListener('click', () => scrollRow(row.innerId, 'right'));
-    });
-}
-
-// اسکرول با کلیک روی فلش‌ها
-function scrollRow(targetId, direction) {
-    const inner = document.getElementById(targetId);
-    if (!inner) return;
-    const scrollAmount = 120;
-    inner.scrollBy({
-        left: direction === 'left' ? -scrollAmount : scrollAmount,
-        behavior: 'smooth'
-    });
-}
-
-// راه‌اندازی Event Listenerها برای فلش‌ها
 function setupFilterScrollArrows() {
     const rows = [
         { innerId: 'modality-scroll-inner', leftId: 'modality-arrow-left', rightId: 'modality-arrow-right' },
