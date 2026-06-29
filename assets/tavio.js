@@ -18,6 +18,9 @@ let selectedShareUserId = null;
 // ================== FIELD DEFINITIONS ==================
 let fieldDefinitions = [];
 
+// New state for modal AI models
+let modalSelectedAIModels = [];
+
 function parsePromptFields(template) {
     const fields = [];
     const regex = /\{([^}]+)\}/g;
@@ -166,7 +169,7 @@ function detectFields() {
     renderFieldEditors();
 }
 
-// ================== AI MODELS ==================
+// ================== AI MODELS (Editor) ==================
 let selectedAIModels = [];
 
 function renderAIModels() {
@@ -207,6 +210,63 @@ function addCustomAIModel() {
         tag.onclick = () => toggleAIModel(model);
         container.insertBefore(tag, input);
         renderAIModels();
+    }
+    input.value = '';
+}
+
+// ================== AI MODELS (Modal) ==================
+function renderModalAIModels() {
+    const container = document.getElementById('modal-ai-models-container');
+    if (!container) return;
+    container.innerHTML = '';
+
+    const defaultModels = ['gpt-4', 'claude-3', 'gemini-pro', 'llama-3', 'mistral-large'];
+    defaultModels.forEach(model => {
+        const tag = document.createElement('div');
+        tag.className = 'ai-model-tag';
+        if (modalSelectedAIModels.includes(model)) {
+            tag.classList.add('selected');
+        }
+        tag.dataset.model = model;
+        tag.textContent = model.replace(/-/g, ' ');
+        tag.addEventListener('click', () => {
+            toggleModalAIModel(model);
+        });
+        container.appendChild(tag);
+    });
+
+    // Add any custom models already selected
+    modalSelectedAIModels.forEach(model => {
+        if (!defaultModels.includes(model)) {
+            const tag = document.createElement('div');
+            tag.className = 'ai-model-tag selected';
+            tag.dataset.model = model;
+            tag.textContent = model;
+            tag.addEventListener('click', () => {
+                toggleModalAIModel(model);
+            });
+            container.appendChild(tag);
+        }
+    });
+}
+
+function toggleModalAIModel(model) {
+    const index = modalSelectedAIModels.indexOf(model);
+    if (index > -1) {
+        modalSelectedAIModels.splice(index, 1);
+    } else {
+        modalSelectedAIModels.push(model);
+    }
+    renderModalAIModels();
+}
+
+function addCustomModalAIModel() {
+    const input = document.getElementById('modal-ai-model-input');
+    const model = input.value.trim();
+    if (!model) return;
+    if (!modalSelectedAIModels.includes(model)) {
+        modalSelectedAIModels.push(model);
+        renderModalAIModels();
     }
     input.value = '';
 }
@@ -1067,10 +1127,14 @@ function resetAll() {
 function showNewPromptModal() {
     document.getElementById('new-prompt-modal').classList.remove('hidden');
     document.getElementById('modal-title').focus();
+    modalSelectedAIModels = [];
+    renderModalAIModels();
 }
+
 function hideNewPromptModal() {
     document.getElementById('new-prompt-modal').classList.add('hidden');
 }
+
 async function createNewPrompt() {
     const title = document.getElementById('modal-title').value.trim();
     const category = document.getElementById('modal-category').value;
@@ -1091,7 +1155,7 @@ async function createNewPrompt() {
         pinned: false,
         author_name: currentProfile ? (currentProfile.first_name + ' ' + currentProfile.last_name).trim() || currentProfile.username || 'Unknown' : 'Unknown',
         field_definitions: fieldDefinitions,
-        ai_models: []
+        ai_models: modalSelectedAIModels  // Now from modal selection
     };
 
     const { data, error } = await sb
@@ -1103,7 +1167,7 @@ async function createNewPrompt() {
             user_id: newPrompt.user_id,
             pinned: newPrompt.pinned,
             field_definitions: newPrompt.field_definitions,
-            ai_models: []
+            ai_models: modalSelectedAIModels
         })
         .select('id, created_at, updated_at')
         .single();
@@ -1171,6 +1235,12 @@ function setupUIListeners() {
     document.getElementById('add-prompt-btn').addEventListener('click', createNewPrompt);
     document.getElementById('new-prompt-modal').addEventListener('click', (e) => {
         if (e.target === e.currentTarget) hideNewPromptModal();
+    });
+
+    // Modal AI model listeners
+    document.getElementById('modal-add-ai-model-btn').addEventListener('click', addCustomModalAIModel);
+    document.getElementById('modal-ai-model-input').addEventListener('keypress', (e) => {
+        if (e.key === 'Enter') addCustomModalAIModel();
     });
 
     document.getElementById('back-to-library-btn').addEventListener('click', backToLibrary);
