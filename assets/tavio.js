@@ -750,8 +750,6 @@ async function restoreSession() {
 
 // ================== AUTH LISTENERS ==================
 function setupAuthListeners() {
-    console.log('🔄 Setting up auth listeners...');
-
     const continueBtn = document.getElementById('auth-continue-btn');
     if (continueBtn) {
         continueBtn.addEventListener('click', () => {
@@ -766,28 +764,23 @@ function setupAuthListeners() {
             showStep('step-2-login');
             document.getElementById('auth-error-1').style.display = 'none';
         });
-    } else {
-        console.warn('⚠️ auth-continue-btn not found');
     }
 
     const signinBtn = document.getElementById('auth-signin-btn');
     if (signinBtn) {
         signinBtn.addEventListener('click', async function(e) {
-            console.log('🟢 Sign In button clicked');
             try {
                 const emailInput = document.getElementById('auth-email');
                 const passwordInput = document.getElementById('auth-password-login');
                 const errorDisplay = document.getElementById('auth-error-login');
 
                 if (!emailInput || !passwordInput) {
-                    console.error('❌ Email or password input not found in DOM');
+                    console.error('Email or password input not found in DOM');
                     return;
                 }
 
                 const email = emailInput.value.trim();
                 const password = passwordInput.value;
-                console.log('📧 Email:', email);
-                console.log('🔑 Password length:', password.length);
 
                 if (!email || !password) {
                     errorDisplay.textContent = 'Please enter email and password.';
@@ -796,36 +789,28 @@ function setupAuthListeners() {
                 }
 
                 errorDisplay.style.display = 'none';
-                console.log('⏳ Attempting sign in...');
                 const { data, error } = await sb.auth.signInWithPassword({ email, password });
-                console.log('✅ Sign in response received:', data, error);
 
                 if (error) {
-                    console.error('❌ Sign in error:', error);
+                    console.error('Sign in error:', error);
                     errorDisplay.textContent = error.message;
                     errorDisplay.style.display = 'block';
                     return;
                 }
 
-                console.log('👤 User signed in:', data.user);
                 currentUser = data.user;
                 currentProfile = await buildCurrentProfile(data.user);
                 currentUserRole = currentProfile?.role || 'recruit';
 
-                const overlay = document.getElementById('auth-overlay');
-                if (overlay) closeModal(overlay);
-
+                closeModal(document.getElementById('auth-overlay'));
                 document.getElementById('app-container').classList.remove('app-hidden');
                 syncSidebarComponent();
                 await syncPrompts();
-                console.log('🎉 Sign in complete!');
             } catch (err) {
-                console.error('💥 Unhandled sign in error:', err);
+                console.error('Unhandled sign in error:', err);
                 alert('An error occurred during sign in. Check console for details.');
             }
         });
-    } else {
-        console.warn('⚠️ auth-signin-btn not found');
     }
 
     const registerBtn = document.getElementById('auth-register-btn');
@@ -857,8 +842,6 @@ function setupAuthListeners() {
             alert('Registration successful! Please check your email to confirm your account.');
             closeModal(authOverlay);
         });
-    } else {
-        console.warn('⚠️ auth-register-btn not found');
     }
 
     const back1 = document.getElementById('auth-back-to-email');
@@ -1231,12 +1214,10 @@ function setupUIListeners() {
 
 // ================== INIT ==================
 document.addEventListener('DOMContentLoaded', async () => {
-    console.log('🚀 DOM loaded, initializing...');
     setupAuthListeners();
     setupUIListeners();
 
     customElements.whenDefined('sidebar-component').then(() => {
-        console.log('✅ Sidebar component defined');
         getSidebarComponent();
         syncSidebarComponent();
     });
