@@ -1838,7 +1838,7 @@ async function maybeAddReferencePrompt() {
 
     const referencePrompt = {
         title: "Prompt Architect",
-        description: "Generate title, description, categories & AI models",
+        description: "Generate a structured prompt entry from your idea",
         categories: ["productivity", "writing"],
         template: `You are a Prompt Architect for the **tavio** prompt library.  
 Your task is to create a new prompt entry based on the following user-submitted **core prompt template**.
