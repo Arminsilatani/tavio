@@ -956,7 +956,8 @@ body {
 .ai-select-placeholder { opacity: 0.7; }
 .ai-select-dropdown {
     position: absolute;
-    top: calc(100% + 4px);
+    bottom: calc(100% + 4px);   /* باز شدن به سمت بالا */
+    top: auto;                  /* top را غیرفعال کن */
     left: 0;
     right: 0;
     background: #1e1e1e;
