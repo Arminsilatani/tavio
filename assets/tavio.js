@@ -2012,7 +2012,6 @@ function setupUIListeners() {
     }
 
     document.getElementById('back-to-library-btn').addEventListener('click', backToLibrary);
-    document.getElementById('detect-variables-btn').addEventListener('click', detectFields);
     document.getElementById('generate-prompt-btn').addEventListener('click', generatePrompt);
     document.getElementById('copy-prompt-btn').addEventListener('click', copyPrompt);
     document.getElementById('reset-btn').addEventListener('click', resetAll);
