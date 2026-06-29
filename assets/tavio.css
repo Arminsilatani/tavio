@@ -959,7 +959,7 @@ body {
 }
 .ai-select-dropdown {
     position: absolute;
-    top: 40px;                      /* از بالای دکمه شروع شود */
+    top: 43px;                      /* از بالای دکمه شروع شود */
     left: 0;
     right: 0;
     transform: translateY(-100%); /* به‌اندازه‌ی ارتفاع خودش به بالا منتقل شود */
