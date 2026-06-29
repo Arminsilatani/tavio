@@ -1531,22 +1531,23 @@ function updateVar(key, value) {
 
 function generatePrompt() {
     let filled = document.getElementById('template-textarea').value;
+    
+    // جایگزینی فیلدهای تعریف‌شده
+    fieldDefinitions.forEach(field => {
+        const regex = new RegExp(`\\{${field.raw || field.name}\\}`, 'g');
+        let value = field.value || `[${field.name}]`;
+        if (field.type === 'multi-select' && Array.isArray(field.value)) {
+            value = field.value.length > 0 ? field.value.join(', ') : `[${field.name}]`;
+        }
+        filled = filled.replace(regex, value);
+    });
+
+    // اگر هنوز {{variable}} باقی مانده باشد (برای پشتیبانی از قالب‌های قدیمی)
     Object.keys(currentVariables).forEach(key => {
         const val = currentVariables[key] || `[${key}]`;
         filled = filled.replace(new RegExp(`\\{\\{${key}\\}\\}`, 'g'), val);
     });
-    fieldDefinitions.forEach(field => {
-        const regex = new RegExp(`\\{${field.raw || field.name}\\}`, 'g');
-        let value = field.value || `[${field.name}]`;
-        if (field.type === 'single-select' && field.options.length > 0) {
-            value = field.value || field.options[0] || `[${field.name}]`;
-        }
-        if (field.type === 'multi-select' && field.options.length > 0) {
-            const selected = field.value || [];
-            value = selected.length > 0 ? selected.join(', ') : `[${field.name}]`;
-        }
-        filled = filled.replace(regex, value);
-    });
+
     const display = document.getElementById('result-display');
     display.textContent = '';
     document.getElementById('result-actions').classList.add('hidden');
