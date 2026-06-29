@@ -1067,7 +1067,7 @@ body {
     border-top: none;
 }
 .ai-company-header {
-    padding: 15px 12px;
+    padding: 8px 12px;
     font-weight: 600;
     font-size: 13px;
     color: var(--accent);
