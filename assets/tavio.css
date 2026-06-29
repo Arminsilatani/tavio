@@ -119,7 +119,7 @@ body {
     font-size: 13px;
     cursor: pointer;
     transition: all 0.2s ease;
-    border-radius: 5px !important;
+    border-radius: 5px;
 }
 .category-chip.active,
 .category-chip:hover {
