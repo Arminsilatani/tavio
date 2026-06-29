@@ -577,10 +577,7 @@ body {
     gap: 12px;
     justify-content: flex-end;
 }
-.modal-input::placeholder,
-.modal-textarea::placeholder {
-    font-size: 19px;
-}
+
 /* Specific modal sections */
 .share-modal-desc {
     color: #aaa;
