@@ -962,7 +962,6 @@ body {
 }
 #cancel-modal-btn {
     flex: 3 0 0;               /* 30% عرض با احتساب gap */
-    border: none;              /* حذف حاشیه‌ی پیش‌فرض */
     color: #ccc;               /* رنگ متن ثابت */
     background: transparent;
 }
