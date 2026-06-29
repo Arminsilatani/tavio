@@ -541,11 +541,37 @@ function renderModalityCapsules() {
         const chip = document.createElement('div');
         chip.className = 'capsule-chip' + (modalAIModalityFilters.includes(mod) ? ' active' : '');
         chip.textContent = mod;
-        chip.addEventListener('click', () => {
+        chip.addEventListener('click', (e) => {
+            e.stopPropagation(); // <-- این خط را اضافه کنید
             const idx = modalAIModalityFilters.indexOf(mod);
             if (idx > -1) modalAIModalityFilters.splice(idx, 1);
             else modalAIModalityFilters.push(mod);
             renderModalityCapsules();
+            if (aiDropdownOpen) renderModalAIDropdown();
+        });
+        row.appendChild(chip);
+    });
+}
+
+function renderPricingCapsules() {
+    const row = document.getElementById('dropdown-pricing-capsules');
+    if (!row) return;
+    row.innerHTML = '';
+    PRICING_CAPSULES.forEach((price, index) => {
+        if (index > 0) {
+            const divider = document.createElement('span');
+            divider.className = 'capsule-divider';
+            row.appendChild(divider);
+        }
+        const chip = document.createElement('div');
+        chip.className = 'capsule-chip' + (modalAIPricingFilters.includes(price) ? ' active' : '');
+        chip.textContent = price;
+        chip.addEventListener('click', (e) => {
+            e.stopPropagation(); // <-- این خط را اضافه کنید
+            const idx = modalAIPricingFilters.indexOf(price);
+            if (idx > -1) modalAIPricingFilters.splice(idx, 1);
+            else modalAIPricingFilters.push(price);
+            renderPricingCapsules();
             if (aiDropdownOpen) renderModalAIDropdown();
         });
         row.appendChild(chip);
@@ -587,11 +613,13 @@ function renderModalCategories() {
         if (modalSelectedCategories.includes(cat.id)) chip.classList.add('active');
         chip.dataset.category = cat.id;
         chip.innerHTML = `<span class="chip-icon">${cat.icon}</span><span>${cat.label}</span>`;
-        chip.addEventListener('click', () => {
-            const idx = modalSelectedCategories.indexOf(cat.id);
-            if (idx > -1) modalSelectedCategories.splice(idx, 1);
-            else modalSelectedCategories.push(cat.id);
-            renderModalCategories();
+        chip.addEventListener('click', (e) => {
+            e.stopPropagation(); 
+            const idx = modalAIModalityFilters.indexOf(mod);
+            if (idx > -1) modalAIModalityFilters.splice(idx, 1);
+            else modalAIModalityFilters.push(mod);
+            renderModalityCapsules();
+            if (aiDropdownOpen) renderModalAIDropdown();
         });
         container.appendChild(chip);
     });
