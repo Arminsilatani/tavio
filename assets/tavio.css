@@ -969,6 +969,10 @@ body {
     max-height: 320px;
     overflow-y: auto;
 }
+.ai-select-button.active {
+    border-radius: 8px 8px 0 0;
+    border-bottom: none;
+}
 .ai-search-container {
     display: flex;
     align-items: center;
