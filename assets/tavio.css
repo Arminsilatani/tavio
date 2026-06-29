@@ -959,7 +959,7 @@ body {
 }
 .ai-select-dropdown {
     position: absolute;
-    top: 43;
+    top: 0;
     left: 0;
     right: 0;
     transform: translateY(-100%);
@@ -970,7 +970,7 @@ body {
     display: flex;
     flex-direction: column;
     box-sizing: border-box;
-    max-height: 0;
+    max-height: 340px;
     opacity: 0;
     overflow: hidden;
     transition: max-height 0.3s ease, opacity 0.3s ease;
@@ -990,10 +990,7 @@ body {
     background: var(--accent);
     border-radius: 3px;
 }
-.ai-select-dropdown {
-    scrollbar-width: thin;
-    scrollbar-color: var(--accent) transparent;
-}
+
 .ai-select-button.invisible {
     visibility: hidden;
 }
