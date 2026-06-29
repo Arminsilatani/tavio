@@ -983,11 +983,19 @@ function hideGlobalLoader() {
     document.getElementById('initial-loader').style.display = 'none';
 }
 function openModal(modal) {
-    modal.classList.remove('hidden');
-    modal.style.display = 'flex';
+    modal.style.display = 'flex';          // ابتدا نمایش داده شود
+    // با یک فریم تأخیر، کلاس hidden حذف می‌شود تا transition اجرا گردد
+    requestAnimationFrame(() => {
+        modal.classList.remove('hidden');
+    });
 }
 function closeModal(modal) {
     modal.classList.add('hidden');
+    // پس از پایان transition، display را none کن تا فضایی اشغال نکند
+    modal.addEventListener('transitionend', function handler() {
+        modal.style.display = 'none';
+        modal.removeEventListener('transitionend', handler);
+    });
 }
 function showStep(stepId) {
     document.querySelectorAll('.auth-step').forEach(s => s.classList.remove('active'));
