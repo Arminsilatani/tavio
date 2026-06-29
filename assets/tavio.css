@@ -965,6 +965,10 @@ body {
     color: #ccc;               /* رنگ متن ثابت */
     background: transparent;
 }
+#cancel-modal-btn:hover {
+    color: #ff6b6b;
+    border: 1px solid #ff6b6b;
+}
 /* در فایل tavio.css، سلکتور زیر را پیدا کنید یا اضافه کنید */
 #ai-select-placeholder {
   font-size: 12px;      /* این خط مستقیماً سایز را تنظیم می‌کند */
