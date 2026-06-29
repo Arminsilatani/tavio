@@ -1637,6 +1637,49 @@ async function saveCurrentPrompt() {
 }
 
 // ================== UI EVENT LISTENERS ==================
+// بروزرسانی وضعیت نمایش فلش‌ها برای یک ردیف مشخص
+function updateRowArrows(rowId) {
+    const inner = document.getElementById(rowId);
+    const leftArrow = document.getElementById(rowId.replace('scroll-inner', 'arrow-left'));
+    const rightArrow = document.getElementById(rowId.replace('scroll-inner', 'arrow-right'));
+    if (!inner || !leftArrow || !rightArrow) return;
+
+    const canScrollLeft = inner.scrollLeft > 0;
+    const canScrollRight = inner.scrollLeft + inner.clientWidth < inner.scrollWidth - 1;
+
+    leftArrow.classList.toggle('hidden', !canScrollLeft);
+    rightArrow.classList.toggle('hidden', !canScrollRight);
+}
+
+// اسکرول با کلیک روی فلش‌ها
+function scrollRow(targetId, direction) {
+    const inner = document.getElementById(targetId);
+    if (!inner) return;
+    const scrollAmount = 120;
+    inner.scrollBy({
+        left: direction === 'left' ? -scrollAmount : scrollAmount,
+        behavior: 'smooth'
+    });
+}
+
+// راه‌اندازی Event Listenerها برای فلش‌ها
+function setupFilterScrollArrows() {
+    const rows = [
+        { innerId: 'modality-scroll-inner', leftId: 'modality-arrow-left', rightId: 'modality-arrow-right' },
+        { innerId: 'pricing-scroll-inner', leftId: 'pricing-arrow-left', rightId: 'pricing-arrow-right' }
+    ];
+
+    rows.forEach(row => {
+        const inner = document.getElementById(row.innerId);
+        if (!inner) return;
+
+        inner.addEventListener('scroll', () => updateRowArrows(row.innerId));
+
+        document.getElementById(row.leftId)?.addEventListener('click', () => scrollRow(row.innerId, 'left'));
+        document.getElementById(row.rightId)?.addEventListener('click', () => scrollRow(row.innerId, 'right'));
+    });
+}
+
 function setupUIListeners() {
     document.getElementById('search-input').addEventListener('input', filterPrompts);
 
