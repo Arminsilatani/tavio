@@ -1,3 +1,4 @@
+```css
 @font-face {
     font-family: "Kalameh";
     src: url("../../assets/fonts/KalamehWeb-Regular.woff2") format("woff2"),
@@ -104,22 +105,63 @@ body {
     font-size: 15px;
 }
 
-.categories {
+/* ---------- Category scroll wrapper ---------- */
+.category-scroll-wrapper {
     display: flex;
-    gap: 8px;
-    flex-wrap: wrap;
+    align-items: center;
+    gap: 4px;
     margin-bottom: 28px;
 }
+
+/* ---------- Scroll buttons (arrows) ---------- */
+.scroll-btn {
+    background: none;
+    border: none;
+    color: var(--accent);
+    cursor: pointer;
+    padding: 0 8px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    opacity: 0.7;
+    transition: opacity 0.2s;
+    flex-shrink: 0;
+    font-size: 18px;
+}
+.scroll-btn:hover {
+    opacity: 1;
+}
+
+/* ---------- Categories container (now scrollable) ---------- */
+#category-filters {
+    flex: 1;
+    flex-wrap: nowrap !important;
+    overflow-x: auto;
+    overflow-y: hidden;
+    white-space: nowrap;
+    scrollbar-width: none;          /* Firefox */
+    -ms-overflow-style: none;       /* IE/Edge */
+    display: flex;
+    gap: 8px;
+    padding: 2px 0;
+    margin-bottom: 0;              /* override previous margin, wrapper handles it */
+}
+#category-filters::-webkit-scrollbar {
+    display: none;                  /* Chrome, Safari */
+}
+
+/* ---------- Category chip style ---------- */
 .category-chip {
     background: rgba(255,255,255,0.04);
     border: 1px solid var(--border);
     color: #aaa;
     padding: 6px 16px;
-    border-radius: 9999px;
+    border-radius: 8px;             /* same as fields */
     font-size: 13px;
     cursor: pointer;
     transition: all 0.2s ease;
-    border-radius: 5px;
+    white-space: nowrap;
+    flex-shrink: 0;
 }
 .category-chip.active,
 .category-chip:hover {
@@ -233,6 +275,23 @@ body {
     margin-bottom: 8px;
     letter-spacing: 0.5px;
 }
+
+/* ---------- Description textarea (two‑line) ---------- */
+#prompt-description {
+    width: 100%;
+    min-height: 48px;
+    height: auto;
+    resize: vertical;
+    line-height: 1.5;
+    background: rgba(255,255,255,0.04);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    color: var(--text);
+    padding: 12px 16px;
+    font-size: 15px;
+    font-family: inherit;
+}
+
 #template-textarea {
     width: 100%;
     min-height: 160px;
@@ -244,6 +303,9 @@ body {
     font-size: 15px;
     resize: vertical;
     font-family: inherit;
+}
+.detect-btn {
+    margin-top: 8px;
 }
 
 /* Fields Editor */
@@ -379,7 +441,7 @@ body {
 .ai-model-tag {
     background: rgba(176, 255, 165, 0.1);
     border: 1px solid rgba(176, 255, 165, 0.2);
-    border-radius: 9999px;
+    border-radius: 8px;
     padding: 4px 14px;
     font-size: 13px;
     color: var(--accent);
@@ -398,7 +460,7 @@ body {
 .ai-model-input {
     background: rgba(255,255,255,0.05);
     border: 1px solid var(--border);
-    border-radius: 9999px;
+    border-radius: 8px;
     color: var(--text);
     padding: 4px 14px;
     font-size: 13px;
@@ -410,6 +472,7 @@ body {
     outline: none;
 }
 
+/* Buttons */
 .btn-primary, .btn-secondary, .btn-generate, .btn-copy {
     font-family: "Kalameh", sans-serif;
     font-weight: 700;
@@ -465,6 +528,7 @@ body {
 }
 .result-actions { display: flex; gap: 12px; margin-top: 16px; }
 
+/* Modals */
 .modal {
     position: fixed;
     top: 0; left: 0;
@@ -482,6 +546,9 @@ body {
     width: 90%;
     max-width: 460px;
     padding: 28px;
+}
+.modal-content-wide {
+    max-width: 560px;
 }
 .modal-title {
     color: var(--accent);
@@ -510,6 +577,69 @@ body {
     display: flex;
     gap: 12px;
     justify-content: flex-end;
+}
+
+/* Specific modal sections */
+.share-modal-desc {
+    color: #aaa;
+    font-size: 14px;
+    margin-bottom: 16px;
+}
+.share-user-list {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    max-height: 200px;
+    overflow-y: auto;
+    margin-bottom: 16px;
+}
+
+.preview-categories {
+    margin-bottom: 12px;
+}
+.preview-template-text {
+    color: #ccc;
+    font-size: 15px;
+    white-space: pre-wrap;
+    background: rgba(255,255,255,0.04);
+    padding: 16px;
+    border-radius: 8px;
+    margin-bottom: 16px;
+}
+.preview-actions {
+    display: flex;
+    gap: 12px;
+    justify-content: flex-end;
+}
+
+.modal-section-label {
+    font-size: 13px;
+    color: #777;
+    margin-bottom: 8px;
+    display: block;
+}
+.modal-categories-container {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px;
+}
+.modal-ai-models-container {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px;
+}
+.modal-ai-input-row {
+    display: flex;
+    gap: 6px;
+    margin-top: 8px;
+}
+
+/* Description inside modal (two‑line) */
+#modal-description {
+    min-height: 48px;
+    height: auto;
+    resize: vertical;
+    line-height: 1.5;
 }
 
 .hidden { display: none !important; }
@@ -586,6 +716,7 @@ body {
     50%      { opacity: 1;   box-shadow: 0 0 6px var(--accent); }
 }
 
+/* ---------- Auth (unchanged) ---------- */
 .auth-overlay {
     position: fixed;
     top: 0; left: 0;
@@ -698,6 +829,7 @@ body {
     margin-bottom: 12px;
 }
 
+/* ---------- Sidebar (unchanged) ---------- */
 #tavio-sidebar-content { padding: 0 4px; }
 
 .sidebar-item {
@@ -762,12 +894,4 @@ body {
 .tavio-notif-item .notif-actions .reject-btn:hover {
     border-color: #666;
 }
-.modal-ai-section {
-    margin-bottom: 16px;
-}
-.modal-ai-label {
-    font-size: 13px;
-    color: #777;
-    margin-bottom: 8px;
-    display: block;
-}
+```
