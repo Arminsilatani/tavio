@@ -379,6 +379,7 @@ async function fetchPromptsWithAuthors() {
         return promptsData.map(p => ({
             id: p.id,
             title: p.title,
+            description: p.description || '',
             categories: parseCategoryArray(p.category_id),
             template: p.template || '',
             user_id: p.user_id,
@@ -499,6 +500,7 @@ async function sendShareRequest() {
             data: {
                 prompt_id: prompt.id,
                 prompt_title: prompt.title,
+                prompt_description: prompt.description || '',
                 prompt_category: JSON.stringify(prompt.categories),
                 prompt_template: prompt.template,
                 author_id: prompt.user_id,
@@ -538,7 +540,12 @@ function handleShareNotification(notification) {
         chip.style.marginRight = '4px';
         catsContainer.appendChild(chip);
     });
-    document.getElementById('preview-prompt-template').textContent = data.prompt_template || '(No template)';
+    // Show description if present
+    let templateHtml = data.prompt_template || '(No template)';
+    if (data.prompt_description) {
+        templateHtml = `<em>${data.prompt_description}</em><br><br>` + templateHtml;
+    }
+    document.getElementById('preview-prompt-template').innerHTML = templateHtml;
     modal.dataset.notificationId = notification.id;
     modal.dataset.promptData = JSON.stringify(data);
     modal.classList.remove('hidden');
@@ -553,6 +560,7 @@ async function acceptSharedPrompt() {
     const categoriesArray = parseCategoryArray(promptData.prompt_category);
     const newPrompt = {
         title: promptData.prompt_title,
+        description: promptData.prompt_description || '',
         categories: categoriesArray,
         template: promptData.prompt_template,
         user_id: currentUser.id,
@@ -566,6 +574,7 @@ async function acceptSharedPrompt() {
         .from('tavio_prompts')
         .insert({
             title: newPrompt.title,
+            description: newPrompt.description,
             category_id: JSON.stringify(newPrompt.categories),
             template: newPrompt.template,
             user_id: newPrompt.user_id,
@@ -1039,6 +1048,8 @@ function renderPromptGrid(filteredPrompts) {
             const label = ALL_CATEGORIES.find(c => c.id === catId)?.label || catId;
             return `<span class="category-chip" style="pointer-events:none; margin-right:4px;">${label}</span>`;
         }).join('');
+        // Description line
+        const descHtml = prompt.description ? `<p class="prompt-desc" style="font-size:13px; color:#aaa; margin:4px 0 8px; line-height:1.3; max-height:2.6em; overflow:hidden;">${prompt.description}</p>` : '';
         card.innerHTML = `
             <div class="action-buttons">
                 <button class="pin-btn ${prompt.pinned ? 'pinned' : ''}" onclick="event.stopPropagation(); toggleBookmark(${prompt.id})">
@@ -1054,7 +1065,8 @@ function renderPromptGrid(filteredPrompts) {
             </div>
             <div style="display:flex; gap:4px; flex-wrap:wrap; margin-bottom:8px;">${categoryChips}</div>
             <h4>${prompt.title}</h4>
-            <p>${prompt.template ? prompt.template.substring(0, 110) : ''}...</p>
+            ${descHtml}
+            <p style="font-size:14px; color:#aaa; display:-webkit-box; -webkit-line-clamp:3; -webkit-box-orient:vertical; overflow:hidden;">${prompt.template ? prompt.template.substring(0, 110) : ''}...</p>
             <div class="prompt-author">by ${prompt.author_name || 'Unknown'}</div>
         `;
         card.onclick = () => loadPromptIntoEditor(prompt);
@@ -1066,7 +1078,7 @@ function applyCategoryFilters() {
     const searchTerm = document.getElementById('search-input').value.toLowerCase();
     let filtered = prompts;
     if (searchTerm) {
-        filtered = filtered.filter(p => p.title.toLowerCase().includes(searchTerm) || (p.template && p.template.toLowerCase().includes(searchTerm)));
+        filtered = filtered.filter(p => p.title.toLowerCase().includes(searchTerm) || (p.template && p.template.toLowerCase().includes(searchTerm)) || (p.description && p.description.toLowerCase().includes(searchTerm)));
     }
     if (activeCategoryFilters.length > 0) {
         filtered = filtered.filter(p => p.categories.some(cat => activeCategoryFilters.includes(cat)));
@@ -1109,6 +1121,7 @@ function loadPromptIntoEditor(prompt) {
     document.getElementById('library-view').classList.remove('active');
     document.getElementById('editor-view').classList.add('active');
     document.getElementById('current-prompt-title').textContent = prompt.title;
+    document.getElementById('prompt-description').value = prompt.description || '';
     document.getElementById('template-textarea').value = prompt.template || '';
     fieldDefinitions = prompt.field_definitions || [];
     selectedAIModels = prompt.ai_models || [];
@@ -1217,6 +1230,7 @@ function showNewPromptModal() {
     document.getElementById('modal-title').focus();
     modalSelectedAIModels = [];
     modalSelectedCategories = [];
+    document.getElementById('modal-description').value = '';
     renderModalAIModels();
     renderModalCategories();
 }
@@ -1227,6 +1241,7 @@ function hideNewPromptModal() {
 
 async function createNewPrompt() {
     const title = document.getElementById('modal-title').value.trim();
+    const description = document.getElementById('modal-description').value.trim().substring(0, 50);
     const template = document.getElementById('modal-template').value.trim();
     if (!title || !template) {
         alert("Title and template are required.");
@@ -1242,6 +1257,7 @@ async function createNewPrompt() {
 
     const newPrompt = {
         title: title,
+        description: description,
         categories: modalSelectedCategories,
         template: template,
         user_id: currentUser.id,
@@ -1255,6 +1271,7 @@ async function createNewPrompt() {
         .from('tavio_prompts')
         .insert({
             title: newPrompt.title,
+            description: newPrompt.description,
             category_id: JSON.stringify(modalSelectedCategories),
             template: newPrompt.template,
             user_id: newPrompt.user_id,
@@ -1277,6 +1294,7 @@ async function createNewPrompt() {
     prompts.unshift(newPrompt);
     hideNewPromptModal();
     document.getElementById('modal-title').value = '';
+    document.getElementById('modal-description').value = '';
     document.getElementById('modal-template').value = '';
     applyCategoryFilters();
     loadPromptIntoEditor(newPrompt);
@@ -1284,8 +1302,10 @@ async function createNewPrompt() {
 
 async function saveCurrentPrompt() {
     if (!currentPrompt) return;
+    const description = document.getElementById('prompt-description').value.trim().substring(0, 50);
     const template = document.getElementById('template-textarea').value.trim();
     if (!template) return;
+    currentPrompt.description = description;
     currentPrompt.template = template;
     currentPrompt.field_definitions = fieldDefinitions;
     currentPrompt.ai_models = selectedAIModels;
@@ -1293,6 +1313,7 @@ async function saveCurrentPrompt() {
     const { error } = await sb
         .from('tavio_prompts')
         .update({
+            description: description,
             template: template,
             field_definitions: fieldDefinitions,
             ai_models: selectedAIModels
