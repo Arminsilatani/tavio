@@ -136,13 +136,28 @@
             <div class="editor-content">
                 <div class="template-section">
                     <label class="section-label">Prompt Template</label>
-                    <textarea id="template-textarea" placeholder="Enter your prompt template here. Use {{variable}} for placeholders.&#10;Example: Write a story about {{character}} in {{setting}}."></textarea>
+                    <textarea id="template-textarea" placeholder="Enter your prompt template here. Use {field} for simple fields, {option1.option2.option3} for single-select, {opt1/opt2/opt3} for multi-select."></textarea>
+                    <button id="detect-variables-btn" class="btn-secondary small" style="margin-top:8px;">Parse Fields</button>
                 </div>
 
-                <div class="variables-section">
-                    <label class="section-label">Detected Variables</label>
-                    <div id="variables-container" class="variables-grid"></div>
-                    <button id="detect-variables-btn" class="btn-secondary small">Detect Variables</button>
+                <!-- Field Definitions Editor -->
+                <div class="fields-section">
+                    <label class="section-label">Field Definitions</label>
+                    <div id="fields-container" class="fields-container"></div>
+                </div>
+
+                <!-- AI Models Section -->
+                <div class="ai-models-section">
+                    <label class="section-label">Recommended AI Models</label>
+                    <div id="ai-models-container" class="ai-models-container">
+                        <div class="ai-model-tag" data-model="gpt-4">GPT-4</div>
+                        <div class="ai-model-tag" data-model="claude-3">Claude 3</div>
+                        <div class="ai-model-tag" data-model="gemini-pro">Gemini Pro</div>
+                        <div class="ai-model-tag" data-model="llama-3">LLaMA 3</div>
+                        <div class="ai-model-tag" data-model="mistral-large">Mistral Large</div>
+                        <input type="text" id="ai-model-input" placeholder="Add custom AI model..." class="ai-model-input">
+                        <button id="add-ai-model-btn" class="btn-secondary small">Add</button>
+                    </div>
                 </div>
 
                 <div class="generate-section">
@@ -161,7 +176,6 @@
         </div>
     </main>
 
-    <!-- Share Modal -->
     <div id="share-modal" class="modal hidden">
         <div class="modal-content">
             <h3 class="modal-title">Share Prompt</h3>
@@ -174,7 +188,6 @@
         </div>
     </div>
 
-    <!-- Prompt Preview Modal (for recipient) -->
     <div id="prompt-preview-modal" class="modal hidden">
         <div class="modal-content" style="max-width:560px;">
             <h3 class="modal-title" id="preview-prompt-title">Prompt Preview</h3>
