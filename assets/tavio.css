@@ -1009,8 +1009,8 @@ body {
     flex-shrink: 0;
     border-top: 1px solid var(--border);   /* خط جداکننده از بالا */
     border-left: 1px solid var(--border);
-    border-right: 1px solid var(--border);
-    border-bottom: 1px solid var(--border);
+    border-right: 10px solid var(--border);
+    border-bottom: 10px solid var(--border);
 }
 .ai-search-input {
     flex: 1;
