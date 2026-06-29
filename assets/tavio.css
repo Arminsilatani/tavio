@@ -1,4 +1,3 @@
-```css
 @font-face {
     font-family: "Kalameh";
     src: url("../../assets/fonts/KalamehWeb-Regular.woff2") format("woff2"),
@@ -894,4 +893,3 @@ body {
 .tavio-notif-item .notif-actions .reject-btn:hover {
     border-color: #666;
 }
-```
