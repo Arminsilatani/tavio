@@ -475,7 +475,10 @@ function toggleAIDropdown() {
             dropdown.classList.add('open');
         });
 
-        if (button) button.classList.add('invisible');
+        if (button) {
+            button.classList.add('invisible');
+            button.classList.add('open');        // ← چرخش فلش
+        }
 
         aiFilterAreaVisible = false;
         const filterArea = document.getElementById('ai-filter-area');
@@ -488,7 +491,10 @@ function toggleAIDropdown() {
         if (searchInput) setTimeout(() => searchInput.focus(), 50);
     } else {
         dropdown.classList.remove('open');
-        if (button) button.classList.remove('invisible');
+        if (button) {
+            button.classList.remove('invisible');
+            button.classList.remove('open');
+        }
         
         dropdown.addEventListener('transitionend', function onTransitionEnd() {
             if (!aiDropdownOpen) {  // فقط وقتی واقعاً بسته است
@@ -1727,6 +1733,9 @@ function setupUIListeners() {
             toggleAIDropdown();
         }
     });
+
+    // Close dropdown button
+    document.getElementById('ai-close-dropdown-btn')?.addEventListener('click', toggleAIDropdown);
 
     // Filter toggle inside dropdown
     const filterToggleBtn = document.getElementById('ai-filter-toggle-btn');
