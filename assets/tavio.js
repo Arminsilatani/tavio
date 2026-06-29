@@ -1322,12 +1322,20 @@ function setupUIListeners() {
         });
     });
 
-    // Scroll buttons
+    // Scroll buttons for main category filters
     document.getElementById('cat-scroll-left').addEventListener('click', () => {
         document.getElementById('category-filters').scrollBy({ left: -200, behavior: 'smooth' });
     });
     document.getElementById('cat-scroll-right').addEventListener('click', () => {
         document.getElementById('category-filters').scrollBy({ left: 200, behavior: 'smooth' });
+    });
+
+    // Scroll buttons for modal categories
+    document.getElementById('modal-cat-scroll-left').addEventListener('click', () => {
+        document.getElementById('modal-categories-container').scrollBy({ left: -200, behavior: 'smooth' });
+    });
+    document.getElementById('modal-cat-scroll-right').addEventListener('click', () => {
+        document.getElementById('modal-categories-container').scrollBy({ left: 200, behavior: 'smooth' });
     });
 
     document.getElementById('new-prompt-btn').addEventListener('click', showNewPromptModal);
