@@ -317,8 +317,8 @@ function renderModalCategories() {
         const chip = document.createElement('div');
         chip.className = 'category-chip';
         if (modalSelectedCategories.includes(cat.id)) chip.classList.add('active');
-        chip.textContent = cat.label;
         chip.dataset.category = cat.id;
+        chip.innerHTML = `${cat.icon}<span>${cat.label}</span>`;
         chip.addEventListener('click', () => {
             const idx = modalSelectedCategories.indexOf(cat.id);
             if (idx > -1) modalSelectedCategories.splice(idx, 1);
@@ -328,7 +328,6 @@ function renderModalCategories() {
         container.appendChild(chip);
     });
 }
-
 // ================== BOOKMARK ==================
 async function toggleBookmark(promptId) {
     if (!currentUser) {
