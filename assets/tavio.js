@@ -9,12 +9,44 @@ let currentProfile = null;
 let currentUserRole = 'public';
 let sidebarComponent = null;
 
-// Original prompts
+// Original prompts (with author info)
 let prompts = [
-    { id: 1, title: "Story Writer", category: "writing", template: "Write an engaging short story about {{character}} who lives in {{setting}}. The main conflict involves {{conflict}}." },
-    { id: 2, title: "Code Explainer", category: "coding", template: "Explain this {{language}} code snippet in simple terms: {{code}}" },
-    { id: 3, title: "Email Marketer", category: "marketing", template: "Write a cold outreach email for {{product}} targeting {{audience}}. Highlight the key benefit: {{benefit}}." },
-    { id: 4, title: "Business Idea Validator", category: "business", template: "Evaluate this business idea: {{idea}}. Provide pros, cons, and market potential." }
+    { 
+        id: 1, 
+        title: "Story Writer", 
+        category: "writing", 
+        template: "Write an engaging short story about {{character}} who lives in {{setting}}. The main conflict involves {{conflict}}.",
+        user_id: 'user_1',
+        pinned: false,
+        author_name: 'John Doe'
+    },
+    { 
+        id: 2, 
+        title: "Code Explainer", 
+        category: "coding", 
+        template: "Explain this {{language}} code snippet in simple terms: {{code}}",
+        user_id: 'user_1',
+        pinned: true,
+        author_name: 'John Doe'
+    },
+    { 
+        id: 3, 
+        title: "Email Marketer", 
+        category: "marketing", 
+        template: "Write a cold outreach email for {{product}} targeting {{audience}}. Highlight the key benefit: {{benefit}}.",
+        user_id: 'user_2',
+        pinned: false,
+        author_name: 'Jane Smith'
+    },
+    { 
+        id: 4, 
+        title: "Business Idea Validator", 
+        category: "business", 
+        template: "Evaluate this business idea: {{idea}}. Provide pros, cons, and market potential.",
+        user_id: 'user_1',
+        pinned: false,
+        author_name: 'John Doe'
+    }
 ];
 
 let currentPrompt = null;
@@ -22,44 +54,96 @@ let currentVariables = {};
 let shareTargetPromptId = null;
 let selectedShareUserId = null;
 
-// ================== PINNING ==================
-const PIN_STORAGE_KEY = 'tavio_pinned_prompts';
+// ================== BOOKMARK (pinned column) ==================
+async function toggleBookmark(promptId) {
+    if (!currentUser) {
+        alert('Please sign in to bookmark prompts.');
+        return;
+    }
+    const prompt = prompts.find(p => p.id === promptId);
+    if (!prompt) return;
+    
+    const newPinned = !prompt.pinned;
+    // Update in database
+    const { error } = await sb
+        .from('tavio_prompts')
+        .update({ pinned: newPinned })
+        .eq('id', promptId)
+        .eq('user_id', currentUser.id); // Security: only owner can modify
 
-function getPinnedIds() {
+    if (error) {
+        console.error('Error toggling bookmark:', error);
+        alert('Failed to update bookmark. Please try again.');
+    } else {
+        // Update local array
+        prompt.pinned = newPinned;
+        filterPrompts(); // Re-render
+    }
+}
+
+// ================== FETCH PROMPTS WITH AUTHOR NAMES ==================
+async function fetchPromptsWithAuthors() {
+    if (!currentUser) return [];
     try {
-        const stored = localStorage.getItem(PIN_STORAGE_KEY);
-        return stored ? JSON.parse(stored) : [];
-    } catch {
+        const { data, error } = await sb
+            .from('tavio_prompts')
+            .select(`
+                id,
+                title,
+                category_id,
+                template,
+                user_id,
+                pinned,
+                created_at,
+                updated_at,
+                profiles:user_id (
+                    first_name,
+                    last_name,
+                    username
+                )
+            `)
+            .eq('user_id', currentUser.id)
+            .order('created_at', { ascending: false });
+
+        if (error) {
+            console.error('Error fetching prompts:', error);
+            return [];
+        }
+
+        // Format data with author name
+        return data.map(p => ({
+            id: p.id,
+            title: p.title,
+            category: p.category_id || 'general',
+            template: p.template || '',
+            user_id: p.user_id,
+            pinned: p.pinned || false,
+            created_at: p.created_at,
+            updated_at: p.updated_at,
+            author_name: p.profiles 
+                ? (p.profiles.first_name || '') + ' ' + (p.profiles.last_name || '') || p.profiles.username || 'Unknown'
+                : 'Unknown'
+        }));
+    } catch (e) {
+        console.error('Error in fetchPromptsWithAuthors:', e);
         return [];
     }
 }
 
-function savePinnedIds(ids) {
-    localStorage.setItem(PIN_STORAGE_KEY, JSON.stringify(ids));
-}
-
-function togglePin(promptId) {
-    let pinned = getPinnedIds();
-    const index = pinned.indexOf(promptId);
-    if (index > -1) {
-        pinned.splice(index, 1);
-    } else {
-        pinned.push(promptId);
+// ================== SYNC PROMPTS ==================
+async function syncPrompts() {
+    const fetched = await fetchPromptsWithAuthors();
+    if (fetched.length > 0) {
+        prompts = fetched;
     }
-    savePinnedIds(pinned);
-    filterPrompts();
-    return pinned;
-}
-
-function isPinned(promptId) {
-    return getPinnedIds().includes(promptId);
+    renderPromptGrid(prompts);
+    filterByCategory('all');
 }
 
 // ================== SHARING ==================
 async function fetchConnectedUsers() {
     if (!currentUser) return [];
     try {
-        // دریافت اتصالات accepted که کاربر فعلی در آن نقش دارد (چه فرستنده، چه گیرنده)
         const { data, error } = await sb
             .from('dashboard_connectionrequests')
             .select('from_id, to_id')
@@ -73,31 +157,22 @@ async function fetchConnectedUsers() {
 
         if (!data || data.length === 0) return [];
 
-        // استخراج شناسه کاربران متصل (طرف مقابل)
         const connectedIds = data.map(row => {
-            if (row.from_id === currentUser.id) {
-                return row.to_id;
-            } else if (row.to_id === currentUser.id) {
-                return row.from_id;
-            }
+            if (row.from_id === currentUser.id) return row.to_id;
+            else if (row.to_id === currentUser.id) return row.from_id;
             return null;
         }).filter(id => id && id !== currentUser.id);
 
         if (connectedIds.length === 0) return [];
 
-        // حذف تکراری‌ها
         const uniqueIds = [...new Set(connectedIds)];
 
-        // دریافت پروفایل‌ها
         const { data: profiles, error: profError } = await sb
             .from('profiles')
             .select('id, first_name, last_name, username, photo_url')
             .in('id', uniqueIds);
 
-        if (profError) {
-            console.error('Error fetching profiles:', profError);
-            return [];
-        }
+        if (profError) return [];
 
         return profiles || [];
     } catch (e) {
@@ -114,7 +189,6 @@ async function openShareModal(promptId) {
     selectedShareUserId = null;
     sendBtn.disabled = true;
 
-    // Clear previous list
     userList.innerHTML = '<div style="color:#666; padding:8px;">Loading connections...</div>';
 
     const users = await fetchConnectedUsers();
@@ -139,7 +213,6 @@ async function openShareModal(promptId) {
         `;
         div.dataset.userId = user.id;
         div.addEventListener('click', () => {
-            // Deselect previous
             userList.querySelectorAll('.sidebar-item').forEach(el => el.style.background = 'transparent');
             div.style.background = 'rgba(255,255,255,0.08)';
             selectedShareUserId = user.id;
@@ -162,7 +235,6 @@ async function sendShareRequest() {
     const prompt = prompts.find(p => p.id === shareTargetPromptId);
     if (!prompt) return;
 
-    // Send notification to selected user
     const { error } = await sb
         .from('notifications')
         .insert({
@@ -173,7 +245,9 @@ async function sendShareRequest() {
                 prompt_id: prompt.id,
                 prompt_title: prompt.title,
                 prompt_category: prompt.category,
-                prompt_template: prompt.template
+                prompt_template: prompt.template,
+                author_id: prompt.user_id,
+                author_name: prompt.author_name
             },
             is_read: false,
             created_at: new Date().toISOString()
@@ -189,16 +263,14 @@ async function sendShareRequest() {
 }
 
 // ================== HANDLE INCOMING SHARE NOTIFICATIONS ==================
-// This function is called when a notification of type 'share_prompt' is clicked in the sidebar.
-// We'll add event listeners to notification items in loadTavioSidebarNotifications.
 function handleShareNotification(notification) {
     const data = notification.data;
     if (!data) return;
-    // Show preview modal
     const modal = document.getElementById('prompt-preview-modal');
     document.getElementById('preview-prompt-title').textContent = data.prompt_title || 'Shared Prompt';
     document.getElementById('preview-prompt-category').textContent = data.prompt_category || 'General';
     document.getElementById('preview-prompt-template').textContent = data.prompt_template || '(No template)';
+    document.getElementById('preview-prompt-author').textContent = data.author_name || 'Unknown';
     modal.dataset.notificationId = notification.id;
     modal.dataset.promptData = JSON.stringify(data);
     modal.classList.remove('hidden');
@@ -212,17 +284,43 @@ async function acceptSharedPrompt() {
 
     // Add prompt to current user's prompts
     const newPrompt = {
-        id: Date.now() + Math.random(),
         title: promptData.prompt_title,
         category: promptData.prompt_category || 'general',
-        template: promptData.prompt_template
+        template: promptData.prompt_template,
+        user_id: currentUser.id,
+        pinned: false,
+        author_name: promptData.author_name || 'Unknown'
     };
+
+    // Save to database
+    const { data, error } = await sb
+        .from('tavio_prompts')
+        .insert({
+            title: newPrompt.title,
+            category_id: newPrompt.category,
+            template: newPrompt.template,
+            user_id: newPrompt.user_id,
+            pinned: newPrompt.pinned
+        })
+        .select('id, created_at, updated_at')
+        .single();
+
+    if (error) {
+        alert('Failed to save prompt. Please try again.');
+        console.error(error);
+        return;
+    }
+
+    newPrompt.id = data.id;
+    newPrompt.created_at = data.created_at;
+    newPrompt.updated_at = data.updated_at;
     prompts.unshift(newPrompt);
     filterPrompts();
 
-    // Mark notification as read and update status
+    // Mark notification as read
     await sb.from('notifications').update({ is_read: true }).eq('id', notifId);
-    // Optionally send acceptance notification back to sender
+    
+    // Send acceptance notification back to sender
     await sb.from('notifications').insert({
         user_id: notification.sender_id, // need sender_id from notification
         sender_id: currentUser.id,
@@ -232,16 +330,15 @@ async function acceptSharedPrompt() {
     });
 
     modal.classList.add('hidden');
-    loadTavioSidebarNotifications(); // refresh
+    loadTavioSidebarNotifications();
+    updateNotificationDot();
 }
 
 async function rejectSharedPrompt() {
     const modal = document.getElementById('prompt-preview-modal');
     const notifId = modal.dataset.notificationId;
-    // Mark notification as read
     await sb.from('notifications').update({ is_read: true }).eq('id', notifId);
     // Send rejection notification back to sender
-    // (We need sender_id; we could store it in notification, but we'll assume it's there)
     // For simplicity, we'll send a generic rejection
     await sb.from('notifications').insert({
         user_id: currentUser.id, // placeholder – should be sender_id
@@ -252,6 +349,7 @@ async function rejectSharedPrompt() {
     });
     modal.classList.add('hidden');
     loadTavioSidebarNotifications();
+    updateNotificationDot();
 }
 
 // ================== HELPERS ==================
@@ -393,11 +491,9 @@ async function loadTavioSidebarNotifications() {
             `;
         }).join('');
 
-        // Handle click on notification (for share_prompt)
         container.querySelectorAll('.tavio-notif-item').forEach(item => {
             const notifId = item.dataset.id;
             const type = item.dataset.type;
-            // If it's a share_prompt and not yet read, clicking opens preview
             if (type === 'share_prompt') {
                 const acceptBtn = item.querySelector('.accept-btn');
                 const rejectBtn = item.querySelector('.reject-btn');
@@ -407,31 +503,26 @@ async function loadTavioSidebarNotifications() {
                         const notification = data.find(n => n.id == notifId);
                         if (notification) {
                             handleShareNotification(notification);
-                            // We'll handle accept inside the preview modal
                         }
                     });
                 }
                 if (rejectBtn) {
                     rejectBtn.addEventListener('click', (e) => {
                         e.stopPropagation();
-                        // Mark as read and send rejection
                         rejectSharedPromptViaNotif(notifId);
                     });
                 }
-                // Click on the item itself also opens preview
                 item.addEventListener('click', (e) => {
                     if (e.target.closest('.notif-actions')) return;
                     const notification = data.find(n => n.id == notifId);
                     if (notification && !notification.is_read) {
                         handleShareNotification(notification);
                     } else {
-                        // Just mark as read if already read
                         sb.from('notifications').update({ is_read: true }).eq('id', notifId);
                         updateNotificationDot();
                     }
                 });
             } else {
-                // Other notification types: just mark as read on click
                 item.addEventListener('click', async () => {
                     await sb.from('notifications').update({ is_read: true }).eq('id', notifId);
                     item.style.opacity = '0.6';
@@ -447,16 +538,13 @@ async function loadTavioSidebarNotifications() {
 }
 
 async function rejectSharedPromptViaNotif(notifId) {
-    // Fetch notification to get sender_id and data
     const { data: notif, error } = await sb
         .from('notifications')
         .select('sender_id, data')
         .eq('id', notifId)
         .single();
     if (error) return;
-    // Mark as read
     await sb.from('notifications').update({ is_read: true }).eq('id', notifId);
-    // Send rejection notification back to sender
     if (notif.sender_id) {
         await sb.from('notifications').insert({
             user_id: notif.sender_id,
@@ -508,8 +596,7 @@ async function restoreSession() {
         document.getElementById('app-container').classList.remove('app-hidden');
         closeModal(document.getElementById('auth-overlay'));
         syncSidebarComponent();
-        renderPromptGrid(prompts);
-        filterByCategory('all');
+        await syncPrompts(); // Load prompts with author names
     } else {
         document.getElementById('app-container').classList.add('app-hidden');
         openModal(document.getElementById('auth-overlay'));
@@ -551,8 +638,7 @@ function setupAuthListeners() {
         closeModal(authOverlay);
         document.getElementById('app-container').classList.remove('app-hidden');
         syncSidebarComponent();
-        renderPromptGrid(prompts);
-        filterByCategory('all');
+        await syncPrompts();
     });
 
     document.getElementById('auth-register-btn').addEventListener('click', async () => {
@@ -634,25 +720,22 @@ function renderPromptGrid(filteredPrompts) {
     grid.innerHTML = '';
 
     const sorted = [...filteredPrompts].sort((a, b) => {
-        const aPinned = isPinned(a.id);
-        const bPinned = isPinned(b.id);
-        if (aPinned && !bPinned) return -1;
-        if (!aPinned && bPinned) return 1;
+        if (a.pinned && !b.pinned) return -1;
+        if (!a.pinned && b.pinned) return 1;
         return 0;
     });
 
     sorted.forEach(prompt => {
-        const pinned = isPinned(prompt.id);
         const card = document.createElement('div');
-        card.className = 'prompt-card' + (pinned ? ' pinned-card' : '');
+        card.className = 'prompt-card' + (prompt.pinned ? ' pinned-card' : '');
         card.innerHTML = `
             <div class="action-buttons">
-                <button class="pin-btn ${pinned ? 'pinned' : ''}" data-id="${prompt.id}" onclick="event.stopPropagation(); togglePin(${prompt.id})">
-                    <svg xmlns="http://www.w3.org/2000/svg" fill="${pinned ? 'currentColor' : 'none'}" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
+                <button class="pin-btn ${prompt.pinned ? 'pinned' : ''}" onclick="event.stopPropagation(); toggleBookmark(${prompt.id})">
+                    <svg xmlns="http://www.w3.org/2000/svg" fill="${prompt.pinned ? 'currentColor' : 'none'}" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
                         <path stroke-linecap="round" stroke-linejoin="round" d="M17.593 3.322c1.1.128 1.907 1.077 1.907 2.185V21L12 17.25 4.5 21V5.507c0-1.108.806-2.057 1.907-2.185a48.507 48.507 0 0 1 11.186 0Z" />
                     </svg>
                 </button>
-                <button class="share-btn" data-id="${prompt.id}" onclick="event.stopPropagation(); openShareModal(${prompt.id})">
+                <button class="share-btn" onclick="event.stopPropagation(); openShareModal(${prompt.id})">
                     <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
                         <path stroke-linecap="round" stroke-linejoin="round" d="M7.217 10.907a2.25 2.25 0 1 0 0 2.186m0-2.186c.18.324.283.696.283 1.093s-.103.77-.283 1.093m0-2.186 9.566-5.314m-9.566 7.5 9.566 5.314m0 0a2.25 2.25 0 1 0 3.935 2.186 2.25 2.25 0 0 0-3.935-2.186Zm0-12.814a2.25 2.25 0 1 0 3.935-2.186 2.25 2.25 0 0 0-3.935 2.186Z" />
                     </svg>
@@ -661,6 +744,7 @@ function renderPromptGrid(filteredPrompts) {
             <span class="category">${prompt.category}</span>
             <h4>${prompt.title}</h4>
             <p>${prompt.template.substring(0, 110)}...</p>
+            <div class="prompt-author">by ${prompt.author_name || 'Unknown'}</div>
         `;
         card.onclick = () => loadPromptIntoEditor(prompt);
         grid.appendChild(card);
@@ -779,7 +863,7 @@ function showNewPromptModal() {
 function hideNewPromptModal() {
     document.getElementById('new-prompt-modal').classList.add('hidden');
 }
-function createNewPrompt() {
+async function createNewPrompt() {
     const title = document.getElementById('modal-title').value.trim();
     const category = document.getElementById('modal-category').value;
     const template = document.getElementById('modal-template').value.trim();
@@ -787,7 +871,37 @@ function createNewPrompt() {
         alert("Title and template are required.");
         return;
     }
-    const newPrompt = { id: Date.now(), title, category, template };
+
+    const newPrompt = {
+        title: title,
+        category: category,
+        template: template,
+        user_id: currentUser.id,
+        pinned: false,
+        author_name: currentProfile ? (currentProfile.first_name + ' ' + currentProfile.last_name).trim() || currentProfile.username || 'Unknown' : 'Unknown'
+    };
+
+    const { data, error } = await sb
+        .from('tavio_prompts')
+        .insert({
+            title: newPrompt.title,
+            category_id: newPrompt.category,
+            template: newPrompt.template,
+            user_id: newPrompt.user_id,
+            pinned: newPrompt.pinned
+        })
+        .select('id, created_at, updated_at')
+        .single();
+
+    if (error) {
+        alert('Failed to save prompt. Please try again.');
+        console.error(error);
+        return;
+    }
+
+    newPrompt.id = data.id;
+    newPrompt.created_at = data.created_at;
+    newPrompt.updated_at = data.updated_at;
     prompts.unshift(newPrompt);
     hideNewPromptModal();
     document.getElementById('modal-title').value = '';
@@ -795,11 +909,24 @@ function createNewPrompt() {
     filterPrompts();
     loadPromptIntoEditor(newPrompt);
 }
-function saveCurrentPrompt() {
+async function saveCurrentPrompt() {
     if (!currentPrompt) return;
     const template = document.getElementById('template-textarea').value.trim();
     if (!template) return;
     currentPrompt.template = template;
+
+    const { error } = await sb
+        .from('tavio_prompts')
+        .update({ template: template })
+        .eq('id', currentPrompt.id)
+        .eq('user_id', currentUser.id);
+
+    if (error) {
+        alert('Failed to save prompt. Please try again.');
+        console.error(error);
+        return;
+    }
+
     const index = prompts.findIndex(p => p.id === currentPrompt.id);
     if (index !== -1) prompts[index] = currentPrompt;
     else prompts.unshift(currentPrompt);
@@ -837,14 +964,12 @@ function setupUIListeners() {
         sidebarNewPrompt.addEventListener('click', showNewPromptModal);
     }
 
-    // Share modal events
     document.getElementById('share-cancel-btn').addEventListener('click', closeShareModal);
     document.getElementById('share-send-btn').addEventListener('click', sendShareRequest);
     document.getElementById('share-modal').addEventListener('click', (e) => {
         if (e.target === e.currentTarget) closeShareModal();
     });
 
-    // Preview modal events
     document.getElementById('preview-accept-btn').addEventListener('click', acceptSharedPrompt);
     document.getElementById('preview-reject-btn').addEventListener('click', rejectSharedPrompt);
     document.getElementById('prompt-preview-modal').addEventListener('click', (e) => {
