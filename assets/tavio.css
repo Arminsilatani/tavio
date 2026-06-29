@@ -959,17 +959,21 @@ body {
 }
 .ai-select-dropdown {
     position: absolute;
-    bottom: calc(100% + 4px);    /* باز شدن به سمت بالا */
+    top: 0;                      /* از بالای دکمه شروع شود */
     left: 0;
     right: 0;
+    transform: translateY(-100%); /* به‌اندازه‌ی ارتفاع خودش به بالا منتقل شود */
     background: #1e1e1e;
     border: 1px solid var(--border);
     border-radius: 8px 8px 0 0;
     z-index: 1100;
-    max-height: 360px;
+    max-height: 340px;
     display: flex;
     flex-direction: column;
     box-sizing: border-box;
+}
+.ai-select-button.invisible {
+    visibility: hidden;
 }
 .ai-companies-list {
     flex: 1;
