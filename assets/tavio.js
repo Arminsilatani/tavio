@@ -1422,6 +1422,133 @@ function setupUIListeners() {
     });
 }
 
+const ALL_AI_MODELS = [
+    // OpenAI
+    { id: "gpt-5.4", name: "GPT-5.4", company: "OpenAI", tags: ["agentic","paid"], modality:["general","agentic"], pricing:"paid" },
+    { id: "gpt-5.5-instant", name: "GPT-5.5 Instant", company: "OpenAI", tags: ["fast","freemium"], modality:["general","fast"], pricing:"freemium" },
+    { id: "gpt-5.1-thinking", name: "GPT-5.1 Thinking", company: "OpenAI", tags: ["reasoning","paid"], modality:["reasoning"], pricing:"paid" },
+    { id: "gpt-5.1-pro", name: "GPT-5.1 Pro", company: "OpenAI", tags: ["advanced","paid"], modality:["general","advanced"], pricing:"paid" },
+    { id: "gpt-5.1-instant", name: "GPT-5.1 Instant", company: "OpenAI", tags: ["general","paid"], modality:["general"], pricing:"paid" },
+    { id: "gpt-5", name: "GPT-5", company: "OpenAI", tags: ["general","paid"], modality:["general"], pricing:"paid" },
+    { id: "gpt-5-thinking", name: "GPT-5 Thinking", company: "OpenAI", tags: ["reasoning","paid"], modality:["reasoning"], pricing:"paid" },
+    { id: "gpt-5-instant", name: "GPT-5 Instant", company: "OpenAI", tags: ["fast","paid"], modality:["general","fast"], pricing:"paid" },
+    { id: "o3-pro", name: "o3-pro", company: "OpenAI", tags: ["reasoning","paid"], modality:["reasoning"], pricing:"paid" },
+    { id: "o3-mini", name: "o3-mini", company: "OpenAI", tags: ["fast","freemium"], modality:["general","fast"], pricing:"freemium" },
+    { id: "gpt-oss-120b", name: "GPT-OSS 120B", company: "OpenAI", tags: ["open","free"], modality:["general"], pricing:"free" },
+    { id: "gpt-oss-20b", name: "GPT-OSS 20B", company: "OpenAI", tags: ["open","free"], modality:["general"], pricing:"free" },
+    { id: "gpt-oss-safeguard-120b", name: "GPT-OSS Safeguard 120B", company: "OpenAI", tags: ["safety","free"], modality:["safety"], pricing:"free" },
+    { id: "gpt-oss-safeguard-20b", name: "GPT-OSS Safeguard 20B", company: "OpenAI", tags: ["safety","free"], modality:["safety"], pricing:"free" },
+    { id: "gpt-image-2", name: "GPT Image 2", company: "OpenAI", tags: ["image","paid"], modality:["image"], pricing:"paid" },
+    { id: "gpt-realtime-2", name: "GPT Realtime 2", company: "OpenAI", tags: ["voice","paid"], modality:["voice"], pricing:"paid" },
+    { id: "gpt-realtime-mini", name: "GPT Realtime Mini", company: "OpenAI", tags: ["voice","paid"], modality:["voice"], pricing:"paid" },
+
+    // Anthropic
+    { id: "claude-fable-5", name: "Claude Fable 5", company: "Anthropic", tags: ["limited","paid"], modality:["general"], pricing:"paid" },
+    { id: "claude-mythos-5", name: "Claude Mythos 5", company: "Anthropic", tags: ["limited","paid"], modality:["general"], pricing:"paid" },
+    { id: "claude-opus-4.8", name: "Claude Opus 4.8", company: "Anthropic", tags: ["reasoning","paid"], modality:["reasoning"], pricing:"paid" },
+    { id: "claude-opus-4.7", name: "Claude Opus 4.7", company: "Anthropic", tags: ["coding","paid"], modality:["coding"], pricing:"paid" },
+    { id: "claude-opus-4.6", name: "Claude Opus 4.6", company: "Anthropic", tags: ["general","paid"], modality:["general"], pricing:"paid" },
+    { id: "claude-sonnet-4.6", name: "Claude Sonnet 4.6", company: "Anthropic", tags: ["practical","paid"], modality:["general"], pricing:"paid" },
+    { id: "claude-sonnet-4.5", name: "Claude Sonnet 4.5", company: "Anthropic", tags: ["general","paid"], modality:["general"], pricing:"paid" },
+    { id: "claude-haiku-4.5", name: "Claude Haiku 4.5", company: "Anthropic", tags: ["fast","paid"], modality:["general","fast"], pricing:"paid" },
+    { id: "claude-3.5-sonnet", name: "Claude 3.5 Sonnet", company: "Anthropic", tags: ["general","freemium"], modality:["general"], pricing:"freemium" },
+    { id: "claude-3.5-haiku", name: "Claude 3.5 Haiku", company: "Anthropic", tags: ["fast","freemium"], modality:["general","fast"], pricing:"freemium" },
+
+    // Meta
+    { id: "llama-4-scout", name: "Llama 4 Scout", company: "Meta", tags: ["light","free"], modality:["general"], pricing:"free" },
+    { id: "llama-4-maverick", name: "Llama 4 Maverick", company: "Meta", tags: ["general","free"], modality:["general"], pricing:"free" },
+    { id: "llama-4-behemoth", name: "Llama 4 Behemoth", company: "Meta", tags: ["large","free"], modality:["general"], pricing:"free" },
+    { id: "llama-3.3", name: "Llama 3.3", company: "Meta", tags: ["general","free"], modality:["general"], pricing:"free" },
+    { id: "llama-3.2", name: "Llama 3.2", company: "Meta", tags: ["multimodal","free"], modality:["multimodal"], pricing:"free" },
+    { id: "llama-3.1", name: "Llama 3.1", company: "Meta", tags: ["general","free"], modality:["general"], pricing:"free" },
+
+    // Google
+    { id: "gemini-3.1-pro-preview", name: "Gemini 3.1 Pro Preview", company: "Google", tags: ["reasoning","freemium"], modality:["reasoning"], pricing:"freemium" },
+    { id: "gemini-3.1-flash", name: "Gemini 3.1 Flash", company: "Google", tags: ["fast","freemium"], modality:["general","fast"], pricing:"freemium" },
+    { id: "gemini-3.1-flash-lite", name: "Gemini 3.1 Flash Lite", company: "Google", tags: ["economical","freemium"], modality:["general"], pricing:"freemium" },
+    { id: "gemini-3-pro-image", name: "Gemini 3 Pro Image", company: "Google", tags: ["image","paid"], modality:["image"], pricing:"paid" },
+    { id: "gemini-3.1-flash-image", name: "Gemini 3.1 Flash Image", company: "Google", tags: ["image","paid"], modality:["image"], pricing:"paid" },
+    { id: "gemini-3.5-flash", name: "Gemini 3.5 Flash", company: "Google", tags: ["general","freemium"], modality:["general"], pricing:"freemium" },
+    { id: "gemini-3-pro", name: "Gemini 3 Pro", company: "Google", tags: ["advanced","freemium"], modality:["general"], pricing:"freemium" },
+    { id: "gemini-2.5-pro", name: "Gemini 2.5 Pro", company: "Google", tags: ["reasoning","freemium"], modality:["reasoning"], pricing:"freemium" },
+    { id: "gemini-2.5-flash", name: "Gemini 2.5 Flash", company: "Google", tags: ["fast","freemium"], modality:["general","fast"], pricing:"freemium" },
+    { id: "gemini-2.5-flash-lite", name: "Gemini 2.5 Flash-Lite", company: "Google", tags: ["economical","freemium"], modality:["general"], pricing:"freemium" },
+    { id: "gemma-4", name: "Gemma 4", company: "Google", tags: ["open","free"], modality:["general"], pricing:"free" },
+    { id: "gemma-3", name: "Gemma 3", company: "Google", tags: ["open","free"], modality:["general"], pricing:"free" },
+    { id: "veo-3.1-lite-preview", name: "Veo 3.1 Lite Preview", company: "Google", tags: ["video","paid"], modality:["video"], pricing:"paid" },
+
+    // Microsoft
+    { id: "mai-voice-1", name: "MAI Voice-1", company: "Microsoft", tags: ["voice","freemium"], modality:["voice"], pricing:"freemium" },
+    { id: "mai-image-1", name: "MAI Image-1", company: "Microsoft", tags: ["image","freemium"], modality:["image"], pricing:"freemium" },
+    { id: "phi-4", name: "Phi-4", company: "Microsoft", tags: ["reasoning","free"], modality:["reasoning"], pricing:"free" },
+    { id: "phi-4-mini", name: "Phi-4-mini", company: "Microsoft", tags: ["light","free"], modality:["general"], pricing:"free" },
+    { id: "phi-4-multimodal", name: "Phi-4-multimodal", company: "Microsoft", tags: ["multimodal","free"], modality:["multimodal"], pricing:"free" },
+    { id: "phi-3.5", name: "Phi-3.5", company: "Microsoft", tags: ["general","free"], modality:["general"], pricing:"free" },
+
+    // xAI
+    { id: "grok-4", name: "Grok 4", company: "xAI", tags: ["reasoning","paid"], modality:["reasoning"], pricing:"paid" },
+    { id: "grok-4-fast", name: "Grok 4 Fast", company: "xAI", tags: ["fast","paid"], modality:["general","fast"], pricing:"paid" },
+    { id: "grok-3", name: "Grok 3", company: "xAI", tags: ["general","freemium"], modality:["general"], pricing:"freemium" },
+    { id: "grok-3-mini", name: "Grok 3 Mini", company: "xAI", tags: ["economical","freemium"], modality:["general"], pricing:"freemium" },
+
+    // Mistral
+    { id: "mistral-large", name: "Mistral Large", company: "Mistral", tags: ["general","paid"], modality:["general"], pricing:"paid" },
+    { id: "mistral-medium", name: "Mistral Medium", company: "Mistral", tags: ["practical","paid"], modality:["general"], pricing:"paid" },
+    { id: "mistral-small", name: "Mistral Small", company: "Mistral", tags: ["fast","freemium"], modality:["general","fast"], pricing:"freemium" },
+    { id: "mistral-nemo", name: "Mistral Nemo", company: "Mistral", tags: ["light","free"], modality:["general"], pricing:"free" },
+    { id: "mistral-code", name: "Mistral Code", company: "Mistral", tags: ["coding","paid"], modality:["coding"], pricing:"paid" },
+    { id: "mixtral-8x22b", name: "Mixtral 8x22B", company: "Mistral", tags: ["reasoning","free"], modality:["reasoning"], pricing:"free" },
+    { id: "mixtral-8x7b", name: "Mixtral 8x7B", company: "Mistral", tags: ["general","free"], modality:["general"], pricing:"free" },
+    { id: "pixtral", name: "Pixtral", company: "Mistral", tags: ["multimodal","freemium"], modality:["multimodal"], pricing:"freemium" },
+
+    // DeepSeek
+    { id: "deepseek-v4", name: "DeepSeek V4", company: "DeepSeek", tags: ["general","free"], modality:["general"], pricing:"free" },
+    { id: "deepseek-r1", name: "DeepSeek R1", company: "DeepSeek", tags: ["reasoning","free"], modality:["reasoning"], pricing:"free" },
+    { id: "deepseek-v3", name: "DeepSeek V3", company: "DeepSeek", tags: ["general","free"], modality:["general"], pricing:"free" },
+    { id: "deepseek-coder-v2", name: "DeepSeek Coder V2", company: "DeepSeek", tags: ["coding","free"], modality:["coding"], pricing:"free" },
+    { id: "deepseek-vl", name: "DeepSeek VL", company: "DeepSeek", tags: ["multimodal","free"], modality:["multimodal"], pricing:"free" },
+
+    // Qwen / Alibaba
+    { id: "qwen-3.6-plus", name: "Qwen 3.6-Plus", company: "Qwen / Alibaba", tags: ["coding","freemium"], modality:["coding"], pricing:"freemium" },
+    { id: "qwen-3", name: "Qwen 3", company: "Qwen / Alibaba", tags: ["general","free"], modality:["general"], pricing:"free" },
+    { id: "qwen-2.5-max", name: "Qwen 2.5 Max", company: "Qwen / Alibaba", tags: ["reasoning","freemium"], modality:["reasoning"], pricing:"freemium" },
+    { id: "qwen-2.5-plus", name: "Qwen 2.5 Plus", company: "Qwen / Alibaba", tags: ["general","freemium"], modality:["general"], pricing:"freemium" },
+    { id: "qwen-2.5-coder", name: "Qwen 2.5 Coder", company: "Qwen / Alibaba", tags: ["coding","free"], modality:["coding"], pricing:"free" },
+    { id: "qwen-vl", name: "Qwen VL", company: "Qwen / Alibaba", tags: ["multimodal","free"], modality:["multimodal"], pricing:"free" },
+
+    // Baidu
+    { id: "ernie-4.5", name: "Ernie 4.5", company: "Baidu", tags: ["general","freemium"], modality:["general"], pricing:"freemium" },
+    { id: "ernie-4.0", name: "Ernie 4.0", company: "Baidu", tags: ["reasoning","freemium"], modality:["reasoning"], pricing:"freemium" },
+    { id: "ernie-speed", name: "Ernie Speed", company: "Baidu", tags: ["fast","freemium"], modality:["general","fast"], pricing:"freemium" },
+
+    // Zhipu
+    { id: "glm-5.1", name: "GLM-5.1", company: "Zhipu", tags: ["general","freemium"], modality:["general"], pricing:"freemium" },
+    { id: "glm-5v-turbo", name: "GLM-5V-Turbo", company: "Zhipu", tags: ["multimodal","freemium"], modality:["multimodal"], pricing:"freemium" },
+    { id: "glm-4.6", name: "GLM-4.6", company: "Zhipu", tags: ["general","freemium"], modality:["general"], pricing:"freemium" },
+    { id: "glm-4.5", name: "GLM-4.5", company: "Zhipu", tags: ["practical","freemium"], modality:["general"], pricing:"freemium" },
+
+    // Cohere
+    { id: "command-a", name: "Command A", company: "Cohere", tags: ["general","paid"], modality:["general"], pricing:"paid" },
+    { id: "command-r", name: "Command R", company: "Cohere", tags: ["retrieval","paid"], modality:["retrieval"], pricing:"paid" },
+    { id: "command-r-plus", name: "Command R+", company: "Cohere", tags: ["advanced","paid"], modality:["general"], pricing:"paid" },
+
+    // Perplexity
+    { id: "sonar", name: "Sonar", company: "Perplexity", tags: ["search","freemium"], modality:["search"], pricing:"freemium" },
+    { id: "sonar-pro", name: "Sonar Pro", company: "Perplexity", tags: ["advanced","freemium"], modality:["search"], pricing:"freemium" },
+    { id: "sonar-reasoner", name: "Sonar Reasoner", company: "Perplexity", tags: ["reasoning","freemium"], modality:["reasoning"], pricing:"freemium" },
+
+    // Stability AI
+    { id: "stable-diffusion-3.5", name: "Stable Diffusion 3.5", company: "Stability AI", tags: ["image","free"], modality:["image"], pricing:"free" },
+    { id: "stable-diffusion-3", name: "Stable Diffusion 3", company: "Stability AI", tags: ["image","free"], modality:["image"], pricing:"free" },
+    { id: "stable-audio-2.0", name: "Stable Audio 2.0", company: "Stability AI", tags: ["audio","free"], modality:["audio"], pricing:"free" }
+];
+
+// Unique modalities and pricing for capsules
+const ALL_MODALITIES = ["general","agentic","fast","reasoning","advanced","image","voice","video","multimodal","coding","safety","search","retrieval","audio"];
+// we'll only show a few main ones in capsules; we can use the first few unique ones or define a specific set:
+const MODALITY_CAPSULES = ["image","voice","video","coding","reasoning","multimodal","general","search","audio"];
+const PRICING_CAPSULES = ["free","freemium","paid"];
+
 // ================== INIT ==================
 document.addEventListener('DOMContentLoaded', async () => {
     setupAuthListeners();
