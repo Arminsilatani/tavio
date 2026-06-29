@@ -1080,7 +1080,7 @@ body {
     color: #f5f5f5;
     font-weight: 400;
     font-size: 15px;
-    transform: translateY(20px);
+    transform: translateY(1px);
     display: inline-block;
     line-height: 1;
 }
