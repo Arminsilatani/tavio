@@ -956,7 +956,7 @@ body {
 }
 .ai-select-placeholder {
     opacity: 0.7;
-    font-size: 102px;
+    font-size: 12px;
 }
 .ai-select-dropdown {
     position: absolute;
