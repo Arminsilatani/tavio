@@ -453,7 +453,11 @@ function renderModalAIDropdown() {
         logo.className = 'ai-company-logo';
         logo.onerror = function() { this.style.display = 'none'; };
         header.appendChild(logo);
-        header.appendChild(document.createTextNode(company));
+        const nameSpan = document.createElement('span');
+            nameSpan.className = 'ai-company-name';
+            nameSpan.textContent = company;
+            header.appendChild(logo);
+            header.appendChild(nameSpan);
         groupDiv.appendChild(header);
 
         const showAll = aiCompanyExpanded[company] || false;
