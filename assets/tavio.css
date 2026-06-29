@@ -956,7 +956,9 @@ body {
 }
 .ai-select-placeholder {
     opacity: 0.7;
-    font-size: 12px;
+}
+#add-prompt-btn {
+    flex: 7 0 0;               /* 70% عرض با احتساب gap */
 }
 /* در فایل tavio.css، سلکتور زیر را پیدا کنید یا اضافه کنید */
 #ai-select-placeholder {
