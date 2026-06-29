@@ -607,7 +607,6 @@ function renderModalCategories() {
         container.appendChild(chip);
     });
 }
-
 // ================== BOOKMARK ==================
 async function toggleBookmark(promptId) {
     if (!currentUser) {
