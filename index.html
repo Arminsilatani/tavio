@@ -113,12 +113,17 @@
                 <button id="new-prompt-btn" class="btn-primary">+ New Prompt</button>
             </div>
 
-            <div class="categories">
+            <!-- کتگوری فیلترهای چند انتخابی -->
+            <div class="categories" id="category-filters">
                 <button class="category-chip active" data-category="all">All</button>
                 <button class="category-chip" data-category="writing">Writing</button>
                 <button class="category-chip" data-category="coding">Coding</button>
                 <button class="category-chip" data-category="marketing">Marketing</button>
-                <button class="category-chip" data-category="business">Business</button>
+                <button class="category-chip" data-category="analysis">Analysis</button>
+                <button class="category-chip" data-category="education">Education / Learning</button>
+                <button class="category-chip" data-category="productivity">Productivity</button>
+                <button class="category-chip" data-category="creative">Creative</button>
+                <button class="category-chip" data-category="image_media">Image / Media</button>
             </div>
 
             <div id="prompt-grid" class="prompt-grid"></div>
@@ -206,24 +211,25 @@
         <div class="modal-content">
             <h3 class="modal-title">New Prompt Template</h3>
             <input type="text" id="modal-title" class="modal-input" placeholder="Prompt Title">
-            <select id="modal-category" class="modal-input">
-                <option value="writing">Writing</option>
-                <option value="coding">Coding</option>
-                <option value="marketing">Marketing</option>
-                <option value="business">Business</option>
-            </select>
+            
+            <!-- کتگوری های چند انتخابی -->
+            <div class="modal-categories-section">
+                <label class="modal-ai-label" style="margin-bottom:8px; display:block;">Categories</label>
+                <div id="modal-categories-container" class="ai-models-container" style="flex-wrap: wrap; gap: 6px;"></div>
+            </div>
+
             <textarea id="modal-template" class="modal-textarea" placeholder="Paste your prompt template..."></textarea>
+            
             <!-- بخش AI Models -->
-<div class="modal-ai-section">
-    <label class="modal-ai-label">Recommended AI Models</label>
-    <div id="modal-ai-models-container" class="ai-models-container" style="flex-wrap: wrap; gap: 6px;">
-        <!-- اینجا با JS پر می‌شه -->
-    </div>
-    <div style="display: flex; gap: 6px; margin-top: 8px;">
-        <input type="text" id="modal-ai-model-input" placeholder="Add custom model..." class="ai-model-input" style="flex:1;">
-        <button id="modal-add-ai-model-btn" class="btn-secondary small">Add</button>
-    </div>
-</div>
+            <div class="modal-ai-section">
+                <label class="modal-ai-label">Recommended AI Models</label>
+                <div id="modal-ai-models-container" class="ai-models-container" style="flex-wrap: wrap; gap: 6px;"></div>
+                <div style="display: flex; gap: 6px; margin-top: 8px;">
+                    <input type="text" id="modal-ai-model-input" placeholder="Add custom model..." class="ai-model-input" style="flex:1;">
+                    <button id="modal-add-ai-model-btn" class="btn-secondary small">Add</button>
+                </div>
+            </div>
+
             <div class="modal-actions">
                 <button id="cancel-modal-btn" class="btn-secondary">Cancel</button>
                 <button id="add-prompt-btn" class="btn-primary">Add to Library</button>
