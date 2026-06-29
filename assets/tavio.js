@@ -16,7 +16,7 @@ let shareTargetPromptId = null;
 let selectedShareUserId = null;
 
 // ================== FIELD DEFINITIONS ==================
-let fieldDefinitions = []; // Array of { name, type, options, description }
+let fieldDefinitions = [];
 
 function parsePromptFields(template) {
     const fields = [];
@@ -771,14 +771,14 @@ function setupAuthListeners() {
         console.warn('⚠️ auth-continue-btn not found');
     }
 
-    // Sign In button
+    // Sign In button - با listener مستقیم بدون clone
     const signinBtn = document.getElementById('auth-signin-btn');
     if (signinBtn) {
-        // Remove any existing listeners to avoid duplicates
-        const newBtn = signinBtn.cloneNode(true);
-        signinBtn.parentNode.replaceChild(newBtn, signinBtn);
-        
-        newBtn.addEventListener('click', async function(e) {
+        // حذف listenerهای قبلی با استفاده از replace
+        const newSigninBtn = signinBtn.cloneNode(true);
+        signinBtn.parentNode.replaceChild(newSigninBtn, signinBtn);
+        // اکنون listener را روی دکمه جدید می‌گذاریم
+        newSigninBtn.addEventListener('click', async function(e) {
             console.log('🟢 Sign In button clicked');
             try {
                 const emailInput = document.getElementById('auth-email');
