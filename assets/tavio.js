@@ -542,7 +542,7 @@ function renderModalityCapsules() {
         chip.className = 'capsule-chip' + (modalAIModalityFilters.includes(mod) ? ' active' : '');
         chip.textContent = mod;
         chip.addEventListener('click', (e) => {
-            e.stopPropagation(); // <-- این خط را اضافه کنید
+            e.stopPropagation();               // ⬅️ جلوگیری از بسته شدن
             const idx = modalAIModalityFilters.indexOf(mod);
             if (idx > -1) modalAIModalityFilters.splice(idx, 1);
             else modalAIModalityFilters.push(mod);
@@ -567,31 +567,7 @@ function renderPricingCapsules() {
         chip.className = 'capsule-chip' + (modalAIPricingFilters.includes(price) ? ' active' : '');
         chip.textContent = price;
         chip.addEventListener('click', (e) => {
-            e.stopPropagation(); // <-- این خط را اضافه کنید
-            const idx = modalAIPricingFilters.indexOf(price);
-            if (idx > -1) modalAIPricingFilters.splice(idx, 1);
-            else modalAIPricingFilters.push(price);
-            renderPricingCapsules();
-            if (aiDropdownOpen) renderModalAIDropdown();
-        });
-        row.appendChild(chip);
-    });
-}
-
-function renderPricingCapsules() {
-    const row = document.getElementById('dropdown-pricing-capsules');
-    if (!row) return;
-    row.innerHTML = '';
-    PRICING_CAPSULES.forEach((price, index) => {
-        if (index > 0) {
-            const divider = document.createElement('span');
-            divider.className = 'capsule-divider';
-            row.appendChild(divider);
-        }
-        const chip = document.createElement('div');
-        chip.className = 'capsule-chip' + (modalAIPricingFilters.includes(price) ? ' active' : '');
-        chip.textContent = price;
-        chip.addEventListener('click', () => {
+            e.stopPropagation();               // ⬅️ جلوگیری از بسته شدن
             const idx = modalAIPricingFilters.indexOf(price);
             if (idx > -1) modalAIPricingFilters.splice(idx, 1);
             else modalAIPricingFilters.push(price);
