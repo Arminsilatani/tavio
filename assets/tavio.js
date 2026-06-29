@@ -346,6 +346,75 @@ function detectFields() {
     renderFieldEditors();
 }
 
+function renderPromptInputFields() {
+    const container = document.getElementById('prompt-input-fields');
+    if (!container) return;
+    container.innerHTML = '';
+
+    if (!fieldDefinitions || fieldDefinitions.length === 0) {
+        container.innerHTML = '<p style="color:#666;">No fields to fill. This prompt has no dynamic parameters.</p>';
+        return;
+    }
+
+    fieldDefinitions.forEach((field, index) => {
+        const wrapper = document.createElement('div');
+        wrapper.className = 'prompt-field-item';
+
+        const label = document.createElement('label');
+        label.textContent = field.name || 'Field ' + (index + 1);
+        wrapper.appendChild(label);
+
+        let input;
+        if (field.type === 'single-select' && field.options && field.options.length > 0) {
+            input = document.createElement('select');
+            field.options.forEach(opt => {
+                const option = document.createElement('option');
+                option.value = opt;
+                option.textContent = opt;
+                if (field.value === opt) option.selected = true;
+                input.appendChild(option);
+            });
+        } else if (field.type === 'multi-select' && field.options && field.options.length > 0) {
+            // برای سادگی، multi-select را هم با یک select multiple پیاده می‌کنیم (یا می‌توان چند چک‌باکس ساخت)
+            input = document.createElement('select');
+            input.multiple = true;
+            input.style.minHeight = '60px';
+            field.options.forEach(opt => {
+                const option = document.createElement('option');
+                option.value = opt;
+                option.textContent = opt;
+                if (field.value && field.value.includes(opt)) option.selected = true;
+                input.appendChild(option);
+            });
+        } else {
+            input = document.createElement('input');
+            input.type = 'text';
+            input.placeholder = 'Enter ' + (field.name || 'value');
+            if (field.value) input.value = field.value;
+        }
+
+        input.addEventListener('change', (e) => {
+            if (field.type === 'multi-select') {
+                const selected = Array.from(e.target.selectedOptions).map(o => o.value);
+                fieldDefinitions[index].value = selected;
+            } else {
+                fieldDefinitions[index].value = e.target.value;
+            }
+        });
+
+        // توضیحات فیلد (در صورت وجود)
+        if (field.description) {
+            const desc = document.createElement('span');
+            desc.style.fontSize = '11px';
+            desc.style.color = '#888';
+            desc.textContent = field.description;
+            wrapper.appendChild(desc);
+        }
+
+        wrapper.appendChild(input);
+        container.appendChild(wrapper);
+    });
+}
 // ================== AI MODELS (Editor) ==================
 let selectedAIModels = [];
 
