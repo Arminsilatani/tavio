@@ -1593,15 +1593,28 @@ function loadPromptIntoEditor(prompt) {
     // مقداردهی fieldDefinitions از داده‌های ذخیره‌شده، و در صورت خالی بودن، فیلدها را از قالب استخراج کن
     fieldDefinitions = prompt.field_definitions && prompt.field_definitions.length > 0
         ? JSON.parse(JSON.stringify(prompt.field_definitions))
-        : parsePromptFields(prompt.template);   // ← این خط جدید
+        : parsePromptFields(prompt.template);
 
     // اطمینان از وجود خاصیت value
     fieldDefinitions.forEach(f => { if (f.value === undefined) f.value = ''; });
 
     renderPromptInputFields();
 
+    // AI Models
     selectedAIModels = prompt.ai_models || [];
     renderAIModels();
+
+    // مدیریت دکمه‌ی Save/Edit
+    const saveBtn = document.getElementById('save-prompt-btn');
+    if (currentUser && prompt.user_id === currentUser.id) {
+        saveBtn.textContent = 'Edit Prompt';
+        saveBtn.disabled = false;
+        saveBtn.classList.remove('btn-disabled');
+    } else {
+        saveBtn.textContent = 'Edit Prompt';   // یا "Save to Library"
+        saveBtn.disabled = true;
+        saveBtn.classList.add('btn-disabled');
+    }
 }
 
 function backToLibrary() {
