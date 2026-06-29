@@ -983,19 +983,17 @@ function hideGlobalLoader() {
     document.getElementById('initial-loader').style.display = 'none';
 }
 function openModal(modal) {
-    modal.style.display = 'flex';          // ابتدا نمایش داده شود
-    // با یک فریم تأخیر، کلاس hidden حذف می‌شود تا transition اجرا گردد
-    requestAnimationFrame(() => {
-        modal.classList.remove('hidden');
-    });
+    // ۱. با !important نمایش را فعال کن (غلبه بر hidden)
+    modal.style.setProperty('display', 'flex', 'important');
+    // ۲. یک ری‌فلوی اجباری انجام بده تا مرورگر حالت اولیه را پردازش کند
+    void modal.offsetHeight;
+    // ۳. حالا کلاس hidden را بردار → opacity از ۰ به ۱ می‌رود
+    modal.classList.remove('hidden');
 }
+
 function closeModal(modal) {
+    // hidden را اضافه کن (فوراً display: none می‌شود)
     modal.classList.add('hidden');
-    // پس از پایان transition، display را none کن تا فضایی اشغال نکند
-    modal.addEventListener('transitionend', function handler() {
-        modal.style.display = 'none';
-        modal.removeEventListener('transitionend', handler);
-    });
 }
 function showStep(stepId) {
     document.querySelectorAll('.auth-step').forEach(s => s.classList.remove('active'));
