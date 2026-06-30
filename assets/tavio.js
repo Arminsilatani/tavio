@@ -1802,35 +1802,74 @@ function generatePrompt() {
 
     let i = 0;
     generateInterval = setInterval(() => {
-        if (i < filled.length) {
-            display.textContent += filled.charAt(i);
-            i++;
-            display.scrollTop = display.scrollHeight;
-        } else {
-            clearInterval(generateInterval);
-            generateInterval = null;
-            if (copyBtn) {
-                copyBtn.disabled = false;
-                copyBtn.classList.add('blink');
-            }
+    if (i < filled.length) {
+        display.textContent += filled.charAt(i);
+        i++;
+        display.scrollTop = display.scrollHeight;
+    } else {
+        clearInterval(generateInterval);
+        generateInterval = null;
+        if (copyBtn) {
+            copyBtn.disabled = false;
+            copyBtn.classList.add('blink');
         }
-    }, 12);
+    }
+}, 12);
 }
 
 function copyPrompt() {
-    const text = document.getElementById('result-display').textContent;
-    navigator.clipboard.writeText(text).then(() => {
-        const btn = document.getElementById('copy-prompt-btn');
-        if (btn) {
-            btn.classList.remove('blink');   // قطع چشمک‌زدن
-            btn.classList.add('success');    // تغییر آیکون به تیک
-            setTimeout(() => {
-                btn.classList.remove('success');
-            }, 2000);
+    const resultDisplay = document.getElementById('result-display');
+    if (!resultDisplay) return;
+
+    const text = resultDisplay.textContent;
+    if (!text) return;
+
+    // ابتدا API مدرن را امتحان کن
+    if (navigator.clipboard && navigator.clipboard.writeText) {
+        navigator.clipboard.writeText(text).then(() => {
+            handleCopySuccess();
+        }).catch(err => {
+            console.warn('Clipboard API failed, falling back to execCommand', err);
+            fallbackCopy(text);
+        });
+    } else {
+        // مرورگرهای قدیمی یا بافت ناامن
+        fallbackCopy(text);
+    }
+}
+
+function handleCopySuccess() {
+    const btn = document.getElementById('copy-prompt-btn');
+    if (btn) {
+        btn.classList.remove('blink');
+        btn.classList.add('success');
+        setTimeout(() => {
+            btn.classList.remove('success');
+        }, 2000);
+    }
+}
+
+function fallbackCopy(text) {
+    // ایجاد یک textarea موقت برای کپی
+    const textarea = document.createElement('textarea');
+    textarea.value = text;
+    textarea.style.position = 'fixed';
+    textarea.style.left = '-9999px';
+    document.body.appendChild(textarea);
+    textarea.focus();
+    textarea.select();
+
+    try {
+        const successful = document.execCommand('copy');
+        if (successful) {
+            handleCopySuccess();
+        } else {
+            alert('Copy failed. Please copy manually.');
         }
-    }).catch(err => {
-        console.error('Copy failed:', err);
-    });
+    } catch (err) {
+        alert('Copy failed. Please copy manually.');
+    }
+    document.body.removeChild(textarea);
 }
 
 async function confirmDeletePrompt() {
