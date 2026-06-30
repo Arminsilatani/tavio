@@ -1772,12 +1772,18 @@ function resetAll() {
     if (resultActions) resultActions.classList.add('hidden');
     if (promptInputFields) promptInputFields.innerHTML = '';
 
-    aiModelsExpanded = false;
     currentVariables = {};
     fieldDefinitions = [];
     selectedAIModels = [];
+    aiModelsExpanded = false;   // مهم: وضعیت نمایش مدل‌ها هم ریست شود
     renderFieldEditors();
     renderAIModels();
+
+    // اسکرول نرم به بالای نمای ویرایشگر
+    const editorView = document.getElementById('editor-view');
+    if (editorView) {
+        editorView.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    }
 }
 
 function showNewPromptModal() {
