@@ -1580,6 +1580,23 @@ function renderPromptGrid(filteredPrompts) {
 
         const descHtml = prompt.description ? `<p class="prompt-desc">${prompt.description}</p>` : '';
 
+        // ----- ساخت لوگوهای مدل‌های هوش مصنوعی -----
+        let aiModelsHtml = '';
+        if (prompt.ai_models && prompt.ai_models.length > 0) {
+            const maxLogos = 5;   // حداکثر ۵ لوگو نمایش بده
+            const logos = prompt.ai_models.slice(0, maxLogos).map(modelId => {
+                const modelInfo = ALL_AI_MODELS.find(m => m.id === modelId);
+                if (!modelInfo) return '';
+                const logoFile = getCompanyLogo(modelInfo.company);
+                return `<img src="${logoFile}" alt="${modelInfo.company}" class="card-ai-logo">`;
+            }).join('');
+            const extra = prompt.ai_models.length > maxLogos 
+                ? `<span class="card-ai-more">+${prompt.ai_models.length - maxLogos}</span>` 
+                : '';
+            aiModelsHtml = logos + extra;
+        }
+        // -------------------------------------------
+
         card.innerHTML = `
             <div class="action-buttons">
                 <button class="pin-btn ${prompt.pinned ? 'pinned' : ''}">
@@ -1596,17 +1613,15 @@ function renderPromptGrid(filteredPrompts) {
             <div class="category-chips-inline">${categoryChips}</div>
             <h4>${prompt.title}</h4>
             ${descHtml}
-            <p class="prompt-snippet">${prompt.template ? prompt.template.substring(0, 110) : ''}...</p>
+            <div class="card-ai-models">${aiModelsHtml}</div>
             <div class="prompt-author">by ${prompt.author_name || 'Unknown'}</div>
         `;
 
-        // اتصال رویداد کلیک برای خود کارت (باز کردن ویرایشگر)
+        // اتصال رویدادها (بدون تغییر)
         card.addEventListener('click', () => loadPromptIntoEditor(prompt));
 
-        // اتصال رویدادها به دکمه‌های action با توقف انتشار
         const pinBtn = card.querySelector('.pin-btn');
         const shareBtn = card.querySelector('.share-btn');
-
         if (pinBtn) {
             pinBtn.addEventListener('click', (e) => {
                 e.stopPropagation();
