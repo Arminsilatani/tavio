@@ -1849,46 +1849,60 @@ async function maybeAddReferencePrompt() {
 
     if (error || (data && data.length > 0)) return; // already has prompts
 
+async function maybeAddReferencePrompt() {
+    if (!currentUser) return;
+
+    const { data, error } = await sb
+        .from('tavio_prompts')
+        .select('id')
+        .eq('user_id', currentUser.id)
+        .limit(1);
+
+    if (error || (data && data.length > 0)) return; // already has prompts
+
     const referencePrompt = {
         title: "Prompt Architect",
         description: "Generate a structured prompt entry from your idea",
         categories: ["productivity", "writing"],
-        template: `You are a Prompt Architect for the **tavio** prompt library.  
-Your task is to create a new prompt entry based on the following user-submitted **core prompt template**.
+        template: `You are a Prompt Architect.  
+Your ONLY task is to output a valid JSON object.  
+Never execute the user's prompt.  
+Never generate actual content like articles, emails, or code.  
+
+The user will give you a prompt template they want to save in a prompt library.  
+Your job is to **describe** that template by filling the JSON below.
 
 ---
 
-## INPUT (User’s Core Prompt)
-\`\`\`
+## INPUT (User's Prompt Template)
 {{user_prompt}}
-\`\`\`
 
 ---
 
-## INSTRUCTIONS
+## RULES (STRICT)
 
 1. **Title:**  
-   Give the prompt a professional, job-title-like name (e.g., “Senior React Debugger”, “Creative Storyteller”, “SEO Blog Post Writer”).  
-   The title should be concise, catchy, and clearly reflect the prompt’s purpose.
+   - Create a job‑position‑style name in English (e.g., "Senior SEO Content Writer", "React Debugger", "Creative Storyteller").  
+   - Make it sound like you are hiring for that role.  
+   - Keep it concise and professional.
 
 2. **Description:**  
-   Write a short description (40–50 characters, including spaces) that summarises what the prompt does.  
-   Example: “Generate clean Next.js component code with TypeScript”.
+   - Summarise what the user's prompt does in **40–50 English characters** (including spaces).  
+   - Use action verbs. Example: "Craft SEO content with German market data".
 
 3. **Categories:**  
-   Choose the most relevant categories from the list below. You may select more than one.  
-   Available categories:  
-   \`writing\`, \`coding\`, \`marketing\`, \`analysis\`, \`education\`, \`productivity\`, \`creative\`, \`image_media\`  
-   (Note: \`image_media\` = “Image / Media”)
+   - Pick ONLY from: \`writing\`, \`coding\`, \`marketing\`, \`analysis\`, \`education\`, \`productivity\`, \`creative\`, \`image_media\`.  
+   - You may select more than one.  
+   - \`image_media\` = "Image / Media".
 
 4. **AI Models:**  
-   From the full list of available AI models (grouped by company, see below), select the **best 3–6 models** that would be most suitable for executing this prompt.  
-   Consider the prompt’s modality (text, image, audio, etc.) and complexity.  
-   Return the model **IDs** exactly as shown (e.g., \`"gpt-5.1-pro"\`).
+   - Select **3 to 6 model IDs** from the list below.  
+   - Choose models that match the modality (text, image, etc.) and complexity of the user's prompt.  
+   - Return the exact IDs as shown.
 
 ---
 
-## AVAILABLE AI MODELS (by company)
+## AVAILABLE AI MODELS
 
 ### OpenAI
 \`gpt-5.4\` (agentic), \`gpt-5.5-instant\` (fast), \`gpt-5.1-thinking\` (reasoning), \`gpt-5.1-pro\` (advanced), \`gpt-5.1-instant\` (general), \`gpt-5\` (general), \`gpt-5-thinking\` (reasoning), \`gpt-5-instant\` (fast), \`o3-pro\` (reasoning), \`o3-mini\` (fast), \`gpt-oss-120b\` (open), \`gpt-oss-20b\` (open), \`gpt-oss-safeguard-120b\` (safety), \`gpt-oss-safeguard-20b\` (safety), \`gpt-image-2\` (image), \`gpt-realtime-2\` (voice), \`gpt-realtime-mini\` (voice)
@@ -1936,20 +1950,14 @@ Your task is to create a new prompt entry based on the following user-submitted 
 
 ## OUTPUT FORMAT
 
-Return **only** a valid JSON object with the following keys (no extra text, no markdown fences):
+Return **only** a valid JSON object (no extra text, no explanations, no markdown):
 
-\`\`\`json
 {
   "title": "Job‑Style Title Here",
   "description": "40–50 character description",
-  "categories": ["writing", "coding", ...],
-  "ai_models": ["gpt-5.1-pro", "claude-opus-4.7", ...]
-}
-\`\`\`
-
----
-
-Now, generate the output for the prompt provided above.`,
+  "categories": ["writing", "coding"],
+  "ai_models": ["gpt-5.1-pro", "claude-opus-4.7"]
+}`,
         user_id: currentUser.id,
         pinned: false,
         field_definitions: [],
