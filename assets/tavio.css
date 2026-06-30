@@ -292,7 +292,7 @@ body {
 }
 .back-btn:hover .back-text {
     max-width: 4em;              /* کافی برای نمایش "Back" */
-    margin-left: 6px;
+    margin-left: 15px;
 }
 /* جابجایی جزئی پیکان هنگام hover (دلخواه) */
 .back-btn:hover .back-arrow {
