@@ -1482,3 +1482,94 @@ body {
     padding: 20px;
     margin-bottom: 24px;          /* فاصله تا بخش بعدی (AI Models) */
 }
+/* استایل کلی select در فیلدهای ورودی پرامپت */
+.prompt-field-item select {
+    appearance: none;
+    -webkit-appearance: none;
+    background-color: rgba(255, 255, 255, 0.05);
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    color: var(--text);
+    padding: 8px 36px 8px 12px;      /* فضای کافی برای آیکون سفارشی */
+    font-size: 14px;
+    font-family: "Kalameh", sans-serif;
+    cursor: pointer;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='%23aaa' stroke-width='2'%3E%3Cpolyline points='6 9 12 15 18 9'/%3E%3C/svg%3E");
+    background-repeat: no-repeat;
+    background-position: right 12px center;
+    background-size: 12px;
+    transition: border-color 0.2s ease;
+}
+.prompt-field-item select:focus {
+    border-color: var(--accent);
+    outline: none;
+}
+/* استایل option ها */
+.prompt-field-item select option {
+    background-color: #1a1a1a;       /* پس‌زمینهٔ تیره برای آیتم‌ها */
+    color: var(--text);
+}
+/* برای selectهای multiple ارتفاع کمی بیشتر */
+.prompt-field-item select[multiple] {
+    background-image: none;          /* حذف آیکون chevron برای multi-select */
+    padding: 8px 12px;
+    min-height: 80px;
+}
+/* ---------- Custom Multi-Select Checkbox Group ---------- */
+.multi-checkbox-group {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;                     /* فاصله بین آیتم‌ها */
+    margin-top: 4px;
+}
+
+.multi-checkbox-item {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    cursor: pointer;
+    font-size: 14px;
+    color: #aaa;
+    user-select: none;
+    transition: color 0.2s;
+}
+
+/* استایل چک‌باکس سفارشی */
+.multi-checkbox-item input[type="checkbox"] {
+    appearance: none;
+    -webkit-appearance: none;
+    width: 18px;
+    height: 18px;
+    border: 1px solid var(--border);
+    border-radius: 4px;
+    background: rgba(255, 255, 255, 0.05);
+    cursor: pointer;
+    position: relative;
+    flex-shrink: 0;
+    transition: background 0.2s, border-color 0.2s;
+    margin: 0;                    /* حذف margin پیش‌فرض مرورگر */
+}
+
+/* حالت انتخاب‌شده */
+.multi-checkbox-item input[type="checkbox"]:checked {
+    background: var(--accent);
+    border-color: var(--accent);
+}
+
+/* تیک سفید داخل چک‌باکس */
+.multi-checkbox-item input[type="checkbox"]:checked::after {
+    content: "";
+    position: absolute;
+    top: 2px;
+    left: 5px;
+    width: 4px;
+    height: 8px;
+    border: solid #0d0d0d;
+    border-width: 0 2px 2px 0;
+    transform: rotate(45deg);
+}
+
+/* رنگ متن آیتم‌های انتخاب‌شده */
+.multi-checkbox-item.checked {
+    color: var(--accent);
+}
