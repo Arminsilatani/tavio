@@ -475,21 +475,30 @@ textarea::-webkit-scrollbar-thumb,
     gap: 8px;
     z-index: 5;
 }
+.result-display {
+    position: relative;        /* تا شمارنده نسبت به آن absolute شود */
+}
+
 .token-count-container {
+    position: absolute;
+    bottom: 8px;
+    right: 12px;
     display: flex;
-    justify-content: flex-end;
-    margin-top: 10px;
-    font-size: 12px;
-    color: #777;
+    align-items: center;
+    z-index: 2;
 }
 .token-count-container.hidden {
     display: none;
 }
+
 .token-count-display {
-    background: rgba(255,255,255,0.05);
+    background: rgba(0,0,0,0.6);
     border: 1px solid var(--border);
     border-radius: 6px;
-    padding: 4px 10px;
+    padding: 2px 8px;
+    font-size: 11px;
+    color: #aaa;
+    backdrop-filter: blur(2px);
 }
 /* Icon action buttons */
 .action-icon-btn {
