@@ -572,9 +572,7 @@ textarea::-webkit-scrollbar-thumb,
     object-fit: contain;
     flex-shrink: 0;
 }
-#ai-models-container {
-    margin-top: 2px;
-}
+
 .ai-show-more-btn {
     background: none;
     border: none;
