@@ -1704,10 +1704,15 @@ function copyPrompt() {
 }
 
 function resetAll() {
-    document.getElementById('result-display').textContent = '';
-    document.getElementById('result-actions').classList.add('hidden');
-    document.getElementById('variables-container').innerHTML = '';
-    currentVariables = {};
+    const resultDisplay = document.getElementById('result-display');
+    const resultActions = document.getElementById('result-actions');
+    const promptInputFields = document.getElementById('prompt-input-fields');
+
+    if (resultDisplay) resultDisplay.textContent = '';
+    if (resultActions) resultActions.classList.add('hidden');
+    if (promptInputFields) promptInputFields.innerHTML = '';
+
+    currentVariables = {};   // اگر هنوز جایی استفاده می‌شود
     fieldDefinitions = [];
     selectedAIModels = [];
     renderFieldEditors();
