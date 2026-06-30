@@ -856,7 +856,7 @@ textarea::-webkit-scrollbar-thumb,
 
 .ai-select-dropdown.open {
     opacity: 1;
-    transform: translateY(38px);         /* رسیدن به جای اصلی (بالای دکمه) */
+    transform: translateY(40px);         /* رسیدن به جای اصلی (بالای دکمه) */
     overflow-y: visible;              /* اسکرول داخلی در صورت نیاز */
 }
 .ai-select-button.invisible { visibility: hidden; }
