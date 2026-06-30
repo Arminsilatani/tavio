@@ -574,7 +574,7 @@ textarea::-webkit-scrollbar-thumb,
 }
 .ai-model-tag span {
     position: relative;
-    top: 2px;
+    top: 1px;
 }
 .ai-show-more-btn {
     background: none;
