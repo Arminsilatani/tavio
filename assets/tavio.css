@@ -295,6 +295,7 @@ textarea::-webkit-scrollbar-thumb,
     align-items: center;
     gap: 15px;                  /* فاصلهٔ ۱۵ پیکسل */
     margin-bottom: 10px;
+    margin-top: 10px;
 }
 
 /* هر لوگو */
