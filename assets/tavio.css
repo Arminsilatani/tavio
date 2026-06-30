@@ -575,7 +575,7 @@ textarea::-webkit-scrollbar-thumb,
 
 
 .ai-models-section .section-label::before {
-    margin-top: -2px;          /* آیکون دوباره به جای اصلی برمی‌گردد */
+    margin-top: -12px;          /* آیکون دوباره به جای اصلی برمی‌گردد */
 }
 
 .ai-show-more-btn {
