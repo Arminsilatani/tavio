@@ -8,6 +8,7 @@ let currentUser = null;
 let currentProfile = null;
 let currentUserRole = 'public';
 let sidebarComponent = null;
+let editingPromptId = null;
 
 let prompts = [];
 let currentPrompt = null;
@@ -1720,18 +1721,19 @@ function resetAll() {
 }
 
 function showNewPromptModal() {
-
-    document.getElementById('new-prompt-modal').classList.remove('hidden');
-    document.getElementById('modal-title').focus();
+    editingPromptId = null;   // یعنی ساختن پرامپت جدید
+    document.getElementById('modal-title').value = '';
+    document.getElementById('modal-description').value = '';
+    document.getElementById('modal-template').value = '';
     modalSelectedAIModels = [];
     modalSelectedCategories = [];
     modalAIModalityFilters = [];
     modalAIPricingFilters = [];
     aiCompanyExpanded = {};
-    document.getElementById('modal-description').value = '';
     updateSelectedCountDisplay();
+    document.getElementById('add-prompt-btn').textContent = 'Add to Library';
 
-    // نمایش یا مخفی کردن چک‌باکس global بر اساس نقش کاربر
+    // global checkbox
     const globalToggle = document.getElementById('modal-global-toggle-wrapper');
     if (globalToggle) {
         if (currentUserRole === 'General') {
@@ -1740,10 +1742,9 @@ function showNewPromptModal() {
         } else {
             globalToggle.style.display = 'none';
         }
-    } else {
-        console.error('global-toggle-wrapper not found in DOM');
     }
 
+    // ریست دراپ‌داون هوش مصنوعی
     const dropdown = document.getElementById('ai-select-dropdown');
     const button = document.getElementById('ai-select-button');
     if (dropdown) {
@@ -1757,8 +1758,56 @@ function showNewPromptModal() {
     if (filterArea) filterArea.classList.add('hidden');
     const toggleBtn = document.getElementById('ai-filter-toggle-btn');
     if (toggleBtn) toggleBtn.classList.remove('active');
-    
+
     renderModalCategories();
+    openModal(document.getElementById('new-prompt-modal'));
+}
+
+function openEditPromptModal() {
+    if (!currentPrompt) return;
+    editingPromptId = currentPrompt.id;          // شناسه پرامپتی که ویرایش می‌کنیم
+
+    document.getElementById('modal-title').value = currentPrompt.title || '';
+    document.getElementById('modal-description').value = currentPrompt.description || '';
+    document.getElementById('modal-template').value = currentPrompt.template || '';
+
+    modalSelectedCategories = [...(currentPrompt.categories || [])];
+    modalSelectedAIModels = [...(currentPrompt.ai_models || [])];
+    updateSelectedCountDisplay();
+
+    modalAIModalityFilters = [];
+    modalAIPricingFilters = [];
+    aiCompanyExpanded = {};
+
+    const globalToggle = document.getElementById('modal-global-toggle-wrapper');
+    if (globalToggle) {
+        if (currentUserRole === 'General') {
+            globalToggle.style.display = 'block';
+            document.getElementById('modal-is-global').checked = currentPrompt.is_global || false;
+        } else {
+            globalToggle.style.display = 'none';
+        }
+    }
+
+    document.getElementById('add-prompt-btn').textContent = 'Save Changes';
+
+    // ریست دراپ‌داون
+    const dropdown = document.getElementById('ai-select-dropdown');
+    const button = document.getElementById('ai-select-button');
+    if (dropdown) {
+        dropdown.classList.remove('open');
+        dropdown.classList.add('hidden');
+    }
+    if (button) button.classList.remove('invisible');
+    aiDropdownOpen = false;
+    aiFilterAreaVisible = false;
+    const filterArea = document.getElementById('ai-filter-area');
+    if (filterArea) filterArea.classList.add('hidden');
+    const toggleBtn = document.getElementById('ai-filter-toggle-btn');
+    if (toggleBtn) toggleBtn.classList.remove('active');
+
+    renderModalCategories();
+    openModal(document.getElementById('new-prompt-modal'));
 }
 
 function hideNewPromptModal() {
