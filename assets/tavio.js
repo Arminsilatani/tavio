@@ -1725,7 +1725,6 @@ function loadPromptIntoEditor(prompt) {
         deleteBtn.disabled = !isOwner;
     }
 
-    document.getElementById('token-count-container')?.classList.add('hidden');
 }
 
 function backToLibrary() {
@@ -1807,14 +1806,12 @@ function generatePrompt() {
             display.textContent += filled.charAt(i);
             i++;
             display.scrollTop = display.scrollHeight;
-            updateTokenCount(display.textContent);   // ← با هر کاراکتر شمارنده به‌روز می‌شود
         } else {
             clearInterval(generateInterval);
             generateInterval = null;
             // updateTokenCount(display.textContent); ← می‌توانی حذف کنی چون قبلاً انجام شده
             if (copyBtn) {
-                copyBtn.disabled = false;
-                copyBtn.classList.add('blink');
+                copyBtn.disabled = false;estimateTokenCount
             }
         }
     }, 12);
@@ -1834,26 +1831,6 @@ function copyPrompt() {
     }).catch(err => {
         console.error('Copy failed:', err);
     });
-}
-
-function estimateTokenCount(text) {
-    if (!text) return 0;
-    return Math.ceil(text.length / 4);
-}
-
-function updateTokenCount(text) {
-    const container = document.getElementById('token-count-container');
-    const display = document.getElementById('token-count-display');
-    if (!container || !display) return;
-
-    if (!text || text.trim() === '') {
-        container.classList.add('hidden');
-        return;
-    }
-
-    const count = estimateTokenCount(text);
-    display.textContent = `~${count} tokens`;
-    container.classList.remove('hidden');
 }
 
 async function confirmDeletePrompt() {
@@ -1921,7 +1898,6 @@ function resetAll() {
     const editorView = document.getElementById('editor-view');
     if (editorView) {
         editorView.scrollIntoView({ behavior: 'smooth', block: 'start' });
-        document.getElementById('token-count-container')?.classList.add('hidden');
     }
 }
 
