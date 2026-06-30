@@ -1758,10 +1758,8 @@ function generatePrompt() {
 function copyPrompt() {
     const text = document.getElementById('result-display').textContent;
     navigator.clipboard.writeText(text).then(() => {
-        const btn = document.querySelector('.btn-copy');
-        const original = btn.textContent;
-        btn.textContent = 'Copied!';
-        setTimeout(() => btn.textContent = original, 1800);
+        const btn = document.getElementById('copy-prompt-btn');
+        if (btn) btn.classList.remove('blink');
     });
 }
 
