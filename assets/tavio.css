@@ -457,7 +457,7 @@ textarea::-webkit-scrollbar-thumb,
     max-width: 5em;
     margin-right: 6px;
 }
-.action-icon-btn.reset-btn:hover .btn-text { max-width: 7em; }
+.action-icon-btn.reset-btn:hover .btn-text { max-width: 3em; }
 .action-icon-btn svg {
     flex-shrink: 0;
     stroke: currentColor;
