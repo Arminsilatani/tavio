@@ -1334,7 +1334,6 @@ async function restoreSession() {
         currentUser = session.user;
         currentProfile = await buildCurrentProfile(currentUser);
         currentUserRole = currentProfile?.role || 'recruit';
-        console.log('User role:', currentUserRole);
         document.getElementById('app-container').classList.remove('app-hidden');
         closeModal(document.getElementById('auth-overlay'));
         syncSidebarComponent();
@@ -1721,7 +1720,6 @@ function resetAll() {
 }
 
 function showNewPromptModal() {
-    console.log('currentUserRole in modal:', currentUserRole);   // برای debug نگه دار
 
     document.getElementById('new-prompt-modal').classList.remove('hidden');
     document.getElementById('modal-title').focus();
@@ -1867,56 +1865,7 @@ async function saveCurrentPrompt() {
     applyCategoryFilters();
 }
 
-// ================== REFERENCE PROMPT (auto-add) ==================
-async function maybeAddReferencePrompt() {
-    if (!currentUser) return;
-    try {
-        const { data, error } = await sb
-            .from('tavio_prompts')
-            .select('id')
-            .eq('user_id', currentUser.id)
-            .limit(1);
-
-        if (error) throw error;
-        if (data && data.length > 0) return; // already has prompts
-
-        const referencePrompt = {
-            title: "Prompt Optimizer & Structurer",
-            description: "Analyze raw prompts and produce structured library entry with placeholders",
-            categories: ["analysis", "productivity"],
-            template: `...`, // (همون template طولانی)
-            user_id: currentUser.id,
-            pinned: false,
-            field_definitions: [],
-            ai_models: ["gpt-5.1-pro", "claude-sonnet-4.6", "gemini-3-pro", "command-r-plus"]
-        };
-
-        const { error: insertError } = await sb
-            .from('tavio_prompts')
-            .insert({
-                title: referencePrompt.title,
-                description: referencePrompt.description,
-                content: referencePrompt.template,
-                category_id: JSON.stringify(referencePrompt.categories),
-                user_id: referencePrompt.user_id,
-                pinned: referencePrompt.pinned,
-                field_definitions: referencePrompt.field_definitions,
-                ai_models: referencePrompt.ai_models   // اگه ستون jsonb باشه
-            });
-
-        if (insertError) {
-            console.error('Insert reference prompt failed:', insertError);
-            return;
-        }
-        // حالا دوباره promptها رو fetch کن
-        await syncPrompts();
-    } catch (e) {
-        console.error('maybeAddReferencePrompt error:', e);
-    }
-}
-
 // ================== UI EVENT LISTENERS ==================
-// بروزرسانی وضعیت نمایش فلش‌ها برای یک ردیف مشخص
 function updateRowArrows(rowId) {
     const inner = document.getElementById(rowId);
     if (!inner) return;
