@@ -1677,6 +1677,12 @@ function loadPromptIntoEditor(prompt) {
         saveBtn.disabled = true;
         saveBtn.classList.add('btn-disabled');
     }
+    // در انتهای loadPromptIntoEditor این خط را اضافه کن
+const copyBtn = document.getElementById('copy-prompt-btn');
+if (copyBtn) {
+    copyBtn.disabled = true;
+    copyBtn.classList.remove('blink');
+}
 }
 
 function backToLibrary() {
@@ -1722,7 +1728,6 @@ function updateVar(key, value) {
 function generatePrompt() {
     let filled = document.getElementById('template-textarea').value;
     
-    // جایگزینی فیلدها
     fieldDefinitions.forEach(field => {
         const regex = new RegExp(`\\{\\{${field.raw || field.name}\\}\\}`, 'g');
         let value = field.value || `[${field.name}]`;
@@ -1738,11 +1743,10 @@ function generatePrompt() {
     });
 
     const display = document.getElementById('result-display');
-    const resultActions = document.getElementById('result-actions');
     const copyBtn = document.getElementById('copy-prompt-btn');
 
     display.textContent = '';
-    resultActions.classList.add('hidden');
+    // غیرفعال کردن دکمه کپی و حذف چشمک زدن
     if (copyBtn) {
         copyBtn.disabled = true;
         copyBtn.classList.remove('blink');
@@ -1756,7 +1760,7 @@ function generatePrompt() {
             display.scrollTop = display.scrollHeight;
         } else {
             clearInterval(typeInterval);
-            resultActions.classList.remove('hidden');
+            // فعال‌سازی دکمه کپی و شروع چشمک‌زدن
             if (copyBtn) {
                 copyBtn.disabled = false;
                 copyBtn.classList.add('blink');
@@ -1775,21 +1779,24 @@ function copyPrompt() {
 
 function resetAll() {
     const resultDisplay = document.getElementById('result-display');
-    const resultActions = document.getElementById('result-actions');
     const promptInputFields = document.getElementById('prompt-input-fields');
+    const copyBtn = document.getElementById('copy-prompt-btn');
 
     if (resultDisplay) resultDisplay.textContent = '';
-    if (resultActions) resultActions.classList.add('hidden');
     if (promptInputFields) promptInputFields.innerHTML = '';
+    // ریست کردن دکمه کپی به حالت غیرفعال
+    if (copyBtn) {
+        copyBtn.disabled = true;
+        copyBtn.classList.remove('blink');
+    }
 
     currentVariables = {};
     fieldDefinitions = [];
     selectedAIModels = [];
-    aiModelsExpanded = false;   // وضعیت نمایش مدل‌ها را هم ریست کن
+    aiModelsExpanded = false;
     renderFieldEditors();
     renderAIModels();
 
-    // اسکرول به بالای نمای ویرایشگر
     const editorView = document.getElementById('editor-view');
     if (editorView) {
         editorView.scrollIntoView({ behavior: 'smooth', block: 'start' });
