@@ -952,7 +952,11 @@ textarea::-webkit-scrollbar-thumb,
     margin-top: 15px;      /* فاصلهٔ زیر خط (قبلاً 20px بود) */
     padding-top: 15px;
 }
-.ai-company-group:first-child { border-top: none; }
+.ai-company-group:first-child {
+    border-top: none;
+    margin-top: 0;
+    padding-top: 0;
+}
 .ai-company-header {
     padding: 8px 12px;
     font-weight: 600;
