@@ -288,6 +288,34 @@ textarea::-webkit-scrollbar-thumb,
     align-items: center;
     justify-content: center;
 }
+/* ردیف لوگوی مدل‌های هوش مصنوعی در کارت */
+.card-ai-models {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 6px;
+    margin-bottom: 10px;
+}
+
+/* هر لوگو */
+.card-ai-logo {
+    width: 18px;
+    height: 18px;
+    border-radius: 4px;
+    object-fit: contain;
+    opacity: 0.85;
+    transition: opacity 0.2s;
+}
+.card-ai-logo:hover {
+    opacity: 1;
+}
+
+/* متن +N برای مدل‌های اضافی */
+.card-ai-more {
+    font-size: 10px;
+    color: #aaa;
+    margin-left: 2px;
+}
 /* ---- EDITOR HEADER ---- */
 .editor-header {
     display: flex;
