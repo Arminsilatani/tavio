@@ -572,9 +572,8 @@ textarea::-webkit-scrollbar-thumb,
     object-fit: contain;
     flex-shrink: 0;
 }
-
 .ai-models-section .section-label {
-    margin-top: 2px;          /* ۲ پیکسل فاصله از بالای خود */
+    transform: translateY(2px);
 }
 
 .ai-show-more-btn {
