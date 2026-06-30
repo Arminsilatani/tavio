@@ -1743,6 +1743,7 @@ function backToLibrary() {
     document.getElementById('editor-view').classList.remove('active');
     document.getElementById('library-view').classList.add('active');
     resetAll();
+    deletingPromptId = null;   // این خط را اضافه کن
 }
 
 function detectVariables() {
@@ -1847,22 +1848,27 @@ function copyPrompt() {
 async function confirmDeletePrompt() {
     if (!deletingPromptId) return;
 
-    const { error } = await sb
-        .from('tavio_prompts')
-        .delete()
-        .eq('id', deletingPromptId);
+    try {
+        const { error } = await sb
+            .from('tavio_prompts')
+            .delete()
+            .eq('id', deletingPromptId);
 
-    if (error) {
-        alert('Failed to delete prompt. Please try again.');
-        console.error(error);
-        return;
+        if (error) {
+            alert('Failed to delete prompt.');
+            console.error(error);
+        } else {
+            prompts = prompts.filter(p => p.id !== deletingPromptId);
+            applyCategoryFilters();
+        }
+    } catch (e) {
+        console.error(e);
+    } finally {
+        // همیشه مودال را ببند و به کتابخانه برگرد
+        closeModal(document.getElementById('delete-confirm-modal'));
+        backToLibrary();
+        deletingPromptId = null;
     }
-
-    prompts = prompts.filter(p => p.id !== deletingPromptId);
-    applyCategoryFilters();
-    backToLibrary();
-    closeModal(document.getElementById('delete-confirm-modal'));
-    deletingPromptId = null;
 }
 
 
@@ -2256,7 +2262,7 @@ function setupUIListeners() {
         });
     }
 
-    // دکمهٔ حذف پرامپت در هدر ویرایشگر
+    // دکمهٔ حذف در هدر ویرایشگر
     const deleteBtn = document.getElementById('delete-prompt-btn');
     if (deleteBtn) {
         deleteBtn.addEventListener('click', () => {
@@ -2267,21 +2273,32 @@ function setupUIListeners() {
         });
     }
 
-    // مودال تأیید حذف
+    // مودال تأیید حذف ← قطعهٔ تو دقیقاً همین‌جاست
     const confirmYesBtn = document.getElementById('confirm-yes-btn');
-    if (confirmYesBtn) confirmYesBtn.addEventListener('click', confirmDeletePrompt);
     const confirmNoBtn = document.getElementById('confirm-no-btn');
-    if (confirmNoBtn) confirmNoBtn.addEventListener('click', () => {
-        closeModal(document.getElementById('delete-confirm-modal'));
-        deletingPromptId = null;
-    });
     const deleteConfirmModal = document.getElementById('delete-confirm-modal');
-    if (deleteConfirmModal) deleteConfirmModal.addEventListener('click', (e) => {
-        if (e.target === e.currentTarget) {
-            closeModal(e.currentTarget);
+
+    if (confirmYesBtn) {
+        confirmYesBtn.addEventListener('click', (e) => {
+            e.stopPropagation();
+            confirmDeletePrompt();
+        });
+    }
+    if (confirmNoBtn) {
+        confirmNoBtn.addEventListener('click', (e) => {
+            e.stopPropagation();
+            closeModal(deleteConfirmModal);
             deletingPromptId = null;
-        }
-    });
+        });
+    }
+    if (deleteConfirmModal) {
+        deleteConfirmModal.addEventListener('click', (e) => {
+            if (e.target === e.currentTarget) {
+                closeModal(deleteConfirmModal);
+                deletingPromptId = null;
+            }
+        });
+    }
 
     const sidebarNewPrompt = document.getElementById('tavio-new-prompt-item');
     if (sidebarNewPrompt) sidebarNewPrompt.addEventListener('click', showNewPromptModal);
