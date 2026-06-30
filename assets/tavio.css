@@ -1631,8 +1631,8 @@ body {
 }
 .result-actions {
     position: absolute;
-    top: 8px;
-    right: 12px;
+    top: 0;                    /* هم‌تراز با بالای لیبل */
+    right: 0;
     display: flex;
     gap: 8px;
     z-index: 5;
