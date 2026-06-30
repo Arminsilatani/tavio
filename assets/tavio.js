@@ -1766,25 +1766,30 @@ function generatePrompt() {
         filled = filled.replace(new RegExp(`\\{\\{${key}\\}\\}`, 'g'), val);
     });
 
+    // اگر تایپ قبلی هنوز در حال اجراست، متوقفش کن
+    if (generateInterval) {
+        clearInterval(generateInterval);
+        generateInterval = null;
+    }
+
     const display = document.getElementById('result-display');
     const copyBtn = document.getElementById('copy-prompt-btn');
 
     display.textContent = '';
-    // غیرفعال کردن دکمه کپی و حذف چشمک زدن
     if (copyBtn) {
         copyBtn.disabled = true;
         copyBtn.classList.remove('blink');
     }
 
     let i = 0;
-    const typeInterval = setInterval(() => {
+    generateInterval = setInterval(() => {
         if (i < filled.length) {
             display.textContent += filled.charAt(i);
             i++;
             display.scrollTop = display.scrollHeight;
         } else {
-            clearInterval(typeInterval);
-            // فعال‌سازی دکمه کپی و شروع چشمک‌زدن
+            clearInterval(generateInterval);
+            generateInterval = null;
             if (copyBtn) {
                 copyBtn.disabled = false;
                 copyBtn.classList.add('blink');
