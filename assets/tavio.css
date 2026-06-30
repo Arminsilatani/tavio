@@ -293,7 +293,7 @@ textarea::-webkit-scrollbar-thumb,
     display: flex;
     flex-wrap: wrap;
     align-items: center;
-    gap: 6px;
+    gap: 15px;
     margin-bottom: 10px;
 }
 
