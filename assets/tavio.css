@@ -287,6 +287,7 @@ textarea::-webkit-scrollbar-thumb,
     display: inline-flex;
     align-items: center;
     justify-content: center;
+    transform: translateY(-2px);
 }
 /* ردیف لوگوی مدل‌های هوش مصنوعی در کارت */
 .card-ai-models {
