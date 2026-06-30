@@ -847,7 +847,7 @@ textarea::-webkit-scrollbar-thumb,
     z-index: 1100;
     display: flex;
     flex-direction: column;
-    max-height: 340px;
+    max-height: 360px;
     opacity: 0;
     overflow: hidden;
     transition: transform 0.25s ease, opacity 0.25s ease;
@@ -971,7 +971,7 @@ textarea::-webkit-scrollbar-thumb,
 .ai-model-checkbox {
     display: flex;
     align-items: center;
-    padding: 6px 12px;
+    padding: 6px 25px;
     gap: 8px;
     font-size: 13px;
     color: #ccc;
