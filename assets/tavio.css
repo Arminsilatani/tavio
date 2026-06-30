@@ -572,9 +572,12 @@ textarea::-webkit-scrollbar-thumb,
     object-fit: contain;
     flex-shrink: 0;
 }
-.ai-models-section .label-text {
-    position: relative;
-    top: 2px;
+.ai-models-section .section-label {
+    padding-top: 2px;          /* کل جعبه ۲ پیکسل پایین‌تر می‌رود */
+}
+
+.ai-models-section .section-label::before {
+    margin-top: -2px;          /* آیکون دوباره به جای اصلی برمی‌گردد */
 }
 
 .ai-show-more-btn {
