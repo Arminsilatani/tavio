@@ -573,7 +573,7 @@ textarea::-webkit-scrollbar-thumb,
     flex-shrink: 0;
 }
 .ai-models-section .section-label {
-    transform: translateY(8px);
+    margin-top: 2px;          /* ۲ پیکسل فاصله از بالای خود */
 }
 
 .ai-show-more-btn {
