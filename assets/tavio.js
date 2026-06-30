@@ -1713,19 +1713,19 @@ function loadPromptIntoEditor(prompt) {
         saveBtn.classList.add('btn-disabled');
     }
 
-    // دکمهٔ کپی: غیرفعال و خاموش کردن چشمک‌زدن
     const copyBtn = document.getElementById('copy-prompt-btn');
     if (copyBtn) {
         copyBtn.disabled = true;
         copyBtn.classList.remove('blink', 'success');
     }
 
-    // دکمهٔ حذف: فقط اگر کاربر صاحب پرامپت باشد فعال شود
     const deleteBtn = document.getElementById('delete-prompt-btn');
     if (deleteBtn) {
         const isOwner = currentUser && prompt.user_id === currentUser.id;
         deleteBtn.disabled = !isOwner;
     }
+
+    document.getElementById('token-count-container')?.classList.add('hidden');
 }
 
 function backToLibrary() {
@@ -1810,6 +1810,7 @@ function generatePrompt() {
         } else {
             clearInterval(generateInterval);
             generateInterval = null;
+            updateTokenCount(display.textContent);
             if (copyBtn) {
                 copyBtn.disabled = false;
                 copyBtn.classList.add('blink');
@@ -1832,6 +1833,26 @@ function copyPrompt() {
     }).catch(err => {
         console.error('Copy failed:', err);
     });
+}
+
+function estimateTokenCount(text) {
+    if (!text) return 0;
+    return Math.ceil(text.length / 4);
+}
+
+function updateTokenCount(text) {
+    const container = document.getElementById('token-count-container');
+    const display = document.getElementById('token-count-display');
+    if (!container || !display) return;
+
+    if (!text || text.trim() === '') {
+        container.classList.add('hidden');
+        return;
+    }
+
+    const count = estimateTokenCount(text);
+    display.textContent = `~${count} tokens`;
+    container.classList.remove('hidden');
 }
 
 async function confirmDeletePrompt() {
@@ -1899,6 +1920,7 @@ function resetAll() {
     const editorView = document.getElementById('editor-view');
     if (editorView) {
         editorView.scrollIntoView({ behavior: 'smooth', block: 'start' });
+        document.getElementById('token-count-container')?.classList.add('hidden');
     }
 }
 
