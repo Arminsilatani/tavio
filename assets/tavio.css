@@ -575,7 +575,7 @@ textarea::-webkit-scrollbar-thumb,
 
 .ai-models-section .label-text {
     position: relative;
-    top: 2px;                  /* فقط متن ۲ پیکسل پایین برود */
+    top: 12px;                  /* فقط متن ۲ پیکسل پایین برود */
 }
 .ai-show-more-btn {
     background: none;
