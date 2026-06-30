@@ -266,13 +266,27 @@ textarea::-webkit-scrollbar-thumb,
     padding-top: 8px;
     border-top: 1px solid var(--border);
 }
+/* ردیف تراشه‌های دسته‌بندی */
+.prompt-card .category-chips-inline {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 5px;                     /* فاصلهٔ ۵ پیکسل بین هر تراشه */
+    margin-bottom: 12px;
+}
+
+/* هر تراشه */
 .prompt-card .category-chip {
-    background: var(--accent);
-    color: #0d0d0d;
-    border-color: var(--accent);
+    background: rgba(176, 255, 165, 0.15);   /* پس‌زمینهٔ اکسنت با ۱۵٪ کدورت */
+    border: 1px solid var(--accent);
+    color: var(--accent);
     pointer-events: none;
-    font-size: 9px;
-    border-radius: 9999px;
+    font-size: 8px;                          /* اندازهٔ بسیار کوچک */
+    padding: 2px 8px;
+    border-radius: 9999px;                   /* کاملاً گرد (پیل) */
+    line-height: 1.4;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
 }
 /* ---- EDITOR HEADER ---- */
 .editor-header {
