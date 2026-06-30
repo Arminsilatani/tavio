@@ -16,6 +16,7 @@ let currentVariables = {};
 let shareTargetPromptId = null;
 let selectedShareUserId = null;
 let generateInterval = null;
+let deletingPromptId = null;
 
 // ================== FIELD DEFINITIONS ==================
 let fieldDefinitions = [];
@@ -1540,7 +1541,7 @@ function setupAuthListeners() {
             msg.style.display = 'block';
             if (error) {
                 msg.textContent = error.message;
-                msg.style.color = '#ff5555';
+                msg.style.color = '#ff6b6b';
             } else {
                 msg.textContent = 'Reset link sent! Check your email.';
                 msg.style.color = 'var(--accent)';
@@ -1646,6 +1647,7 @@ function renderPromptGrid(filteredPrompts) {
             });
         }
 
+        const deleteBtn = document.getElementById('delete-prompt-btn');
         grid.appendChild(card);
     });
 }
@@ -1695,44 +1697,46 @@ function loadPromptIntoEditor(prompt) {
     document.getElementById('editor-view').classList.add('active');
     document.getElementById('current-prompt-title').textContent = prompt.title;
 
-    // نمایش توضیح به‌جای textarea
     document.getElementById('prompt-description-display').textContent = prompt.description || 'No description provided.';
-
-    // مخفی نگه داشتن template (فقط برای استفاده داخلی)
     document.getElementById('template-textarea').value = prompt.template || '';
 
-    // مقداردهی fieldDefinitions از داده‌های ذخیره‌شده، و در صورت خالی بودن، فیلدها را از قالب استخراج کن
     fieldDefinitions = prompt.field_definitions && prompt.field_definitions.length > 0
         ? JSON.parse(JSON.stringify(prompt.field_definitions))
         : parsePromptFields(prompt.template);
 
-    // اطمینان از وجود خاصیت value
     fieldDefinitions.forEach(f => { if (f.value === undefined) f.value = ''; });
 
     renderPromptInputFields();
 
-    // AI Models
     selectedAIModels = prompt.ai_models || [];
     renderAIModels();
 
-    // مدیریت دکمه‌ی Save/Edit
     const saveBtn = document.getElementById('save-prompt-btn');
+    const saveLabel = saveBtn ? saveBtn.querySelector('.btn-label') : null;
+
     if (currentUser && prompt.user_id === currentUser.id) {
-        const label = saveBtn.querySelector('.btn-label');
-        if (label) label.textContent = 'Edit Prompt';
+        if (saveLabel) saveLabel.textContent = 'Edit Prompt';
         saveBtn.disabled = false;
         saveBtn.classList.remove('btn-disabled');
     } else {
-        if (label) label.textContent = 'Edit Prompt';
+        if (saveLabel) saveLabel.textContent = 'Edit Prompt';
         saveBtn.disabled = true;
         saveBtn.classList.add('btn-disabled');
     }
-    // در انتهای loadPromptIntoEditor این خط را اضافه کن
-const copyBtn = document.getElementById('copy-prompt-btn');
-if (copyBtn) {
-    copyBtn.disabled = true;
-    copyBtn.classList.remove('blink');
-}
+
+    // دکمهٔ کپی: غیرفعال و خاموش کردن چشمک‌زدن
+    const copyBtn = document.getElementById('copy-prompt-btn');
+    if (copyBtn) {
+        copyBtn.disabled = true;
+        copyBtn.classList.remove('blink', 'success');
+    }
+
+    // دکمهٔ حذف: فقط اگر کاربر صاحب پرامپت باشد فعال شود
+    const deleteBtn = document.getElementById('delete-prompt-btn');
+    if (deleteBtn) {
+        const isOwner = currentUser && prompt.user_id === currentUser.id;
+        deleteBtn.disabled = !isOwner;
+    }
 }
 
 function backToLibrary() {
@@ -2170,7 +2174,6 @@ function setupUIListeners() {
         document.getElementById('category-filters').scrollBy({ left: 200, behavior: 'smooth' });
     });
 
-    // فلش‌های اسکرول کتگوری‌ها
     const modalCatLeft = document.getElementById('modal-categories-arrow-left');
     if (modalCatLeft) modalCatLeft.addEventListener('click', () => {
         document.getElementById('modal-categories-scroll-inner').scrollBy({ left: -200, behavior: 'smooth' });
@@ -2182,7 +2185,6 @@ function setupUIListeners() {
 
     document.getElementById('new-prompt-btn').addEventListener('click', showNewPromptModal);
 
-    // دکمه‌های مودال (Cancel, Add to Library)
     const cancelBtn = document.getElementById('cancel-modal-btn');
     if (cancelBtn) cancelBtn.addEventListener('click', hideNewPromptModal);
     const addBtn = document.getElementById('add-prompt-btn');
@@ -2192,7 +2194,6 @@ function setupUIListeners() {
         if (e.target === e.currentTarget) hideNewPromptModal();
     });
 
-    // AI dropdown
     const aiSelectBtn = document.getElementById('ai-select-button');
     if (aiSelectBtn) aiSelectBtn.addEventListener('click', toggleAIDropdown);
     const aiSearchInput = document.getElementById('ai-search-input');
@@ -2203,11 +2204,9 @@ function setupUIListeners() {
         }
     });
 
-    // Close dropdown button
     const closeDropdownBtn = document.getElementById('ai-close-dropdown-btn');
     if (closeDropdownBtn) closeDropdownBtn.addEventListener('click', toggleAIDropdown);
 
-    // Filter toggle inside dropdown
     const filterToggleBtn = document.getElementById('ai-filter-toggle-btn');
     if (filterToggleBtn) {
         filterToggleBtn.addEventListener('click', (e) => {
@@ -2216,7 +2215,6 @@ function setupUIListeners() {
         });
     }
 
-    // دکمه‌های ویرایشگر
     const backBtn = document.getElementById('back-to-library-btn');
     if (backBtn) backBtn.addEventListener('click', backToLibrary);
     const genBtn = document.getElementById('generate-prompt-btn');
@@ -2236,10 +2234,36 @@ function setupUIListeners() {
         });
     }
 
+    // دکمهٔ حذف پرامپت در هدر ویرایشگر
+    const deleteBtn = document.getElementById('delete-prompt-btn');
+    if (deleteBtn) {
+        deleteBtn.addEventListener('click', () => {
+            if (!deleteBtn.disabled && currentPrompt) {
+                deletingPromptId = currentPrompt.id;
+                openModal(document.getElementById('delete-confirm-modal'));
+            }
+        });
+    }
+
+    // مودال تأیید حذف
+    const confirmYesBtn = document.getElementById('confirm-yes-btn');
+    if (confirmYesBtn) confirmYesBtn.addEventListener('click', confirmDeletePrompt);
+    const confirmNoBtn = document.getElementById('confirm-no-btn');
+    if (confirmNoBtn) confirmNoBtn.addEventListener('click', () => {
+        closeModal(document.getElementById('delete-confirm-modal'));
+        deletingPromptId = null;
+    });
+    const deleteConfirmModal = document.getElementById('delete-confirm-modal');
+    if (deleteConfirmModal) deleteConfirmModal.addEventListener('click', (e) => {
+        if (e.target === e.currentTarget) {
+            closeModal(e.currentTarget);
+            deletingPromptId = null;
+        }
+    });
+
     const sidebarNewPrompt = document.getElementById('tavio-new-prompt-item');
     if (sidebarNewPrompt) sidebarNewPrompt.addEventListener('click', showNewPromptModal);
 
-    // Share modal
     const shareCancel = document.getElementById('share-cancel-btn');
     if (shareCancel) shareCancel.addEventListener('click', closeShareModal);
     const shareSend = document.getElementById('share-send-btn');
@@ -2249,7 +2273,6 @@ function setupUIListeners() {
         if (e.target === e.currentTarget) closeShareModal();
     });
 
-    // Preview modal
     const previewAccept = document.getElementById('preview-accept-btn');
     if (previewAccept) previewAccept.addEventListener('click', acceptSharedPrompt);
     const previewReject = document.getElementById('preview-reject-btn');
@@ -2261,7 +2284,6 @@ function setupUIListeners() {
         }
     });
 
-    // راه‌اندازی فلش‌های اسکرول افقی فیلترها
     setupFilterScrollArrows();
 }
 
