@@ -574,7 +574,7 @@ textarea::-webkit-scrollbar-thumb,
 }
 .ai-models-section .label-text {
     position: relative;
-    top: 2px;
+    top: 21px;
 }
 
 .ai-show-more-btn {
