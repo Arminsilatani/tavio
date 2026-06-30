@@ -15,6 +15,7 @@ let currentPrompt = null;
 let currentVariables = {};
 let shareTargetPromptId = null;
 let selectedShareUserId = null;
+let generateInterval = null;
 
 // ================== FIELD DEFINITIONS ==================
 let fieldDefinitions = [];
@@ -1801,6 +1802,12 @@ function copyPrompt() {
 }
 
 function resetAll() {
+    // توقف تایپ در حال اجرا
+    if (generateInterval) {
+        clearInterval(generateInterval);
+        generateInterval = null;
+    }
+
     const resultDisplay = document.getElementById('result-display');
     const copyBtn = document.getElementById('copy-prompt-btn');
 
@@ -1813,22 +1820,22 @@ function resetAll() {
         copyBtn.classList.remove('blink');
     }
 
-    // فقط مقادیر فیلدها را خالی کن، نه خود فیلدها را
+    // فقط مقادیر فیلدها را خالی کن، ساختار فیلدها دست‌نخورده بماند
     if (fieldDefinitions && fieldDefinitions.length > 0) {
         fieldDefinitions.forEach(f => {
             if (f.type === 'multi-select') {
-                f.value = [];               // پاک کردن آرایه‌ی انتخاب‌ها
+                f.value = [];
             } else {
-                f.value = '';               // پاک کردن مقدار متنی یا انتخابی
+                f.value = '';
             }
         });
-        renderPromptInputFields();          // بازسازی فیلدها با مقادیر خالی
+        renderPromptInputFields();   // بازسازی فیلدها با مقادیر خالی
     }
 
-    // ریست وضعیت نمایش مدل‌های بیشتر
+    // بستن نمایش مدل‌های بیشتر (اگر باز شده باشد)
     aiModelsExpanded = false;
 
-    // اسکرول نرم به بالای نمای ویرایشگر
+    // اسکرول نرم به بالای ویرایشگر
     const editorView = document.getElementById('editor-view');
     if (editorView) {
         editorView.scrollIntoView({ behavior: 'smooth', block: 'start' });
