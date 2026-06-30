@@ -593,10 +593,6 @@ body {
     transition: background 0.2s ease, transform 0.1s ease;
     width: 100%;               /* تمام عرض */
 }
-.btn-generate:hover {
-    background: #c8ffbe;
-    transform: translateY(-1px);
-}
 .btn-generate svg {
     flex-shrink: 0;
     stroke: #111;              /* رنگ آیکون هنگام normal */
