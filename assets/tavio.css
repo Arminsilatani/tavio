@@ -1599,7 +1599,7 @@ body {
     border: 1px solid var(--border);
     border-radius: 12px;
     padding: 20px;
-    margin-top: 0;
+    margin-top: 0;             /* gap صفر است، خودمان margin می‌دهیم */
     display: flex;
     flex-direction: column;
     gap: 24px;
