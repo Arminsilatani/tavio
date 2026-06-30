@@ -1609,11 +1609,12 @@ function loadPromptIntoEditor(prompt) {
     // مدیریت دکمه‌ی Save/Edit
     const saveBtn = document.getElementById('save-prompt-btn');
     if (currentUser && prompt.user_id === currentUser.id) {
-        saveBtn.textContent = 'Edit Prompt';
+        const label = saveBtn.querySelector('.btn-label');
+        if (label) label.textContent = 'Edit Prompt';
         saveBtn.disabled = false;
         saveBtn.classList.remove('btn-disabled');
     } else {
-        saveBtn.textContent = 'Edit Prompt';   // یا "Save to Library"
+        if (label) label.textContent = 'Edit Prompt';
         saveBtn.disabled = true;
         saveBtn.classList.add('btn-disabled');
     }
