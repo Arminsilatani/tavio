@@ -1267,8 +1267,8 @@ textarea::-webkit-scrollbar-thumb,
 }
 
 .editor-header .delete-btn svg {
-    width: 20px;                /* آیکون بزرگ‌تر */
-    height: 20px;
+    width: 15px;                /* آیکون بزرگ‌تر */
+    height: 15px;
 }
 
 /* مودال تأیید حذف */
