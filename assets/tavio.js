@@ -809,7 +809,7 @@ function parseCategoryArray(category_id) {
 async function fetchPromptsWithAuthors() {
     if (!currentUser) return [];
     try {
-        // ⬅️ به جای .eq('user_id')، از or استفاده می‌کنیم
+        // ⬅️ ستون is_global اضافه شده، از or استفاده می‌کنیم
         const { data: promptsData, error: promptsError } = await sb
             .from('tavio_prompts')
             .select('*')
@@ -850,7 +850,7 @@ async function fetchPromptsWithAuthors() {
             author_name: authorMap[p.user_id] || 'Unknown',
             field_definitions: p.field_definitions || [],
             ai_models: p.ai_models || [],
-            is_global: p.is_global || false   // اضافه شد تا در prompt ذخیره شود
+            is_global: p.is_global || false   // اضافه شد
         }));
     } catch (e) {
         console.error('Error in fetchPromptsWithAuthors:', e);
@@ -1334,6 +1334,7 @@ async function restoreSession() {
         currentUser = session.user;
         currentProfile = await buildCurrentProfile(currentUser);
         currentUserRole = currentProfile?.role || 'recruit';
+        console.log('User role:', currentUserRole);
         document.getElementById('app-container').classList.remove('app-hidden');
         closeModal(document.getElementById('auth-overlay'));
         syncSidebarComponent();
@@ -1712,7 +1713,7 @@ function resetAll() {
     if (resultActions) resultActions.classList.add('hidden');
     if (promptInputFields) promptInputFields.innerHTML = '';
 
-    currentVariables = {};   // اگر هنوز جایی استفاده می‌شود
+    currentVariables = {};
     fieldDefinitions = [];
     selectedAIModels = [];
     renderFieldEditors();
@@ -1720,6 +1721,8 @@ function resetAll() {
 }
 
 function showNewPromptModal() {
+    console.log('currentUserRole in modal:', currentUserRole);   // برای debug نگه دار
+
     document.getElementById('new-prompt-modal').classList.remove('hidden');
     document.getElementById('modal-title').focus();
     modalSelectedAIModels = [];
@@ -1730,7 +1733,7 @@ function showNewPromptModal() {
     document.getElementById('modal-description').value = '';
     updateSelectedCountDisplay();
 
-    // نمایش/مخفی کردن چک‌باکس global بر اساس نقش
+    // نمایش یا مخفی کردن چک‌باکس global بر اساس نقش کاربر
     const globalToggle = document.getElementById('modal-global-toggle-wrapper');
     if (globalToggle) {
         if (currentUserRole === 'general') {
@@ -1739,6 +1742,8 @@ function showNewPromptModal() {
         } else {
             globalToggle.style.display = 'none';
         }
+    } else {
+        console.error('global-toggle-wrapper not found in DOM');
     }
 
     const dropdown = document.getElementById('ai-select-dropdown');
@@ -1760,7 +1765,7 @@ function showNewPromptModal() {
 
 function hideNewPromptModal() {
     document.getElementById('new-prompt-modal').classList.add('hidden');
-    // ریست چک‌باکس global
+    // ریست چک‌باکس global (در صورت وجود)
     const globalCheckbox = document.getElementById('modal-is-global');
     if (globalCheckbox) globalCheckbox.checked = false;
 }
@@ -1781,6 +1786,7 @@ async function createNewPrompt() {
     const fields = parsePromptFields(template);
     fieldDefinitions = fields;
 
+    // خواندن وضعیت چک‌باکس global
     const isGlobal = document.getElementById('modal-is-global')?.checked || false;
 
     const newPrompt = {
