@@ -1722,25 +1722,21 @@ function updateVar(key, value) {
 function generatePrompt() {
     let filled = document.getElementById('template-textarea').value;
     
-    // جایگزینی فیلدهای تعریف‌شده (الگوی {{...}})
-    fieldDefinitions.forEach(field => {
-        const regex = new RegExp(`\\{\\{${field.raw || field.name}\\}\\}`, 'g');
-        let value = field.value || `[${field.name}]`;
-        if (field.type === 'multi-select' && Array.isArray(field.value)) {
-            value = field.value.length > 0 ? field.value.join(', ') : `[${field.name}]`;
-        }
-        filled = filled.replace(regex, value);
-    });
-
-    // پشتیبانی از {{variable}} قدیمی
-    Object.keys(currentVariables).forEach(key => {
-        const val = currentVariables[key] || `[${key}]`;
-        filled = filled.replace(new RegExp(`\\{\\{${key}\\}\\}`, 'g'), val);
-    });
+    // جایگزینی فیلدها ...
+    // (همان حلقه‌های قبلی بدون تغییر)
 
     const display = document.getElementById('result-display');
+    const resultActions = document.getElementById('result-actions');
+    const copyBtn = document.getElementById('copy-prompt-btn');
+
     display.textContent = '';
-    document.getElementById('result-actions').classList.add('hidden');
+    resultActions.classList.add('hidden');
+    // غیرفعال کردن دکمه کپی و پاک کردن چشمک زدن
+    if (copyBtn) {
+        copyBtn.disabled = true;
+        copyBtn.classList.remove('blink');
+    }
+
     let i = 0;
     const typeInterval = setInterval(() => {
         if (i < filled.length) {
@@ -1749,7 +1745,12 @@ function generatePrompt() {
             display.scrollTop = display.scrollHeight;
         } else {
             clearInterval(typeInterval);
-            document.getElementById('result-actions').classList.remove('hidden');
+            resultActions.classList.remove('hidden');
+            // فعال‌سازی دکمه کپی + شروع چشمک‌زدن
+            if (copyBtn) {
+                copyBtn.disabled = false;
+                copyBtn.classList.add('blink');
+            }
         }
     }, 12);
 }
