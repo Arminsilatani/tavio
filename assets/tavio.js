@@ -1828,7 +1828,15 @@ function copyPrompt() {
     const text = document.getElementById('result-display').textContent;
     navigator.clipboard.writeText(text).then(() => {
         const btn = document.getElementById('copy-prompt-btn');
-        if (btn) btn.classList.remove('blink');
+        if (btn) {
+            btn.classList.remove('blink');   // قطع چشمک‌زدن
+            btn.classList.add('success');    // تغییر آیکون به تیک
+            setTimeout(() => {
+                btn.classList.remove('success');
+            }, 2000);
+        }
+    }).catch(err => {
+        console.error('Copy failed:', err);
     });
 }
 
@@ -1848,7 +1856,7 @@ function resetAll() {
     // غیرفعال کردن دکمه کپی و قطع چشمک‌زدن
     if (copyBtn) {
         copyBtn.disabled = true;
-        copyBtn.classList.remove('blink');
+        copyBtn.classList.remove('blink', 'success');
     }
 
     // فقط مقادیر فیلدها را خالی کن، ساختار فیلدها دست‌نخورده بماند
