@@ -266,7 +266,12 @@ textarea::-webkit-scrollbar-thumb,
     padding-top: 8px;
     border-top: 1px solid var(--border);
 }
-
+.prompt-card .category-chip {
+    background: var(--accent);
+    color: #111;
+    border-color: var(--accent);
+    pointer-events: none;
+}
 /* ---- EDITOR HEADER ---- */
 .editor-header {
     display: flex;
