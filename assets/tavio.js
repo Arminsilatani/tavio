@@ -1725,6 +1725,17 @@ function showNewPromptModal() {
     document.getElementById('modal-description').value = '';
     updateSelectedCountDisplay();
 
+    // نمایش/مخفی کردن چک‌باکس global بر اساس نقش
+    const globalToggle = document.getElementById('modal-global-toggle-wrapper');
+    if (globalToggle) {
+        if (currentUserRole === 'general') {
+            globalToggle.style.display = 'block';
+            document.getElementById('modal-is-global').checked = false;
+        } else {
+            globalToggle.style.display = 'none';
+        }
+    }
+
     const dropdown = document.getElementById('ai-select-dropdown');
     const button = document.getElementById('ai-select-button');
     if (dropdown) {
@@ -1744,6 +1755,9 @@ function showNewPromptModal() {
 
 function hideNewPromptModal() {
     document.getElementById('new-prompt-modal').classList.add('hidden');
+    // ریست چک‌باکس global
+    const globalCheckbox = document.getElementById('modal-is-global');
+    if (globalCheckbox) globalCheckbox.checked = false;
 }
 
 async function createNewPrompt() {
@@ -1762,6 +1776,8 @@ async function createNewPrompt() {
     const fields = parsePromptFields(template);
     fieldDefinitions = fields;
 
+    const isGlobal = document.getElementById('modal-is-global')?.checked || false;
+
     const newPrompt = {
         title: title,
         description: description,
@@ -1771,7 +1787,8 @@ async function createNewPrompt() {
         pinned: false,
         author_name: currentProfile ? (currentProfile.first_name + ' ' + currentProfile.last_name).trim() || currentProfile.username || 'Unknown' : 'Unknown',
         field_definitions: fieldDefinitions,
-        ai_models: modalSelectedAIModels
+        ai_models: modalSelectedAIModels,
+        is_global: isGlobal
     };
 
     const { data, error } = await sb
@@ -1784,7 +1801,8 @@ async function createNewPrompt() {
             user_id: newPrompt.user_id,
             pinned: newPrompt.pinned,
             field_definitions: newPrompt.field_definitions,
-            ai_models: modalSelectedAIModels
+            ai_models: modalSelectedAIModels,
+            is_global: newPrompt.is_global   // اضافه شد
         })
         .select('id, created_at, updated_at')
         .single();
