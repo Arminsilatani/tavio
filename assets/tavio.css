@@ -1668,7 +1668,7 @@ body {
 .action-icon-btn:disabled {
     opacity: 0.4;
     cursor: default;
-    pointer-events: none;       /* هیچ hover یا کلیکی اجرا نشود */
+    pointer-events: none;      /* هیچ واکنشی به hover ندهد */
 }
 .action-icon-btn .btn-text {
     display: inline-block;
