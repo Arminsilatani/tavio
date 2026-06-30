@@ -472,7 +472,7 @@ function renderPromptInputFields() {
     });
 }
 // ================== AI MODELS (Editor) ==================
-let selectedAIModels = [];
+let aiModelsExpanded = false;   // اضافه کن بالای فایل در بخش STATE
 
 function renderAIModels() {
     const container = document.getElementById('ai-models-container');
@@ -485,8 +485,11 @@ function renderAIModels() {
         return;
     }
 
-    selectedAIModels.forEach(modelId => {
-        // پیدا کردن اطلاعات مدل از ALL_AI_MODELS
+    const maxVisible = 3;
+    const total = selectedAIModels.length;
+    const modelsToShow = aiModelsExpanded ? selectedAIModels : selectedAIModels.slice(0, maxVisible);
+
+    modelsToShow.forEach(modelId => {
         const modelInfo = ALL_AI_MODELS.find(m => m.id === modelId);
         const companyName = modelInfo ? modelInfo.company : 'Unknown';
         const displayName = modelInfo ? modelInfo.name : modelId;
@@ -494,21 +497,42 @@ function renderAIModels() {
         const tag = document.createElement('div');
         tag.className = 'ai-model-tag';
 
-        // لوگوی شرکت
         const logo = document.createElement('img');
-        logo.src = getCompanyLogo(companyName);   // همان تابعی که در مودال استفاده می‌کنیم
+        logo.src = getCompanyLogo(companyName);
         logo.alt = companyName;
         logo.className = 'model-logo';
         logo.onerror = function() { this.style.display = 'none'; };
         tag.appendChild(logo);
 
-        // نام مدل
         const nameSpan = document.createElement('span');
         nameSpan.textContent = displayName;
         tag.appendChild(nameSpan);
 
         container.appendChild(tag);
     });
+
+    // دکمه "Show more" یا "Show less"
+    if (total > maxVisible) {
+        const btn = document.createElement('button');
+        btn.className = 'ai-show-more-btn';
+        const remaining = total - maxVisible;
+        if (!aiModelsExpanded) {
+            btn.textContent = `+ ${remaining} models`;
+            btn.addEventListener('click', (e) => {
+                e.stopPropagation();
+                aiModelsExpanded = true;
+                renderAIModels();
+            });
+        } else {
+            btn.textContent = 'Show less';
+            btn.addEventListener('click', (e) => {
+                e.stopPropagation();
+                aiModelsExpanded = false;
+                renderAIModels();
+            });
+        }
+        container.appendChild(btn);
+    }
 }
 
 function toggleAIModel(model) {
@@ -1749,6 +1773,7 @@ function resetAll() {
     if (resultActions) resultActions.classList.add('hidden');
     if (promptInputFields) promptInputFields.innerHTML = '';
 
+    aiModelsExpanded = false;
     currentVariables = {};
     fieldDefinitions = [];
     selectedAIModels = [];
