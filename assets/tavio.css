@@ -339,7 +339,11 @@ body {
 .edit-btn:hover svg {
     stroke: #0d0d0d;
 }
-.editor-content { display: grid; gap: 32px; }
+.editor-content {
+    display: flex;
+    flex-direction: column;
+    gap: 0;                     /* حذف gap؛ با margin دستی کنترل می‌کنیم */
+}
 .section-label {
     display: block;
     font-size: 13px;
