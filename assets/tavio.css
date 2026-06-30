@@ -1276,7 +1276,7 @@ textarea::-webkit-scrollbar-thumb,
 }
 
 .editor-header .delete-btn {
-    margin-top: 8px;           /* ۱۰ پیکسل پایین‌تر */
+    margin-top: 16px;           /* ۱۰ پیکسل پایین‌تر */
     padding: 6px 12px;          /* افزایش ناحیهٔ کلیک */
     font-size: 16px;            /* درشت‌تر شدن متن (در صورت نمایش) */
 }
