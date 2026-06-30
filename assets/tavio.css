@@ -572,8 +572,9 @@ textarea::-webkit-scrollbar-thumb,
     object-fit: contain;
     flex-shrink: 0;
 }
-.ai-models-section .section-label {
-    margin-top: 2px;          /* ۲ پیکسل فاصله از بالای خود */
+.ai-models-section .label-text {
+    position: relative;
+    top: 2px;
 }
 
 .ai-show-more-btn {
