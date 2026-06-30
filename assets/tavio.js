@@ -1802,24 +1802,33 @@ function copyPrompt() {
 
 function resetAll() {
     const resultDisplay = document.getElementById('result-display');
-    const promptInputFields = document.getElementById('prompt-input-fields');
     const copyBtn = document.getElementById('copy-prompt-btn');
 
+    // پاک کردن متن تولیدشده
     if (resultDisplay) resultDisplay.textContent = '';
-    if (promptInputFields) promptInputFields.innerHTML = '';
-    // ریست کردن دکمه کپی به حالت غیرفعال
+
+    // غیرفعال کردن دکمه کپی و قطع چشمک‌زدن
     if (copyBtn) {
         copyBtn.disabled = true;
         copyBtn.classList.remove('blink');
     }
 
-    currentVariables = {};
-    fieldDefinitions = [];
-    selectedAIModels = [];
-    aiModelsExpanded = false;
-    renderFieldEditors();
-    renderAIModels();
+    // فقط مقادیر فیلدها را خالی کن، نه خود فیلدها را
+    if (fieldDefinitions && fieldDefinitions.length > 0) {
+        fieldDefinitions.forEach(f => {
+            if (f.type === 'multi-select') {
+                f.value = [];               // پاک کردن آرایه‌ی انتخاب‌ها
+            } else {
+                f.value = '';               // پاک کردن مقدار متنی یا انتخابی
+            }
+        });
+        renderPromptInputFields();          // بازسازی فیلدها با مقادیر خالی
+    }
 
+    // ریست وضعیت نمایش مدل‌های بیشتر
+    aiModelsExpanded = false;
+
+    // اسکرول نرم به بالای نمای ویرایشگر
     const editorView = document.getElementById('editor-view');
     if (editorView) {
         editorView.scrollIntoView({ behavior: 'smooth', block: 'start' });
