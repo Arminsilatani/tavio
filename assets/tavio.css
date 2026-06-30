@@ -1363,14 +1363,11 @@ body {
     color: var(--accent);
     border-color: var(--border);
 }
-/* توضیح پرامپت به‌صورت متن ساده */
 .prompt-description-text {
-    margin: 0; 
-    color: #ccc;
-    font-size: 14px;
-    line-height: 1.5;
-    margin-bottom: 5px;
-    padding: 8px 12px;
+    margin: 0;                  /* فاصله بالا صفر شود */
+    font-size: 13px;
+    color: #888;
+    line-height: 1.4;
 }
 
 /* کانتینر فیلدهای ورودی */
