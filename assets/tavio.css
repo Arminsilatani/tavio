@@ -257,16 +257,34 @@ body {
     padding-top: 8px;
     border-top: 1px solid var(--border);
 }
-
+.editor-title h3 {
+    margin: 0;
+    font-size: 20px;
+    line-height: 1.3;
+    color: var(--text);
+}
+.editor-title .prompt-description-text {
+    margin: 2px 0 0 0;           /* فاصله‌ی کم از عنوان */
+    font-size: 13px;
+    color: #888;
+    line-height: 1.4;
+}
 .editor-header {
     display: flex;
-    align-items: center;
+    align-items: flex-start;
     gap: 12px;
-    margin-bottom: 32px;
+    margin-bottom: 20px;
     flex-wrap: nowrap;          /* جلوگیری از شکستن خط */
 }
+.editor-title {
+    flex: 1;                      /* فضای باقی‌مانده را بگیرد */
+    display: flex;
+    flex-direction: column;       /* عنوان و توضیح زیر هم */
+    margin-top: -4px;             /* عنوان کمی بالاتر برود (اختیاری) */
+}
 .editor-header .edit-btn {
-    margin-left: auto;          /* چسباندن دکمهٔ ویرایش به انتهای راست */
+    margin-left: auto;
+    align-self: center; 
 }
 /* ---------- Back button with expand animation ---------- */
 .back-btn {
