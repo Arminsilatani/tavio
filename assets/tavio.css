@@ -632,7 +632,6 @@ body {
     overflow-y: auto;
     max-height: 340px;
 }
-.result-actions { display: flex; gap: 12px; margin-top: 16px; }
 
 /* Modals */
 .modal {
