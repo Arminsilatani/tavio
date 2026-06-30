@@ -479,18 +479,6 @@ textarea::-webkit-scrollbar-thumb,
     position: relative;        /* تا شمارنده نسبت به آن absolute شود */
 }
 
-.token-count-container {
-    position: absolute;
-    bottom: 8px;
-    right: 12px;
-    display: flex;
-    align-items: center;
-    z-index: 2;
-}
-.token-count-container.hidden {
-    display: none;
-}
-
 .token-count-display {
     background: rgba(0,0,0,0.6);
     border: 1px solid var(--border);
