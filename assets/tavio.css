@@ -293,7 +293,7 @@ textarea::-webkit-scrollbar-thumb,
     display: flex;
     flex-wrap: wrap;
     align-items: center;
-    gap: 15px;
+    gap: 15px;                  /* فاصلهٔ ۱۵ پیکسل */
     margin-bottom: 10px;
 }
 
