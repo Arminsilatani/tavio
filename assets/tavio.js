@@ -1809,9 +1809,9 @@ function generatePrompt() {
         } else {
             clearInterval(generateInterval);
             generateInterval = null;
-            // updateTokenCount(display.textContent); ← می‌توانی حذف کنی چون قبلاً انجام شده
             if (copyBtn) {
-                copyBtn.disabled = false;estimateTokenCount
+                copyBtn.disabled = false;
+                copyBtn.classList.add('blink');
             }
         }
     }, 12);
