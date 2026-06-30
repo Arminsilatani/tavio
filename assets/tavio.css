@@ -573,7 +573,7 @@ textarea::-webkit-scrollbar-thumb,
     flex-shrink: 0;
 }
 .ai-models-section .section-label {
-    transform: translateY(2px);
+    transform: translateY(8px);
 }
 
 .ai-show-more-btn {
