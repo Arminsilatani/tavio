@@ -282,7 +282,7 @@ textarea::-webkit-scrollbar-thumb,
     pointer-events: none;
     font-size: 8px;                          /* اندازهٔ بسیار کوچک */
     padding: 2px 8px;
-    border-radius: 9999px;                   /* کاملاً گرد (پیل) */
+    border-radius: 100px;                   /* کاملاً گرد (پیل) */
     line-height: 1.4;
     display: inline-flex;
     align-items: center;
