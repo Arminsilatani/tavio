@@ -1251,3 +1251,41 @@ textarea::-webkit-scrollbar-thumb,
     60% { transform: scale(1.2); opacity: 1; }
     100% { transform: scale(1); opacity: 1; }
 }
+/* دکمه حذف */
+.action-icon-btn.delete-btn:hover {
+    color: #ff6b6b;
+}
+.action-icon-btn.delete-btn:hover .btn-text {
+    max-width: 4em;      /* عرض متن Delete */
+    margin-right: 6px;
+}
+
+/* مودال تأیید حذف */
+.confirm-message {
+    color: #ccc;
+    font-size: 15px;
+    margin-bottom: 24px;
+    text-align: center;
+}
+.confirm-actions {
+    display: flex;
+    gap: 12px;
+}
+.confirm-no-btn {
+    flex: 3;               /* 30% */
+}
+.confirm-yes-btn {
+    flex: 7;               /* 70% */
+    background: #ff6b6b;
+    color: #fff;
+    border: none;
+    border-radius: 8px;
+    padding: 10px 22px;
+    font-size: 14px;
+    cursor: pointer;
+    transition: background 0.2s;
+    font-family: "Kalameh", sans-serif;
+}
+.confirm-yes-btn:hover {
+    background: #ff4c4c;
+}
