@@ -1616,6 +1616,12 @@ body {
     opacity: 0.8;
     text-decoration: underline;
 }
+.result-actions-inline {
+    display: flex;
+    justify-content: flex-end;   /* چسباندن به راست */
+    gap: 8px;
+    margin-bottom: 8px;          /* فاصله تا جعبه‌ی متن تولیدشده */
+}
 /* موقعیت‌دهی دکمه‌ها در بالای بخش نتیجه */
 .result-section {
     position: relative;
@@ -1655,10 +1661,11 @@ body {
     border-radius: 6px;
     transition: color 0.2s, background 0.2s;
 }
+
 .action-icon-btn:disabled {
     opacity: 0.4;
     cursor: default;
-    pointer-events: none;          /* هیچ واکنشی به hover ندهد */
+    pointer-events: none;       /* هیچ hover یا کلیکی اجرا نشود */
 }
 .action-icon-btn .btn-text {
     display: inline-block;
