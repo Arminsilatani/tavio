@@ -312,7 +312,7 @@ textarea::-webkit-scrollbar-thumb,
 
 /* متن +N برای مدل‌های اضافی */
 .card-ai-more {
-    font-size: 10px;
+    font-size: 110px;
     color: #aaa;
     margin-left: 2px;
 }
