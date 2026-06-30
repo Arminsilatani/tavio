@@ -260,11 +260,13 @@ body {
 
 .editor-header {
     display: flex;
-    justify-content: space-between;
     align-items: center;
-    margin-bottom: 32px;
-    flex-wrap: wrap;
     gap: 12px;
+    margin-bottom: 32px;
+    flex-wrap: nowrap;          /* جلوگیری از شکستن خط */
+}
+.editor-header .edit-btn {
+    margin-left: auto;          /* چسباندن دکمهٔ ویرایش به انتهای راست */
 }
 .editor-content { display: grid; gap: 32px; }
 .section-label {
