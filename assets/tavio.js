@@ -357,7 +357,6 @@ function renderPromptInputFields() {
         return;
     }
 
-    // کلمات کلیدی که نشان می‌دهند فیلد احتمالاً متن بلندی خواهد داشت
     const longTextKeywords = [
         'prompt', 'content', 'description', 'story', 'code',
         'script', 'template', 'essay', 'article', 'message',
@@ -372,8 +371,9 @@ function renderPromptInputFields() {
         label.textContent = field.name || 'Field ' + (index + 1);
         wrapper.appendChild(label);
 
-        let input;
+        let input;   // می‌تواند input, textarea, select, یا div گروه چک‌باکس باشد
 
+        // ----- Single-Select (Dropdown) -----
         if (field.type === 'single-select' && field.options && field.options.length > 0) {
             input = document.createElement('select');
             field.options.forEach(opt => {
@@ -383,28 +383,67 @@ function renderPromptInputFields() {
                 if (field.value === opt) option.selected = true;
                 input.appendChild(option);
             });
-        } else if (field.type === 'multi-select' && field.options && field.options.length > 0) {
-            input = document.createElement('select');
-            input.multiple = true;
-            input.style.minHeight = '60px';
-            field.options.forEach(opt => {
-                const option = document.createElement('option');
-                option.value = opt;
-                option.textContent = opt;
-                if (field.value && field.value.includes(opt)) option.selected = true;
-                input.appendChild(option);
+
+            // listener یکسان برای select
+            input.addEventListener('change', (e) => {
+                fieldDefinitions[index].value = e.target.value;
             });
-        } else {
-            // تشخیص متن بلند با بررسی نام فیلد
+        }
+        // ----- Multi-Select (Checkbox Group) -----
+        else if (field.type === 'multi-select' && field.options && field.options.length > 0) {
+            const group = document.createElement('div');
+            group.className = 'multi-checkbox-group';
+
+            // اگر value قبلاً تعریف نشده باشد، آرایه خالی
+            if (!Array.isArray(fieldDefinitions[index].value)) {
+                fieldDefinitions[index].value = [];
+            }
+
+            field.options.forEach(opt => {
+                const item = document.createElement('label');
+                item.className = 'multi-checkbox-item';
+                // فعال بودن ظاهری اگر از قبل انتخاب شده باشد
+                if (fieldDefinitions[index].value.includes(opt)) {
+                    item.classList.add('checked');
+                }
+
+                const checkbox = document.createElement('input');
+                checkbox.type = 'checkbox';
+                checkbox.value = opt;
+                checkbox.checked = fieldDefinitions[index].value.includes(opt);
+
+                // بروزرسانی مقدار و کلاس ظاهری
+                checkbox.addEventListener('change', () => {
+                    const arr = fieldDefinitions[index].value;
+                    const idx = arr.indexOf(opt);
+                    if (checkbox.checked) {
+                        if (idx === -1) arr.push(opt);
+                        item.classList.add('checked');
+                    } else {
+                        if (idx > -1) arr.splice(idx, 1);
+                        item.classList.remove('checked');
+                    }
+                });
+
+                item.appendChild(checkbox);
+                item.appendChild(document.createTextNode(opt));
+                group.appendChild(item);
+            });
+
+            input = group;   // کل گروه را جایگزین input می‌کنیم
+            // نیازی به listener جداگانه روی input نیست، هر چک‌باکس کار خودش را می‌کند.
+        }
+        // ----- Text (می‌تواند textarea یا input ساده باشد) -----
+        else {
             const fieldName = (field.name || '').toLowerCase();
             const isLongText = longTextKeywords.some(keyword => fieldName.includes(keyword));
 
             if (isLongText) {
                 input = document.createElement('textarea');
-                input.rows = 4;                     // ارتفاع پیش‌فرض بیشتر
+                input.rows = 4;
                 input.placeholder = 'Enter your ' + (field.name || 'text') + ' here…';
                 input.style.width = '100%';
-                input.style.resize = 'vertical';    // کاربر بتواند اندازه را تغییر دهد
+                input.style.resize = 'vertical';
                 if (field.value) input.value = field.value;
             } else {
                 input = document.createElement('input');
@@ -412,16 +451,12 @@ function renderPromptInputFields() {
                 input.placeholder = 'Enter ' + (field.name || 'value');
                 if (field.value) input.value = field.value;
             }
-        }
 
-        input.addEventListener('change', (e) => {
-            if (field.type === 'multi-select') {
-                const selected = Array.from(e.target.selectedOptions).map(o => o.value);
-                fieldDefinitions[index].value = selected;
-            } else {
+            // listener یکسان برای text/textarea
+            input.addEventListener('change', (e) => {
                 fieldDefinitions[index].value = e.target.value;
-            }
-        });
+            });
+        }
 
         // توضیحات فیلد (در صورت وجود)
         if (field.description) {
