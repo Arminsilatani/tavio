@@ -271,7 +271,7 @@ textarea::-webkit-scrollbar-thumb,
     display: flex;
     flex-wrap: wrap;
     gap: 10px;                     /* فاصلهٔ ۵ پیکسل بین هر تراشه */
-    margin-bottom: 150px;
+    margin-bottom: 15px;
 }
 
 /* هر تراشه */
