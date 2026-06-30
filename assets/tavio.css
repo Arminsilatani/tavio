@@ -597,6 +597,9 @@ body {
     flex-shrink: 0;
     stroke: #111;              /* رنگ آیکون هنگام normal */
 }
+.generate-section {
+    margin-top: -12px;   /* فاصله را به اندازه 12px کمتر می‌کند */
+}
 .btn-copy {
     background: transparent;
     border: 1px solid var(--accent);
