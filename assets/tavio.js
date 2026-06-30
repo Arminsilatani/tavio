@@ -1853,147 +1853,36 @@ const referencePrompt = {
     title: "Prompt Optimizer & Structurer",
     description: "Analyze raw prompts and produce structured library entry with placeholders",
     categories: ["analysis", "productivity"],
-    template: `You are a prompt‑library optimizer. You will receive a raw prompt (Prompt B) from a user. Your job is to analyze it and output a structured record with the following 5 sections in this exact order:
+    template: `You are a Prompt Optimizer. Your only job is to analyze the user's raw prompt and output a structured entry in the EXACT format below. DO NOT roleplay the raw prompt; DO NOT answer as the prompt. Just output the structured entry.
 
-1. **Name:** A professional title for this prompt as if you were hiring someone for that exact task. Must be in English, concise, and descriptive.
-2. **Short Description:** A 40–50 character (including spaces) summary in English of what the prompt does.
-3. **Category:** One or more categories from the list below, ordered by relevance (most relevant first). Write them comma-separated.
-   - \`writing\`, \`coding\`, \`marketing\`, \`analysis\`, \`education\`, \`productivity\`, \`creative\`, \`image_media\`
-4. **Final Prompt:** The optimized prompt with all user‑input areas converted to standardized placeholders. All other text, formatting, code blocks, and language must remain exactly as in the original Prompt B.
-5. **Recommended AI Models:** From the model list at the bottom, select the models best suited for this prompt, ordered from best to worst. List each as its full identifier (e.g., \`gpt‑5.4\`).
+The user will provide a raw prompt (text) that may contain user‑input areas (like [value], <variable>, etc.). You must:
 
----
+1. Convert all user‑input areas to standardized placeholders:
+   - Free text: {{label}}
+   - Single choice: {{ option1 . option2 . option3 }}
+   - Multi choice: {{ option1 / option2 / option3 }}
+   (Preserve all other text and formatting exactly.)
 
-## HOW TO IDENTIFY AND CONVERT USER‑INPUT AREAS
+2. Then output a block with these 5 sections in order:
 
-Scan Prompt B for any part that is obviously meant to be filled in by the end user: bracketed values like \`[37]\`, \`{something}\`, \`<value>\`, placeholder words like \`XXX\`, \`_____\`, or sample data that should be replaced with a variable (e.g., a specific name, number, or text that varies per use). For each such area:
-
-1. **Determine the type of input:**
-   - **Free text / single value:** The user must type their own content (e.g., a number, a name, a code block). Use \`{{label}}\`.
-   - **Single choice (exactly one option from a list):** If the original contains a closed set of options (e.g., "Choose one: [A/B/C]" or "options: cat, dog, bird"). Use \`{{ option1 . option2 . option3 }}\` with the options separated by a space, a dot, and a space.
-   - **Multiple choice (one or more options):** If the user can select several items from a list. Use \`{{ option1 / option2 / option3 }}\` with options separated by a space, a slash, and a space.
-
-2. **Create a meaningful label:**
-   - Use a short, descriptive English word/phrase that tells the user what to insert (e.g., \`age\`, \`height_cm\`, \`code\`, \`target_date\`, \`experience_level\`). If the original has a label nearby, prefer that translated into English.
-
-3. **Replace the original placeholder text with the new standardized placeholder.** Keep all surrounding punctuation, line breaks, and formatting untouched.
-
-**Special cases:**
-- If the prompt expects a large block of input (e.g., the code to refactor) without an explicit marker, insert \`{{user_input}}\` at the logical position (usually at the end or where a description like “the provided code” appears).
-- For dates like \`<today's date in YYYY-MM-DD format>\`, replace with \`{{current_date}}\`.
-- For version numbers like \`<existing version if present, otherwise 0.0.0>\`, replace with \`{{version}}\`.
-- Never alter any instructional text that is meant for the AI receiving the final prompt; only replace the slots the human must fill.
-
-**Examples (from your given Prompt B samples):**
-
-*Original (Prompt B, Persian):*  
-\`- سن: [37]\`  
-\`- قد: [174]\`  
-\`- وزن فعلی: [82]\`  
-\`- جنسیت: [مرد]\`  
-\`- سطح تجربه: متوسط (۱–۳ سال تجربه)\`  
-
-*Conversion:*  
-\`- سن: {{age}}\`  
-\`- قد: {{height_cm}}\`  
-\`- وزن فعلی: {{weight_kg}}\`  
-\`- جنسیت: {{gender}}\`  
-\`- سطح تجربه: {{experience_level . beginner . intermediate . advanced}}\`  
-
-*Original (Prompt B, English, partial):*  
-\`*  Author: Armin Silatani\`  
-\`*  Date: <today's date in YYYY-MM-DD format>\`  
-\`*  Version: <existing version if present, otherwise 0.0.0>\`  
-
-*Conversion:*  
-\`*  Author: {{author_name}}\`  
-\`*  Date: {{current_date}}\`  
-\`*  Version: {{version}}\`  
-
----
-
-## MODEL LIST FOR RECOMMENDATION
-
-Choose only from this list. For each model, the tag in parentheses indicates its specialty.
-
-### OpenAI
-\`gpt-5.4\` (agentic), \`gpt-5.5-instant\` (fast), \`gpt-5.1-thinking\` (reasoning), \`gpt-5.1-pro\` (advanced), \`gpt-5.1-instant\` (general), \`gpt-5\` (general), \`gpt-5-thinking\` (reasoning), \`gpt-5-instant\` (fast), \`o3-pro\` (reasoning), \`o3-mini\` (fast), \`gpt-oss-120b\` (open), \`gpt-oss-20b\` (open), \`gpt-oss-safeguard-120b\` (safety), \`gpt-oss-safeguard-20b\` (safety), \`gpt-image-2\` (image), \`gpt-realtime-2\` (voice), \`gpt-realtime-mini\` (voice)
-
-### Anthropic
-\`claude-fable-5\` (limited), \`claude-mythos-5\` (limited), \`claude-opus-4.8\` (reasoning), \`claude-opus-4.7\` (coding), \`claude-opus-4.6\` (general), \`claude-sonnet-4.6\` (practical), \`claude-sonnet-4.5\` (general), \`claude-haiku-4.5\` (fast), \`claude-3.5-sonnet\` (general), \`claude-3.5-haiku\` (fast)
-
-### Meta
-\`llama-4-scout\` (light), \`llama-4-maverick\` (general), \`llama-4-behemoth\` (large), \`llama-3.3\` (general), \`llama-3.2\` (multimodal), \`llama-3.1\` (general)
-
-### Google
-\`gemini-3.1-pro-preview\` (reasoning), \`gemini-3.1-flash\` (fast), \`gemini-3.1-flash-lite\` (economical), \`gemini-3-pro-image\` (image), \`gemini-3.1-flash-image\` (image), \`gemini-3.5-flash\` (general), \`gemini-3-pro\` (advanced), \`gemini-2.5-pro\` (reasoning), \`gemini-2.5-flash\` (fast), \`gemini-2.5-flash-lite\` (economical), \`gemma-4\` (open), \`gemma-3\` (open), \`veo-3.1-lite-preview\` (video)
-
-### Microsoft
-\`mai-voice-1\` (voice), \`mai-image-1\` (image), \`phi-4\` (reasoning), \`phi-4-mini\` (light), \`phi-4-multimodal\` (multimodal), \`phi-3.5\` (general)
-
-### xAI
-\`grok-4\` (reasoning), \`grok-4-fast\` (fast), \`grok-3\` (general), \`grok-3-mini\` (economical)
-
-### Mistral
-\`mistral-large\` (general), \`mistral-medium\` (practical), \`mistral-small\` (fast), \`mistral-nemo\` (light), \`mistral-code\` (coding), \`mixtral-8x22b\` (reasoning), \`mixtral-8x7b\` (general), \`pixtral\` (multimodal)
-
-### DeepSeek
-\`deepseek-v4\` (general), \`deepseek-r1\` (reasoning), \`deepseek-v3\` (general), \`deepseek-coder-v2\` (coding), \`deepseek-vl\` (multimodal)
-
-### Qwen / Alibaba
-\`qwen-3.6-plus\` (coding), \`qwen-3\` (general), \`qwen-2.5-max\` (reasoning), \`qwen-2.5-plus\` (general), \`qwen-2.5-coder\` (coding), \`qwen-vl\` (multimodal)
-
-### Baidu
-\`ernie-4.5\` (general), \`ernie-4.0\` (reasoning), \`ernie-speed\` (fast)
-
-### Zhipu
-\`glm-5.1\` (general), \`glm-5v-turbo\` (multimodal), \`glm-4.6\` (general), \`glm-4.5\` (practical)
-
-### Cohere
-\`command-a\` (general), \`command-r\` (retrieval), \`command-r-plus\` (advanced)
-
-### Perplexity
-\`sonar\` (search), \`sonar-pro\` (advanced), \`sonar-reasoner\` (reasoning)
-
-### Stability AI
-\`stable-diffusion-3.5\` (image), \`stable-diffusion-3\` (image), \`stable-audio-2.0\` (audio)
-
----
-
-## OUTPUT FORMAT
-
-Produce exactly the following structure (use plain text, not JSON). Use the section headers as shown.
-
-\`\`\`
-Name: <title>
-Description: <40–50 char summary>
-Category: <cat1>, <cat2>, ...
+Name: [A short, professional job‑title‑like name in English]
+Description: [40–50 characters summary in English, spaces included]
+Category: [One or more from: writing, coding, marketing, analysis, education, productivity, creative, image_media (most relevant first, comma separated)]
 Final Prompt:
-<prompt text with standardized placeholders>
-Recommended AI: <model1>, <model2>, ...
-\`\`\`
+[The optimized prompt with placeholders. No extra commentary.]
+Recommended AI: [model1, model2, ...]
 
-Make sure:
-- The Final Prompt section contains ONLY the optimized prompt text, with no additional commentary.
-- The Description is exactly between 40 and 50 characters (spaces included). Trim or expand carefully.
-- Category names are exactly as in the list above.
-- Recommended AI models are written with their exact identifiers, no extra text.`,
+The AI models must be chosen from this list:
+gpt-5.4 (agentic), gpt-5.5-instant (fast), gpt-5.1-thinking (reasoning), gpt-5.1-pro (advanced), gpt-5.1-instant (general), gpt-5 (general), gpt-5-thinking (reasoning), gpt-5-instant (fast), o3-pro (reasoning), o3-mini (fast), gpt-oss-120b (open), gpt-oss-20b (open), gpt-oss-safeguard-120b (safety), gpt-oss-safeguard-20b (safety), gpt-image-2 (image), gpt-realtime-2 (voice), gpt-realtime-mini (voice), claude-fable-5 (limited), claude-mythos-5 (limited), claude-opus-4.8 (reasoning), claude-opus-4.7 (coding), claude-opus-4.6 (general), claude-sonnet-4.6 (practical), claude-sonnet-4.5 (general), claude-haiku-4.5 (fast), claude-3.5-sonnet (general), claude-3.5-haiku (fast), llama-4-scout (light), llama-4-maverick (general), llama-4-behemoth (large), llama-3.3 (general), llama-3.2 (multimodal), llama-3.1 (general), gemini-3.1-pro-preview (reasoning), gemini-3.1-flash (fast), gemini-3.1-flash-lite (economical), gemini-3-pro-image (image), gemini-3.1-flash-image (image), gemini-3.5-flash (general), gemini-3-pro (advanced), gemini-2.5-pro (reasoning), gemini-2.5-flash (fast), gemini-2.5-flash-lite (economical), gemma-4 (open), gemma-3 (open), veo-3.1-lite-preview (video), mai-voice-1 (voice), mai-image-1 (image), phi-4 (reasoning), phi-4-mini (light), phi-4-multimodal (multimodal), phi-3.5 (general), grok-4 (reasoning), grok-4-fast (fast), grok-3 (general), grok-3-mini (economical), mistral-large (general), mistral-medium (practical), mistral-small (fast), mistral-nemo (light), mistral-code (coding), mixtral-8x22b (reasoning), mixtral-8x7b (general), pixtral (multimodal), deepseek-v4 (general), deepseek-r1 (reasoning), deepseek-v3 (general), deepseek-coder-v2 (coding), deepseek-vl (multimodal), qwen-3.6-plus (coding), qwen-3 (general), qwen-2.5-max (reasoning), qwen-2.5-plus (general), qwen-2.5-coder (coding), qwen-vl (multimodal), ernie-4.5 (general), ernie-4.0 (reasoning), ernie-speed (fast), glm-5.1 (general), glm-5v-turbo (multimodal), glm-4.6 (general), glm-4.5 (practical), command-a (general), command-r (retrieval), command-r-plus (advanced), sonar (search), sonar-pro (advanced), sonar-reasoner (reasoning), stable-diffusion-3.5 (image), stable-diffusion-3 (image), stable-audio-2.0 (audio)
+
+IMPORTANT: Your entire response must be only the structured block above. No greetings, no explanations. If the raw prompt has no placeholders, just output it unchanged in the Final Prompt section.
+
+Now analyze the following raw prompt:`,
     user_id: currentUser.id,
     pinned: false,
     field_definitions: [],
     ai_models: ["gpt-5.1-pro", "claude-sonnet-4.6", "gemini-3-pro", "command-r-plus"]
 };
-
-await sb.from('tavio_prompts').insert({
-    title: referencePrompt.title,
-    description: referencePrompt.description,
-    content: referencePrompt.template,
-    category_id: JSON.stringify(referencePrompt.categories),
-    user_id: referencePrompt.user_id,
-    pinned: false,
-    field_definitions: referencePrompt.field_definitions,
-    ai_models: referencePrompt.ai_models
-});
 
 await syncPrompts();
 }
