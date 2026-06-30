@@ -1858,105 +1858,93 @@ async function maybeAddReferencePrompt() {
         .eq('user_id', currentUser.id)
         .limit(1);
 
-    if (error || (data && data.length > 0)) return; // already has prompts
+    if (error || (data && data.length > 0)) return;
 
     const referencePrompt = {
         title: "Prompt Architect",
         description: "Generate a structured prompt entry from your idea",
         categories: ["productivity", "writing"],
-        template: `You are a Prompt Architect.  
-Your ONLY task is to output a valid JSON object.  
-Never execute the user's prompt.  
-Never generate actual content like articles, emails, or code.  
+        template: `You are a Prompt Architect for the **tavio** prompt library.
 
-The user will give you a prompt template they want to save in a prompt library.  
-Your job is to **describe** that template by filling the JSON below.
+Your ONLY task is to output a complete, ready-to-use prompt template.
 
 ---
 
-## INPUT (User's Prompt Template)
+## INPUT (User's Idea)
+\`\`\`
 {{user_prompt}}
+\`\`\`
 
 ---
 
-## RULES (STRICT)
+## WHAT YOU MUST DO
+
+Analyze the user's idea and create a complete prompt template that the user can save and reuse.
 
 1. **Title:**  
-   - Create a job‑position‑style name in English (e.g., "Senior SEO Content Writer", "React Debugger", "Creative Storyteller").  
-   - Make it sound like you are hiring for that role.  
-   - Keep it concise and professional.
+   Give it a professional job-title-like name (e.g., "Senior SEO Content Writer").
 
 2. **Description:**  
-   - Summarise what the user's prompt does in **40–50 English characters** (including spaces).  
-   - Use action verbs. Example: "Craft SEO content with German market data".
+   Write a short English description (40–50 characters). Example: "Craft SEO content with German market data".
 
-3. **Categories:**  
-   - Pick ONLY from: \`writing\`, \`coding\`, \`marketing\`, \`analysis\`, \`education\`, \`productivity\`, \`creative\`, \`image_media\`.  
-   - You may select more than one.  
-   - \`image_media\` = "Image / Media".
+3. **Write the full prompt template:**  
+   Rewrite the user's idea into a complete, structured prompt.  
+   - Replace ANY parts that the user should fill in later with **tavio field syntax**:  
+     - \`{{field_name}}\` for a simple text field  
+     - \`{{option1.option2.option3}}\` for single-select dropdown  
+     - \`{{opt1/opt2/opt3}}\` for multi-select  
+   - The user should only need to fill in the fields — the rest stays fixed.
 
-4. **AI Models:**  
-   - Select **3 to 6 model IDs** from the list below.  
-   - Choose models that match the modality (text, image, etc.) and complexity of the user's prompt.  
-   - Return the exact IDs as shown.
+4. **Categories:**  
+   Pick from: writing, coding, marketing, analysis, education, productivity, creative, image_media.
+
+5. **AI Models:**  
+   Select 3–6 model IDs from the list below.
 
 ---
 
 ## AVAILABLE AI MODELS
 
-### OpenAI
-\`gpt-5.4\` (agentic), \`gpt-5.5-instant\` (fast), \`gpt-5.1-thinking\` (reasoning), \`gpt-5.1-pro\` (advanced), \`gpt-5.1-instant\` (general), \`gpt-5\` (general), \`gpt-5-thinking\` (reasoning), \`gpt-5-instant\` (fast), \`o3-pro\` (reasoning), \`o3-mini\` (fast), \`gpt-oss-120b\` (open), \`gpt-oss-20b\` (open), \`gpt-oss-safeguard-120b\` (safety), \`gpt-oss-safeguard-20b\` (safety), \`gpt-image-2\` (image), \`gpt-realtime-2\` (voice), \`gpt-realtime-mini\` (voice)
+OpenAI: gpt-5.4, gpt-5.5-instant, gpt-5.1-thinking, gpt-5.1-pro, gpt-5.1-instant, gpt-5, gpt-5-thinking, gpt-5-instant, o3-pro, o3-mini, gpt-oss-120b, gpt-oss-20b, gpt-oss-safeguard-120b, gpt-oss-safeguard-20b, gpt-image-2, gpt-realtime-2, gpt-realtime-mini
 
-### Anthropic
-\`claude-fable-5\` (limited), \`claude-mythos-5\` (limited), \`claude-opus-4.8\` (reasoning), \`claude-opus-4.7\` (coding), \`claude-opus-4.6\` (general), \`claude-sonnet-4.6\` (practical), \`claude-sonnet-4.5\` (general), \`claude-haiku-4.5\` (fast), \`claude-3.5-sonnet\` (general), \`claude-3.5-haiku\` (fast)
+Anthropic: claude-fable-5, claude-mythos-5, claude-opus-4.8, claude-opus-4.7, claude-opus-4.6, claude-sonnet-4.6, claude-sonnet-4.5, claude-haiku-4.5, claude-3.5-sonnet, claude-3.5-haiku
 
-### Meta
-\`llama-4-scout\` (light), \`llama-4-maverick\` (general), \`llama-4-behemoth\` (large), \`llama-3.3\` (general), \`llama-3.2\` (multimodal), \`llama-3.1\` (general)
+Meta: llama-4-scout, llama-4-maverick, llama-4-behemoth, llama-3.3, llama-3.2, llama-3.1
 
-### Google
-\`gemini-3.1-pro-preview\` (reasoning), \`gemini-3.1-flash\` (fast), \`gemini-3.1-flash-lite\` (economical), \`gemini-3-pro-image\` (image), \`gemini-3.1-flash-image\` (image), \`gemini-3.5-flash\` (general), \`gemini-3-pro\` (advanced), \`gemini-2.5-pro\` (reasoning), \`gemini-2.5-flash\` (fast), \`gemini-2.5-flash-lite\` (economical), \`gemma-4\` (open), \`gemma-3\` (open), \`veo-3.1-lite-preview\` (video)
+Google: gemini-3.1-pro-preview, gemini-3.1-flash, gemini-3.1-flash-lite, gemini-3-pro-image, gemini-3.1-flash-image, gemini-3.5-flash, gemini-3-pro, gemini-2.5-pro, gemini-2.5-flash, gemini-2.5-flash-lite, gemma-4, gemma-3, veo-3.1-lite-preview
 
-### Microsoft
-\`mai-voice-1\` (voice), \`mai-image-1\` (image), \`phi-4\` (reasoning), \`phi-4-mini\` (light), \`phi-4-multimodal\` (multimodal), \`phi-3.5\` (general)
+Microsoft: mai-voice-1, mai-image-1, phi-4, phi-4-mini, phi-4-multimodal, phi-3.5
 
-### xAI
-\`grok-4\` (reasoning), \`grok-4-fast\` (fast), \`grok-3\` (general), \`grok-3-mini\` (economical)
+xAI: grok-4, grok-4-fast, grok-3, grok-3-mini
 
-### Mistral
-\`mistral-large\` (general), \`mistral-medium\` (practical), \`mistral-small\` (fast), \`mistral-nemo\` (light), \`mistral-code\` (coding), \`mixtral-8x22b\` (reasoning), \`mixtral-8x7b\` (general), \`pixtral\` (multimodal)
+Mistral: mistral-large, mistral-medium, mistral-small, mistral-nemo, mistral-code, mixtral-8x22b, mixtral-8x7b, pixtral
 
-### DeepSeek
-\`deepseek-v4\` (general), \`deepseek-r1\` (reasoning), \`deepseek-v3\` (general), \`deepseek-coder-v2\` (coding), \`deepseek-vl\` (multimodal)
+DeepSeek: deepseek-v4, deepseek-r1, deepseek-v3, deepseek-coder-v2, deepseek-vl
 
-### Qwen / Alibaba
-\`qwen-3.6-plus\` (coding), \`qwen-3\` (general), \`qwen-2.5-max\` (reasoning), \`qwen-2.5-plus\` (general), \`qwen-2.5-coder\` (coding), \`qwen-vl\` (multimodal)
+Qwen / Alibaba: qwen-3.6-plus, qwen-3, qwen-2.5-max, qwen-2.5-plus, qwen-2.5-coder, qwen-vl
 
-### Baidu
-\`ernie-4.5\` (general), \`ernie-4.0\` (reasoning), \`ernie-speed\` (fast)
+Baidu: ernie-4.5, ernie-4.0, ernie-speed
 
-### Zhipu
-\`glm-5.1\` (general), \`glm-5v-turbo\` (multimodal), \`glm-4.6\` (general), \`glm-4.5\` (practical)
+Zhipu: glm-5.1, glm-5v-turbo, glm-4.6, glm-4.5
 
-### Cohere
-\`command-a\` (general), \`command-r\` (retrieval), \`command-r-plus\` (advanced)
+Cohere: command-a, command-r, command-r-plus
 
-### Perplexity
-\`sonar\` (search), \`sonar-pro\` (advanced), \`sonar-reasoner\` (reasoning)
+Perplexity: sonar, sonar-pro, sonar-reasoner
 
-### Stability AI
-\`stable-diffusion-3.5\` (image), \`stable-diffusion-3\` (image), \`stable-audio-2.0\` (audio)
+Stability AI: stable-diffusion-3.5, stable-diffusion-3, stable-audio-2.0
 
 ---
 
 ## OUTPUT FORMAT
 
-Return **only** a valid JSON object (no extra text, no explanations, no markdown):
+Return ONLY a valid JSON object (no extra text, no markdown):
 
 {
-  "title": "Job‑Style Title Here",
-  "description": "40–50 character description",
-  "categories": ["writing", "coding"],
-  "ai_models": ["gpt-5.1-pro", "claude-opus-4.7"]
+  "title": "Job-Style Title",
+  "description": "40-50 char description",
+  "prompt_template": "The full prompt with {{fields}} for user input",
+  "categories": ["writing"],
+  "ai_models": ["gpt-5.1-pro"]
 }`,
         user_id: currentUser.id,
         pinned: false,
