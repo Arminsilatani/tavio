@@ -1847,17 +1847,6 @@ async function maybeAddReferencePrompt() {
         .eq('user_id', currentUser.id)
         .limit(1);
 
-    if (error || (data && data.length > 0)) return; // already has prompts
-
-async function maybeAddReferencePrompt() {
-    if (!currentUser) return;
-
-    const { data, error } = await sb
-        .from('tavio_prompts')
-        .select('id')
-        .eq('user_id', currentUser.id)
-        .limit(1);
-
     if (error || (data && data.length > 0)) return;
 
     const referencePrompt = {
