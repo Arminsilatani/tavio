@@ -1812,15 +1812,17 @@ function openEditPromptModal() {
 
 function hideNewPromptModal() {
     document.getElementById('new-prompt-modal').classList.add('hidden');
-    // ریست چک‌باکس global (در صورت وجود)
+    editingPromptId = null;
+    document.getElementById('add-prompt-btn').textContent = 'Add to Library';
     const globalCheckbox = document.getElementById('modal-is-global');
     if (globalCheckbox) globalCheckbox.checked = false;
 }
 
-async function createNewPrompt() {
+async function savePromptFromModal() {
     const title = document.getElementById('modal-title').value.trim();
     const description = document.getElementById('modal-description').value.trim().substring(0, 50);
     const template = document.getElementById('modal-template').value.trim();
+
     if (!title || !template) {
         alert("Title and template are required.");
         return;
@@ -1830,57 +1832,87 @@ async function createNewPrompt() {
         return;
     }
 
-    const fields = parsePromptFields(template);
-    fieldDefinitions = fields;
-
-    // خواندن وضعیت چک‌باکس global
     const isGlobal = document.getElementById('modal-is-global')?.checked || false;
+    const fields = parsePromptFields(template);
 
-    const newPrompt = {
-        title: title,
-        description: description,
-        categories: modalSelectedCategories,
-        template: template,
-        user_id: currentUser.id,
-        pinned: false,
-        author_name: currentProfile ? (currentProfile.first_name + ' ' + currentProfile.last_name).trim() || currentProfile.username || 'Unknown' : 'Unknown',
-        field_definitions: fieldDefinitions,
+    const promptData = {
+        title,
+        description,
+        category_id: JSON.stringify(modalSelectedCategories),
+        content: template,
+        field_definitions: fields,
         ai_models: modalSelectedAIModels,
         is_global: isGlobal
     };
 
-    const { data, error } = await sb
-        .from('tavio_prompts')
-        .insert({
-            title: newPrompt.title,
-            description: newPrompt.description,
-            content: newPrompt.template,
-            category_id: JSON.stringify(modalSelectedCategories),
-            user_id: newPrompt.user_id,
-            pinned: newPrompt.pinned,
-            field_definitions: newPrompt.field_definitions,
-            ai_models: modalSelectedAIModels,
-            is_global: newPrompt.is_global   // اضافه شد
-        })
-        .select('id, created_at, updated_at')
-        .single();
+    try {
+        if (editingPromptId) {
+            // ویرایش پرامپت موجود
+            const { error } = await sb
+                .from('tavio_prompts')
+                .update(promptData)
+                .eq('id', editingPromptId)
+                .eq('user_id', currentUser.id);
 
-    if (error) {
+            if (error) throw error;
+
+            // به‌روزرسانی در آرایه محلی
+            const index = prompts.findIndex(p => p.id === editingPromptId);
+            if (index !== -1) {
+                prompts[index] = {
+                    ...prompts[index],
+                    ...promptData,
+                    categories: modalSelectedCategories,
+                    template: template,
+                    ai_models: modalSelectedAIModels,
+                    field_definitions: fields,
+                    description: description
+                };
+            }
+
+            // اگر همین پرامپت توی ویرایشگر بازه، currentPrompt رو هم تازه‌سازی کن
+            if (currentPrompt && currentPrompt.id === editingPromptId) {
+                currentPrompt = { ...prompts[index] };
+                loadPromptIntoEditor(currentPrompt);
+            }
+
+            alert('Prompt updated successfully.');
+        } else {
+            // ایجاد پرامپت جدید
+            const { data, error } = await sb
+                .from('tavio_prompts')
+                .insert({
+                    ...promptData,
+                    user_id: currentUser.id,
+                    pinned: false
+                })
+                .select('id, created_at, updated_at')
+                .single();
+
+            if (error) throw error;
+
+            const newPrompt = {
+                ...promptData,
+                id: data.id,
+                user_id: currentUser.id,
+                pinned: false,
+                created_at: data.created_at,
+                updated_at: data.updated_at,
+                author_name: currentProfile ? (currentProfile.first_name + ' ' + currentProfile.last_name).trim() || currentProfile.username || 'Unknown' : 'Unknown',
+                categories: modalSelectedCategories
+            };
+            prompts.unshift(newPrompt);
+            alert('Prompt added to library!');
+        }
+
+        hideNewPromptModal();
+        applyCategoryFilters();
+        editingPromptId = null;
+        document.getElementById('add-prompt-btn').textContent = 'Add to Library';
+    } catch (error) {
+        console.error('Error saving prompt:', error);
         alert('Failed to save prompt. Please try again.');
-        console.error(error);
-        return;
     }
-
-    newPrompt.id = data.id;
-    newPrompt.created_at = data.created_at;
-    newPrompt.updated_at = data.updated_at;
-    prompts.unshift(newPrompt);
-    hideNewPromptModal();
-    document.getElementById('modal-title').value = '';
-    document.getElementById('modal-description').value = '';
-    document.getElementById('modal-template').value = '';
-    applyCategoryFilters();
-    loadPromptIntoEditor(newPrompt);
 }
 
 async function saveCurrentPrompt() {
@@ -1989,7 +2021,7 @@ function setupUIListeners() {
     const cancelBtn = document.getElementById('cancel-modal-btn');
     if (cancelBtn) cancelBtn.addEventListener('click', hideNewPromptModal);
     const addBtn = document.getElementById('add-prompt-btn');
-    if (addBtn) addBtn.addEventListener('click', createNewPrompt);
+    if (addBtn) addBtn.addEventListener('click', savePromptFromModal);
     const newPromptModal = document.getElementById('new-prompt-modal');
     if (newPromptModal) newPromptModal.addEventListener('click', (e) => {
         if (e.target === e.currentTarget) hideNewPromptModal();
@@ -2029,22 +2061,15 @@ function setupUIListeners() {
     const resetBtn = document.getElementById('reset-btn');
     if (resetBtn) resetBtn.addEventListener('click', resetAll);
     const saveBtn = document.getElementById('save-prompt-btn');
-    if (saveBtn) saveBtn.addEventListener('click', saveCurrentPrompt);
-
-    // ===== این بخش‌ها حذف یا کامنت شوند =====
-    // const addAIBtn = document.getElementById('add-ai-model-btn');
-    // if (addAIBtn) addAIBtn.addEventListener('click', addCustomAIModel);
-    // const aiModelInput = document.getElementById('ai-model-input');
-    // if (aiModelInput) aiModelInput.addEventListener('keypress', (e) => {
-    //     if (e.key === 'Enter') addCustomAIModel();
-    // });
-
-    // document.querySelectorAll('.ai-model-tag').forEach(tag => {
-    //     tag.addEventListener('click', () => {
-    //         const model = tag.dataset.model;
-    //         toggleAIModel(model);
-    //     });
-    // });
+    if (saveBtn) {
+        saveBtn.addEventListener('click', () => {
+            if (currentPrompt && currentUser && currentPrompt.user_id === currentUser.id) {
+                openEditPromptModal();
+            } else {
+                alert('You can only edit your own prompts.');
+            }
+        });
+    }
 
     const sidebarNewPrompt = document.getElementById('tavio-new-prompt-item');
     if (sidebarNewPrompt) sidebarNewPrompt.addEventListener('click', showNewPromptModal);
