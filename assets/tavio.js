@@ -1179,9 +1179,11 @@ function openModal(modal) {
 }
 
 function closeModal(modal) {
-    // hidden را اضافه کن (فوراً display: none می‌شود)
-    modal.classList.add('hidden');
+    if (!modal) return;
+    modal.classList.add('hidden');            // برای سایر استایل‌ها (opacity و …)
+    modal.style.setProperty('display', 'none', 'important');  // کاملاً حذف از جریان صفحه
 }
+
 function showStep(stepId) {
     document.querySelectorAll('.auth-step').forEach(s => s.classList.remove('active'));
     document.getElementById(stepId).classList.add('active');
