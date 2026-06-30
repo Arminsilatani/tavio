@@ -840,7 +840,7 @@ textarea::-webkit-scrollbar-thumb,
     right: 0;
     bottom: 100%;                     /* چسبیدن به بالای دکمه */
     top: auto;
-    transform: translateY(8px);       /* کمی پایین‌تر از محل نهایی (برای انیمیشن) */
+    transform: translateY(18px);       /* کمی پایین‌تر از محل نهایی (برای انیمیشن) */
     background: #1e1e1e;
     border: 1px solid var(--border);
     border-radius: 8px;
