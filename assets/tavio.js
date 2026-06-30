@@ -1597,17 +1597,13 @@ function renderPromptGrid(filteredPrompts) {
         // ----- ساخت لوگوهای مدل‌های هوش مصنوعی -----
         let aiModelsHtml = '';
         if (prompt.ai_models && prompt.ai_models.length > 0) {
-            const maxLogos = 5;   // حداکثر ۵ لوگو نمایش بده
-            const logos = prompt.ai_models.slice(0, maxLogos).map(modelId => {
+            const logos = prompt.ai_models.map(modelId => {
                 const modelInfo = ALL_AI_MODELS.find(m => m.id === modelId);
                 if (!modelInfo) return '';
                 const logoFile = getCompanyLogo(modelInfo.company);
                 return `<img src="${logoFile}" alt="${modelInfo.company}" class="card-ai-logo">`;
             }).join('');
-            const extra = prompt.ai_models.length > maxLogos 
-                ? `<span class="card-ai-more">+${prompt.ai_models.length - maxLogos}</span>` 
-                : '';
-            aiModelsHtml = logos + extra;
+            aiModelsHtml = logos;   // فقط لوگوها، بدون +N
         }
         // -------------------------------------------
 
