@@ -1232,3 +1232,22 @@ textarea::-webkit-scrollbar-thumb,
     cursor: not-allowed;
     pointer-events: none;
 }
+.action-icon-btn .icon-copy,
+.action-icon-btn .icon-check {
+    flex-shrink: 0;
+    display: flex;
+    align-items: center;
+}
+.action-icon-btn.success .icon-copy {
+    display: none;
+}
+.action-icon-btn.success .icon-check {
+    display: flex;
+    animation: checkPop 0.3s ease;
+}
+
+@keyframes checkPop {
+    0% { transform: scale(0.5); opacity: 0; }
+    60% { transform: scale(1.2); opacity: 1; }
+    100% { transform: scale(1); opacity: 1; }
+}
