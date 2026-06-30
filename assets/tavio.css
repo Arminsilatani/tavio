@@ -1633,6 +1633,15 @@ body {
 }
 
 /* دکمه‌های آیکون‌دار (Copy / Reset) */
+.result-actions-top {
+    display: flex;
+    justify-content: flex-end;      /* چسباندن به راست */
+    gap: 10px;
+    margin-bottom: 12px;            /* فاصله تا باکس خروجی */
+}
+.result-actions-top.hidden {
+    display: none;
+}
 .action-icon-btn {
     display: inline-flex;
     align-items: center;
@@ -1648,8 +1657,8 @@ body {
 }
 .action-icon-btn:disabled {
     opacity: 0.4;
-    cursor: not-allowed;
-    pointer-events: none;
+    cursor: default;
+    pointer-events: none;          /* هیچ واکنشی به hover ندهد */
 }
 .action-icon-btn .btn-text {
     display: inline-block;
@@ -1664,11 +1673,11 @@ body {
     color: var(--accent);
 }
 .action-icon-btn:hover .btn-text {
-    max-width: 5em;                /* عرض مناسب برای "Copy" */
+    max-width: 5em;
     margin-right: 6px;
 }
 .action-icon-btn.reset-btn:hover .btn-text {
-    max-width: 7em;                /* عرض بیشتر برای "New Prompt" */
+    max-width: 7em;
 }
 .action-icon-btn svg {
     flex-shrink: 0;
@@ -1676,10 +1685,13 @@ body {
     transition: stroke 0.2s;
 }
 
-/* انیمیشن چشمک‌زدن دکمه کپی */
 @keyframes copyBlink {
     0%, 100% { opacity: 1; }
     50% { opacity: 0.3; }
+}
+.action-icon-btn.copy-btn.blink {
+    color: var(--accent);
+    animation: copyBlink 1s infinite;
 }
 .action-icon-btn.copy-btn.blink {
     color: var(--accent);
