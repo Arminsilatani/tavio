@@ -1844,6 +1844,28 @@ function copyPrompt() {
     });
 }
 
+async function confirmDeletePrompt() {
+    if (!deletingPromptId) return;
+
+    const { error } = await sb
+        .from('tavio_prompts')
+        .delete()
+        .eq('id', deletingPromptId);
+
+    if (error) {
+        alert('Failed to delete prompt. Please try again.');
+        console.error(error);
+        return;
+    }
+
+    prompts = prompts.filter(p => p.id !== deletingPromptId);
+    applyCategoryFilters();
+    backToLibrary();
+    closeModal(document.getElementById('delete-confirm-modal'));
+    deletingPromptId = null;
+}
+
+
 function resetAll() {
     // توقف تایپ در حال اجرا
     if (generateInterval) {
