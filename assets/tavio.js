@@ -206,9 +206,19 @@ let aiCompanyExpanded = {};
 
 function parsePromptFields(template) {
     const fields = [];
-    const regex = /\{\{(.+?)\}\}/g;   // فقط {{...}} را می‌گیرد
+    // ذخیره‌سازی escape‌ها
+    const escapedOpen = /\\\{\{/g;
+    const escapedClose = /\\\}\}/g;
+    const placeholderOpen = '___ESCAPED_OPEN___';
+    const placeholderClose = '___ESCAPED_CLOSE___';
+
+    // جایگزینی موقت escape‌ها با placeholder
+    let safeTemplate = template.replace(escapedOpen, placeholderOpen)
+                               .replace(escapedClose, placeholderClose);
+
+    const regex = /\{\{(.+?)\}\}/g;
     let match;
-    while ((match = regex.exec(template)) !== null) {
+    while ((match = regex.exec(safeTemplate)) !== null) {
         const content = match[1].trim();
         let type = 'text';
         let options = [];
@@ -224,6 +234,7 @@ function parsePromptFields(template) {
             name = options.join('_');
         }
 
+        // جلوگیری از تعریف تکراری
         const existing = fieldDefinitions.find(f => f.name === name && f.type === type);
         if (!existing) {
             fields.push({
@@ -231,7 +242,7 @@ function parsePromptFields(template) {
                 type: type,
                 options: options,
                 description: '',
-                raw: match[1]
+                raw: match[1]    // محتوای بدون escape
             });
         } else {
             existing.options = options;
