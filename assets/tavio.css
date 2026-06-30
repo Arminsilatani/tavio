@@ -280,7 +280,6 @@ body {
     flex: 1;                      /* فضای باقی‌مانده را بگیرد */
     display: flex;
     flex-direction: column;       /* عنوان و توضیح زیر هم */
-    margin-top: -2px;             /* عنوان کمی بالاتر برود (اختیاری) */
 }
 .editor-header .edit-btn {
     margin-left: auto;
