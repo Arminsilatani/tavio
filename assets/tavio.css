@@ -836,8 +836,11 @@ textarea::-webkit-scrollbar-thumb,
 #ai-select-placeholder { font-size: 12px; }
 .ai-select-dropdown {
     position: absolute;
-    top: 43px;
-    left: 0; right: 0;
+    left: 0;
+    right: 0;
+    bottom: 100%;                     /* چسبیدن به بالای دکمه */
+    top: auto;
+    transform: translateY(8px);       /* کمی پایین‌تر از محل نهایی (برای انیمیشن) */
     background: #1e1e1e;
     border: 1px solid var(--border);
     border-radius: 8px;
@@ -847,11 +850,14 @@ textarea::-webkit-scrollbar-thumb,
     max-height: 340px;
     opacity: 0;
     overflow: hidden;
-    transition: max-height 0.3s ease, opacity 0.3s ease;
+    transition: transform 0.25s ease, opacity 0.25s ease;
+    box-sizing: border-box;
 }
+
 .ai-select-dropdown.open {
     opacity: 1;
-    overflow-y: visible;
+    transform: translateY(0);         /* رسیدن به جای اصلی (بالای دکمه) */
+    overflow-y: visible;              /* اسکرول داخلی در صورت نیاز */
 }
 .ai-select-button.invisible { visibility: hidden; }
 .ai-bottom-fixed {
