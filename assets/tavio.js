@@ -1736,7 +1736,7 @@ function showNewPromptModal() {
     // نمایش یا مخفی کردن چک‌باکس global بر اساس نقش کاربر
     const globalToggle = document.getElementById('modal-global-toggle-wrapper');
     if (globalToggle) {
-        if (currentUserRole === 'general') {
+        if (currentUserRole === 'General') {
             globalToggle.style.display = 'block';
             document.getElementById('modal-is-global').checked = false;
         } else {
