@@ -1811,7 +1811,11 @@ function openEditPromptModal() {
 }
 
 function hideNewPromptModal() {
-    document.getElementById('new-prompt-modal').classList.add('hidden');
+    const modal = document.getElementById('new-prompt-modal');
+    if (modal) {
+        modal.style.removeProperty('display');   // پاک کردن inline style
+        modal.classList.add('hidden');           // کلاس hidden را اضافه کن
+    }
     editingPromptId = null;
     document.getElementById('add-prompt-btn').textContent = 'Add to Library';
     const globalCheckbox = document.getElementById('modal-is-global');
