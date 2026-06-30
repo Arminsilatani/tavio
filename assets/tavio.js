@@ -1807,10 +1807,11 @@ function generatePrompt() {
             display.textContent += filled.charAt(i);
             i++;
             display.scrollTop = display.scrollHeight;
+            updateTokenCount(display.textContent);   // ← با هر کاراکتر شمارنده به‌روز می‌شود
         } else {
             clearInterval(generateInterval);
             generateInterval = null;
-            updateTokenCount(display.textContent);
+            // updateTokenCount(display.textContent); ← می‌توانی حذف کنی چون قبلاً انجام شده
             if (copyBtn) {
                 copyBtn.disabled = false;
                 copyBtn.classList.add('blink');
