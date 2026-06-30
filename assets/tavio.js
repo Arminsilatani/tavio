@@ -2019,7 +2019,7 @@ function hideNewPromptModal() {
 
 async function savePromptFromModal() {
     const title = document.getElementById('modal-title').value.trim();
-    const description = document.getElementById('modal-description').value.trim().substring(0, 50);
+    const description = document.getElementById('modal-description').value.trim().substring(0, 150);
     const template = document.getElementById('modal-template').value.trim();
 
     if (!title || !template) {
