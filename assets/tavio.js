@@ -1722,8 +1722,20 @@ function updateVar(key, value) {
 function generatePrompt() {
     let filled = document.getElementById('template-textarea').value;
     
-    // جایگزینی فیلدها ...
-    // (همان حلقه‌های قبلی بدون تغییر)
+    // جایگزینی فیلدها
+    fieldDefinitions.forEach(field => {
+        const regex = new RegExp(`\\{\\{${field.raw || field.name}\\}\\}`, 'g');
+        let value = field.value || `[${field.name}]`;
+        if (field.type === 'multi-select' && Array.isArray(field.value)) {
+            value = field.value.length > 0 ? field.value.join(', ') : `[${field.name}]`;
+        }
+        filled = filled.replace(regex, value);
+    });
+
+    Object.keys(currentVariables).forEach(key => {
+        const val = currentVariables[key] || `[${key}]`;
+        filled = filled.replace(new RegExp(`\\{\\{${key}\\}\\}`, 'g'), val);
+    });
 
     const display = document.getElementById('result-display');
     const resultActions = document.getElementById('result-actions');
@@ -1731,7 +1743,6 @@ function generatePrompt() {
 
     display.textContent = '';
     resultActions.classList.add('hidden');
-    // غیرفعال کردن دکمه کپی و پاک کردن چشمک زدن
     if (copyBtn) {
         copyBtn.disabled = true;
         copyBtn.classList.remove('blink');
@@ -1746,7 +1757,6 @@ function generatePrompt() {
         } else {
             clearInterval(typeInterval);
             resultActions.classList.remove('hidden');
-            // فعال‌سازی دکمه کپی + شروع چشمک‌زدن
             if (copyBtn) {
                 copyBtn.disabled = false;
                 copyBtn.classList.add('blink');
@@ -1775,11 +1785,11 @@ function resetAll() {
     currentVariables = {};
     fieldDefinitions = [];
     selectedAIModels = [];
-    aiModelsExpanded = false;   // مهم: وضعیت نمایش مدل‌ها هم ریست شود
+    aiModelsExpanded = false;   // وضعیت نمایش مدل‌ها را هم ریست کن
     renderFieldEditors();
     renderAIModels();
 
-    // اسکرول نرم به بالای نمای ویرایشگر
+    // اسکرول به بالای نمای ویرایشگر
     const editorView = document.getElementById('editor-view');
     if (editorView) {
         editorView.scrollIntoView({ behavior: 'smooth', block: 'start' });
