@@ -573,10 +573,6 @@ textarea::-webkit-scrollbar-thumb,
     flex-shrink: 0;
 }
 
-.ai-models-section .section-label::before {
-    margin-top: -2px;          /* آیکون دوباره به جای اصلی برمی‌گردد */
-}
-
 .ai-show-more-btn {
     background: none;
     border: none;
