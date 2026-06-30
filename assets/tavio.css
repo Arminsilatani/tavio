@@ -475,7 +475,22 @@ textarea::-webkit-scrollbar-thumb,
     gap: 8px;
     z-index: 5;
 }
-
+.token-count-container {
+    display: flex;
+    justify-content: flex-end;
+    margin-top: 10px;
+    font-size: 12px;
+    color: #777;
+}
+.token-count-container.hidden {
+    display: none;
+}
+.token-count-display {
+    background: rgba(255,255,255,0.05);
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    padding: 4px 10px;
+}
 /* Icon action buttons */
 .action-icon-btn {
     display: inline-flex;
