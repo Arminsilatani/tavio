@@ -578,12 +578,28 @@ body {
 }
 .btn-secondary:hover { border-color: #666; color: var(--text); }
 .btn-generate {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 10px;                 /* فاصله بین آیکون و متن */
     background: var(--accent);
     color: #111;
-    width: 100%;
-    padding: 16px;
+    border: none;
+    border-radius: 10px;
+    padding: 14px 28px;
     font-size: 16px;
-    margin-top: 12px;
+    font-weight: 500;
+    cursor: pointer;
+    transition: background 0.2s ease, transform 0.1s ease;
+    width: 100%;               /* تمام عرض */
+}
+.btn-generate:hover {
+    background: #c8ffbe;
+    transform: translateY(-1px);
+}
+.btn-generate svg {
+    flex-shrink: 0;
+    stroke: #111;              /* رنگ آیکون هنگام normal */
 }
 .btn-copy {
     background: transparent;
