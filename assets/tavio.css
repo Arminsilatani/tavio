@@ -289,7 +289,9 @@ textarea::-webkit-scrollbar-thumb,
     justify-content: center;
     transform: translateY(-2px);
 }
-
+.prompt-card .prompt-desc {
+    text-align: justify;
+}
 /* ردیف لوگوی مدل‌های هوش مصنوعی در کارت */
 .card-ai-models {
     display: flex;
