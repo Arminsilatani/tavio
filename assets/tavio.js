@@ -1824,33 +1824,37 @@ function copyPrompt() {
     const text = resultDisplay.textContent;
     if (!text) return;
 
-    // ابتدا API مدرن را امتحان کن
+    const copyBtn = document.getElementById('copy-prompt-btn');
+
     if (navigator.clipboard && navigator.clipboard.writeText) {
         navigator.clipboard.writeText(text).then(() => {
-            handleCopySuccess();
-        }).catch(err => {
-            console.warn('Clipboard API failed, falling back to execCommand', err);
-            fallbackCopy(text);
+            handleCopySuccess(copyBtn);
+        }).catch(() => {
+            fallbackCopy(text, copyBtn);
         });
     } else {
-        // مرورگرهای قدیمی یا بافت ناامن
-        fallbackCopy(text);
+        fallbackCopy(text, copyBtn);
     }
 }
 
-function handleCopySuccess() {
-    const btn = document.getElementById('copy-prompt-btn');
-    if (btn) {
-        btn.classList.remove('blink');
-        btn.classList.add('success');
-        setTimeout(() => {
-            btn.classList.remove('success');
-        }, 2000);
-    }
+function handleCopySuccess(btn) {
+    if (!btn) return;
+    // قطع چشمک زدن، نمایش موفقیت
+    btn.classList.remove('blink');
+    btn.classList.add('success');
+
+    // تغییر متن داخل دکمه به "Copied"
+    const btnText = btn.querySelector('.btn-text');
+    if (btnText) btnText.textContent = 'Copied';
+
+    // بعد از ۲ ثانیه به حالت اول برگردد
+    setTimeout(() => {
+        btn.classList.remove('success');
+        if (btnText) btnText.textContent = 'Copy';
+    }, 2000);
 }
 
-function fallbackCopy(text) {
-    // ایجاد یک textarea موقت برای کپی
+function fallbackCopy(text, btn) {
     const textarea = document.createElement('textarea');
     textarea.value = text;
     textarea.style.position = 'fixed';
@@ -1862,7 +1866,7 @@ function fallbackCopy(text) {
     try {
         const successful = document.execCommand('copy');
         if (successful) {
-            handleCopySuccess();
+            handleCopySuccess(btn);
         } else {
             alert('Copy failed. Please copy manually.');
         }
