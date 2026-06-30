@@ -1260,6 +1260,17 @@ textarea::-webkit-scrollbar-thumb,
     margin-right: 6px;
 }
 
+.editor-header .delete-btn {
+    margin-top: 10px;           /* ۱۰ پیکسل پایین‌تر */
+    padding: 6px 12px;          /* افزایش ناحیهٔ کلیک */
+    font-size: 16px;            /* درشت‌تر شدن متن (در صورت نمایش) */
+}
+
+.editor-header .delete-btn svg {
+    width: 20px;                /* آیکون بزرگ‌تر */
+    height: 20px;
+}
+
 /* مودال تأیید حذف */
 .confirm-message {
     color: #ccc;
