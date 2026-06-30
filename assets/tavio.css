@@ -299,8 +299,8 @@ textarea::-webkit-scrollbar-thumb,
 
 /* هر لوگو */
 .card-ai-logo {
-    width: 18px;
-    height: 18px;
+    width: 10px;
+    height: 10px;
     border-radius: 4px;
     object-fit: contain;
     opacity: 0.85;
