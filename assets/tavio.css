@@ -270,7 +270,7 @@ textarea::-webkit-scrollbar-thumb,
 .prompt-card .category-chips-inline {
     display: flex;
     flex-wrap: wrap;
-    gap: 5px;                     /* فاصلهٔ ۵ پیکسل بین هر تراشه */
+    gap: 10px;                     /* فاصلهٔ ۵ پیکسل بین هر تراشه */
     margin-bottom: 12px;
 }
 
