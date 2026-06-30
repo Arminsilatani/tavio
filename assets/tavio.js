@@ -809,10 +809,11 @@ function parseCategoryArray(category_id) {
 async function fetchPromptsWithAuthors() {
     if (!currentUser) return [];
     try {
+        // ⬅️ به جای .eq('user_id')، از or استفاده می‌کنیم
         const { data: promptsData, error: promptsError } = await sb
             .from('tavio_prompts')
             .select('*')
-            .eq('user_id', currentUser.id)
+            .or(`user_id.eq.${currentUser.id},is_global.eq.true`)
             .order('created_at', { ascending: false });
 
         if (promptsError) {
@@ -848,7 +849,8 @@ async function fetchPromptsWithAuthors() {
             updated_at: p.updated_at,
             author_name: authorMap[p.user_id] || 'Unknown',
             field_definitions: p.field_definitions || [],
-            ai_models: p.ai_models || []
+            ai_models: p.ai_models || [],
+            is_global: p.is_global || false   // اضافه شد تا در prompt ذخیره شود
         }));
     } catch (e) {
         console.error('Error in fetchPromptsWithAuthors:', e);
@@ -1336,7 +1338,6 @@ async function restoreSession() {
         closeModal(document.getElementById('auth-overlay'));
         syncSidebarComponent();
         await syncPrompts();
-        await maybeAddReferencePrompt();   // این خط را اضافه کن
     } else {
         document.getElementById('app-container').classList.add('app-hidden');
         openModal(document.getElementById('auth-overlay'));
