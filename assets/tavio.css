@@ -573,7 +573,7 @@ textarea::-webkit-scrollbar-thumb,
     flex-shrink: 0;
 }
 #ai-models-container {
-    margin-top: 21px;
+    margin-top: 2px;
 }
 .ai-show-more-btn {
     background: none;
