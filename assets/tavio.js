@@ -1996,6 +1996,7 @@ await sb.from('tavio_prompts').insert({
 });
 
 await syncPrompts();
+}
 
 // ================== UI EVENT LISTENERS ==================
 // بروزرسانی وضعیت نمایش فلش‌ها برای یک ردیف مشخص
