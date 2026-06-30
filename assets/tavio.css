@@ -947,7 +947,11 @@ textarea::-webkit-scrollbar-thumb,
     white-space: nowrap;
     margin-right: 4px;
 }
-.ai-company-group { border-top: 1px solid var(--border); }
+.ai-company-group {
+    border-top: 1px solid var(--border);
+    margin-top: 15px;      /* فاصلهٔ زیر خط (قبلاً 20px بود) */
+    padding-top: 15px;
+}
 .ai-company-group:first-child { border-top: none; }
 .ai-company-header {
     padding: 8px 12px;
