@@ -207,16 +207,18 @@ let aiCompanyExpanded = {};
 
 function parsePromptFields(template) {
     const fields = [];
-    // حذف موقت escapeها
     const safe = template.replace(/\\\{\{/g, '\u0000').replace(/\\\}\}/g, '\u0001');
     const regex = /\{\{(.+?)\}\}/g;
     let match;
+
     while ((match = regex.exec(safe)) !== null) {
         const content = match[1].trim();
         let type = 'text';
         let options = [];
         let name = content;
+        let inputType = 'text';   // برای فیلدهای متنی
 
+        // اولویت با جداکننده‌های . و / (برای انتخاب‌ها)
         if (content.includes('.')) {
             type = 'single-select';
             options = content.split('.').map(s => s.trim()).filter(s => s);
@@ -225,6 +227,16 @@ function parsePromptFields(template) {
             type = 'multi-select';
             options = content.split('/').map(s => s.trim()).filter(s => s);
             name = options.join('_');
+        } else {
+            // بررسی پسوند نوع (textarea, number)
+            const colonIndex = content.lastIndexOf(':');
+            if (colonIndex > -1) {
+                const possibleType = content.slice(colonIndex + 1).trim().toLowerCase();
+                if (possibleType === 'textarea' || possibleType === 'number') {
+                    inputType = possibleType;
+                    name = content.slice(0, colonIndex).trim();
+                } // در غیر این صورت، نام همان محتواست
+            }
         }
 
         const existing = fieldDefinitions.find(f => f.name === name && f.type === type);
@@ -234,7 +246,8 @@ function parsePromptFields(template) {
                 type: type,
                 options: options,
                 description: '',
-                raw: match[1]
+                raw: match[1],
+                inputType: type === 'text' ? inputType : undefined
             });
         } else {
             existing.options = options;
@@ -361,12 +374,6 @@ function renderPromptInputFields() {
         return;
     }
 
-    const longTextKeywords = [
-        'prompt', 'content', 'description', 'story', 'code',
-        'script', 'template', 'essay', 'article', 'message',
-        'text', 'body', 'instruction', 'task'
-    ];
-
     fieldDefinitions.forEach((field, index) => {
         const wrapper = document.createElement('div');
         wrapper.className = 'prompt-field-item';
@@ -375,7 +382,7 @@ function renderPromptInputFields() {
         label.textContent = field.name || 'Field ' + (index + 1);
         wrapper.appendChild(label);
 
-        let input;   // می‌تواند input, textarea, select, یا div گروه چک‌باکس باشد
+        let input;
 
         // ----- Single-Select (Dropdown) -----
         if (field.type === 'single-select' && field.options && field.options.length > 0) {
@@ -388,7 +395,6 @@ function renderPromptInputFields() {
                 input.appendChild(option);
             });
 
-            // listener یکسان برای select
             input.addEventListener('change', (e) => {
                 fieldDefinitions[index].value = e.target.value;
             });
@@ -398,7 +404,6 @@ function renderPromptInputFields() {
             const group = document.createElement('div');
             group.className = 'multi-checkbox-group';
 
-            // اگر value قبلاً تعریف نشده باشد، آرایه خالی
             if (!Array.isArray(fieldDefinitions[index].value)) {
                 fieldDefinitions[index].value = [];
             }
@@ -406,7 +411,6 @@ function renderPromptInputFields() {
             field.options.forEach(opt => {
                 const item = document.createElement('label');
                 item.className = 'multi-checkbox-item';
-                // فعال بودن ظاهری اگر از قبل انتخاب شده باشد
                 if (fieldDefinitions[index].value.includes(opt)) {
                     item.classList.add('checked');
                 }
@@ -416,7 +420,6 @@ function renderPromptInputFields() {
                 checkbox.value = opt;
                 checkbox.checked = fieldDefinitions[index].value.includes(opt);
 
-                // بروزرسانی مقدار و کلاس ظاهری
                 checkbox.addEventListener('change', () => {
                     const arr = fieldDefinitions[index].value;
                     const idx = arr.indexOf(opt);
@@ -434,29 +437,32 @@ function renderPromptInputFields() {
                 group.appendChild(item);
             });
 
-            input = group;   // کل گروه را جایگزین input می‌کنیم
-            // نیازی به listener جداگانه روی input نیست، هر چک‌باکس کار خودش را می‌کند.
+            input = group;
         }
-        // ----- Text (می‌تواند textarea یا input ساده باشد) -----
+        // ----- Text fields (text, textarea, number) -----
         else {
-            const fieldName = (field.name || '').toLowerCase();
-            const isLongText = longTextKeywords.some(keyword => fieldName.includes(keyword));
+            const inputType = field.inputType || 'text';   // از قبل در parsePromptFields تعیین شده
+            const fieldName = field.name || 'value';
 
-            if (isLongText) {
+            if (inputType === 'textarea') {
                 input = document.createElement('textarea');
                 input.rows = 4;
-                input.placeholder = 'Enter your ' + (field.name || 'text') + ' here…';
+                input.placeholder = 'Enter your ' + fieldName + ' here…';
                 input.style.width = '100%';
                 input.style.resize = 'vertical';
+                if (field.value) input.value = field.value;
+            } else if (inputType === 'number') {
+                input = document.createElement('input');
+                input.type = 'number';
+                input.placeholder = 'Enter ' + fieldName;
                 if (field.value) input.value = field.value;
             } else {
                 input = document.createElement('input');
                 input.type = 'text';
-                input.placeholder = 'Enter ' + (field.name || 'value');
+                input.placeholder = 'Enter ' + fieldName;
                 if (field.value) input.value = field.value;
             }
 
-            // listener یکسان برای text/textarea
             input.addEventListener('change', (e) => {
                 fieldDefinitions[index].value = e.target.value;
             });
