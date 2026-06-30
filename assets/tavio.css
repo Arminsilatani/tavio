@@ -1616,3 +1616,90 @@ body {
     opacity: 0.8;
     text-decoration: underline;
 }
+/* موقعیت‌دهی دکمه‌ها در بالای بخش نتیجه */
+.result-section {
+    position: relative;
+}
+.result-actions {
+    position: absolute;
+    top: 8px;
+    right: 12px;
+    display: flex;
+    gap: 8px;
+    z-index: 5;
+}
+.result-actions.hidden {
+    display: none;
+}
+
+/* دکمه‌های آیکون‌دار (Copy / Reset) */
+.action-icon-btn {
+    display: inline-flex;
+    align-items: center;
+    overflow: hidden;
+    white-space: nowrap;
+    background: transparent;
+    border: none;
+    color: #aaa;
+    cursor: pointer;
+    padding: 4px 8px;
+    border-radius: 6px;
+    transition: color 0.2s, background 0.2s;
+}
+.action-icon-btn:disabled {
+    opacity: 0.4;
+    cursor: not-allowed;
+    pointer-events: none;
+}
+.action-icon-btn .btn-text {
+    display: inline-block;
+    max-width: 0;
+    overflow: hidden;
+    margin-right: 0;
+    transition: max-width 0.3s ease, margin-right 0.3s ease;
+    font-size: 13px;
+    color: inherit;
+}
+.action-icon-btn:hover {
+    color: var(--accent);
+}
+.action-icon-btn:hover .btn-text {
+    max-width: 5em;                /* عرض مناسب برای "Copy" */
+    margin-right: 6px;
+}
+.action-icon-btn.reset-btn:hover .btn-text {
+    max-width: 7em;                /* عرض بیشتر برای "New Prompt" */
+}
+.action-icon-btn svg {
+    flex-shrink: 0;
+    stroke: currentColor;
+    transition: stroke 0.2s;
+}
+
+/* انیمیشن چشمک‌زدن دکمه کپی */
+@keyframes copyBlink {
+    0%, 100% { opacity: 1; }
+    50% { opacity: 0.3; }
+}
+.action-icon-btn.copy-btn.blink {
+    color: var(--accent);
+    animation: copyBlink 1s infinite;
+}
+
+/* فاصله دکمه Generate */
+.generate-section {
+    margin-top: -12px;
+    margin-bottom: -12px;
+}
+
+/* باکس خروجی */
+.editor-output-box {
+    background: rgba(255, 255, 255, 0.03);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 20px;
+    margin-top: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 24px;
+}
