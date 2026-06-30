@@ -1588,3 +1588,30 @@ body {
 .multi-checkbox-item.checked {
     color: var(--accent);
 }
+/* باکس خروجی (Generated + AI Models) */
+.editor-output-box {
+    background: rgba(255, 255, 255, 0.03);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 20px;
+    margin-top: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 24px;
+}
+
+/* دکمه نمایش مدل‌های بیشتر/کمتر */
+.ai-show-more-btn {
+    background: none;
+    border: none;
+    color: var(--accent);
+    font-size: 13px;
+    cursor: pointer;
+    padding: 4px 8px;
+    margin-left: 4px;
+    transition: opacity 0.2s;
+}
+.ai-show-more-btn:hover {
+    opacity: 0.8;
+    text-decoration: underline;
+}
