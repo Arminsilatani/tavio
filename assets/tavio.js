@@ -115,7 +115,7 @@ const ALL_AI_MODELS = [
     { id: "llama-3.1", name: "Llama 3.1", company: "Meta", tags: ["general","free"], modality:["general"], pricing:"free" },
 
     // Google
-    { id: "gemini-3.1-pro-preview", name: "Gemini 3.1 Pro Preview", company: "Google", tags: ["reasoning","freemium"], modality:["reasoning"], pricing:"freemium" },
+    { id: "gemini-3.1-pro", name: "Gemini 3.1 Pro", company: "Google", tags: ["reasoning","freemium"], modality:["reasoning"], pricing:"freemium" },
     { id: "gemini-3.1-flash", name: "Gemini 3.1 Flash", company: "Google", tags: ["fast","freemium"], modality:["general","fast"], pricing:"freemium" },
     { id: "gemini-3.1-flash-lite", name: "Gemini 3.1 Flash Lite", company: "Google", tags: ["economical","freemium"], modality:["general"], pricing:"freemium" },
     { id: "gemini-3-pro-image", name: "Gemini 3 Pro Image", company: "Google", tags: ["image","paid"], modality:["image"], pricing:"paid" },
@@ -127,7 +127,7 @@ const ALL_AI_MODELS = [
     { id: "gemini-2.5-flash-lite", name: "Gemini 2.5 Flash-Lite", company: "Google", tags: ["economical","freemium"], modality:["general"], pricing:"freemium" },
     { id: "gemma-4", name: "Gemma 4", company: "Google", tags: ["open","free"], modality:["general"], pricing:"free" },
     { id: "gemma-3", name: "Gemma 3", company: "Google", tags: ["open","free"], modality:["general"], pricing:"free" },
-    { id: "veo-3.1-lite-preview", name: "Veo 3.1 Lite Preview", company: "Google", tags: ["video","paid"], modality:["video"], pricing:"paid" },
+    { id: "veo-3.1-lite", name: "Veo 3.1 Lite", company: "Google", tags: ["video","paid"], modality:["video"], pricing:"paid" },
 
     // Microsoft
     { id: "mai-voice-1", name: "MAI Voice-1", company: "Microsoft", tags: ["voice","freemium"], modality:["voice"], pricing:"freemium" },
