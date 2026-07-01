@@ -217,25 +217,37 @@ function parsePromptFields(template) {
         let options = [];
         let name = content;
         let inputType = 'text';   // برای فیلدهای متنی
+        let label = content;      // برچسب نمایشی – پیش‌فرض خود محتوا
 
-        // اولویت با جداکننده‌های . و / (برای انتخاب‌ها)
-        if (content.includes('.')) {
+        // اولویت با فرمت جدید: label: options
+        const colonIndex = content.indexOf(':');
+        let payload = content;
+        if (colonIndex > -1) {
+            label = content.slice(0, colonIndex).trim();
+            payload = content.slice(colonIndex + 1).trim();
+        }
+
+        if (payload.includes('.')) {
             type = 'single-select';
-            options = content.split('.').map(s => s.trim()).filter(s => s);
-            name = options.join('_');
-        } else if (content.includes('/')) {
+            options = payload.split('.').map(s => s.trim()).filter(s => s);
+            name = label;   // نام فیلد همان برچسب خوانا
+        } else if (payload.includes('/')) {
             type = 'multi-select';
-            options = content.split('/').map(s => s.trim()).filter(s => s);
-            name = options.join('_');
+            options = payload.split('/').map(s => s.trim()).filter(s => s);
+            name = label;   // نام فیلد همان برچسب خوانا
         } else {
-            // بررسی پسوند نوع (textarea, number)
-            const colonIndex = content.lastIndexOf(':');
-            if (colonIndex > -1) {
-                const possibleType = content.slice(colonIndex + 1).trim().toLowerCase();
+            // متن ساده (ممکن است پسوند نوع داشته باشد)
+            const textColonIndex = content.lastIndexOf(':');
+            if (textColonIndex > -1) {
+                const possibleType = content.slice(textColonIndex + 1).trim().toLowerCase();
                 if (possibleType === 'textarea' || possibleType === 'number') {
                     inputType = possibleType;
-                    name = content.slice(0, colonIndex).trim();
-                } // در غیر این صورت، نام همان محتواست
+                    name = content.slice(0, textColonIndex).trim();
+                    label = name;
+                }
+            } else {
+                name = content;
+                label = content;
             }
         }
 
@@ -247,7 +259,8 @@ function parsePromptFields(template) {
                 options: options,
                 description: '',
                 raw: match[1],
-                inputType: type === 'text' ? inputType : undefined
+                inputType: type === 'text' ? inputType : undefined,
+                label: label           // ذخیرهٔ برچسب تمیز
             });
         } else {
             existing.options = options;
@@ -257,6 +270,16 @@ function parsePromptFields(template) {
 }
 
 function renderFieldEditors() {
+    const container = document.getElementById('fields-container');
+    if (!container) return;
+    container.innerHTML = '';
+
+    if (fieldDefinitions.length === 0) {
+        container.innerHTML = `<p style="color:#666; grid-column:1/-1;">No fields detected. Use {field} in your template.</p>`;
+        return;
+    }
+
+    function renderFieldEditors() {
     const container = document.getElementById('fields-container');
     if (!container) return;
     container.innerHTML = '';
@@ -287,10 +310,13 @@ function renderFieldEditors() {
             `;
         }
 
+        // نمایش label (در صورت وجود) به عنوان مقدار فیلد Name
+        const displayName = field.label || field.name || '';
+
         div.innerHTML = `
             <div class="field-row">
                 <label>Name</label>
-                <input type="text" value="${field.name}" onchange="updateFieldName(${index}, this.value)" placeholder="Field name">
+                <input type="text" value="${displayName}" onchange="updateFieldName(${index}, this.value)" placeholder="Field name">
                 <label>Type</label>
                 <select onchange="updateFieldType(${index}, this.value)">
                     <option value="text" ${field.type === 'text' ? 'selected' : ''}>Text</option>
