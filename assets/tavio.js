@@ -1264,25 +1264,37 @@ function syncSidebarComponent() {
 }
 
 async function updateNotificationDot() {
+    console.log('🔍 updateNotificationDot started');
     const comp = getSidebarComponent();
-    if (!comp || !comp.shadowRoot) return;
+    if (!comp || !comp.shadowRoot) {
+        console.warn('No comp or shadowRoot');
+        return;
+    }
 
-    // مقداردهی اولیه: بررسی کن آیا اعلان خوانده‌نشده‌ای وجود دارد
     let hasUnread = false;
     if (currentUser) {
+        console.log('Current user:', currentUser.id);
         const { data, error } = await sb
             .from('notifications')
             .select('id')
             .eq('user_id', currentUser.id)
             .eq('is_read', false)
             .limit(1);
-        if (!error && data && data.length > 0) {
-            hasUnread = true;
+        if (error) {
+            console.error('Query error:', error);
+        } else {
+            console.log('Unread notifications:', data);
+            hasUnread = data && data.length > 0;
         }
+    } else {
+        console.warn('No currentUser');
     }
 
     const dot = comp.shadowRoot.getElementById('avatar-notif-dot');
-    if (!dot) return;
+    if (!dot) {
+        console.warn('Dot element not found');
+        return;
+    }
 
     // تزریق استایل (فقط یک بار)
     if (!comp.shadowRoot.getElementById('notif-dot-fix-style')) {
@@ -1308,6 +1320,7 @@ async function updateNotificationDot() {
         comp.shadowRoot.appendChild(style);
     }
 
+    console.log('Setting dot display to', hasUnread ? 'block' : 'none');
     dot.style.display = hasUnread ? 'block' : 'none';
 }
 
