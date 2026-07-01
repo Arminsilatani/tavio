@@ -1269,41 +1269,42 @@ async function updateNotificationDot() {
     const comp = getSidebarComponent();
     if (!comp || !comp.shadowRoot) return;
 
+    // اگر کاربر هنوز لاگین نکرده، هیچ کاری نکن
+    if (!currentUser || !currentUser.id) return;
+
     let hasUnread = false;
 
-    if (currentUser) {
-        // ۱. اعلان‌های خوانده‌نشده (جدول notifications)
-        const { data: notifs } = await sb
-            .from('notifications')
+    // ۱. اعلان‌های خوانده‌نشده
+    const { data: notifs } = await sb
+        .from('notifications')
+        .select('id')
+        .eq('user_id', currentUser.id)
+        .eq('is_read', false)
+        .limit(1);
+
+    if (notifs && notifs.length > 0) {
+        hasUnread = true;
+    }
+
+    // ۲. رویدادهای تقویم از امروز به بعد
+    if (!hasUnread) {
+        const today = new Date().toISOString().split('T')[0];
+
+        const { data: events } = await sb
+            .from('ravlo')
             .select('id')
             .eq('user_id', currentUser.id)
-            .eq('is_read', false)
+            .gte('start_date', today)
             .limit(1);
 
-        if (notifs && notifs.length > 0) {
+        if (events && events.length > 0) {
             hasUnread = true;
-        }
-
-        // ۲. رویدادهای انجام‌نشده از امروز به بعد (ravlo)
-        if (!hasUnread) {
-            const today = new Date().toISOString().split('T')[0]; // e.g., 2026-07-01
-
-            const { data: events } = await sb
-                .from('ravlo')
-                .select('id')
-                .eq('user_id', currentUser.id)
-                .gte('start_date', today)   // از امروز به بعد
-                .limit(1);
-
-            if (events && events.length > 0) {
-                hasUnread = true;
-            }
         }
     }
 
-    console.log('hasUnread (Tavio dot):', hasUnread); // برای دیباگ موقت
+    console.log('updateNotificationDot called, hasUnread:', hasUnread);  // فقط برای دیباگ، بعداً می‌توانید حذف کنید
 
-    // اعمال تغییر روی DOM
+    // اعمال روی DOM
     const dot = comp.shadowRoot.getElementById('avatar-notif-dot');
     if (dot) {
         dot.style.display = hasUnread ? 'block' : 'none';
@@ -1456,6 +1457,16 @@ async function restoreSession() {
         document.getElementById('app-container').classList.remove('app-hidden');
         closeModal(document.getElementById('auth-overlay'));
         syncSidebarComponent();
+        if (session?.user) {
+    currentUser = session.user;
+    currentProfile = await buildCurrentProfile(currentUser);
+    currentUserRole = currentProfile?.role || 'recruit';
+    document.getElementById('app-container').classList.remove('app-hidden');
+    closeModal(document.getElementById('auth-overlay'));
+    syncSidebarComponent();
+    await updateNotificationDot();   // ← این خط را اضافه کنید
+    await syncPrompts();
+}
         await syncPrompts();
     } else {
         document.getElementById('app-container').classList.add('app-hidden');
