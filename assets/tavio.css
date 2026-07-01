@@ -1365,9 +1365,11 @@ textarea::-webkit-scrollbar-thumb,
         width: 100%;
     }
     .editor-header {
-        flex-wrap: wrap;
-        align-items: center;          /* تراز وسط عمودی دکمه‌ها */
-        gap: 8px;                    /* فاصلهٔ بین دکمه‌ها */
+        flex-wrap: wrap !important;
+        justify-content: space-between !important;
+        align-items: stretch !important;
+        gap: 8px !important;
+        margin-bottom: 16px !important;
     }
 
     /* ردیف اول: عنوان + توضیح (وسط‌چین، تمام عرض) */
