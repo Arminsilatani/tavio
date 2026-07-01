@@ -1262,70 +1262,44 @@ function syncSidebarComponent() {
     if (overdueList) overdueList.style.display = 'none';
 
     loadTavioSidebarNotifications();
-
-    // خط جدید: اطمینان از وجود نشانگر در shadow DOM
-    ensureSidebarNotificationDot();
-}
-
-function ensureSidebarNotificationDot() {
-    const comp = getSidebarComponent();
-    if (!comp || !comp.shadowRoot) return;
-
-    // اگر نشانگر قبلاً ساخته شده، هیچ کاری نکن
-    if (comp.shadowRoot.getElementById('sidebar-notif-dot')) return;
-
-    // پیدا کردن المان آواتار کاربر در shadow DOM
-    // (در کامپوننت شما احتمالاً یک المان با کلاس user-avatar وجود دارد)
-    const avatar = comp.shadowRoot.querySelector('.user-avatar');
-    if (!avatar) {
-        console.warn('Notification dot: user avatar element not found in sidebar shadow DOM.');
-        return;
-    }
-
-    // اطمینان از اینکه آواتار position: relative دارد (برای مکان‌دهی مطلق نشانگر)
-    avatar.style.position = 'relative';
-
-    // تزریق استایل‌های نشانگر و انیمیشن چشمک‌زن
-    const style = document.createElement('style');
-    style.textContent = `
-        .notification-dot {
-            position: absolute;
-            top: -2px;
-            right: -2px;
-            width: 4px;
-            height: 4px;
-            background: #ff6b6b;
-            background: var(--accent, #ff6b6b);
-            border-radius: 50%;
-            display: none;
-            z-index: 2;
-            animation: blink 1.2s ease-in-out infinite;
-        }
-        @keyframes blink {
-            0%, 100% { opacity: 1; }
-            50%      { opacity: 0.2; }
-        }
-    `;
-    comp.shadowRoot.appendChild(style);
-
-    // ساخت خود نشانگر و اضافه کردن آن به آواتار
-    const dot = document.createElement('span');
-    dot.id = 'sidebar-notif-dot';
-    dot.className = 'notification-dot';
-    dot.style.display = 'none';
-    avatar.appendChild(dot);
 }
 
 function updateNotificationDot(show) {
-    // ابتدا مطمئن شو نشانگر در shadow DOM وجود دارد
-    ensureSidebarNotificationDot();
-
     const comp = getSidebarComponent();
     if (!comp || !comp.shadowRoot) return;
 
-    const dot = comp.shadowRoot.getElementById('sidebar-notif-dot');
-    if (dot) {
-        dot.style.display = show ? 'block' : 'none';
+    const dot = comp.shadowRoot.getElementById('avatar-notif-dot');
+    if (!dot) {
+        console.warn('Notification dot element not found in sidebar shadow DOM.');
+        return;
+    }
+
+    // نمایش یا مخفی کردن
+    dot.style.display = show ? 'block' : 'none';
+
+    // تزریق استایل blink فقط یک بار (اگر قبلاً وجود نداشته باشد)
+    if (!comp.shadowRoot.getElementById('notif-dot-style')) {
+        const style = document.createElement('style');
+        style.id = 'notif-dot-style';
+        style.textContent = `
+            .notification-dot {
+                position: absolute;
+                top: -2px;
+                right: -2px;
+                width: 4px;
+                height: 4px;
+                background: #ff6b6b;
+                background: var(--accent, #ff6b6b);
+                border-radius: 50%;
+                z-index: 2;
+                animation: blink 1.2s ease-in-out infinite;
+            }
+            @keyframes blink {
+                0%, 100% { opacity: 1; }
+                50%      { opacity: 0.2; }
+            }
+        `;
+        comp.shadowRoot.appendChild(style);
     }
 }
 
