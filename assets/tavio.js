@@ -1066,6 +1066,8 @@ async function sendShareRequest() {
     } else {
         alert('Prompt shared successfully!');
         closeShareModal();
+        // به‌روزرسانی اعلان‌ها و نشانگر
+        loadTavioSidebarNotifications();
     }
 }
 
