@@ -1332,31 +1332,20 @@ textarea::-webkit-scrollbar-thumb,
 }
 
 @media (max-width: 768px) {
+    /* برندینگ */
     .branding {
-        flex-direction: column;   /* لوگو و متن زیر هم */
-        align-items: center;      /* وسط‌چین افقی */
+        flex-direction: column;
+        align-items: center;
         gap: 10px;
     }
-    .brand-logo {
-        height: 36px;             /* لوگو کمی کوچک‌تر */
-    }
-    .brand-text {
-        text-align: center;       /* عنوان و زیرعنوان وسط‌چین */
-    }
-    .brand-name {
-        font-size: 20px;
-    }
-    .brand-tagline {
-        font-size: 12px;
-    }
-    .branding-wrapper {
-        margin-bottom: 24px;
-    }
-        #new-prompt-btn {
-        width: 100%;
-        box-sizing: border-box;
-    }
-        .controls {
+    .brand-logo { height: 36px; }
+    .brand-text { text-align: center; }
+    .brand-name { font-size: 20px; }
+    .brand-tagline { font-size: 12px; }
+    .branding-wrapper { margin-bottom: 24px; }
+
+    /* کنترل‌ها */
+    .controls {
         flex-direction: column;
         gap: 10px;
     }
@@ -1364,6 +1353,12 @@ textarea::-webkit-scrollbar-thumb,
         min-width: unset;
         width: 100%;
     }
+    #new-prompt-btn {
+        width: 100%;
+        box-sizing: border-box;
+    }
+
+    /* ===== EDITOR HEADER ===== */
     .editor-header {
         flex-wrap: wrap;
         justify-content: space-between;
@@ -1376,75 +1371,59 @@ textarea::-webkit-scrollbar-thumb,
         order: 1;
         width: 100%;
         text-align: center;
-        margin: 0 0 4px 0;
+        margin: 0 0 12px 0;
     }
-    .editor-title h3 {
-        font-size: 18px;
-    }
-    .editor-title .prompt-description-text {
-        font-size: 12px;
-        margin-top: 4px;
-    }
+    .editor-title h3 { font-size: 18px; }
+    .editor-title .prompt-description-text { font-size: 12px; margin-top: 4px; }
 
-    /* ===== دکمه‌های ردیف دوم ===== */
-
-    /* دکمهٔ Back (20% عرض) */
+    /* دکمه Back */
     .back-btn {
         order: 2;
         width: 20%;
         justify-content: center;
         margin-left: 0;
         padding: 8px 0;
+        height: 40px;
+        box-sizing: border-box;
     }
-    .back-btn .back-text {
-        display: none !important;        /* متن Back کاملاً مخفی */
-    }
+    .back-btn .back-text { display: none; }
     .back-btn:hover .back-text {
-        max-width: 0 !important;         /* جلوگیری از ظاهر شدن متن در هاور */
-        margin-left: 0 !important;
+        max-width: 0;
+        margin-left: 0;
     }
 
-    /* دکمهٔ Delete (20% عرض، با بورد و آیکون ساده) */
+    /* دکمه Delete */
     .editor-header .delete-btn {
         order: 3;
         width: 20%;
         justify-content: center;
-        border: 1px solid var(--border);  /* بورد اضافه می‌شود */
+        border: 1px solid var(--border);
         border-radius: 6px;
-        padding: 8px 0;                  /* ارتفاع هماهنگ با دکمهٔ Edit */
-        margin-top: 0 !important;        /* حذف margin-top دسکتاپ */
+        padding: 8px 0;
+        margin-top: 0;
+        height: 40px;
+        box-sizing: border-box;
         overflow: visible;
+        background: transparent;
+        align-self: auto;
     }
-    .delete-btn .btn-text {
-        display: none !important;        /* متن Delete کاملاً مخفی */
-    }
+    .delete-btn .btn-text { display: none; }
     .delete-btn:hover .btn-text {
-        max-width: 0 !important;
-        margin-right: 0 !important;
+        max-width: 0;
+        margin-right: 0;
     }
-    /* هاور فقط رنگ آیکون را تغییر بدهد */
-    .delete-btn:hover {
-        color: #ff6b6b;
-    }
+    .delete-btn:hover { color: #ff6b6b; }
 
-    /* دکمهٔ Edit Prompt (60% عرض) */
+    /* دکمه Edit */
     .edit-btn {
         order: 4;
         width: 60%;
         justify-content: center;
-        margin-left: 0 !important;       /* لغو margin-left: auto دسکتاپ */
+        margin-left: 0;
         padding: 8px 0;
-        align-self: center;              /* در صورت نیاز */
-    }
-    .edit-btn .btn-label {
-        display: inline;                 /* متن «Edit Prompt» نمایش داده شود */
-    }
-
-    /* هم‌ارتفاع کردن دکمه‌ها */
-    .back-btn,
-    .editor-header .delete-btn,
-    .edit-btn {
-        height: 40px;                    /* ارتفاع یکسان */
+        height: 40px;
         box-sizing: border-box;
+        align-self: auto;
     }
+    .edit-btn .btn-label { display: inline; }
 }
