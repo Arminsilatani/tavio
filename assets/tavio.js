@@ -279,16 +279,6 @@ function renderFieldEditors() {
         return;
     }
 
-    function renderFieldEditors() {
-    const container = document.getElementById('fields-container');
-    if (!container) return;
-    container.innerHTML = '';
-
-    if (fieldDefinitions.length === 0) {
-        container.innerHTML = `<p style="color:#666; grid-column:1/-1;">No fields detected. Use {field} in your template.</p>`;
-        return;
-    }
-
     fieldDefinitions.forEach((field, index) => {
         const div = document.createElement('div');
         div.className = 'field-editor';
