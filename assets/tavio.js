@@ -1703,50 +1703,83 @@ function updateCategoryChipsUI() {
 }
 
 function loadPromptIntoEditor(prompt) {
-    currentPrompt = { ...prompt };
-    document.getElementById('library-view').classList.remove('active');
-    document.getElementById('editor-view').classList.add('active');
-    document.getElementById('current-prompt-title').textContent = prompt.title;
+    try {
+        currentPrompt = { ...prompt };
+        
+        const libraryView = document.getElementById('library-view');
+        const editorView = document.getElementById('editor-view');
+        const titleEl = document.getElementById('current-prompt-title');
+        const descEl = document.getElementById('prompt-description-display');
+        const templateTextarea = document.getElementById('template-textarea');
+        const copyBtn = document.getElementById('copy-prompt-btn');
+        const deleteBtn = document.getElementById('delete-prompt-btn');
+        const saveBtn = document.getElementById('save-prompt-btn');
 
-    document.getElementById('prompt-description-display').textContent = prompt.description || 'No description provided.';
-    document.getElementById('template-textarea').value = prompt.template || '';
+        if (!libraryView || !editorView || !titleEl) {
+            console.warn('Editor DOM not ready, retrying...');
+            setTimeout(() => loadPromptIntoEditor(prompt), 50);
+            return;
+        }
 
-    fieldDefinitions = prompt.field_definitions && prompt.field_definitions.length > 0
-        ? JSON.parse(JSON.stringify(prompt.field_definitions))
-        : parsePromptFields(prompt.template);
+        libraryView.classList.remove('active');
+        editorView.classList.add('active');
+        titleEl.textContent = prompt.title;
 
-    fieldDefinitions.forEach(f => { if (f.value === undefined) f.value = ''; });
+        if (descEl) {
+            descEl.textContent = prompt.description || 'No description provided.';
+        }
+        if (templateTextarea) {
+            templateTextarea.value = prompt.template || '';
+        }
 
-    renderPromptInputFields();
+        // مقداردهی fieldDefinitions
+        fieldDefinitions = (prompt.field_definitions && prompt.field_definitions.length > 0)
+            ? JSON.parse(JSON.stringify(prompt.field_definitions))
+            : parsePromptFields(prompt.template || '');
 
-    selectedAIModels = prompt.ai_models || [];
-    renderAIModels();
+        // اگر باز هم خالی بود و template محتوی {{ بود، یکبار دیگر تلاش کن
+        if (fieldDefinitions.length === 0 && prompt.template && prompt.template.includes('{{')) {
+            console.warn('No field definitions parsed, trying direct parse');
+            fieldDefinitions = parsePromptFields(prompt.template);
+        }
 
-    const saveBtn = document.getElementById('save-prompt-btn');
-    const saveLabel = saveBtn ? saveBtn.querySelector('.btn-label') : null;
+        fieldDefinitions.forEach(f => { if (f.value === undefined) f.value = ''; });
 
-    if (currentUser && prompt.user_id === currentUser.id) {
-        if (saveLabel) saveLabel.textContent = 'Edit Prompt';
-        saveBtn.disabled = false;
-        saveBtn.classList.remove('btn-disabled');
-    } else {
-        if (saveLabel) saveLabel.textContent = 'Edit Prompt';
-        saveBtn.disabled = true;
-        saveBtn.classList.add('btn-disabled');
+        renderPromptInputFields();
+
+        selectedAIModels = prompt.ai_models || [];
+        renderAIModels();
+
+        // تنظیم دکمه‌های ویرایش و حذف
+        if (saveBtn) {
+            const saveLabel = saveBtn.querySelector('.btn-label');
+            if (currentUser && prompt.user_id === currentUser.id) {
+                if (saveLabel) saveLabel.textContent = 'Edit Prompt';
+                saveBtn.disabled = false;
+                saveBtn.classList.remove('btn-disabled');
+            } else {
+                if (saveLabel) saveLabel.textContent = 'Edit Prompt';
+                saveBtn.disabled = true;
+                saveBtn.classList.add('btn-disabled');
+            }
+        }
+
+        if (copyBtn) {
+            copyBtn.disabled = true;
+            copyBtn.classList.remove('blink', 'success');
+        }
+
+        if (deleteBtn) {
+            const isOwner = currentUser && prompt.user_id === currentUser.id;
+            deleteBtn.disabled = !isOwner;
+        }
+    } catch (error) {
+        console.error('Error loading prompt into editor:', error);
+        // تلاش دوباره پس از رفرش ملایم
+        setTimeout(() => {
+            if (currentPrompt) loadPromptIntoEditor(currentPrompt);
+        }, 100);
     }
-
-    const copyBtn = document.getElementById('copy-prompt-btn');
-    if (copyBtn) {
-        copyBtn.disabled = true;
-        copyBtn.classList.remove('blink', 'success');
-    }
-
-    const deleteBtn = document.getElementById('delete-prompt-btn');
-    if (deleteBtn) {
-        const isOwner = currentUser && prompt.user_id === currentUser.id;
-        deleteBtn.disabled = !isOwner;
-    }
-
 }
 
 function backToLibrary() {
