@@ -1263,14 +1263,28 @@ function syncSidebarComponent() {
     loadTavioSidebarNotifications();
 }
 
-function updateNotificationDot(show) {
+async function updateNotificationDot() {
     const comp = getSidebarComponent();
     if (!comp || !comp.shadowRoot) return;
+
+    // مقداردهی اولیه: بررسی کن آیا اعلان خوانده‌نشده‌ای وجود دارد
+    let hasUnread = false;
+    if (currentUser) {
+        const { data, error } = await sb
+            .from('notifications')
+            .select('id')
+            .eq('user_id', currentUser.id)
+            .eq('is_read', false)
+            .limit(1);
+        if (!error && data && data.length > 0) {
+            hasUnread = true;
+        }
+    }
 
     const dot = comp.shadowRoot.getElementById('avatar-notif-dot');
     if (!dot) return;
 
-    // تزریق استایل فقط یک بار (اگر نقطه نیاز به استایل دارد)
+    // تزریق استایل (فقط یک بار)
     if (!comp.shadowRoot.getElementById('notif-dot-fix-style')) {
         const style = document.createElement('style');
         style.id = 'notif-dot-fix-style';
@@ -1294,7 +1308,7 @@ function updateNotificationDot(show) {
         comp.shadowRoot.appendChild(style);
     }
 
-    dot.style.display = show ? 'block' : 'none';
+    dot.style.display = hasUnread ? 'block' : 'none';
 }
 
 // ================== NOTIFICATIONS SIDEBAR ==================
