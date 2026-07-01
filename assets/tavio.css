@@ -1356,4 +1356,12 @@ textarea::-webkit-scrollbar-thumb,
         width: 100%;
         box-sizing: border-box;
     }
+        .controls {
+        flex-direction: column;
+        gap: 10px;
+    }
+    .search-container {
+        min-width: unset;
+        width: 100%;
+    }
 }
