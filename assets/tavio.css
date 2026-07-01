@@ -1443,7 +1443,7 @@ textarea::-webkit-scrollbar-thumb,
     .back-btn,
     .editor-header .delete-btn,
     .edit-btn {
-        height: 30px;                    /* ارتفاع یکسان */
+        height: 40px;                    /* ارتفاع یکسان */
         box-sizing: border-box;
     }
 }
