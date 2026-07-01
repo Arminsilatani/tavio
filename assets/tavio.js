@@ -1457,16 +1457,7 @@ async function restoreSession() {
         document.getElementById('app-container').classList.remove('app-hidden');
         closeModal(document.getElementById('auth-overlay'));
         syncSidebarComponent();
-        if (session?.user) {
-    currentUser = session.user;
-    currentProfile = await buildCurrentProfile(currentUser);
-    currentUserRole = currentProfile?.role || 'recruit';
-    document.getElementById('app-container').classList.remove('app-hidden');
-    closeModal(document.getElementById('auth-overlay'));
-    syncSidebarComponent();
-    await updateNotificationDot();   // ← این خط را اضافه کنید
-    await syncPrompts();
-}
+        await updateNotificationDot();
         await syncPrompts();
     } else {
         document.getElementById('app-container').classList.add('app-hidden');
