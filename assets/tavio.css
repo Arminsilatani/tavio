@@ -1365,11 +1365,11 @@ textarea::-webkit-scrollbar-thumb,
         width: 100%;
     }
     .editor-header {
-        flex-wrap: wrap !important;
-        justify-content: space-between !important;
-        align-items: stretch !important;
-        gap: 8px !important;
-        margin-bottom: 16px !important;
+        flex-wrap: wrap;
+        justify-content: space-between;
+        align-items: stretch;
+        gap: 8px;
+        margin-bottom: 16px;
     }
 
     /* ردیف اول: عنوان + توضیح (وسط‌چین، تمام عرض) */
