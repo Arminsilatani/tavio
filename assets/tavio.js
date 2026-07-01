@@ -1274,7 +1274,7 @@ function syncSidebarComponent() {
         style.textContent = `
             @media (max-width: 768px) {
                 .hamburger-btn {
-                    margin-left: -14px !important;
+                    margin-left: -10px !important;
                 }
             }
         `;
