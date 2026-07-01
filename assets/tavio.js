@@ -1409,6 +1409,7 @@ async function loadTavioSidebarNotifications() {
         console.error('Error loading notifications:', e);
         container.innerHTML = '';
     }
+    updateNotificationDot();
 }
 
 async function rejectSharedPromptViaNotif(notifId) {
