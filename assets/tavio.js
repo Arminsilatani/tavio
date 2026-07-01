@@ -1273,6 +1273,24 @@ function updateNotificationDot(show) {
     // تزریق استایل فقط یک بار (اگر نقطه نیاز به استایل دارد)
     if (!comp.shadowRoot.getElementById('notif-dot-fix-style')) {
         const style = document.createElement('style');
+        style.id = 'notif-dot-fix-style';
+        style.textContent = `
+            #avatar-notif-dot {
+                position: absolute !important;
+                top: -2px !important;
+                right: -2px !important;
+                width: 4px !important;
+                height: 4px !important;
+                background: var(--accent, #ff6b6b) !important;
+                border-radius: 50% !important;
+                z-index: 10 !important;
+                animation: notif-blink 1.2s ease-in-out infinite !important;
+            }
+            @keyframes notif-blink {
+                0%, 100% { opacity: 1; }
+                50%      { opacity: 0.2; }
+            }
+        `;
         comp.shadowRoot.appendChild(style);
     }
 
