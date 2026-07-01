@@ -1429,7 +1429,7 @@ textarea::-webkit-scrollbar-thumb,
     /* دکمهٔ Edit Prompt (60% عرض) */
     .edit-btn {
         order: 4;
-        width: 60%;
+        width: 50%;
         justify-content: center;
         margin-left: 0 !important;       /* لغو margin-left: auto دسکتاپ */
         padding: 8px 0;
