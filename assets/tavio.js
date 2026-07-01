@@ -1265,42 +1265,14 @@ function syncSidebarComponent() {
 }
 
 function updateNotificationDot(show) {
+    console.log('🔔 updateNotificationDot called with', show, new Error().stack);
     const comp = getSidebarComponent();
     if (!comp || !comp.shadowRoot) return;
 
     const dot = comp.shadowRoot.getElementById('avatar-notif-dot');
-    if (!dot) {
-        console.warn('Notification dot element not found in sidebar shadow DOM.');
-        return;
-    }
+    if (!dot) return;
 
-    // نمایش یا مخفی کردن
     dot.style.display = show ? 'block' : 'none';
-
-    // تزریق استایل blink فقط یک بار (اگر قبلاً وجود نداشته باشد)
-    if (!comp.shadowRoot.getElementById('notif-dot-style')) {
-        const style = document.createElement('style');
-        style.id = 'notif-dot-style';
-        style.textContent = `
-            .notification-dot {
-                position: absolute;
-                top: -2px;
-                right: -2px;
-                width: 4px;
-                height: 4px;
-                background: #ff6b6b;
-                background: var(--accent, #ff6b6b);
-                border-radius: 50%;
-                z-index: 2;
-                animation: blink 1.2s ease-in-out infinite;
-            }
-            @keyframes blink {
-                0%, 100% { opacity: 1; }
-                50%      { opacity: 0.2; }
-            }
-        `;
-        comp.shadowRoot.appendChild(style);
-    }
 }
 
 // ================== NOTIFICATIONS SIDEBAR ==================
