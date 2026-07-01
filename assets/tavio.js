@@ -1266,64 +1266,56 @@ function syncSidebarComponent() {
 }
 
 async function updateNotificationDot() {
-    console.log('🔍 updateNotificationDot started');
     const comp = getSidebarComponent();
-    if (!comp || !comp.shadowRoot) {
-        console.warn('No comp or shadowRoot');
-        return;
-    }
+    if (!comp || !comp.shadowRoot) return;
 
     let hasUnread = false;
+
     if (currentUser) {
-        console.log('Current user:', currentUser.id);
-        const { data, error } = await sb
+        // ۱. اعلان‌های خوانده‌نشده از جدول notifications
+        const { data: notifs, error: notifErr } = await sb
             .from('notifications')
             .select('id')
             .eq('user_id', currentUser.id)
             .eq('is_read', false)
             .limit(1);
-        if (error) {
-            console.error('Query error:', error);
-        } else {
-            console.log('Unread notifications:', data);
-            hasUnread = data && data.length > 0;
+
+        if (!notifErr && notifs && notifs.length > 0) {
+            hasUnread = true;
         }
+
+        // ۲. رویدادهای امروز و فردا از تقویم (جدول ravlo)
+        if (!hasUnread) {
+            const today = new Date();
+            const tomorrow = new Date(today);
+            tomorrow.setDate(tomorrow.getDate() + 1);
+            const todayStr = today.toISOString().split('T')[0];
+            const tomorrowStr = tomorrow.toISOString().split('T')[0];
+
+            const { data: events, error: eventErr } = await sb
+                .from('ravlo')
+                .select('id')
+                .eq('user_id', currentUser.id)
+                .gte('start_date', todayStr)
+                .lte('start_date', tomorrowStr)
+                .limit(1);
+
+            if (!eventErr && events && events.length > 0) {
+                hasUnread = true;
+            }
+        }
+    }
+
+    // استفاده از متد رسمی کامپوننت (اگر وجود دارد)
+    if (typeof comp.setNotificationDot === 'function') {
+        comp.setNotificationDot(hasUnread);
     } else {
-        console.warn('No currentUser');
+        // روش fallback: دستکاری مستقیم DOM
+        const dot = comp.shadowRoot.getElementById('avatar-notif-dot');
+        if (dot) {
+            dot.style.display = hasUnread ? 'block' : 'none';
+        }
     }
-
-    const dot = comp.shadowRoot.getElementById('avatar-notif-dot');
-    if (!dot) {
-        console.warn('Dot element not found');
-        return;
-    }
-
-    // تزریق استایل (فقط یک بار)
-    if (!comp.shadowRoot.getElementById('notif-dot-fix-style')) {
-        const style = document.createElement('style');
-        style.id = 'notif-dot-fix-style';
-        style.textContent = `
-            #avatar-notif-dot {
-                position: absolute !important;
-                top: -2px !important;
-                right: -2px !important;
-                width: 4px !important;
-                height: 4px !important;
-                background: var(--accent, #ff6b6b) !important;
-                border-radius: 50% !important;
-                z-index: 10 !important;
-                animation: notif-blink 1.2s ease-in-out infinite !important;
-            }
-            @keyframes notif-blink {
-                0%, 100% { opacity: 1; }
-                50%      { opacity: 0.2; }
-            }
-        `;
-        comp.shadowRoot.appendChild(style);
-    }
-
-    console.log('Setting dot display to', hasUnread ? 'block' : 'none');
-    dot.style.display = hasUnread ? 'block' : 'none';
 }
 
 // ================== NOTIFICATIONS SIDEBAR ==================
