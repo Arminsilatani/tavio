@@ -1330,3 +1330,26 @@ textarea::-webkit-scrollbar-thumb,
 .confirm-yes-btn:hover {
     background: #ff4c4c;
 }
+
+@media (max-width: 768px) {
+    .branding {
+        flex-direction: column;   /* لوگو و متن زیر هم */
+        align-items: center;      /* وسط‌چین افقی */
+        gap: 8px;
+    }
+    .brand-logo {
+        height: 36px;             /* لوگو کمی کوچک‌تر */
+    }
+    .brand-text {
+        text-align: center;       /* عنوان و زیرعنوان وسط‌چین */
+    }
+    .brand-name {
+        font-size: 20px;
+    }
+    .brand-tagline {
+        font-size: 12px;
+    }
+    .branding-wrapper {
+        margin-bottom: 24px;
+    }
+}
