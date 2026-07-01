@@ -2,6 +2,9 @@
 const SUPABASE_URL = 'https://vzqicidepdmraygulrey.supabase.co';
 const SUPABASE_ANON_KEY = 'sb_publishable_kqRWgOmLISOE2EuLL1s8fw_WN6FJRTI';
 const sb = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+function escapeRegExp(string) {
+    return string.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+}
 
 // ================== STATE ==================
 let currentUser = null;
@@ -1860,7 +1863,7 @@ function generatePrompt() {
     let filled = document.getElementById('template-textarea').value;
     
     fieldDefinitions.forEach(field => {
-        const regex = new RegExp(`\\{\\{${field.raw || field.name}\\}\\}`, 'g');
+        const regex = new RegExp(`\\{\\{${escapeRegExp(field.raw || field.name)}\\}\\}`, 'g');
         let value = field.value || `[${field.name}]`;
         if (field.type === 'multi-select' && Array.isArray(field.value)) {
             value = field.value.length > 0 ? field.value.join(', ') : `[${field.name}]`;
