@@ -1352,4 +1352,8 @@ textarea::-webkit-scrollbar-thumb,
     .branding-wrapper {
         margin-bottom: 24px;
     }
+        #new-prompt-btn {
+        width: 100%;
+        box-sizing: border-box;
+    }
 }
