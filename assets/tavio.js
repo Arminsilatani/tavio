@@ -1266,10 +1266,19 @@ function syncSidebarComponent() {
     if (overdueList) overdueList.style.display = 'none';
 
     loadTavioSidebarNotifications();
-        // جابه‌جایی دکمهٔ همبرگری ۴ پیکسل به چپ (فقط در موبایل)
-    const hamburger = comp.shadowRoot?.querySelector('.sidebar-toggle, .hamburger, button[aria-label="Open sidebar"]');
-    if (hamburger && window.innerWidth <= 768) {
-        hamburger.style.marginLeft = '-14px';
+
+    // تزریق استایل برای جابه‌جایی دکمهٔ همبرگری ۴ پیکسل به چپ در موبایل
+    if (!comp.shadowRoot.getElementById('hamburger-mobile-fix')) {
+        const style = document.createElement('style');
+        style.id = 'hamburger-mobile-fix';
+        style.textContent = `
+            @media (max-width: 768px) {
+                .hamburger-btn {
+                    margin-left: -4px !important;
+                }
+            }
+        `;
+        comp.shadowRoot.appendChild(style);
     }
 }
 
