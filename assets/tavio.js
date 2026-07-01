@@ -1272,49 +1272,41 @@ async function updateNotificationDot() {
     let hasUnread = false;
 
     if (currentUser) {
-        // ۱. اعلان‌های خوانده‌نشده از جدول notifications
-        const { data: notifs, error: notifErr } = await sb
+        // ۱. اعلان‌های خوانده‌نشده (جدول notifications)
+        const { data: notifs } = await sb
             .from('notifications')
             .select('id')
             .eq('user_id', currentUser.id)
             .eq('is_read', false)
             .limit(1);
 
-        if (!notifErr && notifs && notifs.length > 0) {
+        if (notifs && notifs.length > 0) {
             hasUnread = true;
         }
 
-        // ۲. رویدادهای امروز و فردا از تقویم (جدول ravlo)
+        // ۲. رویدادهای انجام‌نشده از امروز به بعد (ravlo)
         if (!hasUnread) {
-            const today = new Date();
-            const tomorrow = new Date(today);
-            tomorrow.setDate(tomorrow.getDate() + 1);
-            const todayStr = today.toISOString().split('T')[0];
-            const tomorrowStr = tomorrow.toISOString().split('T')[0];
+            const today = new Date().toISOString().split('T')[0]; // e.g., 2026-07-01
 
-            const { data: events, error: eventErr } = await sb
+            const { data: events } = await sb
                 .from('ravlo')
                 .select('id')
                 .eq('user_id', currentUser.id)
-                .gte('start_date', todayStr)
-                .lte('start_date', tomorrowStr)
+                .gte('start_date', today)   // از امروز به بعد
                 .limit(1);
 
-            if (!eventErr && events && events.length > 0) {
+            if (events && events.length > 0) {
                 hasUnread = true;
             }
         }
     }
 
-    // استفاده از متد رسمی کامپوننت (اگر وجود دارد)
-    if (typeof comp.setNotificationDot === 'function') {
-        comp.setNotificationDot(hasUnread);
-    } else {
-        // روش fallback: دستکاری مستقیم DOM
-        const dot = comp.shadowRoot.getElementById('avatar-notif-dot');
-        if (dot) {
-            dot.style.display = hasUnread ? 'block' : 'none';
-        }
+    console.log('hasUnread (Tavio dot):', hasUnread); // برای دیباگ موقت
+
+    // اعمال تغییر روی DOM
+    const dot = comp.shadowRoot.getElementById('avatar-notif-dot');
+    if (dot) {
+        dot.style.display = hasUnread ? 'block' : 'none';
     }
 }
 
