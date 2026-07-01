@@ -1269,7 +1269,7 @@ function syncSidebarComponent() {
         // جابه‌جایی دکمهٔ همبرگری ۴ پیکسل به چپ (فقط در موبایل)
     const hamburger = comp.shadowRoot?.querySelector('.sidebar-toggle, .hamburger, button[aria-label="Open sidebar"]');
     if (hamburger && window.innerWidth <= 768) {
-        hamburger.style.marginLeft = '-4px';
+        hamburger.style.marginLeft = '-14px';
     }
 }
 
