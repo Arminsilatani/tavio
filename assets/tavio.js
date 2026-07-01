@@ -2044,11 +2044,21 @@ function showNewPromptModal() {
 
 function openEditPromptModal() {
     if (!currentPrompt) return;
-    editingPromptId = currentPrompt.id;          // شناسه پرامپتی که ویرایش می‌کنیم
+    editingPromptId = currentPrompt.id;
 
-    document.getElementById('modal-title').value = currentPrompt.title || '';
-    document.getElementById('modal-description').value = currentPrompt.description || '';
-    document.getElementById('modal-template').value = currentPrompt.template || '';
+    const titleInput = document.getElementById('modal-title');
+    const descTextarea = document.getElementById('modal-description');
+    const templateTextarea = document.getElementById('modal-template');
+
+    // اگر هر یک از این عناصر ضروری هنوز در دسترس نیستند، یک تلاش دوباره در ۵۰ میلی‌ثانیهٔ دیگر انجام بده
+    if (!titleInput || !templateTextarea) {
+        setTimeout(() => openEditPromptModal(), 50);
+        return;
+    }
+
+    titleInput.value = currentPrompt.title || '';
+    descTextarea.value = currentPrompt.description || '';
+    templateTextarea.value = currentPrompt.template || '';
 
     modalSelectedCategories = [...(currentPrompt.categories || [])];
     modalSelectedAIModels = [...(currentPrompt.ai_models || [])];
