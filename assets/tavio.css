@@ -1372,12 +1372,11 @@ textarea::-webkit-scrollbar-thumb,
         margin-bottom: 16px;
     }
 
-    /* ردیف اول: عنوان + توضیح (وسط‌چین، تمام عرض) */
     .editor-title {
         order: 1;
         width: 100%;
         text-align: center;
-        margin-bottom: 8px;
+        margin: 0 0 4px 0;
     }
     .editor-title h3 {
         font-size: 18px;
