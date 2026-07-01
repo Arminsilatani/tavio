@@ -1417,7 +1417,7 @@ textarea::-webkit-scrollbar-thumb,
     /* دکمه Edit */
     .edit-btn {
         order: 4;
-        width: 40%;
+        width: 60%;
         justify-content: center;
         margin-left: 0;
         padding: 8px 0;
