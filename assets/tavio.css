@@ -1335,7 +1335,7 @@ textarea::-webkit-scrollbar-thumb,
     .branding {
         flex-direction: column;   /* لوگو و متن زیر هم */
         align-items: center;      /* وسط‌چین افقی */
-        gap: 18px;
+        gap: 8px;
     }
     .brand-logo {
         height: 36px;             /* لوگو کمی کوچک‌تر */
