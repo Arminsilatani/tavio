@@ -1167,7 +1167,7 @@ textarea::-webkit-scrollbar-thumb,
 .editor-header .delete-btn .btn-text {
     position: absolute;
     right: 70%;
-    margin-right: 80px;
+    margin-right: 8px;
     top: 50%;
     transform: translateY(-50%) translateX(10px); /* اول یه کم سمت راست باشه */
     opacity: 0;
