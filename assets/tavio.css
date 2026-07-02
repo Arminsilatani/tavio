@@ -742,10 +742,7 @@ textarea::-webkit-scrollbar-thumb,
 
 /* =========================== GLASS MODALS ============================ */
 
-/* Prevent background scrolling when a modal is open */
-body.modal-open {
-    overflow: hidden;
-}
+
 
 /* The full‑screen overlay behind the panel */
 .modal {
