@@ -711,33 +711,6 @@ textarea::-webkit-scrollbar-thumb,
     user-select: none;
     transition: color 0.2s;
 }
-.multi-checkbox-item input[type="checkbox"] {
-    appearance: none;
-    -webkit-appearance: none;
-    width: 18px; height: 18px;
-    border: 1px solid var(--border);
-    border-radius: 4px;
-    background: rgba(255, 255, 255, 0.05);
-    cursor: pointer;
-    position: relative;
-    flex-shrink: 0;
-    transition: background 0.2s, border-color 0.2s;
-    margin: 0;
-}
-.multi-checkbox-item input[type="checkbox"]:checked {
-    background: var(--accent);
-    border-color: var(--accent);
-}
-.multi-checkbox-item input[type="checkbox"]:checked::after {
-    content: "";
-    position: absolute;
-    top: 2px; left: 5px;
-    width: 4px; height: 8px;
-    border: solid #0d0d0d;
-    border-width: 0 2px 2px 0;
-    transform: rotate(45deg);
-}
-.multi-checkbox-item.checked { color: var(--accent); }
 
 /* =========================== GLASS MODALS ============================ */
 
@@ -1099,23 +1072,6 @@ textarea::-webkit-scrollbar-thumb,
     border-radius: 4px;
     object-fit: contain;
 }
-.ai-model-checkbox {
-    display: flex;
-    align-items: center;
-    padding: 6px 25px;
-    gap: 8px;
-    font-size: 13px;
-    color: #ccc;
-}
-.ai-model-checkbox input[type="checkbox"] { accent-color: var(--accent); }
-.show-more-btn {
-    font-size: 11px;
-    color: var(--accent);
-    background: none;
-    border: none;
-    padding: 4px 12px;
-    cursor: pointer;
-}
 
 /* ------------------------- BUTTONS ------------------------- */
 .btn-primary, .btn-secondary, .btn-copy {
@@ -1467,24 +1423,30 @@ textarea::-webkit-scrollbar-thumb,
 
 /* ======================== چک‌باکس نقطه‌ای نئونی ۳×۳ ======================== */
 
+/* بازنشانی کامل و اعمال نقطه‌ها */
 .multi-checkbox-item input[type="checkbox"],
 .ai-model-checkbox input[type="checkbox"],
 #modal-is-global {
 
-  /* ـــــــ پایه: مخفی کردن ظاهر پیش‌فرض ـــــــ */
+  /* حذف کامل ظاهر پیش‌فرض */
   -webkit-appearance: none;
   appearance: none;
-  width: 24px;                /* دقیقاً ۲۴px – فضای کافی برای ۹ نقطه */
+  width: 24px;
   height: 24px;
   margin: 0;
-  vertical-align: middle;
-  cursor: pointer;
+  padding: 0;
+  border: none;               /* ← حذف حاشیه */
+  border-radius: 0;           /* ← حذف گوشه‌های گرد */
   background: transparent;
   position: relative;
+  cursor: pointer;
   outline: none;
+  box-sizing: border-box;
 
-  /* ـــــــ ۹ نقطه طوسی (حالت عادی) ـــــــ */
+  /* ۹ نقطه طوسی در حالت عادی */
   --c-base: #2a2a2a;
+  --c-on: var(--accent);       /* رنگ نئونی از تم */
+
   background-image:
     radial-gradient(circle, var(--c-base) 40%, transparent 65%),
     radial-gradient(circle, var(--c-base) 40%, transparent 65%),
@@ -1496,18 +1458,20 @@ textarea::-webkit-scrollbar-thumb,
     radial-gradient(circle, var(--c-base) 40%, transparent 65%),
     radial-gradient(circle, var(--c-base) 40%, transparent 65%);
 
-  background-size: 5px 5px;                    /* اندازهٔ هر نقطه */
+  background-size: 5px 5px;
   background-position:
     3px 3px,   10px 3px,   17px 3px,
     3px 10px,  10px 10px,  17px 10px,
     3px 17px,  10px 17px,  17px 17px;
   background-repeat: no-repeat;
-
-  /* متغیر رنگ نئونی (از تم میاد) */
-  --c-on: var(--accent);
 }
 
-/* ـــــــ لایهٔ نئونی (::before) برای حالت تیک‌خورده ـــــــ */
+/* غیرفعال کردن تیک مربعی قدیمی */
+.multi-checkbox-item input[type="checkbox"]::after {
+  content: none !important;
+}
+
+/* لایه نئونی (::before) که فقط هنگام تیک ظاهر می‌شود */
 .multi-checkbox-item input[type="checkbox"]::before,
 .ai-model-checkbox input[type="checkbox"]::before,
 #modal-is-global::before {
@@ -1530,16 +1494,22 @@ textarea::-webkit-scrollbar-thumb,
   background-repeat: no-repeat;
 
   opacity: 0;
-  pointer-events: none;
   filter: drop-shadow(0 0 4px var(--c-on));
   transition: opacity 0.2s;
+  pointer-events: none;
 }
 
-/* ـــــــ حالت تیک‌خورده: لایهٔ نئونی ظاهر می‌شه ـــــــ */
 .multi-checkbox-item input[type="checkbox"]:checked::before,
 .ai-model-checkbox input[type="checkbox"]:checked::before,
 #modal-is-global:checked::before {
   opacity: 1;
+}
+
+/* اختیاری: hover ملایم */
+.multi-checkbox-item input[type="checkbox"]:hover:not(:checked),
+.ai-model-checkbox input[type="checkbox"]:hover:not(:checked),
+#modal-is-global:hover:not(:checked) {
+  filter: brightness(1.2);
 }
 
 /* ------------------------- RESPONSIVE (MOBILE) ------------------------- */
