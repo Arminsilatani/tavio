@@ -1164,7 +1164,7 @@ textarea::-webkit-scrollbar-thumb,
     left: 50%;
     transform: translateX(-50%);
     background: var(--accent);
-    color: #fff;
+    color: #0d0d0d;
     padding: 10px 20px;
     border-radius: 8px;
     display: flex;
