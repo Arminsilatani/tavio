@@ -1441,6 +1441,8 @@ textarea::-webkit-scrollbar-thumb,
     cursor: pointer;
     outline: none;
     box-sizing: border-box;
+    position: relative;
+    top: -2px;
 
     --c-base: #2a2a2a;
     --c-on: var(--accent);
