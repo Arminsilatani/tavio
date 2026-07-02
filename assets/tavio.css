@@ -1073,6 +1073,7 @@ textarea::-webkit-scrollbar-thumb,
     object-fit: contain;
 }
 
+
 /* ------------------------- BUTTONS ------------------------- */
 .btn-primary, .btn-secondary, .btn-copy {
     font-family: "Kalameh", sans-serif;
