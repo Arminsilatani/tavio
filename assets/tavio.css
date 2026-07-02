@@ -1457,7 +1457,7 @@ textarea::-webkit-scrollbar-thumb,
         radial-gradient(circle, var(--c-base) 40%, transparent 65%),
         radial-gradient(circle, var(--c-base) 40%, transparent 65%);
 
-    background-size: 5px 5px;
+    background-size: 4px 4px;
     background-position:
         3px 3px,   10px 3px,   17px 3px,
         3px 10px,  10px 10px,  17px 10px,
