@@ -504,6 +504,7 @@ function renderPromptInputFields() {
 
                 const checkbox = document.createElement('input');
                 checkbox.type = 'checkbox';
+                checkbox.classList.add('neon-checkbox');
                 checkbox.value = opt;
                 checkbox.checked = fieldDefinitions[index].value.includes(opt);
 
