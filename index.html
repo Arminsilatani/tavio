@@ -6,16 +6,12 @@ Version: 0.0.0
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <!-- :::::::::::::::::::::::::: META TAGS :::::::::::::::::::::::::: -->
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-
-    <!-- :::::::::::::::::::::::::: SEO META :::::::::::::::::::::::::: -->
     <title>Organize Your Prompts | Tavio</title>
     <meta name="description" content="This page provides a personal space for you to save, categorize, and manage your own collection of prompts, ensuring they are always ready for quick access.">
     <meta name="robots" content="noindex, nofollow">
 
-    <!-- :::::::::::::::::::::::::: FAVICON & STYLES :::::::::::::::::::::::::: -->
     <link rel="apple-touch-icon" href="/assets/apple-touch-icon.png">
     <link rel="icon" type="image/x-icon" href="/assets/favicon.ico">
     <link rel="icon" type="image/svg+xml" href="/assets/favicon.svg">
@@ -26,91 +22,55 @@ Version: 0.0.0
     <script src="https://arminsilatani.github.io/tools/assets/sidebar-component.js" type="module" defer></script>
     <script src="/assets/tavio.js" defer></script>
 
-    <!-- :::::::::::::::::::::::::: RESOURCE HINTS :::::::::::::::::::::::::: -->
-    <!-- <link rel="preconnect" href="[FONT_OR_API_DOMAIN]" crossorigin> -->
-    <!-- <link rel="preload" href="[CRITICAL_RESOURCE_URL]" as="[style|script|font]"> -->
-
-    <!-- :::::::::::::::::::::::::: OPEN GRAPH :::::::::::::::::::::::::: -->
-
-    <!-- :::::::::::::::::::::::::: TWITTER CARD :::::::::::::::::::::::::: -->
     <meta name="twitter:card" content="summary_large_image">
     <meta name="twitter:title" content="tavio • Prompt Library">
-    <!-- <meta name="twitter:description" content="[YOUR_DESCRIPTION_HERE]"> -->
-
-    <!-- :::::::::::::::::::::::::: CANONICAL & HREFLANG :::::::::::::::::::::::::: -->
     <link rel="canonical" href="[https://tavio.arminsilatani.com/]">
-    <!-- <link rel="alternate" hreflang="[LANG_CODE]" href="[ABSOLUTE_URL_TO_ALT_VERSION]"> -->
 
-    <!-- :::::::::::::::::::::::::: SCHEMA :::::::::::::::::::::::::: -->
-<script type="application/ld+json">
-{
-  "@context": "https://schema.org",
-  "@graph": [
+    <script type="application/ld+json">
     {
-      "@type": "WebSite",
-      "@id": "https://tavio.arminsilatani.com/#WebSite",
-      "url": "https://tavio.arminsilatani.com/",
-      "name": "Tavio",
-      "description": "Categorized Prompt Library",
-      "publisher": {
-        "@id": "https://tavio.arminsilatani.com/#Person"
-      },
-      "inLanguage": "en-US",
-      "potentialAction": {
-        "@type": "SearchAction",
-        "target": {
-          "@type": "EntryPoint",
-          "urlTemplate": "https://tavio.arminsilatani.com/?s={search_term_string}"
+      "@context": "https://schema.org",
+      "@graph": [
+        {
+          "@type": "WebSite",
+          "@id": "https://tavio.arminsilatani.com/#WebSite",
+          "url": "https://tavio.arminsilatani.com/",
+          "name": "Tavio",
+          "description": "Categorized Prompt Library",
+          "publisher": { "@id": "https://tavio.arminsilatani.com/#Person" },
+          "inLanguage": "en-US",
+          "potentialAction": {
+            "@type": "SearchAction",
+            "target": { "@type": "EntryPoint", "urlTemplate": "https://tavio.arminsilatani.com/?s={search_term_string}" },
+            "query-input": "required name=search_term_string"
+          }
         },
-        "query-input": "required name=search_term_string"
-      }
-    },
-    {
-      "@type": "WebPage",
-      "@id": "https://tavio.arminsilatani.com/#WebPage",
-      "url": "https://tavio.arminsilatani.com/",
-      "name": "Tavio: Categorized Prompt Library for AI",
-      "isPartOf": {
-        "@id": "https://tavio.arminsilatani.com/#WebSite"
-      },
-      "about": {
-        "@id": "https://tavio.arminsilatani.com/#SoftwareApplication"
-      },
-      "primaryImageOfPage": {
-        "@type": "ImageObject",
-        "url": "https://tavio.arminsilatani.com/assets/Ta.svg"
-      },
-      "inLanguage": "en-US"
-    },
-    {
-      "@type": "SoftwareApplication",
-      "@id": "https://tavio.arminsilatani.com/#SoftwareApplication",
-      "name": "Tavio",
-      "alternateName": "Tavio Prompt Library",
-      "description": "Tavio is a web-based application to create, manage, and categorize your personal library of AI prompts. It provides a structured way to store and retrieve prompts for various use cases.",
-      "applicationCategory": ["DeveloperTool", "ProductivityApplication"],
-      "operatingSystem": "Web-based",
-      "author": {
-        "@id": "https://tavio.arminsilatani.com/#Person"
-      },
-      "publisher": {
-        "@id": "https://tavio.arminsilatani.com/#Person"
-      },
-      "offers": {
-        "@type": "Offer",
-        "price": "0",
-        "priceCurrency": "USD"
-      },
-      "mainEntityOfPage": {
-        "@id": "https://tavio.arminsilatani.com/#WebPage"
-      }
+        {
+          "@type": "WebPage",
+          "@id": "https://tavio.arminsilatani.com/#WebPage",
+          "url": "https://tavio.arminsilatani.com/",
+          "name": "Tavio: Categorized Prompt Library for AI",
+          "isPartOf": { "@id": "https://tavio.arminsilatani.com/#WebSite" },
+          "about": { "@id": "https://tavio.arminsilatani.com/#SoftwareApplication" },
+          "primaryImageOfPage": { "@type": "ImageObject", "url": "https://tavio.arminsilatani.com/assets/Ta.svg" },
+          "inLanguage": "en-US"
+        },
+        {
+          "@type": "SoftwareApplication",
+          "@id": "https://tavio.arminsilatani.com/#SoftwareApplication",
+          "name": "Tavio",
+          "alternateName": "Tavio Prompt Library",
+          "description": "Tavio is a web-based application to create, manage, and categorize your personal library of AI prompts. It provides a structured way to store and retrieve prompts for various use cases.",
+          "applicationCategory": ["DeveloperTool", "ProductivityApplication"],
+          "operatingSystem": "Web-based",
+          "author": { "@id": "https://tavio.arminsilatani.com/#Person" },
+          "publisher": { "@id": "https://tavio.arminsilatani.com/#Person" },
+          "offers": { "@type": "Offer", "price": "0", "priceCurrency": "USD" },
+          "mainEntityOfPage": { "@id": "https://tavio.arminsilatani.com/#WebPage" }
+        }
+      ]
     }
-  ]
-}
-</script>
-
+    </script>
 </head>
-
 <body>
 
 <!-- ------------------------- INITIAL LOADER ------------------------- -->
