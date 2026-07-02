@@ -1274,14 +1274,16 @@ async function rejectSharedPromptViaNotif(notifId) {
 
 /* ------------------------- HELPER FUNCTIONS ------------------------- */
 function showGlobalLoader() {
-    document.getElementById('initial-loader').style.display = 'flex';
+    const loader = document.getElementById('initial-loader');
+    if (loader) loader.classList.remove('hidden');
 }
 function hideGlobalLoader() {
-    document.getElementById('initial-loader').style.display = 'none';
+    const loader = document.getElementById('initial-loader');
+    if (loader) loader.classList.add('hidden');
 }
 function openModal(modal) {
     if (!modal) return;
-    modal.classList.remove('hidden');   // ← حذف !important قبلی
+    modal.classList.remove('hidden');
     modal.style.display = 'flex';
 }
 
