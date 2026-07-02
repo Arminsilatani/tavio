@@ -704,7 +704,7 @@ textarea::-webkit-scrollbar-thumb,
 .multi-checkbox-item {
     display: flex;
     align-items: center;
-    gap: 6px;
+    gap: 1px;
     cursor: pointer;
     font-size: 14px;
     color: #aaa;
