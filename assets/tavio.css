@@ -1430,8 +1430,8 @@ textarea::-webkit-scrollbar-thumb,
 .neon-checkbox {
     -webkit-appearance: none;
     appearance: none;
-    width: 18px;
-    height: 18px;
+    width: 20px;
+    height: 20px;
     margin: 0;
     padding: 0;
     border: none;
@@ -1445,7 +1445,7 @@ textarea::-webkit-scrollbar-thumb,
     --c-base: #2a2a2a;
     --c-on: var(--accent);
 
-    /* ۹ نقطه طوسی */
+    /* نقطه‌ها ۳px (قبلاً ۴px) */
     background-image:
         radial-gradient(circle, var(--c-base) 40%, transparent 65%),
         radial-gradient(circle, var(--c-base) 40%, transparent 65%),
@@ -1457,23 +1457,22 @@ textarea::-webkit-scrollbar-thumb,
         radial-gradient(circle, var(--c-base) 40%, transparent 65%),
         radial-gradient(circle, var(--c-base) 40%, transparent 65%);
 
-    background-size: 4px 4px;
+    background-size: 3px 3px;   /* قبل ۴px */
+
+    /* موقعیت‌ها برای شبکهٔ متقارن با نقطهٔ ۳px */
     background-position:
-        2.5px 2.5px,   8px 2.5px,   13.5px 2.5px,
-        2.5px 8px,     8px 8px,     13.5px 8px,
-        2.5px 13.5px,  8px 13.5px,  13.5px 13.5px;
+        3px 3px,   10px 3px,   17px 3px,
+        3px 10px,  10px 10px,  17px 10px,
+        3px 17px,  10px 17px,  17px 17px;
     background-repeat: no-repeat;
 }
 
-.neon-checkbox::after {
-    content: none !important;
-}
-
-/* لایهٔ نئونی (::before) */
+/* لایهٔ نئونی هم با همان اندازه */
 .neon-checkbox::before {
     content: "";
     position: absolute;
     inset: 0;
+
     background-image:
         radial-gradient(circle, var(--c-on) 40%, transparent 65%),
         radial-gradient(circle, var(--c-on) 40%, transparent 65%),
@@ -1489,11 +1488,10 @@ textarea::-webkit-scrollbar-thumb,
     background-repeat: no-repeat;
 
     opacity: 0;
-    filter: drop-shadow(0 0 4px var(--c-on));
+    filter: drop-shadow(0 0 2px var(--c-on)); /* گلوی کوچیک‌تر متناسب با نقطهٔ ۳px */
     transition: opacity 0.2s;
     pointer-events: none;
 }
-
 .neon-checkbox:checked::before {
     opacity: 1;
 }
