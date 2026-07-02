@@ -1465,84 +1465,58 @@ textarea::-webkit-scrollbar-thumb,
 }
 .tavio-notif-item .notif-actions .reject-btn:hover { border-color: #666; }
 
-/* ======================== NEON DOT CHECKBOX (برای تمام چک‌باکس‌های سایت) ======================== */
+/* ======================== NEON DOT CHECKBOX (ساده و تمیز) ======================== */
 
-/* ۱. مخفی‌کردن چک‌باکس واقعی (ولی قابل کلیک و focus) */
+/* هر چک‌باکسی که می‌خوایم نئونی بشه */
 .multi-checkbox-item input[type="checkbox"],
 .ai-model-checkbox input[type="checkbox"],
-.global-check-label input[type="checkbox"] {
-    position: absolute;
-    opacity: 0;
-    width: 1px;
-    height: 1px;
-    overflow: hidden;
-    clip: rect(0 0 0 0);
-    white-space: nowrap;
-    pointer-events: none;   /* کلیک رو لیبل هندل می‌کنه */
+#modal-is-global {
+  appearance: none;
+  -webkit-appearance: none;
+  width: 22px;
+  height: 22px;
+  margin: 0;
+  vertical-align: middle;
+  cursor: pointer;
+  outline: none;
+  background-color: transparent;
+
+  /* ۹ نقطه طوسی (حالت عادی) */
+  --dot-color: #2a2a2a;
+  background-image:
+    radial-gradient(circle, var(--dot-color) 40%, transparent 65%),
+    radial-gradient(circle, var(--dot-color) 40%, transparent 65%),
+    radial-gradient(circle, var(--dot-color) 40%, transparent 65%),
+    radial-gradient(circle, var(--dot-color) 40%, transparent 65%),
+    radial-gradient(circle, var(--dot-color) 40%, transparent 65%),
+    radial-gradient(circle, var(--dot-color) 40%, transparent 65%),
+    radial-gradient(circle, var(--dot-color) 40%, transparent 65%),
+    radial-gradient(circle, var(--dot-color) 40%, transparent 65%),
+    radial-gradient(circle, var(--dot-color) 40%, transparent 65%);
+
+  background-size: 5px 5px;
+  background-position:
+    3px 3px, 9.5px 3px, 16px 3px,
+    3px 9.5px, 9.5px 9.5px, 16px 9.5px,
+    3px 16px, 9.5px 16px, 16px 16px;
+  background-repeat: no-repeat;
+
+  transition: box-shadow 0.2s, background-color 0.2s;
 }
 
-/* ۲. استایل پایه لیبل‌ها (فضا برای نقطه‌ها) */
-.multi-checkbox-item,
-.ai-model-checkbox,
-.global-check-label {
-    position: relative;
-    padding-left: 30px;      /* فضای کافی برای شبکه ۳×۳ */
-    cursor: pointer;
-    user-select: none;
-    display: inline-flex;    /* برای تراز عمودی با متن */
-    align-items: center;
-    min-height: 26px;        /* ارتفاع حداقل برای کلیک راحت */
-    color: #aaa;             /* رنگ پیش‌فرض متن */
-    transition: color 0.2s;
+/* حالت hover (قبل از تیک) */
+.multi-checkbox-item input[type="checkbox"]:hover:not(:checked),
+.ai-model-checkbox input[type="checkbox"]:hover:not(:checked),
+#modal-is-global:hover:not(:checked) {
+  --dot-color: #555;
 }
 
-/* ۳. شبکه نقطه‌ای ۳×۳ (با ۹ radial-gradient) */
-.multi-checkbox-item::before,
-.ai-model-checkbox::before,
-.global-check-label::before {
-    content: '';
-    position: absolute;
-    left: 0;
-    top: 50%;
-    transform: translateY(-50%);
-    width: 22px;   /* 6*3 + 2*2 = 22 */
-    height: 22px;
-    /* ۹ نقطه با رنگ متغیر */
-    background:
-        radial-gradient(circle, var(--dot-color, #2a2a2a) 100%, transparent 100%) 3px 3px / 6px 6px no-repeat,
-        radial-gradient(circle, var(--dot-color, #2a2a2a) 100%, transparent 100%) 11px 3px / 6px 6px no-repeat,
-        radial-gradient(circle, var(--dot-color, #2a2a2a) 100%, transparent 100%) 19px 3px / 6px 6px no-repeat,
-        radial-gradient(circle, var(--dot-color, #2a2a2a) 100%, transparent 100%) 3px 11px / 6px 6px no-repeat,
-        radial-gradient(circle, var(--dot-color, #2a2a2a) 100%, transparent 100%) 11px 11px / 6px 6px no-repeat,
-        radial-gradient(circle, var(--dot-color, #2a2a2a) 100%, transparent 100%) 19px 11px / 6px 6px no-repeat,
-        radial-gradient(circle, var(--dot-color, #2a2a2a) 100%, transparent 100%) 3px 19px / 6px 6px no-repeat,
-        radial-gradient(circle, var(--dot-color, #2a2a2a) 100%, transparent 100%) 11px 19px / 6px 6px no-repeat,
-        radial-gradient(circle, var(--dot-color, #2a2a2a) 100%, transparent 100%) 19px 19px / 6px 6px no-repeat;
-    transition: box-shadow 0.15s;
-}
-
-/* ۴. حالت تیک‌خورده – نقطه‌ها نئونی و glow */
-.multi-checkbox-item:has(input:checked)::before,
-.ai-model-checkbox:has(input:checked)::before,
-.global-check-label:has(input:checked)::before {
-    --dot-color: var(--accent);
-    box-shadow: 0 0 6px var(--accent);
-}
-
-/* ۵. تغییر رنگ متن وقتی تیک خورده */
-.multi-checkbox-item:has(input:checked),
-.ai-model-checkbox:has(input:checked),
-.global-check-label:has(input:checked) {
-    color: var(--accent);
-}
-
-.multi-checkbox-item:has(input:checked)::before,
-.ai-model-checkbox:has(input:checked)::before,
-.global-check-label:has(input:checked)::before {
-    /* ... کد قبلی ... */
-    opacity: 0.9;   /* برای حفظ وضوح */
-    /* برای کم‌نور کردن گوشه‌ها نمی‌تونیم جداگونه opacity بدیم چون همه نقطه‌ها با radial-gradient کشیده شدن.
-       یه راهش اینه که از دو تا pseudo-element استفاده کنیم، ولی پیچیده می‌شه. بی‌خیالش. */
+/* حالت تیک‌خورده – نئونی */
+.multi-checkbox-item input[type="checkbox"]:checked,
+.ai-model-checkbox input[type="checkbox"]:checked,
+#modal-is-global:checked {
+  --dot-color: var(--accent);
+  box-shadow: 0 0 6px var(--accent);
 }
 
 /* ------------------------- RESPONSIVE (MOBILE) ------------------------- */
