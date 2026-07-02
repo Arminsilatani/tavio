@@ -1261,44 +1261,64 @@ textarea::-webkit-scrollbar-thumb,
     color: inherit;
 }
 
-/* ------------------------- FULLPAGE LOADER ------------------------- */
+/* ------------------------- FULLPAGE NEON DOTS LOADER ------------------------- */
 .fullpage-loader {
     position: fixed;
     inset: 0;
     background: rgba(0, 0, 0, 0.75);
     backdrop-filter: blur(4px);
-    z-index: 99999;
+    z-index: 99999;                /* highest possible – stay above modals */
     display: flex;
     align-items: center;
     justify-content: center;
 }
+
 .lds-grid {
     display: grid;
-    grid-template-columns: repeat(3, 8px);
-    grid-gap: 5px;
+    grid-template-columns: repeat(3, var(--loader-dot-size, 8px));
+    grid-gap: calc(var(--loader-dot-size, 8px) * 0.625);
     justify-content: center;
     align-items: center;
 }
+
 .lds-grid div {
-    width: 8px; height: 8px;
+    width: var(--loader-dot-size, 8px);
+    height: var(--loader-dot-size, 8px);
     border-radius: 50%;
     background: var(--accent);
-    box-shadow: 0 0 4px var(--accent);
-    animation: neonBlink 1.5s infinite ease-in-out;
+    box-shadow: 0 0 calc(var(--loader-dot-size, 8px) * 0.5) var(--accent);
+    animation: neonBlink var(--loader-anim-speed, 1.5s) infinite ease-in-out;
 }
-.lds-grid div:nth-child(1) { animation-delay: 0.0s; animation-duration: 1.2s; }
-.lds-grid div:nth-child(2) { animation-delay: 0.3s; animation-duration: 1.4s; }
-.lds-grid div:nth-child(3) { animation-delay: 0.7s; animation-duration: 1.1s; }
-.lds-grid div:nth-child(4) { animation-delay: 0.1s; animation-duration: 1.3s; }
-.lds-grid div:nth-child(5) { animation-delay: 0.5s; animation-duration: 1.6s; }
-.lds-grid div:nth-child(6) { animation-delay: 0.2s; animation-duration: 1.2s; }
-.lds-grid div:nth-child(7) { animation-delay: 0.8s; animation-duration: 1.5s; }
-.lds-grid div:nth-child(8) { animation-delay: 0.4s; animation-duration: 1.3s; }
-.lds-grid div:nth-child(9) { animation-delay: 0.6s; animation-duration: 1.1s; }
 
+/* Different delays & durations for a organic wave pattern (all relative to base speed) */
+.lds-grid div:nth-child(1) { animation-delay: 0s;           animation-duration: calc(var(--loader-anim-speed, 1.5s) * 0.8); }
+.lds-grid div:nth-child(2) { animation-delay: calc(var(--loader-anim-speed, 1.5s) * 0.2);  animation-duration: calc(var(--loader-anim-speed, 1.5s) * 0.93); }
+.lds-grid div:nth-child(3) { animation-delay: calc(var(--loader-anim-speed, 1.5s) * 0.47); animation-duration: calc(var(--loader-anim-speed, 1.5s) * 0.73); }
+.lds-grid div:nth-child(4) { animation-delay: calc(var(--loader-anim-speed, 1.5s) * 0.07); animation-duration: calc(var(--loader-anim-speed, 1.5s) * 0.87); }
+.lds-grid div:nth-child(5) { animation-delay: calc(var(--loader-anim-speed, 1.5s) * 0.33); animation-duration: calc(var(--loader-anim-speed, 1.5s) * 1.07); }
+.lds-grid div:nth-child(6) { animation-delay: calc(var(--loader-anim-speed, 1.5s) * 0.13); animation-duration: calc(var(--loader-anim-speed, 1.5s) * 0.8); }
+.lds-grid div:nth-child(7) { animation-delay: calc(var(--loader-anim-speed, 1.5s) * 0.53); animation-duration: calc(var(--loader-anim-speed, 1.5s) * 1.0); }
+.lds-grid div:nth-child(8) { animation-delay: calc(var(--loader-anim-speed, 1.5s) * 0.27); animation-duration: calc(var(--loader-anim-speed, 1.5s) * 0.87); }
+.lds-grid div:nth-child(9) { animation-delay: calc(var(--loader-anim-speed, 1.5s) * 0.4);  animation-duration: calc(var(--loader-anim-speed, 1.5s) * 0.73); }
+
+/* Corner dots slightly dimmer for a more natural look */
+.lds-grid div:nth-child(1),
+.lds-grid div:nth-child(3),
+.lds-grid div:nth-child(7),
+.lds-grid div:nth-child(9) {
+    opacity: 0.35;
+}
+
+/* Keyframes: neon glow pulses */
 @keyframes neonBlink {
-    0%, 100% { opacity: 0.2; box-shadow: 0 0 2px var(--accent); }
-    50%      { opacity: 1;   box-shadow: 0 0 6px var(--accent); }
+    0%, 100% {
+        opacity: 0.2;
+        box-shadow: 0 0 calc(var(--loader-dot-size, 8px) * 0.25) var(--accent);
+    }
+    50% {
+        opacity: 1;
+        box-shadow: 0 0 calc(var(--loader-dot-size, 8px) * 0.75) var(--accent);
+    }
 }
 
 /* ------------------------- AUTH OVERLAY ------------------------- */
