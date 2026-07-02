@@ -1072,7 +1072,23 @@ textarea::-webkit-scrollbar-thumb,
     border-radius: 4px;
     object-fit: contain;
 }
-
+.ai-model-checkbox {
+    display: flex;
+    align-items: center;
+    padding: 6px 25px;
+    gap: 8px;
+    font-size: 13px;
+    color: #ccc;
+}
+.ai-model-checkbox input[type="checkbox"] { accent-color: var(--accent); }
+.show-more-btn {
+    font-size: 11px;
+    color: var(--accent);
+    background: none;
+    border: none;
+    padding: 4px 12px;
+    cursor: pointer;
+}
 
 /* ------------------------- BUTTONS ------------------------- */
 .btn-primary, .btn-secondary, .btn-copy {
