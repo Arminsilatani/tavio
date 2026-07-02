@@ -1481,7 +1481,7 @@ textarea::-webkit-scrollbar-thumb,
         radial-gradient(circle, var(--c-on) 40%, transparent 65%),
         radial-gradient(circle, var(--c-on) 40%, transparent 65%),
         radial-gradient(circle, var(--c-on) 40%, transparent 65%);
-    background-size: 3px 3px;
+    background-size: 4px 4px;
     background-position: inherit;   /* از والد می‌گیره */
     background-repeat: no-repeat;
 
