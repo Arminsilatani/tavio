@@ -1445,7 +1445,7 @@ textarea::-webkit-scrollbar-thumb,
     --c-base: #2a2a2a;
     --c-on: var(--accent);
 
-    /* ۴ نقطه (۲×۲) */
+    /* ۴ نقطه */
     background-image:
         radial-gradient(circle, var(--c-base) 40%, transparent 65%),
         radial-gradient(circle, var(--c-base) 40%, transparent 65%),
@@ -1454,10 +1454,10 @@ textarea::-webkit-scrollbar-thumb,
 
     background-size: 4px 4px;
 
-    /* موقعیت‌های ۴ نقطه – متقارن وسط چک‌باکس ۲۰px */
+    /* موقعیت‌های نزدیک‌تر (gap = 6px) */
     background-position:
-        4px 4px,   12px 4px,
-        4px 12px,  12px 12px;
+        4px 4px,   10px 4px,
+        4px 10px,  10px 10px;
     background-repeat: no-repeat;
 }
 
