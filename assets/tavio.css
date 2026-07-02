@@ -1465,6 +1465,166 @@ textarea::-webkit-scrollbar-thumb,
 }
 .tavio-notif-item .notif-actions .reject-btn:hover { border-color: #666; }
 
+/* ==================== NEON DOT CHECKLIST ==================== */
+#checklist-container {
+    color: var(--text, #f5f5f5);
+    font-family: inherit;
+    max-width: 600px;
+    margin: 0 auto;
+}
+
+#checklist-items {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+}
+
+.checklist-row {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 6px 0;
+    animation: checklistSlideDown 0.25s ease;
+    position: relative;
+}
+
+.checklist-row.subtask {
+    margin-left: 32px;
+}
+
+/* چک‌باکس ۳×۳ نقطه‌ای */
+.neon-checkbox {
+    display: inline-grid;
+    grid-template-columns: repeat(3, 6px);
+    grid-template-rows: repeat(3, 6px);
+    grid-gap: 2px;
+    cursor: pointer;
+    flex-shrink: 0;
+    padding: 2px;
+    border-radius: 4px;
+    transition: background 0.15s;
+}
+.neon-checkbox:hover {
+    background: rgba(255,255,255,0.05);
+}
+
+.neon-checkbox .dot {
+    width: 6px;
+    height: 6px;
+    border-radius: 50%;
+    background: #2a2a2a;
+    transition: background 0.15s, box-shadow 0.15s;
+}
+
+/* حالت تیک‌خورده – نقطه‌ها نئونی می‌شن */
+.neon-checkbox.checked .dot {
+    background: var(--accent);
+    box-shadow: 0 0 4px var(--accent);
+}
+
+/* نقطه‌های گوشه کمی کم‌نورتر برای ظاهر طبیعی‌تر */
+.neon-checkbox.checked .dot:nth-child(1),
+.neon-checkbox.checked .dot:nth-child(3),
+.neon-checkbox.checked .dot:nth-child(7),
+.neon-checkbox.checked .dot:nth-child(9) {
+    opacity: 0.35;
+}
+
+/* متن قابل ویرایش */
+.checklist-text {
+    flex: 1;
+    background: transparent;
+    border: none;
+    color: inherit;
+    font-size: 15px;
+    padding: 4px 6px;
+    border-radius: 4px;
+    outline: none;
+    transition: background 0.15s;
+    min-width: 0;
+}
+.checklist-text:focus {
+    background: rgba(255,255,255,0.05);
+}
+
+/* دکمه‌های کناری */
+.checklist-actions {
+    display: flex;
+    gap: 4px;
+    flex-shrink: 0;
+}
+.checklist-actions button {
+    background: none;
+    border: none;
+    color: #888;
+    cursor: pointer;
+    padding: 4px 6px;
+    border-radius: 4px;
+    font-size: 16px;
+    line-height: 1;
+    transition: color 0.15s, background 0.15s;
+}
+.checklist-actions button:hover {
+    color: var(--accent);
+    background: rgba(255,255,255,0.05);
+}
+.checklist-delete-btn:hover {
+    color: #ff6b6b !important;
+}
+
+/* ردیف اضافه کردن آیتم */
+.checklist-add-row {
+    display: flex;
+    gap: 8px;
+    margin-top: 12px;
+    align-items: center;
+}
+.checklist-new-input {
+    flex: 1;
+    background: rgba(255,255,255,0.05);
+    border: 1px solid var(--border, rgba(255,255,255,0.08));
+    border-radius: 8px;
+    color: inherit;
+    padding: 8px 12px;
+    font-size: 14px;
+    outline: none;
+}
+.checklist-new-input:focus {
+    border-color: var(--accent);
+}
+.checklist-add-btn {
+    background: var(--accent);
+    color: #111;
+    border: none;
+    border-radius: 8px;
+    width: 36px;
+    height: 36px;
+    font-size: 20px;
+    font-weight: bold;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: background 0.2s;
+}
+.checklist-add-btn:hover {
+    background: color-mix(in srgb, var(--accent) 85%, white);
+}
+
+/* انیمیشن ظاهر شدن آیتم جدید */
+@keyframes checklistSlideDown {
+    from {
+        opacity: 0;
+        transform: translateY(-8px);
+        max-height: 0;
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+        max-height: 50px;
+    }
+}
+
 /* ------------------------- RESPONSIVE (MOBILE) ------------------------- */
 @media (max-width: 768px) {
     .branding {
@@ -1494,9 +1654,9 @@ textarea::-webkit-scrollbar-thumb,
     /* Editor header (mobile) */
 .editor-header {
     display: flex;
-    flex-wrap: wrap;                /* اجازه شکستن خط */
-    align-items: flex-start;        /* تراز عمودی بالا */
-    gap: 8px;                       /* فاصله بین عناصر */
+    flex-wrap: wrap;
+    align-items: flex-start;
+    gap: 8px;
 }
     .editor-title {
         flex: 0 0 100%;
