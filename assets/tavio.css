@@ -1465,59 +1465,7 @@ textarea::-webkit-scrollbar-thumb,
 }
 .tavio-notif-item .notif-actions .reject-btn:hover { border-color: #666; }
 
-/* ======================== NEON DOT CHECKBOX (ساده و تمیز) ======================== */
 
-/* هر چک‌باکسی که می‌خوایم نئونی بشه */
-.multi-checkbox-item input[type="checkbox"],
-.ai-model-checkbox input[type="checkbox"],
-#modal-is-global {
-  appearance: none;
-  -webkit-appearance: none;
-  width: 22px;
-  height: 22px;
-  margin: 0;
-  vertical-align: middle;
-  cursor: pointer;
-  outline: none;
-  background-color: transparent;
-
-  /* ۹ نقطه طوسی (حالت عادی) */
-  --dot-color: #2a2a2a;
-  background-image:
-    radial-gradient(circle, var(--dot-color) 40%, transparent 65%),
-    radial-gradient(circle, var(--dot-color) 40%, transparent 65%),
-    radial-gradient(circle, var(--dot-color) 40%, transparent 65%),
-    radial-gradient(circle, var(--dot-color) 40%, transparent 65%),
-    radial-gradient(circle, var(--dot-color) 40%, transparent 65%),
-    radial-gradient(circle, var(--dot-color) 40%, transparent 65%),
-    radial-gradient(circle, var(--dot-color) 40%, transparent 65%),
-    radial-gradient(circle, var(--dot-color) 40%, transparent 65%),
-    radial-gradient(circle, var(--dot-color) 40%, transparent 65%);
-
-  background-size: 5px 5px;
-  background-position:
-    3px 3px, 9.5px 3px, 16px 3px,
-    3px 9.5px, 9.5px 9.5px, 16px 9.5px,
-    3px 16px, 9.5px 16px, 16px 16px;
-  background-repeat: no-repeat;
-
-  transition: box-shadow 0.2s, background-color 0.2s;
-}
-
-/* حالت hover (قبل از تیک) */
-.multi-checkbox-item input[type="checkbox"]:hover:not(:checked),
-.ai-model-checkbox input[type="checkbox"]:hover:not(:checked),
-#modal-is-global:hover:not(:checked) {
-  --dot-color: #555;
-}
-
-/* حالت تیک‌خورده – نئونی */
-.multi-checkbox-item input[type="checkbox"]:checked,
-.ai-model-checkbox input[type="checkbox"]:checked,
-#modal-is-global:checked {
-  --dot-color: var(--accent);
-  box-shadow: 0 0 6px var(--accent);
-}
 
 /* ------------------------- RESPONSIVE (MOBILE) ------------------------- */
 @media (max-width: 768px) {
