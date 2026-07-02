@@ -2416,23 +2416,6 @@ function setupUIListeners() {
 
     document.getElementById('new-prompt-btn').addEventListener('click', showNewPromptModal);
 
-    // Close modal when clicking on the dark backdrop (not the panel)
-    document.addEventListener('click', function(e) {
-        const modal = e.target.closest('.modal');
-        if (modal && e.target === modal) {
-            closeModal(modal);
-        }
-    });
-
-    // Close modal via the × button
-    document.addEventListener('click', function(e) {
-        const closeBtn = e.target.closest('.close-modal');
-        if (closeBtn) {
-            const modal = closeBtn.closest('.modal');
-            if (modal) closeModal(modal);
-        }
-    });
-
     const cancelBtn = document.getElementById('cancel-modal-btn');
     if (cancelBtn) cancelBtn.addEventListener('click', hideNewPromptModal);
     const addBtn = document.getElementById('add-prompt-btn');
