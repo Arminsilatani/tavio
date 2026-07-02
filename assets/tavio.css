@@ -1067,7 +1067,7 @@ textarea::-webkit-scrollbar-thumb,
 .ai-model-checkbox {
     display: flex;
     align-items: center;
-    padding: 6px 25px;
+    padding: 16px 25px;
     gap:1px;
     font-size: 13px;
     color: #ccc;
