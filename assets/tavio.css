@@ -217,7 +217,7 @@ textarea::-webkit-scrollbar-thumb,
     top: 12px; right: 12px;
     display: flex;
     gap: 4px;
-    z-index: 2;
+    z-index: 0;                       /* تغییر یافته */
 }
 .prompt-card .action-buttons button {
     background: none;
@@ -333,8 +333,8 @@ textarea::-webkit-scrollbar-thumb,
     flex-wrap: nowrap;
 }
 .editor-title {
-    flex: 1 1 0%;                   /* کوچک‌ترین فضای ممکن، اما رشد کند */
-    min-width: 0;                   /* جلوگیری از overflow */
+    flex: 1 1 0%;
+    min-width: 0;
 }
 .editor-title h3 {
     margin: 0;
@@ -472,7 +472,7 @@ textarea::-webkit-scrollbar-thumb,
     right: 0;
     display: flex;
     gap: 8px;
-    z-index: 5;
+    z-index: 1;                        /* تغییر یافته */
 }
 .result-display {
     position: relative;
@@ -721,7 +721,7 @@ textarea::-webkit-scrollbar-thumb,
     inset: 0;
     background: rgba(0, 0, 0, 0.7);
     backdrop-filter: blur(6px);
-    z-index: 1000;
+    z-index: 3;                       /* تغییر یافته */
     justify-content: center;
     align-items: flex-start;
     overflow-y: auto;
@@ -768,7 +768,7 @@ textarea::-webkit-scrollbar-thumb,
     border: none;
     transition: color 0.2s;
     line-height: 1;
-    z-index: 10;
+    z-index: 2;                       /* تغییر یافته */
 }
 .close-modal:hover {
     color: #fff;
@@ -933,7 +933,7 @@ textarea::-webkit-scrollbar-thumb,
     background: #1e1e1e;
     border: 1px solid var(--border);
     border-radius: 8px;
-    z-index: 1100;
+    z-index: 4;                       /* تغییر یافته */
     display: flex;
     flex-direction: column;
     max-height: 340px;
@@ -1170,7 +1170,7 @@ textarea::-webkit-scrollbar-thumb,
     display: flex;
     align-items: center;
     gap: 10px;
-    z-index: 9999;
+    z-index: 5;                       /* تغییر یافته */
     box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
     animation: toastSlideDown 0.3s ease;
     font-size: 14px;
@@ -1231,7 +1231,7 @@ textarea::-webkit-scrollbar-thumb,
     inset: 0;
     background: rgba(0, 0, 0, 0.75);
     backdrop-filter: blur(4px);
-    z-index: 99999;
+    z-index: 7;                       /* تغییر یافته */
     display: flex;
     align-items: center;
     justify-content: center;
@@ -1292,7 +1292,7 @@ textarea::-webkit-scrollbar-thumb,
     display: flex;
     align-items: center;
     justify-content: center;
-    z-index: 10000;
+    z-index: 6;                       /* تغییر یافته */
 }
 .auth-box {
     background: rgba(255,255,255,0.05);
@@ -1441,13 +1441,11 @@ textarea::-webkit-scrollbar-thumb,
     cursor: pointer;
     outline: none;
     box-sizing: border-box;
-    position: relative;
     top: -1.5px;
 
     --c-base: #2a2a2a;
     --c-on: var(--accent);
 
-    /* ۴ نقطه */
     background-image:
         radial-gradient(circle, var(--c-base) 40%, transparent 65%),
         radial-gradient(circle, var(--c-base) 40%, transparent 65%),
@@ -1455,8 +1453,6 @@ textarea::-webkit-scrollbar-thumb,
         radial-gradient(circle, var(--c-base) 40%, transparent 65%);
 
     background-size: 4px 4px;
-
-    /* موقعیت‌های نزدیک‌تر (gap = 6px) */
     background-position:
         4px 4px,   10px 4px,
         4px 10px,  10px 10px;
@@ -1486,7 +1482,7 @@ textarea::-webkit-scrollbar-thumb,
     opacity: 1;
 }
 
-/* تغییر رنگ متن label وقتی چک‌باکس تیک خورده */
+/* تغییر رنگ متن label */
 .multi-checkbox-item:has(.neon-checkbox:checked) {
     color: var(--accent);
 }
