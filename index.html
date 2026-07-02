@@ -42,13 +42,94 @@ Version: 0.0.0
     <!-- <link rel="alternate" hreflang="[LANG_CODE]" href="[ABSOLUTE_URL_TO_ALT_VERSION]"> -->
 
     <!-- :::::::::::::::::::::::::: SCHEMA :::::::::::::::::::::::::: -->
-    <!-- <script type="application/ld+json">
+<script type="application/ld+json">
 {
   "@context": "https://schema.org",
-  "@type": "[YOUR_SCHEMA_TYPE]",
-  "name": "[YOUR_NAME]"
+  "@graph": [
+    {
+      "@type": "WebSite",
+      "@id": "https://tavio.arminsilatani.com/#WebSite",
+      "url": "https://tavio.arminsilatani.com/",
+      "name": "Tavio",
+      "description": "Categorized Prompt Library",
+      "publisher": {
+        "@id": "https://tavio.arminsilatani.com/#Person"
+      },
+      "inLanguage": "en-US",
+      "potentialAction": {
+        "@type": "SearchAction",
+        "target": {
+          "@type": "EntryPoint",
+          "urlTemplate": "https://tavio.arminsilatani.com/?s={search_term_string}"
+        },
+        "query-input": "required name=search_term_string"
+      }
+    },
+    {
+      "@type": "WebPage",
+      "@id": "https://tavio.arminsilatani.com/#WebPage",
+      "url": "https://tavio.arminsilatani.com/",
+      "name": "Tavio: Categorized Prompt Library for AI",
+      "isPartOf": {
+        "@id": "https://tavio.arminsilatani.com/#WebSite"
+      },
+      "about": {
+        "@id": "https://tavio.arminsilatani.com/#SoftwareApplication"
+      },
+      "primaryImageOfPage": {
+        "@type": "ImageObject",
+        "url": "https://arminsilatani.com/images/favicon.png"
+      },
+      "inLanguage": "en-US"
+    },
+    {
+      "@type": "Person",
+      "@id": "https://tavio.arminsilatani.com/#Person",
+      "name": "Armin Silatani",
+      "url": "https://arminsilatani.com/en/",
+      "image": {
+        "@type": "ImageObject",
+        "url": "https://arminsilatani.com/images/favicon.png",
+        "caption": "Armin Silatani"
+      },
+      "jobTitle": "Digital Marketing Specialist",
+      "email": "contact@arminsilatani.com",
+      "telephone": "+989125759466",
+      "sameAs": [
+        "https://www.linkedin.com/in/arminsilatani/",
+        "https://github.com/Arminsilatani",
+        "https://www.instagram.com/arminsilatani",
+        "https://t.me/ArminSilatani",
+        "https://wa.me/+989125759466"
+      ]
+    },
+    {
+      "@type": "SoftwareApplication",
+      "@id": "https://tavio.arminsilatani.com/#SoftwareApplication",
+      "name": "Tavio",
+      "alternateName": "Tavio Prompt Library",
+      "description": "Tavio is a web-based application to create, manage, and categorize your personal library of AI prompts. It provides a structured way to store and retrieve prompts for various use cases.",
+      "applicationCategory": ["DeveloperTool", "ProductivityApplication"],
+      "operatingSystem": "Web-based",
+      "author": {
+        "@id": "https://tavio.arminsilatani.com/#Person"
+      },
+      "publisher": {
+        "@id": "https://tavio.arminsilatani.com/#Person"
+      },
+      "offers": {
+        "@type": "Offer",
+        "price": "0",
+        "priceCurrency": "USD"
+      },
+      "mainEntityOfPage": {
+        "@id": "https://tavio.arminsilatani.com/#WebPage"
+      }
+    }
+  ]
 }
-</script> -->
+</script>
+
 </head>
 
 <body>
