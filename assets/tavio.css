@@ -1536,6 +1536,15 @@ textarea::-webkit-scrollbar-thumb,
     color: var(--accent);
 }
 
+.multi-checkbox-item:has(input:checked)::before,
+.ai-model-checkbox:has(input:checked)::before,
+.global-check-label:has(input:checked)::before {
+    /* ... کد قبلی ... */
+    opacity: 0.9;   /* برای حفظ وضوح */
+    /* برای کم‌نور کردن گوشه‌ها نمی‌تونیم جداگونه opacity بدیم چون همه نقطه‌ها با radial-gradient کشیده شدن.
+       یه راهش اینه که از دو تا pseudo-element استفاده کنیم، ولی پیچیده می‌شه. بی‌خیالش. */
+}
+
 /* ------------------------- RESPONSIVE (MOBILE) ------------------------- */
 @media (max-width: 768px) {
     .branding {
