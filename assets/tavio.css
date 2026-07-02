@@ -1080,7 +1080,6 @@ textarea::-webkit-scrollbar-thumb,
     font-size: 13px;
     color: #ccc;
 }
-.ai-model-checkbox input[type="checkbox"] { accent-color: var(--accent); }
 .show-more-btn {
     font-size: 11px;
     color: var(--accent);
