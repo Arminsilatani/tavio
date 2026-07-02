@@ -1430,8 +1430,8 @@ textarea::-webkit-scrollbar-thumb,
 .neon-checkbox {
     -webkit-appearance: none;
     appearance: none;
-    width: 24px;
-    height: 24px;
+    width: 18px;
+    height: 18px;
     margin: 0;
     padding: 0;
     border: none;
