@@ -364,147 +364,147 @@ Version: 0.0.0
     </main>
 
     <!-- ------------------------- MODALS ------------------------- -->
-    <div id="share-modal" class="modal">
-        <div class="modal-content">
-            <span class="close-modal">&times;</span>
-            <h3 class="modal-title">Share Prompt</h3>
-            <p class="share-modal-desc">Select a connected user to share this prompt with:</p>
-            <div id="share-user-list" class="share-user-list"></div>
-            <div class="modal-actions">
-                <button id="share-cancel-btn" class="btn-secondary">Cancel</button>
-                <button id="share-send-btn" class="btn-primary" disabled>Send</button>
-            </div>
+<div id="share-modal" class="modal" onclick="if(event.target===this) closeShareModal()">
+    <div class="modal-content">
+        <span class="close-modal" onclick="closeShareModal()">&times;</span>
+        <h3 class="modal-title">Share Prompt</h3>
+        <p class="share-modal-desc">Select a connected user to share this prompt with:</p>
+        <div id="share-user-list" class="share-user-list"></div>
+        <div class="modal-actions">
+            <button id="share-cancel-btn" class="btn-secondary" onclick="closeShareModal()">Cancel</button>
+            <button id="share-send-btn" class="btn-primary" disabled>Send</button>
         </div>
     </div>
+</div>
 
-    <div id="prompt-preview-modal" class="modal">
-        <div class="modal-content modal-content-wide">
-            <span class="close-modal">&times;</span>
-            <h3 class="modal-title" id="preview-prompt-title">Prompt Preview</h3>
-            <div id="preview-prompt-categories" class="preview-categories"></div>
-            <p id="preview-prompt-template" class="preview-template-text"></p>
-            <div class="preview-actions">
-                <button id="preview-reject-btn" class="btn-secondary">Reject</button>
-                <button id="preview-accept-btn" class="btn-primary">Accept</button>
-            </div>
+<div id="prompt-preview-modal" class="modal" onclick="if(event.target===this) rejectSharedPrompt()">
+    <div class="modal-content modal-content-wide">
+        <span class="close-modal" onclick="rejectSharedPrompt()">&times;</span>
+        <h3 class="modal-title" id="preview-prompt-title">Prompt Preview</h3>
+        <div id="preview-prompt-categories" class="preview-categories"></div>
+        <p id="preview-prompt-template" class="preview-template-text"></p>
+        <div class="preview-actions">
+            <button id="preview-reject-btn" class="btn-secondary" onclick="rejectSharedPrompt()">Reject</button>
+            <button id="preview-accept-btn" class="btn-primary">Accept</button>
         </div>
     </div>
+</div>
 
-    <div id="new-prompt-modal" class="modal">
-        <div class="modal-content">
-            <span class="close-modal">&times;</span>
-            <h3 class="modal-title">New Prompt Template</h3>
-            <input type="text" id="modal-title" class="modal-input" placeholder="Prompt Title">
-            <textarea id="modal-description" class="modal-textarea" placeholder="Short description (max 150 chars)" maxlength="150" rows="2"></textarea>
+<div id="new-prompt-modal" class="modal" onclick="if(event.target===this) hideNewPromptModal()">
+    <div class="modal-content">
+        <span class="close-modal" onclick="hideNewPromptModal()">&times;</span>
+        <h3 class="modal-title">New Prompt Template</h3>
+        <input type="text" id="modal-title" class="modal-input" placeholder="Prompt Title">
+        <textarea id="modal-description" class="modal-textarea" placeholder="Short description (max 150 chars)" maxlength="150" rows="2"></textarea>
 
-            <div class="modal-categories-section">
-                <div class="capsule-scroll-row" id="modal-categories-scroll-row">
-                    <span class="filter-label">categories:</span>
-                    <button class="scroll-arrow scroll-arrow-left hidden" id="modal-categories-arrow-left" data-target="modal-categories-scroll-inner">
-                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                            <polyline points="15 18 9 12 15 6"></polyline>
-                        </svg>
-                    </button>
-                    <div class="capsule-scroll-inner" id="modal-categories-scroll-inner">
-                        <div class="filter-text-row" id="modal-categories-text-row"></div>
-                    </div>
-                    <button class="scroll-arrow scroll-arrow-right hidden" id="modal-categories-arrow-right" data-target="modal-categories-scroll-inner">
-                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                            <polyline points="9 18 15 12 9 6"></polyline>
-                        </svg>
-                    </button>
+        <div class="modal-categories-section">
+            <div class="capsule-scroll-row" id="modal-categories-scroll-row">
+                <span class="filter-label">categories:</span>
+                <button class="scroll-arrow scroll-arrow-left hidden" id="modal-categories-arrow-left" data-target="modal-categories-scroll-inner">
+                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <polyline points="15 18 9 12 15 6"></polyline>
+                    </svg>
+                </button>
+                <div class="capsule-scroll-inner" id="modal-categories-scroll-inner">
+                    <div class="filter-text-row" id="modal-categories-text-row"></div>
                 </div>
+                <button class="scroll-arrow scroll-arrow-right hidden" id="modal-categories-arrow-right" data-target="modal-categories-scroll-inner">
+                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <polyline points="9 18 15 12 9 6"></polyline>
+                    </svg>
+                </button>
             </div>
+        </div>
 
-            <textarea id="modal-template" class="modal-textarea" placeholder="Paste your prompt template..."></textarea>
+        <textarea id="modal-template" class="modal-textarea" placeholder="Paste your prompt template..."></textarea>
 
-            <div class="modal-ai-section">
-                <div class="ai-select-wrapper">
-                    <div class="ai-select-button" id="ai-select-button">
-                        <span id="ai-select-placeholder">Select AI models</span>
-                        <svg class="chevron" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                            <polyline points="18 15 12 9 6 15"></polyline>
-                        </svg>
-                    </div>
-                    <div class="ai-select-dropdown hidden" id="ai-select-dropdown">
-                        <div class="ai-companies-list" id="ai-companies-list"></div>
-                        <div class="ai-bottom-fixed">
-                            <div class="ai-filter-area hidden" id="ai-filter-area">
-                                <div class="capsule-scroll-row" id="modality-scroll-row">
-                                    <span class="filter-label">capabilities:</span>
-                                    <button class="scroll-arrow scroll-arrow-left hidden" id="modality-arrow-left" data-target="modality-scroll-inner">
-                                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                                            <polyline points="15 18 9 12 15 6"></polyline>
-                                        </svg>
-                                    </button>
-                                    <div class="capsule-scroll-inner" id="modality-scroll-inner">
-                                        <div class="filter-text-row" id="dropdown-modality-capsules"></div>
-                                    </div>
-                                    <button class="scroll-arrow scroll-arrow-right hidden" id="modality-arrow-right" data-target="modality-scroll-inner">
-                                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                                            <polyline points="9 18 15 12 9 6"></polyline>
-                                        </svg>
-                                    </button>
-                                </div>
-                                <div class="capsule-scroll-row" id="pricing-scroll-row" style="margin-top:6px;">
-                                    <span class="filter-label">access type:</span>
-                                    <button class="scroll-arrow scroll-arrow-left hidden" id="pricing-arrow-left" data-target="pricing-scroll-inner">
-                                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                                            <polyline points="15 18 9 12 15 6"></polyline>
-                                        </svg>
-                                    </button>
-                                    <div class="capsule-scroll-inner" id="pricing-scroll-inner">
-                                        <div class="filter-text-row" id="dropdown-pricing-capsules"></div>
-                                    </div>
-                                    <button class="scroll-arrow scroll-arrow-right hidden" id="pricing-arrow-right" data-target="pricing-scroll-inner">
-                                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                                            <polyline points="9 18 15 12 9 6"></polyline>
-                                        </svg>
-                                    </button>
-                                </div>
-                            </div>
-                            <div class="ai-search-container">
-                                <input type="text" id="ai-search-input" class="ai-search-input" placeholder="Search models...">
-                                <button type="button" class="ai-filter-toggle-btn" id="ai-filter-toggle-btn" aria-label="Toggle filters">
-                                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" width="16" height="16">
-                                        <path stroke-linecap="round" stroke-linejoin="round" d="M12 3c2.755 0 5.455.232 8.083.678.533.09.917.556.917 1.096v1.044a2.25 2.25 0 0 1-.659 1.591l-5.432 5.432a2.25 2.25 0 0 0-.659 1.591v2.927a2.25 2.25 0 0 1-1.244 2.013L9.75 21v-6.568a2.25 2.25 0 0 0-.659-1.591L3.659 7.409A2.25 2.25 0 0 1 3 5.818V4.774c0-.54.384-1.006.917-1.096A48.32 48.32 0 0 1 12 3Z" />
+        <div class="modal-ai-section">
+            <div class="ai-select-wrapper">
+                <div class="ai-select-button" id="ai-select-button">
+                    <span id="ai-select-placeholder">Select AI models</span>
+                    <svg class="chevron" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <polyline points="18 15 12 9 6 15"></polyline>
+                    </svg>
+                </div>
+                <div class="ai-select-dropdown hidden" id="ai-select-dropdown">
+                    <div class="ai-companies-list" id="ai-companies-list"></div>
+                    <div class="ai-bottom-fixed">
+                        <div class="ai-filter-area hidden" id="ai-filter-area">
+                            <div class="capsule-scroll-row" id="modality-scroll-row">
+                                <span class="filter-label">capabilities:</span>
+                                <button class="scroll-arrow scroll-arrow-left hidden" id="modality-arrow-left" data-target="modality-scroll-inner">
+                                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                        <polyline points="15 18 9 12 15 6"></polyline>
                                     </svg>
                                 </button>
-                                <button type="button" class="ai-close-dropdown-btn" id="ai-close-dropdown-btn" aria-label="Close dropdown">
+                                <div class="capsule-scroll-inner" id="modality-scroll-inner">
+                                    <div class="filter-text-row" id="dropdown-modality-capsules"></div>
+                                </div>
+                                <button class="scroll-arrow scroll-arrow-right hidden" id="modality-arrow-right" data-target="modality-scroll-inner">
                                     <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                                        <polyline points="6 9 12 15 18 9"></polyline>
+                                        <polyline points="9 18 15 12 9 6"></polyline>
+                                    </svg>
+                                </button>
+                            </div>
+                            <div class="capsule-scroll-row" id="pricing-scroll-row" style="margin-top:6px;">
+                                <span class="filter-label">access type:</span>
+                                <button class="scroll-arrow scroll-arrow-left hidden" id="pricing-arrow-left" data-target="pricing-scroll-inner">
+                                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                        <polyline points="15 18 9 12 15 6"></polyline>
+                                    </svg>
+                                </button>
+                                <div class="capsule-scroll-inner" id="pricing-scroll-inner">
+                                    <div class="filter-text-row" id="dropdown-pricing-capsules"></div>
+                                </div>
+                                <button class="scroll-arrow scroll-arrow-right hidden" id="pricing-arrow-right" data-target="pricing-scroll-inner">
+                                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                        <polyline points="9 18 15 12 9 6"></polyline>
                                     </svg>
                                 </button>
                             </div>
                         </div>
+                        <div class="ai-search-container">
+                            <input type="text" id="ai-search-input" class="ai-search-input" placeholder="Search models...">
+                            <button type="button" class="ai-filter-toggle-btn" id="ai-filter-toggle-btn" aria-label="Toggle filters">
+                                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" width="16" height="16">
+                                    <path stroke-linecap="round" stroke-linejoin="round" d="M12 3c2.755 0 5.455.232 8.083.678.533.09.917.556.917 1.096v1.044a2.25 2.25 0 0 1-.659 1.591l-5.432 5.432a2.25 2.25 0 0 0-.659 1.591v2.927a2.25 2.25 0 0 1-1.244 2.013L9.75 21v-6.568a2.25 2.25 0 0 0-.659-1.591L3.659 7.409A2.25 2.25 0 0 1 3 5.818V4.774c0-.54.384-1.006.917-1.096A48.32 48.32 0 0 1 12 3Z" />
+                                </svg>
+                            </button>
+                            <button type="button" class="ai-close-dropdown-btn" id="ai-close-dropdown-btn" aria-label="Close dropdown">
+                                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                    <polyline points="6 9 12 15 18 9"></polyline>
+                                </svg>
+                            </button>
+                        </div>
                     </div>
                 </div>
             </div>
+        </div>
 
-            <div class="modal-global-toggle" id="modal-global-toggle-wrapper" style="display:none;">
-                <label class="global-check-label">
-                    <input type="checkbox" id="modal-is-global">
-                    <span>Set as global (visible to all users)</span>
-                </label>
-            </div>
+        <div class="modal-global-toggle" id="modal-global-toggle-wrapper" style="display:none;">
+            <label class="global-check-label">
+                <input type="checkbox" id="modal-is-global">
+                <span>Set as global (visible to all users)</span>
+            </label>
+        </div>
 
-            <div class="modal-actions">
-                <button id="cancel-modal-btn" class="btn-secondary">Cancel</button>
-                <button id="add-prompt-btn" class="btn-primary">Add to Library</button>
-            </div>
+        <div class="modal-actions">
+            <button id="cancel-modal-btn" class="btn-secondary" onclick="hideNewPromptModal()">Cancel</button>
+            <button id="add-prompt-btn" class="btn-primary">Add to Library</button>
         </div>
     </div>
+</div>
 
-    <div id="delete-confirm-modal" class="modal">
-        <div class="modal-content">
-            <span class="close-modal">&times;</span>
-            <p class="confirm-message">Are you sure you want to delete this prompt?</p>
-            <div class="confirm-actions">
-                <button id="confirm-no-btn" class="btn-secondary confirm-no-btn">No</button>
-                <button id="confirm-yes-btn" class="confirm-yes-btn">Yes, I'm sure</button>
-            </div>
+<div id="delete-confirm-modal" class="modal" onclick="if(event.target===this) closeModal(this)">
+    <div class="modal-content">
+        <span class="close-modal" onclick="closeModal(document.getElementById('delete-confirm-modal'))">&times;</span>
+        <p class="confirm-message">Are you sure you want to delete this prompt?</p>
+        <div class="confirm-actions">
+            <button id="confirm-no-btn" class="btn-secondary confirm-no-btn" onclick="closeModal(document.getElementById('delete-confirm-modal'))">No</button>
+            <button id="confirm-yes-btn" class="confirm-yes-btn">Yes, I'm sure</button>
         </div>
     </div>
+</div>
 
     <!-- ------------------------- FOOTER ------------------------- -->
     <footer class="footer">
