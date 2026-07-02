@@ -1281,6 +1281,7 @@ function hideGlobalLoader() {
 }
 function openModal(modal) {
     if (!modal) return;
+    modal.classList.remove('hidden');   // ← حذف !important قبلی
     modal.style.display = 'flex';
 }
 
