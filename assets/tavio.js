@@ -2530,6 +2530,187 @@ function setupUIListeners() {
     setupFilterScrollArrows();
 }
 
+(function() {
+    const container = document.getElementById('checklist-items');
+    const newInput = document.getElementById('checklist-new-input');
+    const addBtn = document.getElementById('checklist-add-btn');
+
+    let items = [];
+
+    function uid() {
+        return Date.now().toString(36) + Math.random().toString(36).substr(2, 5);
+    }
+
+    function flattenAll(parents, level = 0) {
+        let flat = [];
+        parents.forEach(item => {
+            flat.push({ ...item, level });
+            if (item.subtasks && item.subtasks.length) {
+                flat = flat.concat(flattenAll(item.subtasks, level + 1));
+            }
+        });
+        return flat;
+    }
+
+    function findItemById(id, list = items) {
+        for (let item of list) {
+            if (item.id === id) return item;
+            if (item.subtasks) {
+                const found = findItemById(id, item.subtasks);
+                if (found) return found;
+            }
+        }
+        return null;
+    }
+
+    function findParent(id, list = items, parent = null) {
+        for (let item of list) {
+            if (item.id === id) return parent;
+            if (item.subtasks) {
+                const result = findParent(id, item.subtasks, item);
+                if (result !== undefined) return result;
+            }
+        }
+        return undefined;
+    }
+
+    function render() {
+        if (!container) return;
+        const flat = flattenAll(items);
+        container.innerHTML = flat.map(item => {
+            const indent = item.level > 0 ? 'subtask' : '';
+            const checkedClass = item.checked ? 'checked' : '';
+            const dots = Array(9).fill('<span class="dot"></span>').join('');
+            return `
+                <div class="checklist-row ${indent}" data-id="${item.id}">
+                    <div class="neon-checkbox ${checkedClass}" data-id="${item.id}" role="checkbox" aria-checked="${item.checked}">
+                        ${dots}
+                    </div>
+                    <input type="text" class="checklist-text" value="${escapeHtml(item.text)}" 
+                           data-id="${item.id}" placeholder="Item…">
+                    <div class="checklist-actions">
+                        <button class="checklist-subtask-btn" data-id="${item.id}" title="Add subtask">↳+</button>
+                        <button class="checklist-delete-btn" data-id="${item.id}" title="Delete">×</button>
+                    </div>
+                </div>
+            `;
+        }).join('');
+    }
+
+    function escapeHtml(text) {
+        return text.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
+    }
+
+    container.addEventListener('click', function(e) {
+        const target = e.target;
+        const id = target.closest('[data-id]')?.dataset.id;
+        if (!id) return;
+
+        if (target.closest('.neon-checkbox')) {
+            const item = findItemById(id);
+            if (item) {
+                item.checked = !item.checked;
+                render();
+                saveState();
+            }
+            return;
+        }
+
+        if (target.closest('.checklist-delete-btn')) {
+            const parent = findParent(id);
+            if (parent) {
+                parent.subtasks = parent.subtasks.filter(s => s.id !== id);
+            } else {
+                items = items.filter(i => i.id !== id);
+            }
+            render();
+            saveState();
+            return;
+        }
+
+        if (target.closest('.checklist-subtask-btn')) {
+            const parentItem = findItemById(id);
+            if (parentItem) {
+                if (!parentItem.subtasks) parentItem.subtasks = [];
+                const newSub = {
+                    id: uid(),
+                    text: '',
+                    checked: false,
+                    subtasks: []
+                };
+                parentItem.subtasks.push(newSub);
+                render();
+                saveState();
+                const newInput = container.querySelector(`[data-id="${newSub.id}"] .checklist-text`);
+                if (newInput) newInput.focus();
+            }
+            return;
+        }
+    });
+
+    container.addEventListener('input', function(e) {
+        const input = e.target;
+        if (!input.classList.contains('checklist-text')) return;
+        const id = input.dataset.id;
+        const item = findItemById(id);
+        if (item) {
+            item.text = input.value;
+            saveState();
+        }
+    });
+
+    function addNewItem() {
+        const text = newInput.value.trim();
+        if (!text) return;
+        const newItem = {
+            id: uid(),
+            text: text,
+            checked: false,
+            subtasks: []
+        };
+        items.push(newItem);
+        newInput.value = '';
+        render();
+        saveState();
+        const newInputEl = container.querySelector(`[data-id="${newItem.id}"] .checklist-text`);
+        if (newInputEl) newInputEl.focus();
+    }
+
+    addBtn.addEventListener('click', addNewItem);
+    newInput.addEventListener('keydown', function(e) {
+        if (e.key === 'Enter') {
+            e.preventDefault();
+            addNewItem();
+        }
+    });
+
+    function saveState() {
+        try {
+            localStorage.setItem('neonChecklist', JSON.stringify(items));
+        } catch(e) {}
+    }
+
+    function loadState() {
+        try {
+            const saved = localStorage.getItem('neonChecklist');
+            if (saved) {
+                items = JSON.parse(saved);
+            }
+        } catch(e) {}
+        if (!items || items.length === 0) {
+            items = [{
+                id: uid(),
+                text: '',
+                checked: false,
+                subtasks: []
+            }];
+        }
+        render();
+    }
+
+    loadState();
+})();
+
 /* ------------------------- INITIALIZATION ------------------------- */
 document.addEventListener('DOMContentLoaded', async () => {
     setupAuthListeners();
