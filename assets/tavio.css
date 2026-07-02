@@ -1445,24 +1445,19 @@ textarea::-webkit-scrollbar-thumb,
     --c-base: #2a2a2a;
     --c-on: var(--accent);
 
+    /* ۴ نقطه (۲×۲) */
     background-image:
-        radial-gradient(circle, var(--c-base) 40%, transparent 65%),
-        radial-gradient(circle, var(--c-base) 40%, transparent 65%),
-        radial-gradient(circle, var(--c-base) 40%, transparent 65%),
-        radial-gradient(circle, var(--c-base) 40%, transparent 65%),
-        radial-gradient(circle, var(--c-base) 40%, transparent 65%),
         radial-gradient(circle, var(--c-base) 40%, transparent 65%),
         radial-gradient(circle, var(--c-base) 40%, transparent 65%),
         radial-gradient(circle, var(--c-base) 40%, transparent 65%),
         radial-gradient(circle, var(--c-base) 40%, transparent 65%);
 
-    background-size: 3px 3px;
+    background-size: 4px 4px;
 
-    /* موقعیت‌های جدید – متقارن و وسط‌چین */
+    /* موقعیت‌های ۴ نقطه – متقارن وسط چک‌باکس ۲۰px */
     background-position:
-        1.5px 1.5px,   8.5px 1.5px,   15.5px 1.5px,
-        1.5px 8.5px,   8.5px 8.5px,   15.5px 8.5px,
-        1.5px 15.5px,  8.5px 15.5px,  15.5px 15.5px;
+        4px 4px,   12px 4px,
+        4px 12px,  12px 12px;
     background-repeat: no-repeat;
 }
 
@@ -1475,14 +1470,9 @@ textarea::-webkit-scrollbar-thumb,
         radial-gradient(circle, var(--c-on) 40%, transparent 65%),
         radial-gradient(circle, var(--c-on) 40%, transparent 65%),
         radial-gradient(circle, var(--c-on) 40%, transparent 65%),
-        radial-gradient(circle, var(--c-on) 40%, transparent 65%),
-        radial-gradient(circle, var(--c-on) 40%, transparent 65%),
-        radial-gradient(circle, var(--c-on) 40%, transparent 65%),
-        radial-gradient(circle, var(--c-on) 40%, transparent 65%),
-        radial-gradient(circle, var(--c-on) 40%, transparent 65%),
         radial-gradient(circle, var(--c-on) 40%, transparent 65%);
     background-size: 4px 4px;
-    background-position: inherit;   /* از والد می‌گیره */
+    background-position: inherit;
     background-repeat: no-repeat;
 
     opacity: 0;
