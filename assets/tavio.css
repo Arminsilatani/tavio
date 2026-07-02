@@ -714,8 +714,6 @@ textarea::-webkit-scrollbar-thumb,
 
 /* =========================== GLASS MODALS ============================ */
 
-
-
 /* The full‑screen overlay behind the panel */
 .modal {
     display: none;
@@ -740,14 +738,13 @@ textarea::-webkit-scrollbar-thumb,
     max-width: 420px;
     color: var(--text);
     backdrop-filter: blur(10px);
-    /* allow content to determine height; scroll only the overlay */
     overflow: visible;
     animation: modalIn 0.22s cubic-bezier(0.4, 0, 0.2, 1);
     position: relative;
-    margin: auto;  /* centers vertically when overlay scrolls */
+    margin: auto;
 }
 
-/* WebKit scrollbar for the panel (if it ever gets scroll) */
+/* WebKit scrollbar for the panel */
 .modal-content::-webkit-scrollbar {
     width: 6px;
 }
@@ -846,10 +843,6 @@ textarea::-webkit-scrollbar-thumb,
     font-size: 14px;
     cursor: pointer;
 }
-.modal-content #modal-is-global {
-    accent-color: var(--accent);
-    width: 16px; height: 16px;
-}
 
 /* Share modal specifics */
 .modal-content .share-modal-desc {
@@ -916,7 +909,6 @@ textarea::-webkit-scrollbar-thumb,
 }
 
 /* ------------------------- AI SELECT DROPDOWN (NEW PROMPT MODAL) ------------------------- */
-/* (kept intact, but placed after modal styles to ensure it works) */
 .ai-select-wrapper { position: relative; margin-bottom: 8px; }
 .ai-select-button {
     background: rgba(255,255,255,0.05);
@@ -1239,7 +1231,7 @@ textarea::-webkit-scrollbar-thumb,
     inset: 0;
     background: rgba(0, 0, 0, 0.75);
     backdrop-filter: blur(4px);
-    z-index: 99999;                /* highest possible – stay above modals */
+    z-index: 99999;
     display: flex;
     align-items: center;
     justify-content: center;
@@ -1262,7 +1254,6 @@ textarea::-webkit-scrollbar-thumb,
     animation: neonBlink var(--loader-anim-speed, 1.5s) infinite ease-in-out;
 }
 
-/* Different delays & durations for a organic wave pattern (all relative to base speed) */
 .lds-grid div:nth-child(1) { animation-delay: 0s;           animation-duration: calc(var(--loader-anim-speed, 1.5s) * 0.8); }
 .lds-grid div:nth-child(2) { animation-delay: calc(var(--loader-anim-speed, 1.5s) * 0.2);  animation-duration: calc(var(--loader-anim-speed, 1.5s) * 0.93); }
 .lds-grid div:nth-child(3) { animation-delay: calc(var(--loader-anim-speed, 1.5s) * 0.47); animation-duration: calc(var(--loader-anim-speed, 1.5s) * 0.73); }
@@ -1273,7 +1264,6 @@ textarea::-webkit-scrollbar-thumb,
 .lds-grid div:nth-child(8) { animation-delay: calc(var(--loader-anim-speed, 1.5s) * 0.27); animation-duration: calc(var(--loader-anim-speed, 1.5s) * 0.87); }
 .lds-grid div:nth-child(9) { animation-delay: calc(var(--loader-anim-speed, 1.5s) * 0.4);  animation-duration: calc(var(--loader-anim-speed, 1.5s) * 0.73); }
 
-/* Corner dots slightly dimmer for a more natural look */
 .lds-grid div:nth-child(1),
 .lds-grid div:nth-child(3),
 .lds-grid div:nth-child(7),
@@ -1281,7 +1271,6 @@ textarea::-webkit-scrollbar-thumb,
     opacity: 0.35;
 }
 
-/* Keyframes: neon glow pulses */
 @keyframes neonBlink {
     0%, 100% {
         opacity: 0.2;
@@ -1437,7 +1426,88 @@ textarea::-webkit-scrollbar-thumb,
 }
 .tavio-notif-item .notif-actions .reject-btn:hover { border-color: #666; }
 
+/* ======================== چک‌باکس نقطه‌ای نئونی (کلاس مشترک) ======================== */
+.neon-checkbox {
+    -webkit-appearance: none;
+    appearance: none;
+    width: 24px;
+    height: 24px;
+    margin: 0;
+    padding: 0;
+    border: none;
+    border-radius: 0;
+    background: transparent;
+    position: relative;
+    cursor: pointer;
+    outline: none;
+    box-sizing: border-box;
 
+    --c-base: #2a2a2a;
+    --c-on: var(--accent);
+
+    /* ۹ نقطه طوسی */
+    background-image:
+        radial-gradient(circle, var(--c-base) 40%, transparent 65%),
+        radial-gradient(circle, var(--c-base) 40%, transparent 65%),
+        radial-gradient(circle, var(--c-base) 40%, transparent 65%),
+        radial-gradient(circle, var(--c-base) 40%, transparent 65%),
+        radial-gradient(circle, var(--c-base) 40%, transparent 65%),
+        radial-gradient(circle, var(--c-base) 40%, transparent 65%),
+        radial-gradient(circle, var(--c-base) 40%, transparent 65%),
+        radial-gradient(circle, var(--c-base) 40%, transparent 65%),
+        radial-gradient(circle, var(--c-base) 40%, transparent 65%);
+
+    background-size: 5px 5px;
+    background-position:
+        3px 3px,   10px 3px,   17px 3px,
+        3px 10px,  10px 10px,  17px 10px,
+        3px 17px,  10px 17px,  17px 17px;
+    background-repeat: no-repeat;
+}
+
+.neon-checkbox::after {
+    content: none !important;
+}
+
+/* لایهٔ نئونی (::before) */
+.neon-checkbox::before {
+    content: "";
+    position: absolute;
+    inset: 0;
+    background-image:
+        radial-gradient(circle, var(--c-on) 40%, transparent 65%),
+        radial-gradient(circle, var(--c-on) 40%, transparent 65%),
+        radial-gradient(circle, var(--c-on) 40%, transparent 65%),
+        radial-gradient(circle, var(--c-on) 40%, transparent 65%),
+        radial-gradient(circle, var(--c-on) 40%, transparent 65%),
+        radial-gradient(circle, var(--c-on) 40%, transparent 65%),
+        radial-gradient(circle, var(--c-on) 40%, transparent 65%),
+        radial-gradient(circle, var(--c-on) 40%, transparent 65%),
+        radial-gradient(circle, var(--c-on) 40%, transparent 65%);
+    background-size: 5px 5px;
+    background-position: inherit;
+    background-repeat: no-repeat;
+
+    opacity: 0;
+    filter: drop-shadow(0 0 4px var(--c-on));
+    transition: opacity 0.2s;
+    pointer-events: none;
+}
+
+.neon-checkbox:checked::before {
+    opacity: 1;
+}
+
+/* تغییر رنگ متن label وقتی چک‌باکس تیک خورده */
+.multi-checkbox-item:has(.neon-checkbox:checked) {
+    color: var(--accent);
+}
+.ai-model-checkbox:has(.neon-checkbox:checked) {
+    color: var(--accent);
+}
+.global-check-label:has(.neon-checkbox:checked) {
+    color: var(--accent);
+}
 
 /* ------------------------- RESPONSIVE (MOBILE) ------------------------- */
 @media (max-width: 768px) {
@@ -1465,13 +1535,12 @@ textarea::-webkit-scrollbar-thumb,
         box-sizing: border-box;
     }
 
-    /* Editor header (mobile) */
-.editor-header {
-    display: flex;
-    flex-wrap: wrap;
-    align-items: flex-start;
-    gap: 8px;
-}
+    .editor-header {
+        display: flex;
+        flex-wrap: wrap;
+        align-items: flex-start;
+        gap: 8px;
+    }
     .editor-title {
         flex: 0 0 100%;
         order: 1;
@@ -1490,7 +1559,6 @@ textarea::-webkit-scrollbar-thumb,
         line-height: 1.4;
     }
 
-    /* Back button */
     .back-btn {
         order: 2;
         width: 20%;
@@ -1506,7 +1574,6 @@ textarea::-webkit-scrollbar-thumb,
         margin-left: 0;
     }
 
-    /* Delete button */
     .editor-header .delete-btn {
         order: 3;
         width: 20%;
@@ -1527,7 +1594,6 @@ textarea::-webkit-scrollbar-thumb,
     }
     .delete-btn:hover { color: #ff6b6b; }
 
-    /* Edit button */
     .edit-btn {
         order: 4;
         width: 55%;
