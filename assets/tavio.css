@@ -1155,11 +1155,11 @@ textarea::-webkit-scrollbar-thumb,
 }
 
 .editor-header .delete-btn {
-    margin-left: auto;
     margin-top: 16px;
     padding: 6px 12px;
     font-size: 16px;
     justify-content: center; 
+    align-self: center;
 }
 .editor-header .delete-btn svg {
     width: 18px;
