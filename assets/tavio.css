@@ -1459,9 +1459,9 @@ textarea::-webkit-scrollbar-thumb,
 
     background-size: 4px 4px;
     background-position:
-        3px 3px,   10px 3px,   17px 3px,
-        3px 10px,  10px 10px,  17px 10px,
-        3px 17px,  10px 17px,  17px 17px;
+        2.5px 2.5px,   8px 2.5px,   13.5px 2.5px,
+        2.5px 8px,     8px 8px,     13.5px 8px,
+        2.5px 13.5px,  8px 13.5px,  13.5px 13.5px;
     background-repeat: no-repeat;
 }
 
