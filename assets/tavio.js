@@ -1,36 +1,18 @@
-// ================== CONFIG ==================
+/*
+
+Author: Armin Silatani
+Date: 2026-07-02
+Version: 0.0.0
+*/
+
+/* =========================== TAVIO PROMPT APP ============================ */
+
+/* :::::::::::::::::::::::::: CONFIGURATION :::::::::::::::::::::::::: */
 const SUPABASE_URL = 'https://vzqicidepdmraygulrey.supabase.co';
 const SUPABASE_ANON_KEY = 'sb_publishable_kqRWgOmLISOE2EuLL1s8fw_WN6FJRTI';
 const sb = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
-function escapeRegExp(string) {
-    return string.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
-}
 
-// ================== STATE ==================
-let currentUser = null;
-let currentProfile = null;
-let currentUserRole = 'public';
-let sidebarComponent = null;
-let editingPromptId = null;
-
-let prompts = [];
-let currentPrompt = null;
-let currentVariables = {};
-let shareTargetPromptId = null;
-let selectedShareUserId = null;
-let generateInterval = null;
-let deletingPromptId = null;
-
-// ================== FIELD DEFINITIONS ==================
-let fieldDefinitions = [];
-
-// Modal states
-let modalSelectedAIModels = [];
-let modalSelectedCategories = [];
-
-// Filter state
-let activeCategoryFilters = [];
-
+/* :::::::::::::::::::::::::: GLOBAL CONSTANTS :::::::::::::::::::::::::: */
 const ALL_CATEGORIES = [
     {
         id: 'writing',
@@ -76,7 +58,6 @@ const ALL_CATEGORIES = [
 
 const ALL_ICON = `<svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" width="16" height="16"><path stroke-linecap="round" stroke-linejoin="round" d="M2.036 12.322a1.012 1.012 0 0 1 0-.639C3.423 7.51 7.36 4.5 12 4.5c4.638 0 8.573 3.007 9.963 7.178.07.207.07.431 0 .639C20.577 16.49 16.64 19.5 12 19.5c-4.638 0-8.573-3.007-9.963-7.178Z" /><path stroke-linecap="round" stroke-linejoin="round" d="M15 12a3 3 0 1 1-6 0 3 3 0 0 1 6 0Z" /></svg>`;
 
-// ================== AI MODELS DATA (for modal dropdown) ==================
 const ALL_AI_MODELS = [
     // OpenAI
     { id: "gpt-5.4", name: "GPT-5.4", company: "OpenAI", tags: ["agentic","paid"], modality:["general","agentic"], pricing:"paid" },
@@ -201,13 +182,70 @@ const ALL_AI_MODELS = [
 const MODALITY_CAPSULES = ["image","voice","video","coding","reasoning","multimodal","general","search","audio"];
 const PRICING_CAPSULES = ["free","freemium","paid"];
 
-// Modal AI filter state
-let modalAIModalityFilters = [];
-let modalAIPricingFilters = [];
+const COMPANY_LOGOS = {
+    "OpenAI": "openai.png",
+    "Anthropic": "anthropic.png",
+    "Meta": "meta.png",
+    "Google": "google.png",
+    "Microsoft": "microsoft.png",
+    "xAI": "xAI.png",
+    "Mistral": "mistral.png",
+    "DeepSeek": "deepseek.png",
+    "Qwen / Alibaba": "qwen.png",
+    "Baidu": "ernie.png",
+    "Zhipu": "Zhipu.png",
+    "Cohere": "cohere.png",
+    "Perplexity": "Perplexity.png",
+    "Stability AI": "Stability-AI.png"
+};
+
+/* :::::::::::::::::::::::::: APPLICATION STATE :::::::::::::::::::::::::: */
+let currentUser = null;
+let currentProfile = null;
+let currentUserRole = 'public';
+let sidebarComponent = null;
+let editingPromptId = null;
+
+let prompts = [];
+let currentPrompt = null;
+let currentVariables = {};
+let shareTargetPromptId = null;
+let selectedShareUserId = null;
+let generateInterval = null;
+let deletingPromptId = null;
+
+let fieldDefinitions = [];
+
+let modalSelectedAIModels = [];
+let modalSelectedCategories = [];
+
+let activeCategoryFilters = [];
+
+let aiModelsExpanded = false;
 let aiDropdownOpen = false;
 let aiFilterAreaVisible = false;
 let aiCompanyExpanded = {};
 
+/* ------------------------- UTILITY FUNCTIONS ------------------------- */
+function escapeRegExp(string) {
+    return string.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+}
+
+function parseCategoryArray(category_id) {
+    if (!category_id) return [];
+    try {
+        if (typeof category_id === 'string') return JSON.parse(category_id);
+        if (Array.isArray(category_id)) return category_id;
+    } catch (e) {}
+    return [];
+}
+
+function getCompanyLogo(company) {
+    const filename = COMPANY_LOGOS[company] || "default.png";
+    return `assets/logo/${filename}`;
+}
+
+/* ------------------------- FIELD DEFINITION MANAGEMENT ------------------------- */
 function parsePromptFields(template) {
     const fields = [];
     const safe = template.replace(/\\\{\{/g, '\u0000').replace(/\\\}\}/g, '\u0001');
@@ -219,10 +257,9 @@ function parsePromptFields(template) {
         let type = 'text';
         let options = [];
         let name = content;
-        let inputType = 'text';   // برای فیلدهای متنی
-        let label = content;      // برچسب نمایشی – پیش‌فرض خود محتوا
+        let inputType = 'text';
+        let label = content;
 
-        // اولویت با فرمت جدید: label: options
         const colonIndex = content.indexOf(':');
         let payload = content;
         if (colonIndex > -1) {
@@ -233,13 +270,12 @@ function parsePromptFields(template) {
         if (payload.includes('.')) {
             type = 'single-select';
             options = payload.split('.').map(s => s.trim()).filter(s => s);
-            name = label;   // نام فیلد همان برچسب خوانا
+            name = label;
         } else if (payload.includes('/')) {
             type = 'multi-select';
             options = payload.split('/').map(s => s.trim()).filter(s => s);
-            name = label;   // نام فیلد همان برچسب خوانا
+            name = label;
         } else {
-            // متن ساده (ممکن است پسوند نوع داشته باشد)
             const textColonIndex = content.lastIndexOf(':');
             if (textColonIndex > -1) {
                 const possibleType = content.slice(textColonIndex + 1).trim().toLowerCase();
@@ -263,7 +299,7 @@ function parsePromptFields(template) {
                 description: '',
                 raw: match[1],
                 inputType: type === 'text' ? inputType : undefined,
-                label: label           // ذخیرهٔ برچسب تمیز
+                label: label
             });
         } else {
             existing.options = options;
@@ -303,7 +339,6 @@ function renderFieldEditors() {
             `;
         }
 
-        // نمایش label (در صورت وجود) به عنوان مقدار فیلد Name
         const displayName = field.label || field.name || '';
 
         div.innerHTML = `
@@ -403,7 +438,6 @@ function renderPromptInputFields() {
 
         let input;
 
-        // ----- Single-Select (Dropdown) -----
         if (field.type === 'single-select' && field.options && field.options.length > 0) {
             input = document.createElement('select');
             field.options.forEach(opt => {
@@ -418,7 +452,6 @@ function renderPromptInputFields() {
                 fieldDefinitions[index].value = e.target.value;
             });
         }
-        // ----- Multi-Select (Checkbox Group) -----
         else if (field.type === 'multi-select' && field.options && field.options.length > 0) {
             const group = document.createElement('div');
             group.className = 'multi-checkbox-group';
@@ -458,9 +491,8 @@ function renderPromptInputFields() {
 
             input = group;
         }
-        // ----- Text fields (text, textarea, number) -----
         else {
-            const inputType = field.inputType || 'text';   // از قبل در parsePromptFields تعیین شده
+            const inputType = field.inputType || 'text';
             const fieldName = field.name || 'value';
 
             if (inputType === 'textarea') {
@@ -487,7 +519,6 @@ function renderPromptInputFields() {
             });
         }
 
-        // توضیحات فیلد (در صورت وجود)
         if (field.description) {
             const desc = document.createElement('span');
             desc.style.fontSize = '11px';
@@ -500,9 +531,8 @@ function renderPromptInputFields() {
         container.appendChild(wrapper);
     });
 }
-// ================== AI MODELS (Editor) ==================
-let aiModelsExpanded = false;   // اضافه کن بالای فایل در بخش STATE
 
+/* ------------------------- AI MODELS SELECTION (EDITOR) ------------------------- */
 function renderAIModels() {
     const container = document.getElementById('ai-models-container');
     if (!container) return;
@@ -540,7 +570,6 @@ function renderAIModels() {
         container.appendChild(tag);
     });
 
-    // دکمه "Show more" یا "Show less"
     if (total > maxVisible) {
         const btn = document.createElement('button');
         btn.className = 'ai-show-more-btn';
@@ -592,31 +621,7 @@ function addCustomAIModel() {
     input.value = '';
 }
 
-// ================== AI MODELS (Modal - Dropdown) ==================
-// نگاشت نام شرکت به نام فایل لوگو (بدون پسوند)
-const COMPANY_LOGOS = {
-    "OpenAI": "openai.png",
-    "Anthropic": "anthropic.png",
-    "Meta": "meta.png",
-    "Google": "google.png",
-    "Microsoft": "microsoft.png",
-    "xAI": "xAI.png",
-    "Mistral": "mistral.png",
-    "DeepSeek": "deepseek.png",
-    "Qwen / Alibaba": "qwen.png",
-    "Baidu": "ernie.png",
-    "Zhipu": "Zhipu.png",
-    "Cohere": "cohere.png",
-    "Perplexity": "Perplexity.png",
-    "Stability AI": "Stability-AI.png"
-};
-
-function getCompanyLogo(company) {
-    const filename = COMPANY_LOGOS[company] || "default.png"; // fallback
-    return `assets/logo/${filename}`;
-}
-
-// تابع اصلاح‌شده
+/* ------------------------- AI MODELS MODAL DROPDOWN ------------------------- */
 function renderModalAIDropdown() {
     const container = document.getElementById('ai-companies-list');
     if (!container) return;
@@ -647,7 +652,6 @@ function renderModalAIDropdown() {
         const header = document.createElement('div');
         header.className = 'ai-company-header';
 
-        // افزودن لوگو
         const logo = document.createElement('img');
         logo.src = getCompanyLogo(company);
         logo.alt = company;
@@ -713,7 +717,7 @@ function toggleAIDropdown() {
 
         if (button) {
             button.classList.add('invisible');
-            button.classList.add('open');        // ← چرخش فلش
+            button.classList.add('open');
         }
 
         aiFilterAreaVisible = false;
@@ -733,7 +737,7 @@ function toggleAIDropdown() {
         }
         
         dropdown.addEventListener('transitionend', function onTransitionEnd() {
-            if (!aiDropdownOpen) {  // فقط وقتی واقعاً بسته است
+            if (!aiDropdownOpen) {
                 dropdown.classList.add('hidden');
             }
             dropdown.removeEventListener('transitionend', onTransitionEnd);
@@ -751,7 +755,6 @@ function toggleAIFilterArea() {
             toggleBtn?.classList.add('active');
             renderModalityCapsules();
             renderPricingCapsules();
-            // بعد از رندر، فلش‌ها را به‌روز کن
             setTimeout(() => {
                 updateRowArrows('modality-scroll-inner');
                 updateRowArrows('pricing-scroll-inner');
@@ -780,14 +783,12 @@ function renderModalityCapsules() {
     if (!row) return;
     row.innerHTML = '';
     MODALITY_CAPSULES.forEach((mod, index) => {
-        // جداکننده
         if (index > 0) {
             const sep = document.createElement('span');
             sep.className = 'filter-text-separator';
             sep.textContent = '|';
             row.appendChild(sep);
         }
-        // آیتم متنی
         const item = document.createElement('span');
         item.className = 'filter-text-item' + (modalAIModalityFilters.includes(mod) ? ' active' : '');
         item.textContent = mod;
@@ -831,7 +832,7 @@ function renderPricingCapsules() {
     setTimeout(() => updateRowArrows('pricing-scroll-inner'), 10);
 }
 
-// ================== MODAL CATEGORIES ==================
+/* ------------------------- MODAL CATEGORIES ------------------------- */
 function renderModalCategories() {
     const row = document.getElementById('modal-categories-text-row');
     if (!row) return;
@@ -852,15 +853,14 @@ function renderModalCategories() {
             if (idx > -1) modalSelectedCategories.splice(idx, 1);
             else modalSelectedCategories.push(cat.id);
             renderModalCategories();
-            // به‌روزرسانی فلش‌ها
             setTimeout(() => updateRowArrows('modal-categories-scroll-inner'), 10);
         });
         row.appendChild(item);
     });
-    // به‌روزرسانی وضعیت فلش‌ها
     setTimeout(() => updateRowArrows('modal-categories-scroll-inner'), 10);
 }
-// ================== BOOKMARK ==================
+
+/* ------------------------- BOOKMARK ------------------------- */
 async function toggleBookmark(promptId) {
     if (!currentUser) {
         alert('Please sign in to bookmark prompts.');
@@ -885,20 +885,10 @@ async function toggleBookmark(promptId) {
     }
 }
 
-// ================== FETCH PROMPTS ==================
-function parseCategoryArray(category_id) {
-    if (!category_id) return [];
-    try {
-        if (typeof category_id === 'string') return JSON.parse(category_id);
-        if (Array.isArray(category_id)) return category_id;
-    } catch (e) {}
-    return [];
-}
-
+/* ------------------------- FETCH PROMPTS ------------------------- */
 async function fetchPromptsWithAuthors() {
     if (!currentUser) return [];
     try {
-        // ⬅️ ستون is_global اضافه شده، از or استفاده می‌کنیم
         const { data: promptsData, error: promptsError } = await sb
             .from('tavio_prompts')
             .select('*')
@@ -939,7 +929,7 @@ async function fetchPromptsWithAuthors() {
             author_name: authorMap[p.user_id] || 'Unknown',
             field_definitions: p.field_definitions || [],
             ai_models: p.ai_models || [],
-            is_global: p.is_global || false   // اضافه شد
+            is_global: p.is_global || false
         }));
     } catch (e) {
         console.error('Error in fetchPromptsWithAuthors:', e);
@@ -953,7 +943,7 @@ async function syncPrompts() {
     applyCategoryFilters();
 }
 
-// ================== SHARING ==================
+/* ------------------------- SHARING ------------------------- */
 async function fetchConnectedUsers() {
     if (!currentUser) return [];
     try {
@@ -1069,12 +1059,11 @@ async function sendShareRequest() {
     } else {
         alert('Prompt shared successfully!');
         closeShareModal();
-        // به‌روزرسانی اعلان‌ها و نشانگر
         loadTavioSidebarNotifications();
     }
 }
 
-// ================== HANDLE SHARE NOTIFICATIONS ==================
+/* ------------------------- HANDLE SHARE NOTIFICATIONS ------------------------- */
 function handleShareNotification(notification) {
     const data = notification.data;
     if (!data) return;
@@ -1180,7 +1169,27 @@ async function rejectSharedPrompt() {
     updateNotificationDot();
 }
 
-// ================== HELPERS ==================
+async function rejectSharedPromptViaNotif(notifId) {
+    const { data: notif } = await sb
+        .from('notifications')
+        .select('sender_id, data')
+        .eq('id', notifId)
+        .single();
+    await sb.from('notifications').update({ is_read: true }).eq('id', notifId);
+    if (notif?.sender_id) {
+        await sb.from('notifications').insert({
+            user_id: notif.sender_id,
+            sender_id: currentUser.id,
+            type: 'share_rejected',
+            data: notif.data,
+            is_read: false
+        });
+    }
+    loadTavioSidebarNotifications();
+    updateNotificationDot();
+}
+
+/* ------------------------- HELPER FUNCTIONS ------------------------- */
 function showGlobalLoader() {
     document.getElementById('initial-loader').style.display = 'flex';
 }
@@ -1188,26 +1197,21 @@ function hideGlobalLoader() {
     document.getElementById('initial-loader').style.display = 'none';
 }
 function openModal(modal) {
-    // ۱. با !important نمایش را فعال کن (غلبه بر hidden)
     modal.style.setProperty('display', 'flex', 'important');
-    // ۲. یک ری‌فلوی اجباری انجام بده تا مرورگر حالت اولیه را پردازش کند
     void modal.offsetHeight;
-    // ۳. حالا کلاس hidden را بردار → opacity از ۰ به ۱ می‌رود
     modal.classList.remove('hidden');
 }
-
 function closeModal(modal) {
     if (!modal) return;
-    modal.classList.add('hidden');            // برای سایر استایل‌ها (opacity و …)
-    modal.style.setProperty('display', 'none', 'important');  // کاملاً حذف از جریان صفحه
+    modal.classList.add('hidden');
+    modal.style.setProperty('display', 'none', 'important');
 }
-
 function showStep(stepId) {
     document.querySelectorAll('.auth-step').forEach(s => s.classList.remove('active'));
     document.getElementById(stepId).classList.add('active');
 }
 
-// ================== SIDEBAR ==================
+/* ------------------------- SIDEBAR ------------------------- */
 function getSidebarComponent() {
     if (!sidebarComponent) {
         sidebarComponent = document.querySelector('sidebar-component');
@@ -1223,7 +1227,7 @@ function getSidebarComponent() {
     return sidebarComponent;
 }
 
-// ================== PROFILE ==================
+/* ------------------------- PROFILE ------------------------- */
 async function buildCurrentProfile(user) {
     const { data: profileRow } = await sb
         .from('profiles')
@@ -1242,7 +1246,7 @@ async function buildCurrentProfile(user) {
     };
 }
 
-// ================== SYNC SIDEBAR ==================
+/* ------------------------- SYNC SIDEBAR ------------------------- */
 function syncSidebarComponent() {
     const comp = getSidebarComponent();
     if (!comp || typeof comp.setUser !== 'function') return;
@@ -1267,7 +1271,6 @@ function syncSidebarComponent() {
 
     loadTavioSidebarNotifications();
 
-    // تزریق استایل برای جابه‌جایی دکمهٔ همبرگری ۴ پیکسل به چپ در موبایل
     if (!comp.shadowRoot.getElementById('hamburger-mobile-fix')) {
         const style = document.createElement('style');
         style.id = 'hamburger-mobile-fix';
@@ -1286,12 +1289,10 @@ async function updateNotificationDot() {
     const comp = getSidebarComponent();
     if (!comp || !comp.shadowRoot) return;
 
-    // اگر کاربر هنوز لاگین نکرده، هیچ کاری نکن
     if (!currentUser || !currentUser.id) return;
 
     let hasUnread = false;
 
-    // ۱. اعلان‌های خوانده‌نشده
     const { data: notifs } = await sb
         .from('notifications')
         .select('id')
@@ -1303,7 +1304,6 @@ async function updateNotificationDot() {
         hasUnread = true;
     }
 
-    // ۲. رویدادهای تقویم از امروز به بعد
     if (!hasUnread) {
         const today = new Date().toISOString().split('T')[0];
 
@@ -1319,16 +1319,13 @@ async function updateNotificationDot() {
         }
     }
 
-    console.log('updateNotificationDot called, hasUnread:', hasUnread);  // فقط برای دیباگ، بعداً می‌توانید حذف کنید
-
-    // اعمال روی DOM
     const dot = comp.shadowRoot.getElementById('avatar-notif-dot');
     if (dot) {
         dot.style.display = hasUnread ? 'block' : 'none';
     }
 }
 
-// ================== NOTIFICATIONS SIDEBAR ==================
+/* ------------------------- NOTIFICATIONS SIDEBAR ------------------------- */
 async function loadTavioSidebarNotifications() {
     const container = document.getElementById('tavio-notif-list');
     if (!container) return;
@@ -1416,27 +1413,7 @@ async function loadTavioSidebarNotifications() {
     updateNotificationDot();
 }
 
-async function rejectSharedPromptViaNotif(notifId) {
-    const { data: notif } = await sb
-        .from('notifications')
-        .select('sender_id, data')
-        .eq('id', notifId)
-        .single();
-    await sb.from('notifications').update({ is_read: true }).eq('id', notifId);
-    if (notif?.sender_id) {
-        await sb.from('notifications').insert({
-            user_id: notif.sender_id,
-            sender_id: currentUser.id,
-            type: 'share_rejected',
-            data: notif.data,
-            is_read: false
-        });
-    }
-    loadTavioSidebarNotifications();
-    updateNotificationDot();
-}
-
-// ================== AUTH ==================
+/* ------------------------- AUTHENTICATION ------------------------- */
 async function logout() {
     await sb.auth.signOut();
     currentUser = null;
@@ -1484,7 +1461,6 @@ async function restoreSession() {
     hideGlobalLoader();
 }
 
-// ================== AUTH LISTENERS ==================
 function setupAuthListeners() {
     const continueBtn = document.getElementById('auth-continue-btn');
     if (continueBtn) {
@@ -1634,7 +1610,7 @@ function setupAuthListeners() {
     });
 }
 
-// ================== TAVIO PROMPT LOGIC ==================
+/* ------------------------- TAVIO PROMPT LOGIC ------------------------- */
 function renderPromptGrid(filteredPrompts) {
     const grid = document.getElementById('prompt-grid');
     if (!grid) return;
@@ -1657,7 +1633,6 @@ function renderPromptGrid(filteredPrompts) {
 
         const descHtml = prompt.description ? `<p class="prompt-desc">${prompt.description}</p>` : '';
 
-        // ----- ساخت لوگوهای مدل‌های هوش مصنوعی -----
         let aiModelsHtml = '';
         if (prompt.ai_models && prompt.ai_models.length > 0) {
             const logos = prompt.ai_models.map(modelId => {
@@ -1666,9 +1641,8 @@ function renderPromptGrid(filteredPrompts) {
                 const logoFile = getCompanyLogo(modelInfo.company);
                 return `<img src="${logoFile}" alt="${modelInfo.company}" class="card-ai-logo">`;
             }).join('');
-            aiModelsHtml = logos;   // فقط لوگوها، بدون +N
+            aiModelsHtml = logos;
         }
-        // -------------------------------------------
 
         card.innerHTML = `
             <div class="action-buttons">
@@ -1690,7 +1664,6 @@ function renderPromptGrid(filteredPrompts) {
             <div class="prompt-author">by ${prompt.author_name || 'Unknown'}</div>
         `;
 
-        // اتصال رویدادها (بدون تغییر)
         card.addEventListener('click', () => loadPromptIntoEditor(prompt));
 
         const pinBtn = card.querySelector('.pin-btn');
@@ -1708,7 +1681,6 @@ function renderPromptGrid(filteredPrompts) {
             });
         }
 
-        const deleteBtn = document.getElementById('delete-prompt-btn');
         grid.appendChild(card);
     });
 }
@@ -1782,12 +1754,10 @@ function loadPromptIntoEditor(prompt) {
             templateTextarea.value = prompt.template || '';
         }
 
-        // مقداردهی fieldDefinitions
         fieldDefinitions = (prompt.field_definitions && prompt.field_definitions.length > 0)
             ? JSON.parse(JSON.stringify(prompt.field_definitions))
             : parsePromptFields(prompt.template || '');
 
-        // اگر باز هم خالی بود و template محتوی {{ بود، یکبار دیگر تلاش کن
         if (fieldDefinitions.length === 0 && prompt.template && prompt.template.includes('{{')) {
             console.warn('No field definitions parsed, trying direct parse');
             fieldDefinitions = parsePromptFields(prompt.template);
@@ -1800,7 +1770,6 @@ function loadPromptIntoEditor(prompt) {
         selectedAIModels = prompt.ai_models || [];
         renderAIModels();
 
-        // تنظیم دکمه‌های ویرایش و حذف
         if (saveBtn) {
             const saveLabel = saveBtn.querySelector('.btn-label');
             if (currentUser && prompt.user_id === currentUser.id) {
@@ -1825,7 +1794,6 @@ function loadPromptIntoEditor(prompt) {
         }
     } catch (error) {
         console.error('Error loading prompt into editor:', error);
-        // تلاش دوباره پس از رفرش ملایم
         setTimeout(() => {
             if (currentPrompt) loadPromptIntoEditor(currentPrompt);
         }, 100);
@@ -1836,7 +1804,7 @@ function backToLibrary() {
     document.getElementById('editor-view').classList.remove('active');
     document.getElementById('library-view').classList.add('active');
     resetAll();
-    deletingPromptId = null;   // این خط را اضافه کن
+    deletingPromptId = null;
 }
 
 function detectVariables() {
@@ -1890,7 +1858,6 @@ function generatePrompt() {
         filled = filled.replace(new RegExp(`\\{\\{${key}\\}\\}`, 'g'), val);
     });
 
-    // اگر تایپ قبلی هنوز در حال اجراست، متوقفش کن
     if (generateInterval) {
         clearInterval(generateInterval);
         generateInterval = null;
@@ -1944,15 +1911,12 @@ function copyPrompt() {
 
 function handleCopySuccess(btn) {
     if (!btn) return;
-    // قطع چشمک زدن، نمایش موفقیت
     btn.classList.remove('blink');
     btn.classList.add('success');
 
-    // تغییر متن داخل دکمه به "Copied"
     const btnText = btn.querySelector('.btn-text');
     if (btnText) btnText.textContent = 'Copied';
 
-    // بعد از ۲ ثانیه به حالت اول برگردد
     setTimeout(() => {
         btn.classList.remove('success');
         if (btnText) btnText.textContent = 'Copy';
@@ -2000,16 +1964,13 @@ async function confirmDeletePrompt() {
     } catch (e) {
         console.error(e);
     } finally {
-        // همیشه مودال را ببند و به کتابخانه برگرد
         closeModal(document.getElementById('delete-confirm-modal'));
         backToLibrary();
         deletingPromptId = null;
     }
 }
 
-
 function resetAll() {
-    // توقف تایپ در حال اجرا
     if (generateInterval) {
         clearInterval(generateInterval);
         generateInterval = null;
@@ -2018,16 +1979,13 @@ function resetAll() {
     const resultDisplay = document.getElementById('result-display');
     const copyBtn = document.getElementById('copy-prompt-btn');
 
-    // پاک کردن متن تولیدشده
     if (resultDisplay) resultDisplay.textContent = '';
 
-    // غیرفعال کردن دکمه کپی و قطع چشمک‌زدن
     if (copyBtn) {
         copyBtn.disabled = true;
         copyBtn.classList.remove('blink', 'success');
     }
 
-    // فقط مقادیر فیلدها را خالی کن، ساختار فیلدها دست‌نخورده بماند
     if (fieldDefinitions && fieldDefinitions.length > 0) {
         fieldDefinitions.forEach(f => {
             if (f.type === 'multi-select') {
@@ -2036,21 +1994,20 @@ function resetAll() {
                 f.value = '';
             }
         });
-        renderPromptInputFields();   // بازسازی فیلدها با مقادیر خالی
+        renderPromptInputFields();
     }
 
-    // بستن نمایش مدل‌های بیشتر (اگر باز شده باشد)
     aiModelsExpanded = false;
 
-    // اسکرول نرم به بالای ویرایشگر
     const editorView = document.getElementById('editor-view');
     if (editorView) {
         editorView.scrollIntoView({ behavior: 'smooth', block: 'start' });
     }
 }
 
+/* ------------------------- MODAL PROMPT (NEW/EDIT) ------------------------- */
 function showNewPromptModal() {
-    editingPromptId = null;   // یعنی ساختن پرامپت جدید
+    editingPromptId = null;
     document.getElementById('modal-title').value = '';
     document.getElementById('modal-description').value = '';
     document.getElementById('modal-template').value = '';
@@ -2062,7 +2019,6 @@ function showNewPromptModal() {
     updateSelectedCountDisplay();
     document.getElementById('add-prompt-btn').textContent = 'Add to Library';
 
-    // global checkbox
     const globalToggle = document.getElementById('modal-global-toggle-wrapper');
     if (globalToggle) {
         if (currentUserRole === 'General') {
@@ -2073,7 +2029,6 @@ function showNewPromptModal() {
         }
     }
 
-    // ریست دراپ‌داون هوش مصنوعی
     const dropdown = document.getElementById('ai-select-dropdown');
     const button = document.getElementById('ai-select-button');
     if (dropdown) {
@@ -2100,7 +2055,6 @@ function openEditPromptModal() {
     const descTextarea = document.getElementById('modal-description');
     const templateTextarea = document.getElementById('modal-template');
 
-    // اگر هر یک از این عناصر ضروری هنوز در دسترس نیستند، یک تلاش دوباره در ۵۰ میلی‌ثانیهٔ دیگر انجام بده
     if (!titleInput || !templateTextarea) {
         setTimeout(() => openEditPromptModal(), 50);
         return;
@@ -2130,7 +2084,6 @@ function openEditPromptModal() {
 
     document.getElementById('add-prompt-btn').textContent = 'Save Changes';
 
-    // ریست دراپ‌داون
     const dropdown = document.getElementById('ai-select-dropdown');
     const button = document.getElementById('ai-select-button');
     if (dropdown) {
@@ -2152,8 +2105,8 @@ function openEditPromptModal() {
 function hideNewPromptModal() {
     const modal = document.getElementById('new-prompt-modal');
     if (modal) {
-        modal.style.removeProperty('display');   // پاک کردن inline style
-        modal.classList.add('hidden');           // کلاس hidden را اضافه کن
+        modal.style.removeProperty('display');
+        modal.classList.add('hidden');
     }
     editingPromptId = null;
     document.getElementById('add-prompt-btn').textContent = 'Add to Library';
@@ -2190,7 +2143,6 @@ async function savePromptFromModal() {
 
     try {
         if (editingPromptId) {
-            // ویرایش پرامپت موجود
             const { error } = await sb
                 .from('tavio_prompts')
                 .update(promptData)
@@ -2199,7 +2151,6 @@ async function savePromptFromModal() {
 
             if (error) throw error;
 
-            // به‌روزرسانی در آرایه محلی
             const index = prompts.findIndex(p => p.id === editingPromptId);
             if (index !== -1) {
                 prompts[index] = {
@@ -2213,7 +2164,6 @@ async function savePromptFromModal() {
                 };
             }
 
-            // اگر همین پرامپت توی ویرایشگر بازه، currentPrompt رو هم تازه‌سازی کن
             if (currentPrompt && currentPrompt.id === editingPromptId) {
                 currentPrompt = { ...prompts[index] };
                 loadPromptIntoEditor(currentPrompt);
@@ -2221,7 +2171,6 @@ async function savePromptFromModal() {
 
             alert('Prompt updated successfully.');
         } else {
-            // ایجاد پرامپت جدید
             const { data, error } = await sb
                 .from('tavio_prompts')
                 .insert({
@@ -2269,7 +2218,7 @@ async function saveCurrentPrompt() {
     const { error } = await sb
         .from('tavio_prompts')
         .update({
-            description: currentPrompt.description,  // از currentPrompt می‌خوانیم
+            description: currentPrompt.description,
             content: template,
             field_definitions: fieldDefinitions,
             ai_models: selectedAIModels
@@ -2289,7 +2238,7 @@ async function saveCurrentPrompt() {
     applyCategoryFilters();
 }
 
-// ================== UI EVENT LISTENERS ==================
+/* ------------------------- UI EVENT LISTENERS & HELPERS ------------------------- */
 function updateRowArrows(rowId) {
     const inner = document.getElementById(rowId);
     if (!inner) return;
@@ -2408,7 +2357,6 @@ function setupUIListeners() {
         });
     }
 
-    // دکمهٔ حذف در هدر ویرایشگر
     const deleteBtn = document.getElementById('delete-prompt-btn');
     if (deleteBtn) {
         deleteBtn.addEventListener('click', () => {
@@ -2419,7 +2367,6 @@ function setupUIListeners() {
         });
     }
 
-    // مودال تأیید حذف ← قطعهٔ تو دقیقاً همین‌جاست
     const confirmYesBtn = document.getElementById('confirm-yes-btn');
     const confirmNoBtn = document.getElementById('confirm-no-btn');
     const deleteConfirmModal = document.getElementById('delete-confirm-modal');
@@ -2472,7 +2419,7 @@ function setupUIListeners() {
     setupFilterScrollArrows();
 }
 
-// ================== INIT ==================
+/* ------------------------- INITIALIZATION ------------------------- */
 document.addEventListener('DOMContentLoaded', async () => {
     setupAuthListeners();
     setupUIListeners();
