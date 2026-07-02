@@ -1154,7 +1154,7 @@ textarea::-webkit-scrollbar-thumb,
 
 .editor-header .delete-btn {
     margin-left: auto;
-    margin-top: 0; 
+    margin-top: 20px; 
     position: relative;
     width: 48px;
     overflow: visible;
