@@ -1182,6 +1182,9 @@ textarea::-webkit-scrollbar-thumb,
     opacity: 1;
     transform: translateY(-50%) translateX(0);
 }
+.editor-header .delete-btn:hover {
+    color: #ff6b6b;
+}
 .editor-header .delete-btn svg {
     width: 18px;
     height: 18px;
