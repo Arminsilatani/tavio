@@ -1180,7 +1180,7 @@ textarea::-webkit-scrollbar-thumb,
 .editor-header .delete-btn:hover .btn-text,
 .editor-header .delete-btn:focus-visible .btn-text {
     opacity: 1;
-    transform: translateY(-50%) translateX(20);
+    transform: translateY(-50%) translateX(0);
 }
 .editor-header .delete-btn:hover {
     color: #ff6b6b;
