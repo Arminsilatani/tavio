@@ -1068,7 +1068,7 @@ textarea::-webkit-scrollbar-thumb,
     display: flex;
     align-items: center;
     padding: 6px 25px;
-    gap: 8px;
+    gap: 4px;
     font-size: 13px;
     color: #ccc;
 }
