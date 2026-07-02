@@ -328,7 +328,7 @@ textarea::-webkit-scrollbar-thumb,
 .editor-header {
     display: flex;
     align-items: flex-start;
-    gap: 12px;
+    gap: 8px;
     margin-bottom: 20px;
     flex-wrap: nowrap;
 }
