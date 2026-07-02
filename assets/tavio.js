@@ -706,6 +706,7 @@ function renderModalAIDropdown() {
             label.className = 'ai-model-checkbox';
             const checkbox = document.createElement('input');
             checkbox.type = 'checkbox';
+            checkbox.classList.add('neon-checkbox');
             checkbox.value = model.id;
             checkbox.checked = modalSelectedAIModels.includes(model.id);
             checkbox.addEventListener('change', () => {
