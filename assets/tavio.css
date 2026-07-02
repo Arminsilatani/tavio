@@ -1445,7 +1445,6 @@ textarea::-webkit-scrollbar-thumb,
     --c-base: #2a2a2a;
     --c-on: var(--accent);
 
-    /* نقطه‌ها ۳px (قبلاً ۴px) */
     background-image:
         radial-gradient(circle, var(--c-base) 40%, transparent 65%),
         radial-gradient(circle, var(--c-base) 40%, transparent 65%),
@@ -1457,17 +1456,16 @@ textarea::-webkit-scrollbar-thumb,
         radial-gradient(circle, var(--c-base) 40%, transparent 65%),
         radial-gradient(circle, var(--c-base) 40%, transparent 65%);
 
-    background-size: 3px 3px;   /* قبل ۴px */
+    background-size: 3px 3px;
 
-    /* موقعیت‌ها برای شبکهٔ متقارن با نقطهٔ ۳px */
+    /* موقعیت‌های جدید – متقارن و وسط‌چین */
     background-position:
-        3px 3px,   10px 3px,   17px 3px,
-        3px 10px,  10px 10px,  17px 10px,
-        3px 17px,  10px 17px,  17px 17px;
+        1.5px 1.5px,   8.5px 1.5px,   15.5px 1.5px,
+        1.5px 8.5px,   8.5px 8.5px,   15.5px 8.5px,
+        1.5px 15.5px,  8.5px 15.5px,  15.5px 15.5px;
     background-repeat: no-repeat;
 }
 
-/* لایهٔ نئونی هم با همان اندازه */
 .neon-checkbox::before {
     content: "";
     position: absolute;
@@ -1484,11 +1482,11 @@ textarea::-webkit-scrollbar-thumb,
         radial-gradient(circle, var(--c-on) 40%, transparent 65%),
         radial-gradient(circle, var(--c-on) 40%, transparent 65%);
     background-size: 3px 3px;
-    background-position: inherit;
+    background-position: inherit;   /* از والد می‌گیره */
     background-repeat: no-repeat;
 
     opacity: 0;
-    filter: drop-shadow(0 0 2px var(--c-on)); /* گلوی کوچیک‌تر متناسب با نقطهٔ ۳px */
+    filter: drop-shadow(0 0 2px var(--c-on));
     transition: opacity 0.2s;
     pointer-events: none;
 }
