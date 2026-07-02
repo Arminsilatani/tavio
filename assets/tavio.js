@@ -1280,14 +1280,14 @@ function hideGlobalLoader() {
     document.getElementById('initial-loader').style.display = 'none';
 }
 function openModal(modal) {
-    modal.style.setProperty('display', 'flex', 'important');
-    void modal.offsetHeight;
-    modal.classList.remove('hidden');
+    if (!modal) return;
+    modal.style.display = 'flex';
+    document.body.classList.add('modal-open');
 }
 function closeModal(modal) {
     if (!modal) return;
-    modal.classList.add('hidden');
-    modal.style.setProperty('display', 'none', 'important');
+    modal.style.display = 'none';
+    document.body.classList.remove('modal-open');
 }
 function showStep(stepId) {
     document.querySelectorAll('.auth-step').forEach(s => s.classList.remove('active'));
@@ -2416,6 +2416,23 @@ function setupUIListeners() {
     });
 
     document.getElementById('new-prompt-btn').addEventListener('click', showNewPromptModal);
+
+    // Close modal when clicking on the dark backdrop (not the panel)
+    document.addEventListener('click', function(e) {
+        const modal = e.target.closest('.modal');
+        if (modal && e.target === modal) {
+            closeModal(modal);
+        }
+    });
+
+    // Close modal via the × button
+    document.addEventListener('click', function(e) {
+        const closeBtn = e.target.closest('.close-modal');
+        if (closeBtn) {
+            const modal = closeBtn.closest('.modal');
+            if (modal) closeModal(modal);
+        }
+    });
 
     const cancelBtn = document.getElementById('cancel-modal-btn');
     if (cancelBtn) cancelBtn.addEventListener('click', hideNewPromptModal);
