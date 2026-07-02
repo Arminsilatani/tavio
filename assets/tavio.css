@@ -1155,12 +1155,14 @@ textarea::-webkit-scrollbar-thumb,
 }
 
 .editor-header .delete-btn {
-    margin-top: 16px;
-    padding: 6px 12px;
-    font-size: 16px;
-    justify-content: center; 
-    align-self: center;
     margin-left: auto;
+    position: relative;           /* مبنای قرارگیری متن */
+    width: 48px;
+    overflow: visible;
+    justify-content: center;
+    display: inline-flex;
+    align-items: center;
+    white-space: nowrap;
 }
 .editor-header .delete-btn svg {
     width: 18px;
