@@ -1172,7 +1172,7 @@ textarea::-webkit-scrollbar-thumb,
     transform: translateY(-50%) translateX(10px); 
     opacity: 0;
     white-space: nowrap;
-    pointer-events: none;         /* روی متن کلیک نخوره */
+    pointer-events: none;
     transition: opacity 0.2s ease, transform 0.2s ease;
     color: inherit;
     font-size: 13px;
@@ -1473,13 +1473,12 @@ textarea::-webkit-scrollbar-thumb,
     }
 
     /* Editor header (mobile) */
-    .editor-header {
-        flex-wrap: wrap;
-        justify-content: space-between;
-        align-items: stretch;
-        gap: 8px;
-        margin-bottom: 16px;
-    }
+.editor-header {
+    display: flex;
+    flex-wrap: wrap;                /* اجازه شکستن خط */
+    align-items: flex-start;        /* تراز عمودی بالا */
+    gap: 8px;                       /* فاصله بین عناصر */
+}
     .editor-title {
         flex: 0 0 100%;
         order: 1;
