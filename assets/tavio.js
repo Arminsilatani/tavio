@@ -1282,12 +1282,11 @@ function hideGlobalLoader() {
 function openModal(modal) {
     if (!modal) return;
     modal.style.display = 'flex';
-    document.body.classList.add('modal-open');
 }
+
 function closeModal(modal) {
     if (!modal) return;
     modal.style.display = 'none';
-    document.body.classList.remove('modal-open');
 }
 function showStep(stepId) {
     document.querySelectorAll('.auth-step').forEach(s => s.classList.remove('active'));
