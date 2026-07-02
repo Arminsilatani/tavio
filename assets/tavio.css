@@ -1442,7 +1442,7 @@ textarea::-webkit-scrollbar-thumb,
     outline: none;
     box-sizing: border-box;
     position: relative;
-    top: -2px;
+    top: -1.5px;
 
     --c-base: #2a2a2a;
     --c-on: var(--accent);
