@@ -1164,6 +1164,19 @@ textarea::-webkit-scrollbar-thumb,
     align-items: center;
     white-space: nowrap;
 }
+.editor-header .delete-btn .btn-text {
+    position: absolute;
+    right: 100%;                  /* سمت چپ دکمه */
+    margin-right: 8px;            /* فاصله از دکمه */
+    top: 50%;
+    transform: translateY(-50%) translateX(10px); /* اول یه کم سمت راست باشه */
+    opacity: 0;
+    white-space: nowrap;
+    pointer-events: none;         /* روی متن کلیک نخوره */
+    transition: opacity 0.2s ease, transform 0.2s ease;
+    color: inherit;
+    font-size: 13px;
+}
 .editor-header .delete-btn svg {
     width: 18px;
     height: 18px;
