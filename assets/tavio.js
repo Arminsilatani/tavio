@@ -226,6 +226,41 @@ let aiDropdownOpen = false;
 let aiFilterAreaVisible = false;
 let aiCompanyExpanded = {};
 
+/* ------------------------- TOAST NOTIFICATION ------------------------- */
+function showToast(message) {
+    const toast = document.createElement('div');
+    toast.className = 'ravlo-toast';
+
+    const radius = 10;
+    const circumference = 2 * Math.PI * radius;
+
+    toast.innerHTML = `
+        <svg width="24" height="24" viewBox="0 0 24 24" class="toast-ring">
+            <circle cx="12" cy="12" r="${radius}" fill="none"
+                    stroke="rgba(255,255,255,0.3)" stroke-width="2"/>
+            <circle cx="12" cy="12" r="${radius}" fill="none"
+                    stroke="#fff" stroke-width="2"
+                    stroke-dasharray="${circumference}" stroke-dashoffset="0"
+                    stroke-linecap="round"
+                    style="transition: stroke-dashoffset 4s linear;"/>
+        </svg>
+        <span>${message}</span>
+    `;
+
+    document.body.appendChild(toast);
+
+    requestAnimationFrame(() => {
+        const ring = toast.querySelector('.toast-ring circle:last-child');
+        if (ring) {
+            ring.style.strokeDashoffset = circumference;
+        }
+    });
+
+    setTimeout(() => {
+        if (toast.parentNode) toast.remove();
+    }, 4000);
+}
+
 /* ------------------------- UTILITY FUNCTIONS ------------------------- */
 function escapeRegExp(string) {
     return string.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
@@ -863,12 +898,12 @@ function renderModalCategories() {
 /* ------------------------- BOOKMARK ------------------------- */
 async function toggleBookmark(promptId) {
     if (!currentUser) {
-        alert('Please sign in to bookmark prompts.');
+        showToast('Please sign in to bookmark prompts.');
         return;
     }
     const prompt = prompts.find(p => p.id === promptId);
     if (!prompt) return;
-    
+
     const newPinned = !prompt.pinned;
     const { error } = await sb
         .from('tavio_prompts')
@@ -878,12 +913,13 @@ async function toggleBookmark(promptId) {
 
     if (error) {
         console.error('Error toggling bookmark:', error);
-        alert('Failed to update bookmark. Please try again.');
+        showToast('Failed to update bookmark. Please try again.');
     } else {
         prompt.pinned = newPinned;
         applyCategoryFilters();
     }
 }
+
 
 /* ------------------------- FETCH PROMPTS ------------------------- */
 async function fetchPromptsWithAuthors() {
@@ -1063,6 +1099,42 @@ async function sendShareRequest() {
     }
 }
 
+async function sendShareRequest() {
+    if (!shareTargetPromptId || !selectedShareUserId) return;
+    const prompt = prompts.find(p => p.id === shareTargetPromptId);
+    if (!prompt) return;
+
+    const { error } = await sb
+        .from('notifications')
+        .insert({
+            user_id: selectedShareUserId,
+            sender_id: currentUser.id,
+            type: 'share_prompt',
+            data: {
+                prompt_id: prompt.id,
+                prompt_title: prompt.title,
+                prompt_description: prompt.description || '',
+                prompt_category: JSON.stringify(prompt.categories),
+                prompt_template: prompt.template,
+                author_id: prompt.user_id,
+                author_name: prompt.author_name,
+                field_definitions: prompt.field_definitions || [],
+                ai_models: prompt.ai_models || []
+            },
+            is_read: false,
+            created_at: new Date().toISOString()
+        });
+
+    if (error) {
+        showToast('Failed to send share request. Please try again.');
+        console.error(error);
+    } else {
+        showToast('Prompt shared successfully!');
+        closeShareModal();
+        loadTavioSidebarNotifications();
+    }
+}
+
 /* ------------------------- HANDLE SHARE NOTIFICATIONS ------------------------- */
 function handleShareNotification(notification) {
     const data = notification.data;
@@ -1099,6 +1171,13 @@ async function acceptSharedPrompt() {
     const promptData = JSON.parse(modal.dataset.promptData || '{}');
     if (!promptData.prompt_title) return;
 
+    // گرفتن اطلاعات نوتیفیکیشن برای یافتن sender_id
+    const { data: notification, error: notifError } = await sb
+        .from('notifications')
+        .select('sender_id')
+        .eq('id', notifId)
+        .single();
+
     const categoriesArray = parseCategoryArray(promptData.prompt_category);
     const newPrompt = {
         title: promptData.prompt_title,
@@ -1128,7 +1207,7 @@ async function acceptSharedPrompt() {
         .single();
 
     if (error) {
-        alert('Failed to save prompt. Please try again.');
+        showToast('Failed to save prompt. Please try again.');
         console.error(error);
         return;
     }
@@ -1140,13 +1219,17 @@ async function acceptSharedPrompt() {
     applyCategoryFilters();
 
     await sb.from('notifications').update({ is_read: true }).eq('id', notifId);
-    await sb.from('notifications').insert({
-        user_id: notification.sender_id,
-        sender_id: currentUser.id,
-        type: 'share_accepted',
-        data: { prompt_id: promptData.prompt_id },
-        is_read: false
-    });
+
+    // ارسال نوتیف acceptance برای فرستندهٔ اصلی
+    if (notification?.sender_id) {
+        await sb.from('notifications').insert({
+            user_id: notification.sender_id,
+            sender_id: currentUser.id,
+            type: 'share_accepted',
+            data: { prompt_id: promptData.prompt_id },
+            is_read: false
+        });
+    }
 
     modal.classList.add('hidden');
     loadTavioSidebarNotifications();
@@ -1520,7 +1603,7 @@ function setupAuthListeners() {
                 await syncPrompts();
             } catch (err) {
                 console.error('Unhandled sign in error:', err);
-                alert('An error occurred during sign in. Check console for details.');
+                showToast('An error occurred during sign in. Check console for details.');
             }
         });
     }
@@ -1551,8 +1634,8 @@ function setupAuthListeners() {
                 document.getElementById('auth-error-register').style.display = 'block';
                 return;
             }
-            alert('Registration successful! Please check your email to confirm your account.');
-            closeModal(authOverlay);
+            showToast('Registration successful! Please check your email to confirm your account.');
+            closeModal(document.getElementById('auth-overlay'));
         });
     }
 
@@ -1923,6 +2006,32 @@ function handleCopySuccess(btn) {
     }, 2000);
 }
 
+async function confirmDeletePrompt() {
+    if (!deletingPromptId) return;
+
+    try {
+        const { error } = await sb
+            .from('tavio_prompts')
+            .delete()
+            .eq('id', deletingPromptId);
+
+        if (error) {
+            showToast('Failed to delete prompt.');
+            console.error(error);
+        } else {
+            prompts = prompts.filter(p => p.id !== deletingPromptId);
+            applyCategoryFilters();
+        }
+    } catch (e) {
+        console.error(e);
+    } finally {
+        closeModal(document.getElementById('delete-confirm-modal'));
+        backToLibrary();
+        deletingPromptId = null;
+    }
+}
+
+
 function fallbackCopy(text, btn) {
     const textarea = document.createElement('textarea');
     textarea.value = text;
@@ -1937,10 +2046,10 @@ function fallbackCopy(text, btn) {
         if (successful) {
             handleCopySuccess(btn);
         } else {
-            alert('Copy failed. Please copy manually.');
+            showToast('Copy failed. Please copy manually.');
         }
     } catch (err) {
-        alert('Copy failed. Please copy manually.');
+        showToast('Copy failed. Please copy manually.');
     }
     document.body.removeChild(textarea);
 }
@@ -2120,11 +2229,11 @@ async function savePromptFromModal() {
     const template = document.getElementById('modal-template').value.trim();
 
     if (!title || !template) {
-        alert("Title and template are required.");
+        showToast("Title and template are required.");
         return;
     }
     if (modalSelectedCategories.length === 0) {
-        alert("Please select at least one category.");
+        showToast("Please select at least one category.");
         return;
     }
 
@@ -2169,7 +2278,7 @@ async function savePromptFromModal() {
                 loadPromptIntoEditor(currentPrompt);
             }
 
-            alert('Prompt updated successfully.');
+            showToast('Prompt updated successfully.');
         } else {
             const { data, error } = await sb
                 .from('tavio_prompts')
@@ -2194,7 +2303,7 @@ async function savePromptFromModal() {
                 categories: modalSelectedCategories
             };
             prompts.unshift(newPrompt);
-            alert('Prompt added to library!');
+            showToast('Prompt added to library!');
         }
 
         hideNewPromptModal();
@@ -2203,7 +2312,7 @@ async function savePromptFromModal() {
         document.getElementById('add-prompt-btn').textContent = 'Add to Library';
     } catch (error) {
         console.error('Error saving prompt:', error);
-        alert('Failed to save prompt. Please try again.');
+        showToast('Failed to save prompt. Please try again.');
     }
 }
 
@@ -2352,7 +2461,7 @@ function setupUIListeners() {
             if (currentPrompt && currentUser && currentPrompt.user_id === currentUser.id) {
                 openEditPromptModal();
             } else {
-                alert('You can only edit your own prompts.');
+                showToast('You can only edit your own prompts.');
             }
         });
     }
