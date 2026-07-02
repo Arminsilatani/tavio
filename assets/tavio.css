@@ -1465,33 +1465,26 @@ textarea::-webkit-scrollbar-thumb,
 }
 .tavio-notif-item .notif-actions .reject-btn:hover { border-color: #666; }
 
-/* ======================== NEON DOT CHECKBOX (بر اساس نمونه مرجع) ======================== */
+/* ======================== چک‌باکس نقطه‌ای نئونی ۳×۳ ======================== */
 
-/* انیمیشن pulse مشترک */
-@keyframes pulseNeon {
-  0%, 100% { opacity: 0; }
-  50%      { opacity: 0.75; }
-}
-
-/* استایل پایه برای تمام چک‌باکس‌های مورد نظر */
 .multi-checkbox-item input[type="checkbox"],
 .ai-model-checkbox input[type="checkbox"],
 #modal-is-global {
-  appearance: none;
+
+  /* ـــــــ پایه: مخفی کردن ظاهر پیش‌فرض ـــــــ */
   -webkit-appearance: none;
-  width: 22px;
-  height: 22px;
+  appearance: none;
+  width: 24px;                /* دقیقاً ۲۴px – فضای کافی برای ۹ نقطه */
+  height: 24px;
   margin: 0;
   vertical-align: middle;
   cursor: pointer;
+  background: transparent;
+  position: relative;
   outline: none;
-  background-color: transparent;
 
-  /* رنگ‌های متغیر: پایه تیره، روشن = accent */
+  /* ـــــــ ۹ نقطه طوسی (حالت عادی) ـــــــ */
   --c-base: #2a2a2a;
-  --c-on: var(--accent);
-
-  /* ۹ نقطهٔ طوسی در حالت عادی */
   background-image:
     radial-gradient(circle, var(--c-base) 40%, transparent 65%),
     radial-gradient(circle, var(--c-base) 40%, transparent 65%),
@@ -1503,17 +1496,18 @@ textarea::-webkit-scrollbar-thumb,
     radial-gradient(circle, var(--c-base) 40%, transparent 65%),
     radial-gradient(circle, var(--c-base) 40%, transparent 65%);
 
-  background-size: 5px 5px;
+  background-size: 5px 5px;                    /* اندازهٔ هر نقطه */
   background-position:
-    3px 3px, 9.5px 3px, 16px 3px,
-    3px 9.5px, 9.5px 9.5px, 16px 9.5px,
-    3px 16px, 9.5px 16px, 16px 16px;
+    3px 3px,   10px 3px,   17px 3px,
+    3px 10px,  10px 10px,  17px 10px,
+    3px 17px,  10px 17px,  17px 17px;
   background-repeat: no-repeat;
 
-  position: relative;
+  /* متغیر رنگ نئونی (از تم میاد) */
+  --c-on: var(--accent);
 }
 
-/* Pseudo-element برای حالت تیک‌خورده: نقطه‌های نئونی با glow */
+/* ـــــــ لایهٔ نئونی (::before) برای حالت تیک‌خورده ـــــــ */
 .multi-checkbox-item input[type="checkbox"]::before,
 .ai-model-checkbox input[type="checkbox"]::before,
 #modal-is-global::before {
@@ -1531,7 +1525,6 @@ textarea::-webkit-scrollbar-thumb,
     radial-gradient(circle, var(--c-on) 40%, transparent 65%),
     radial-gradient(circle, var(--c-on) 40%, transparent 65%),
     radial-gradient(circle, var(--c-on) 40%, transparent 65%);
-
   background-size: 5px 5px;
   background-position: inherit;
   background-repeat: no-repeat;
@@ -1539,42 +1532,14 @@ textarea::-webkit-scrollbar-thumb,
   opacity: 0;
   pointer-events: none;
   filter: drop-shadow(0 0 4px var(--c-on));
-  transition: opacity 0.2s ease;
+  transition: opacity 0.2s;
 }
 
-/* حالت تیک‌خورده: نمایش لایهٔ نئونی */
+/* ـــــــ حالت تیک‌خورده: لایهٔ نئونی ظاهر می‌شه ـــــــ */
 .multi-checkbox-item input[type="checkbox"]:checked::before,
 .ai-model-checkbox input[type="checkbox"]:checked::before,
 #modal-is-global:checked::before {
   opacity: 1;
-}
-
-/* (اختیاری) hover روی چک‌باکس تیک‌نخورده – یک glow ضعیف و pulse */
-.multi-checkbox-item input[type="checkbox"]:hover:not(:checked)::after,
-.ai-model-checkbox input[type="checkbox"]:hover:not(:checked)::after,
-#modal-is-global:hover:not(:checked)::after {
-  content: "";
-  position: absolute;
-  inset: 0;
-
-  background-image:
-    radial-gradient(circle, var(--c-on) 40%, transparent 65%),
-    radial-gradient(circle, var(--c-on) 40%, transparent 65%),
-    radial-gradient(circle, var(--c-on) 40%, transparent 65%),
-    radial-gradient(circle, var(--c-on) 40%, transparent 65%),
-    radial-gradient(circle, var(--c-on) 40%, transparent 65%),
-    radial-gradient(circle, var(--c-on) 40%, transparent 65%),
-    radial-gradient(circle, var(--c-on) 40%, transparent 65%),
-    radial-gradient(circle, var(--c-on) 40%, transparent 65%),
-    radial-gradient(circle, var(--c-on) 40%, transparent 65%);
-
-  background-size: 5px 5px;
-  background-position: inherit;
-  background-repeat: no-repeat;
-
-  pointer-events: none;
-  animation: pulseNeon 1.5s infinite ease-in-out;
-  opacity: 0.5;
 }
 
 /* ------------------------- RESPONSIVE (MOBILE) ------------------------- */
