@@ -1160,8 +1160,13 @@ function handleShareNotification(notification) {
     if (!data) return;
 
     const sidebar = getSidebarComponent();
-    if (sidebar && sidebar.closeSidebar) {
-        sidebar.closeSidebar();
+    if (sidebar && sidebar.shadowRoot) {
+        const sidebarEl = sidebar.shadowRoot.querySelector('.sidebar');
+        if (sidebarEl) sidebarEl.classList.remove('open');
+        const overlay = sidebar.shadowRoot.querySelector('.sidebar-overlay');
+        if (overlay) overlay.classList.remove('visible');
+        const hamburger = sidebar.shadowRoot.querySelector('.hamburger-btn');
+        if (hamburger) hamburger.classList.remove('active');
     }
 
     const modal = document.getElementById('prompt-preview-modal');
