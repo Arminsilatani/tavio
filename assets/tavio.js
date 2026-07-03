@@ -1128,6 +1128,7 @@ async function sendShareRequest() {
             user_id: selectedShareUserId,
             sender_id: currentUser.id,
             type: 'share_prompt',
+            title: 'Shared Prompt: ' + prompt.title,
             data: {
                 prompt_id: prompt.id,
                 prompt_title: prompt.title,
