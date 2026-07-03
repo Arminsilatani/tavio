@@ -1427,6 +1427,7 @@ async function loadTavioSidebarNotifications() {
             .from('notifications')
             .select('*')
             .eq('user_id', currentUser.id)
+            .in('type', ['share_prompt', 'share_accepted', 'share_rejected'])
             .order('created_at', { ascending: false })
             .limit(10);
 
