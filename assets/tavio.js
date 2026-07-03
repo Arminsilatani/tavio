@@ -1020,10 +1020,6 @@ async function openShareModal(promptId) {
     shareTargetPromptId = promptId;
     const modal = document.getElementById('share-modal');
     const userList = document.getElementById('share-user-list');
-    const sendBtn = document.getElementById('share-send-btn');
-    selectedShareUserId = null;
-    sendBtn.disabled = true;
-
     userList.innerHTML = `
         <input type="text" id="share-user-search" class="auth-field" placeholder="Search user..." autocomplete="off">
         <div id="share-search-results" style="margin-top:8px;"></div>
@@ -1062,24 +1058,23 @@ async function openShareModal(promptId) {
                             : `<span style="display:inline-block;width:24px;height:24px;border-radius:50%;background:var(--accent);color:#111;text-align:center;line-height:24px;font-size:12px;">${label.charAt(0)}</span>`}
                     </span>
                     <span style="flex:1;">${label}</span>
-                    <button class="btn-secondary small" data-userid="${u.id}" data-connected="${isConnected}">
+                    <button class="btn-secondary small share-action-btn" data-userid="${u.id}" data-connected="${isConnected}">
                         ${isConnected ? 'Send' : 'Connect'}
                     </button>
                 </div>
             `;
         }).join('');
 
-        resultsDiv.querySelectorAll('button').forEach(btn => {
-            btn.addEventListener('click', (e) => {
+        resultsDiv.querySelectorAll('.share-action-btn').forEach(btn => {
+            btn.addEventListener('click', async (e) => {
                 const userId = btn.dataset.userid;
                 const isConnected = btn.dataset.connected === 'true';
                 if (isConnected) {
                     selectedShareUserId = userId;
-                    sendBtn.disabled = false;
-                    resultsDiv.querySelectorAll('.share-user-row').forEach(r => r.style.background = 'rgba(255,255,255,0.03)');
-                    btn.closest('.share-user-row').style.background = 'rgba(176, 255, 165, 0.1)';
+                    await sendShareRequest();
+                    closeShareModal();
                 } else {
-                    sendConnectionRequest(userId);
+                    await sendConnectionRequest(userId);
                     closeShareModal();
                 }
             });
