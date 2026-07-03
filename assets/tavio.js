@@ -1162,11 +1162,14 @@ function handleShareNotification(notification) {
     const sidebar = getSidebarComponent();
     if (sidebar && sidebar.shadowRoot) {
         const sidebarEl = sidebar.shadowRoot.querySelector('.sidebar');
-        if (sidebarEl) sidebarEl.classList.remove('open');
+        if (sidebarEl) sidebarEl.style.transform = 'translateX(-100%)';
         const overlay = sidebar.shadowRoot.querySelector('.sidebar-overlay');
-        if (overlay) overlay.classList.remove('visible');
+        if (overlay) {
+            overlay.classList.remove('open');
+            overlay.style.display = 'none';
+        }
         const hamburger = sidebar.shadowRoot.querySelector('.hamburger-btn');
-        if (hamburger) hamburger.classList.remove('active');
+        if (hamburger) hamburger.classList.remove('open');
     }
 
     const modal = document.getElementById('prompt-preview-modal');
