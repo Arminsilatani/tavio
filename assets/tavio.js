@@ -1011,7 +1011,12 @@ async function fetchConnectedUsers() {
 
         return profiles || [];
     } catch (e) {
-        console.error('Error in fetchConnectedUsers:', e);async function openShareModal(promptId) {
+        console.error('Error in fetchConnectedUsers:', e);
+        return [];
+    }
+}
+
+async function openShareModal(promptId) {
     shareTargetPromptId = promptId;
     const modal = document.getElementById('share-modal');
     const userList = document.getElementById('share-user-list');
