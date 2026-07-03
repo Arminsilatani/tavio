@@ -1455,7 +1455,16 @@ async function loadTavioSidebarNotifications() {
 
         container.innerHTML = data.map(n => {
             let actionsHtml = '';
+            let bodyHtml = '';
             if (n.type === 'share_prompt' && !n.is_read) {
+                const promptData = n.data || {};
+                const description = promptData.prompt_description || '';
+                const words = description.split(' ').slice(0, 50).join(' ');
+                bodyHtml = `
+                    <div class="notif-subtitle">Someone shared a prompt with you.</div>
+                    <div class="notif-prompt-title">${promptData.prompt_title || 'Untitled'}</div>
+                    <div class="notif-prompt-desc">${words}${description.split(' ').length > 50 ? '...' : ''}</div>
+                `;
                 actionsHtml = `
                     <div class="notif-actions">
                         <button class="accept-btn" data-notif-id="${n.id}">Accept</button>
@@ -1465,8 +1474,7 @@ async function loadTavioSidebarNotifications() {
             }
             return `
                 <div class="tavio-notif-item" data-id="${n.id}" data-type="${n.type}" style="${n.is_read ? 'opacity:0.6;' : ''}">
-                    <div class="notif-title">${n.type === 'share_prompt' ? '📨 Shared Prompt' : n.title || 'Notification'}</div>
-                    <div class="notif-body">${n.body || (n.type === 'share_prompt' ? 'Someone shared a prompt with you.' : '')}</div>
+                    ${bodyHtml}
                     <div class="notif-time">${new Date(n.created_at).toLocaleDateString('en-US')}</div>
                     ${actionsHtml}
                 </div>
