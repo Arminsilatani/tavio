@@ -1182,6 +1182,7 @@ function handleShareNotification(notification) {
     modal.dataset.notificationId = notification.id;
     modal.dataset.promptData = JSON.stringify(data);
     modal.classList.remove('hidden');
+    modal.style.display = 'flex';
 }
 
 async function acceptSharedPrompt() {
@@ -1190,7 +1191,6 @@ async function acceptSharedPrompt() {
     const promptData = JSON.parse(modal.dataset.promptData || '{}');
     if (!promptData.prompt_title) return;
 
-    // گرفتن اطلاعات نوتیفیکیشن برای یافتن sender_id
     const { data: notification, error: notifError } = await sb
         .from('notifications')
         .select('sender_id')
@@ -1239,7 +1239,6 @@ async function acceptSharedPrompt() {
 
     await sb.from('notifications').update({ is_read: true }).eq('id', notifId);
 
-    // ارسال نوتیف acceptance برای فرستندهٔ اصلی
     if (notification?.sender_id) {
         await sb.from('notifications').insert({
             user_id: notification.sender_id,
@@ -1251,6 +1250,7 @@ async function acceptSharedPrompt() {
     }
 
     modal.classList.add('hidden');
+    modal.style.display = 'none';
     loadTavioSidebarNotifications();
     updateNotificationDot();
 }
@@ -1267,6 +1267,7 @@ async function rejectSharedPrompt() {
         is_read: false
     });
     modal.classList.add('hidden');
+    modal.style.display = 'none';
     loadTavioSidebarNotifications();
     updateNotificationDot();
 }
