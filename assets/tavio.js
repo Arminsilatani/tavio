@@ -1489,10 +1489,10 @@ async function loadTavioSidebarNotifications() {
                 const acceptBtn = item.querySelector('.accept-btn');
                 const rejectBtn = item.querySelector('.reject-btn');
                 if (acceptBtn) {
-                    acceptBtn.addEventListener('click', (e) => {
+                    acceptBtn.addEventListener('click', async (e) => {
                         e.stopPropagation();
                         const notification = data.find(n => n.id == notifId);
-                        if (notification) handleShareNotification(notification);
+                        if (notification) await acceptSharedPromptDirect(notification);
                     });
                 }
                 if (rejectBtn) {
@@ -1511,14 +1511,69 @@ async function loadTavioSidebarNotifications() {
                         updateNotificationDot();
                     }
                 });
-            } else {
-                item.addEventListener('click', async () => {
-                    await sb.from('notifications').update({ is_read: true }).eq('id', notifId);
-                    item.style.opacity = '0.6';
-                    updateNotificationDot();
-                });
             }
         });
+
+        async function acceptSharedPromptDirect(notification) {
+            const promptData = notification.data;
+            if (!promptData || !promptData.prompt_title) return;
+
+            const categoriesArray = parseCategoryArray(promptData.prompt_category);
+
+            const { data, error } = await sb
+                .from('tavio_prompts')
+                .insert({
+                    title: promptData.prompt_title,
+                    description: promptData.prompt_description || '',
+                    content: promptData.prompt_template,
+                    category_id: JSON.stringify(categoriesArray),
+                    user_id: currentUser.id,
+                    pinned: false,
+                    field_definitions: promptData.field_definitions || [],
+                    ai_models: promptData.ai_models || []
+                })
+                .select('id, created_at, updated_at')
+                .single();
+
+            if (error) {
+                showToast('Failed to save prompt.');
+                console.error(error);
+                return;
+            }
+
+            prompts.unshift({
+                id: data.id,
+                title: promptData.prompt_title,
+                description: promptData.prompt_description || '',
+                categories: categoriesArray,
+                template: promptData.prompt_template,
+                user_id: currentUser.id,
+                pinned: false,
+                created_at: data.created_at,
+                updated_at: data.updated_at,
+                author_name: promptData.author_name || 'Unknown',
+                field_definitions: promptData.field_definitions || [],
+                ai_models: promptData.ai_models || []
+            });
+
+            applyCategoryFilters();
+
+            await sb.from('notifications').update({ is_read: true }).eq('id', notification.id);
+
+            if (notification.sender_id) {
+                await sb.from('notifications').insert({
+                    user_id: notification.sender_id,
+                    sender_id: currentUser.id,
+                    type: 'share_accepted',
+                    data: { prompt_id: promptData.prompt_id },
+                    is_read: false
+                });
+            }
+
+            showToast('Prompt accepted and saved to your library!');
+            loadTavioSidebarNotifications();
+            updateNotificationDot();
+        }
 
     } catch (e) {
         console.error('Error loading notifications:', e);
