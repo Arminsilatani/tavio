@@ -2205,6 +2205,7 @@ function resetAll() {
     }
 }
 
+
 /* ------------------------- MODAL PROMPT (NEW/EDIT) ------------------------- */
 function showNewPromptModal() {
     editingPromptId = null;
