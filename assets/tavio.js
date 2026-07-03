@@ -1174,11 +1174,13 @@ function handleShareNotification(notification) {
         catsContainer.appendChild(chip);
     });
 
-    let templateHtml = data.prompt_template || '(No template)';
+    const templateContainer = document.getElementById('preview-prompt-template');
     if (data.prompt_description) {
-        templateHtml = `<em>${data.prompt_description}</em><br><br>` + templateHtml;
+        templateContainer.innerHTML = `<em>${data.prompt_description}</em>`;
+    } else {
+        templateContainer.innerHTML = '';
     }
-    document.getElementById('preview-prompt-template').innerHTML = templateHtml;
+
     modal.dataset.notificationId = notification.id;
     modal.dataset.promptData = JSON.stringify(data);
     modal.classList.remove('hidden');
