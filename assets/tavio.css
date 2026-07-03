@@ -1426,6 +1426,60 @@ textarea::-webkit-scrollbar-thumb,
 }
 .tavio-notif-item .notif-actions .reject-btn:hover { border-color: #666; }
 
+.tavio-notif-item .notif-subtitle {
+    font-size: 11px;
+    color: #888;
+    margin-bottom: 4px;
+}
+
+.tavio-notif-item .notif-prompt-title {
+    font-size: 16px;
+    font-weight: 600;
+    color: #ddd;
+    margin-bottom: 6px;
+}
+
+.tavio-notif-item .notif-prompt-desc {
+    font-size: 11px;
+    color: #aaa;
+    line-height: 1.4;
+    margin-bottom: 8px;
+}
+
+.tavio-notif-item .notif-actions {
+    display: flex;
+    gap: 8px;
+    margin-top: 10px;
+}
+
+.tavio-notif-item .notif-actions .accept-btn {
+    flex: 7;
+    background: var(--accent);
+    color: #111;
+    border: none;
+    border-radius: 6px;
+    padding: 8px 0;
+    font-size: 13px;
+    cursor: pointer;
+    font-family: inherit;
+}
+
+.tavio-notif-item .notif-actions .reject-btn {
+    flex: 3;
+    background: transparent;
+    color: #ccc;
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    padding: 8px 0;
+    font-size: 13px;
+    cursor: pointer;
+    font-family: inherit;
+}
+
+.tavio-notif-item .notif-actions .reject-btn:hover {
+    border-color: #666;
+}
+
 /* ======================== چک‌باکس نقطه‌ای نئونی (کلاس مشترک) ======================== */
 .neon-checkbox {
     -webkit-appearance: none;
