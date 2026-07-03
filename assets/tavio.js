@@ -1158,6 +1158,12 @@ async function sendShareRequest() {
 function handleShareNotification(notification) {
     const data = notification.data;
     if (!data) return;
+
+    const sidebar = getSidebarComponent();
+    if (sidebar && sidebar.closeSidebar) {
+        sidebar.closeSidebar();
+    }
+
     const modal = document.getElementById('prompt-preview-modal');
     document.getElementById('preview-prompt-title').textContent = data.prompt_title || 'Shared Prompt';
 
