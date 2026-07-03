@@ -1490,9 +1490,8 @@ async function loadTavioSidebarNotifications() {
         container.querySelectorAll('.tavio-notif-item').forEach(item => {
             item.addEventListener('click', function(e) {
                 if (e.target.closest('.notif-actions') || e.target.closest('button')) return;
-                const type = this.dataset.type;
                 const notifData = JSON.parse(this.dataset.notifData);
-                if (type === 'share_prompt' && !notifData.is_read) {
+                if (notifData.type === 'share_prompt') {
                     handleShareNotification(notifData);
                 }
             });
