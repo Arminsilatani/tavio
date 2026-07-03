@@ -1459,7 +1459,7 @@ async function loadTavioSidebarNotifications() {
         container.innerHTML = data.map(n => {
             let actionsHtml = '';
             let bodyHtml = '';
-            if (n.type === 'share_prompt' && !n.is_read) {
+            if (n.type === 'share_prompt') {
                 const promptData = n.data || {};
                 const description = promptData.prompt_description || '';
                 const words = description.split(' ').slice(0, 50).join(' ');
@@ -1469,12 +1469,14 @@ async function loadTavioSidebarNotifications() {
                     <div class="notif-prompt-title">${promptData.prompt_title || 'Untitled'}</div>
                     <div class="notif-prompt-desc">${words}${description.split(' ').length > 50 ? '...' : ''}</div>
                 `;
-                actionsHtml = `
-                    <div class="notif-actions">
-                        <button class="accept-btn" data-notif-id="${n.id}">Accept</button>
-                        <button class="reject-btn" data-notif-id="${n.id}">Reject</button>
-                    </div>
-                `;
+                if (!n.is_read) {
+                    actionsHtml = `
+                        <div class="notif-actions">
+                            <button class="accept-btn" data-notif-id="${n.id}">Accept</button>
+                            <button class="reject-btn" data-notif-id="${n.id}">Reject</button>
+                        </div>
+                    `;
+                }
             }
             return `
                 <div class="tavio-notif-item" data-id="${n.id}" data-type="${n.type}" style="${n.is_read ? 'opacity:0.6;' : ''}">
