@@ -1461,8 +1461,9 @@ async function loadTavioSidebarNotifications() {
                 const promptData = n.data || {};
                 const description = promptData.prompt_description || '';
                 const words = description.split(' ').slice(0, 50).join(' ');
+                const senderName = promptData.author_name || 'Someone';
                 bodyHtml = `
-                    <div class="notif-subtitle">Someone shared a prompt with you.</div>
+                    <div class="notif-subtitle">${senderName} shared a prompt with you.</div>
                     <div class="notif-prompt-title">${promptData.prompt_title || 'Untitled'}</div>
                     <div class="notif-prompt-desc">${words}${description.split(' ').length > 50 ? '...' : ''}</div>
                 `;
