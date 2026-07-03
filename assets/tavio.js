@@ -1144,42 +1144,6 @@ async function sendShareRequest() {
         });
 
     if (error) {
-        alert('Failed to send share request. Please try again.');
-        console.error(error);
-    } else {
-        alert('Prompt shared successfully!');
-        closeShareModal();
-        loadTavioSidebarNotifications();
-    }
-}
-
-async function sendShareRequest() {
-    if (!shareTargetPromptId || !selectedShareUserId) return;
-    const prompt = prompts.find(p => p.id === shareTargetPromptId);
-    if (!prompt) return;
-
-    const { error } = await sb
-        .from('notifications')
-        .insert({
-            user_id: selectedShareUserId,
-            sender_id: currentUser.id,
-            type: 'share_prompt',
-            data: {
-                prompt_id: prompt.id,
-                prompt_title: prompt.title,
-                prompt_description: prompt.description || '',
-                prompt_category: JSON.stringify(prompt.categories),
-                prompt_template: prompt.template,
-                author_id: prompt.user_id,
-                author_name: prompt.author_name,
-                field_definitions: prompt.field_definitions || [],
-                ai_models: prompt.ai_models || []
-            },
-            is_read: false,
-            created_at: new Date().toISOString()
-        });
-
-    if (error) {
         showToast('Failed to send share request. Please try again.');
         console.error(error);
     } else {
