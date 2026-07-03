@@ -1011,12 +1011,7 @@ async function fetchConnectedUsers() {
 
         return profiles || [];
     } catch (e) {
-        console.error('Error in fetchConnectedUsers:', e);
-        return [];
-    }
-}
-
-async function openShareModal(promptId) {
+        console.error('Error in fetchConnectedUsers:', e);async function openShareModal(promptId) {
     shareTargetPromptId = promptId;
     const modal = document.getElementById('share-modal');
     const userList = document.getElementById('share-user-list');
@@ -1024,39 +1019,96 @@ async function openShareModal(promptId) {
     selectedShareUserId = null;
     sendBtn.disabled = true;
 
-    userList.innerHTML = '<div style="color:#666; padding:8px;">Loading connections...</div>';
+    userList.innerHTML = `
+        <input type="text" id="share-user-search" class="auth-field" placeholder="Search user..." autocomplete="off">
+        <div id="share-search-results" style="margin-top:8px;"></div>
+    `;
 
-    const users = await fetchConnectedUsers();
-    if (users.length === 0) {
-        userList.innerHTML = '<div style="color:#666; padding:8px;">No connected users found.</div>';
-        openModal(modal);
-        return;
-    }
+    const searchInput = document.getElementById('share-user-search');
+    const resultsDiv = document.getElementById('share-search-results');
 
-    userList.innerHTML = '';
-    users.forEach(user => {
-        const label = user.username || `${user.first_name || ''} ${user.last_name || ''}`.trim() || user.id;
-        const div = document.createElement('div');
-        div.className = 'sidebar-item';
-        div.style.cursor = 'pointer';
-        div.style.margin = '0';
-        div.innerHTML = `
-            <span class="sidebar-icon">
-                ${user.photo_url ? `<img src="${user.photo_url}" width="20" height="20" style="border-radius:50%;">` : `<span style="display:inline-block;width:20px;height:20px;border-radius:50%;background:var(--accent);color:#111;text-align:center;line-height:20px;font-size:12px;font-weight:bold;">${label.charAt(0)}</span>`}
-            </span>
-            <span>${label}</span>
-        `;
-        div.dataset.userId = user.id;
-        div.addEventListener('click', () => {
-            userList.querySelectorAll('.sidebar-item').forEach(el => el.style.background = 'transparent');
-            div.style.background = 'rgba(255,255,255,0.08)';
-            selectedShareUserId = user.id;
-            sendBtn.disabled = false;
+    let connectedIds = [];
+    try {
+        const { data } = await sb
+            .from('dashboard_connectionrequests')
+            .select('from_id, to_id')
+            .or(`from_id.eq.${currentUser.id},to_id.eq.${currentUser.id}`)
+            .eq('status', 'accepted');
+        if (data) {
+            connectedIds = data.map(r => r.from_id === currentUser.id ? r.to_id : r.from_id);
+        }
+    } catch (e) {}
+
+    searchInput.addEventListener('input', async () => {
+        const query = searchInput.value.trim();
+        if (query.length < 3) {
+            resultsDiv.innerHTML = '';
+            return;
+        }
+        const users = await searchUsers(query);
+        resultsDiv.innerHTML = users.map(u => {
+            const label = u.username || `${u.first_name || ''} ${u.last_name || ''}`.trim() || u.id;
+            const isConnected = connectedIds.includes(u.id);
+            return `
+                <div class="share-user-row" style="display:flex; align-items:center; gap:8px; padding:8px; border-radius:6px; margin-bottom:4px; background:rgba(255,255,255,0.03);">
+                    <span>
+                        ${u.photo_url 
+                            ? `<img src="${u.photo_url}" width="24" height="24" style="border-radius:50%; object-fit:cover;">` 
+                            : `<span style="display:inline-block;width:24px;height:24px;border-radius:50%;background:var(--accent);color:#111;text-align:center;line-height:24px;font-size:12px;">${label.charAt(0)}</span>`}
+                    </span>
+                    <span style="flex:1;">${label}</span>
+                    <button class="btn-secondary small" data-userid="${u.id}" data-connected="${isConnected}">
+                        ${isConnected ? 'Send' : 'Connect'}
+                    </button>
+                </div>
+            `;
+        }).join('');
+
+        resultsDiv.querySelectorAll('button').forEach(btn => {
+            btn.addEventListener('click', (e) => {
+                const userId = btn.dataset.userid;
+                const isConnected = btn.dataset.connected === 'true';
+                if (isConnected) {
+                    selectedShareUserId = userId;
+                    sendBtn.disabled = false;
+                    resultsDiv.querySelectorAll('.share-user-row').forEach(r => r.style.background = 'rgba(255,255,255,0.03)');
+                    btn.closest('.share-user-row').style.background = 'rgba(176, 255, 165, 0.1)';
+                } else {
+                    sendConnectionRequest(userId);
+                    closeShareModal();
+                }
+            });
         });
-        userList.appendChild(div);
     });
 
     openModal(modal);
+}
+
+async function searchUsers(query) {
+    if (!currentUser || query.length < 3) return [];
+    const { data, error } = await sb
+        .from('profiles')
+        .select('id, first_name, last_name, username, photo_url')
+        .or(`first_name.ilike.%${query}%,last_name.ilike.%${query}%,username.ilike.%${query}%`)
+        .limit(20);
+    if (error || !data) return [];
+    return data.filter(u => u.id !== currentUser.id);
+}
+
+async function sendConnectionRequest(targetUserId) {
+    const { error } = await sb
+        .from('dashboard_connectionrequests')
+        .insert({
+            from_id: currentUser.id,
+            to_id: targetUserId,
+            status: 'pending'
+        });
+    if (error) {
+        showToast('Connection request failed');
+        console.error(error);
+    } else {
+        showToast('Connection request sent');
+    }
 }
 
 function closeShareModal() {
