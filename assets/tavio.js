@@ -1029,7 +1029,7 @@ async function openShareModal(promptId) {
     const users = await fetchConnectedUsers();
     if (users.length === 0) {
         userList.innerHTML = '<div style="color:#666; padding:8px;">No connected users found.</div>';
-        modal.classList.remove('hidden');
+        openModal(modal);
         return;
     }
 
@@ -1056,7 +1056,7 @@ async function openShareModal(promptId) {
         userList.appendChild(div);
     });
 
-    modal.classList.remove('hidden');
+    openModal(modal);
 }
 
 function closeShareModal() {
