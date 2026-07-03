@@ -1506,17 +1506,15 @@ async function loadTavioSidebarNotifications() {
                         rejectSharedPromptViaNotif(notifId);
                     });
                 }
-                item.addEventListener('click', (e) => {
-                    if (e.target.closest('.notif-actions')) return;
-                    const notification = data.find(n => n.id == notifId);
-                    if (notification && !notification.is_read) {
-                        handleShareNotification(notification);
-                    } else {
-                        sb.from('notifications').update({ is_read: true }).eq('id', notifId);
-                        updateNotificationDot();
-                    }
-                });
             }
+
+            item.addEventListener('click', (e) => {
+                if (e.target.closest('.notif-actions')) return;
+                const notification = data.find(n => n.id == notifId);
+                if (notification && !notification.is_read && notification.type === 'share_prompt') {
+                    handleShareNotification(notification);
+                }
+            });
         });
 
         async function acceptSharedPromptDirect(notification) {
@@ -2204,7 +2202,6 @@ function resetAll() {
         editorView.scrollIntoView({ behavior: 'smooth', block: 'start' });
     }
 }
-
 
 /* ------------------------- MODAL PROMPT (NEW/EDIT) ------------------------- */
 function showNewPromptModal() {
