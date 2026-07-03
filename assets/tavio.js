@@ -1198,6 +1198,7 @@ function handleShareNotification(notification) {
     modal.style.display = 'flex';
 }
 
+
 async function acceptSharedPrompt() {
     const modal = document.getElementById('prompt-preview-modal');
     const notifId = modal.dataset.notificationId;
