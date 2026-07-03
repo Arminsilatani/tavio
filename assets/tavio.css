@@ -217,7 +217,7 @@ textarea::-webkit-scrollbar-thumb,
     top: 12px; right: 12px;
     display: flex;
     gap: 4px;
-    z-index: 0;                       /* تغییر یافته */
+    z-index: 0;
 }
 .prompt-card .action-buttons button {
     background: none;
@@ -472,7 +472,7 @@ textarea::-webkit-scrollbar-thumb,
     right: 0;
     display: flex;
     gap: 8px;
-    z-index: 1;                        /* تغییر یافته */
+    z-index: 1;
 }
 .result-display {
     position: relative;
@@ -721,7 +721,7 @@ textarea::-webkit-scrollbar-thumb,
     inset: 0;
     background: rgba(0, 0, 0, 0.7);
     backdrop-filter: blur(6px);
-    z-index: 3;                       /* تغییر یافته */
+    z-index: 3;
     justify-content: center;
     align-items: flex-start;
     overflow-y: auto;
@@ -768,7 +768,7 @@ textarea::-webkit-scrollbar-thumb,
     border: none;
     transition: color 0.2s;
     line-height: 1;
-    z-index: 2;                       /* تغییر یافته */
+    z-index: 2;
 }
 .close-modal:hover {
     color: #fff;
@@ -933,7 +933,7 @@ textarea::-webkit-scrollbar-thumb,
     background: #1e1e1e;
     border: 1px solid var(--border);
     border-radius: 8px;
-    z-index: 4;                       /* تغییر یافته */
+    z-index: 4;
     display: flex;
     flex-direction: column;
     max-height: 340px;
@@ -1170,7 +1170,7 @@ textarea::-webkit-scrollbar-thumb,
     display: flex;
     align-items: center;
     gap: 10px;
-    z-index: 5;                       /* تغییر یافته */
+    z-index: 5;
     box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
     animation: toastSlideDown 0.3s ease;
     font-size: 14px;
@@ -1231,7 +1231,7 @@ textarea::-webkit-scrollbar-thumb,
     inset: 0;
     background: rgba(0, 0, 0, 0.75);
     backdrop-filter: blur(4px);
-    z-index: 7;                       /* تغییر یافته */
+    z-index: 7;
     display: flex;
     align-items: center;
     justify-content: center;
@@ -1292,7 +1292,7 @@ textarea::-webkit-scrollbar-thumb,
     display: flex;
     align-items: center;
     justify-content: center;
-    z-index: 6;                       /* تغییر یافته */
+    z-index: 6;
 }
 .auth-box {
     background: rgba(255,255,255,0.05);
@@ -1480,7 +1480,7 @@ textarea::-webkit-scrollbar-thumb,
     border-color: #666;
 }
 
-/* ======================== چک‌باکس نقطه‌ای نئونی (کلاس مشترک) ======================== */
+/* ======================== NEON CHECKBOX ======================== */
 .neon-checkbox {
     -webkit-appearance: none;
     appearance: none;
