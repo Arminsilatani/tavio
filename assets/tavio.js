@@ -226,6 +226,67 @@ let aiDropdownOpen = false;
 let aiFilterAreaVisible = false;
 let aiCompanyExpanded = {};
 
+// ======================== ACCESS CONTROL ========================
+const ROLE_HIERARCHY = ['recruit', 'sergeant', 'commander', 'general'];
+const APP_MIN_ROLE = 'commander';
+
+function hasMinRole(userRole) {
+    const normalized = String(userRole || '').trim().toLowerCase();
+    const userIndex = ROLE_HIERARCHY.indexOf(normalized);
+    const minIndex = ROLE_HIERARCHY.indexOf(APP_MIN_ROLE);
+    return userIndex >= minIndex;
+}
+
+function showAccessDenied(message = 'Access denied.') {
+    const overlay = document.createElement('div');
+    overlay.id = 'access-denied-overlay';
+    overlay.style.cssText = `
+        position: fixed; inset: 0; z-index: 10000;
+        background: rgba(0, 0, 0, 0.7);
+        backdrop-filter: blur(12px);
+        display: flex; align-items: center; justify-content: center;
+        animation: fadeIn 0.3s ease;
+    `;
+
+    const box = document.createElement('div');
+    box.style.cssText = `
+        background: rgba(20, 20, 20, 0.9);
+        border: 1px solid rgba(255,255,255,0.1);
+        border-radius: 16px;
+        padding: 32px 40px;
+        text-align: center;
+        color: #fff;
+        font-family: inherit;
+        font-size: 16px;
+        max-width: 400px;
+        box-shadow: 0 20px 60px rgba(0,0,0,0.5);
+        transform: scale(0.9);
+        animation: popIn 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards;
+    `;
+    box.innerHTML = `
+        <div style="margin-bottom:12px; display:flex; justify-content:center;">
+            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" style="width:40px; height:40px; color: var(--accent, #ff6f91);">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M16.5 10.5V6.75a4.5 4.5 0 1 0-9 0v3.75m-.75 11.25h10.5a2.25 2.25 0 0 0 2.25-2.25v-6.75a2.25 2.25 0 0 0-2.25-2.25H6.75a2.25 2.25 0 0 0-2.25 2.25v6.75a2.25 2.25 0 0 0 2.25 2.25Z" />
+            </svg>
+        </div>
+        <p style="margin:0; line-height:1.5;">${message}</p>
+    `;
+
+    overlay.appendChild(box);
+    document.body.appendChild(overlay);
+
+    if (!document.getElementById('access-denied-styles')) {
+        const style = document.createElement('style');
+        style.id = 'access-denied-styles';
+        style.textContent = `
+            @keyframes fadeIn { from { opacity:0; } to { opacity:1; } }
+            @keyframes popIn { 0% { transform: scale(0.8); opacity:0; } 100% { transform: scale(1); opacity:1; } }
+        `;
+        document.head.appendChild(style);
+    }
+}
+// ==============================================================
+
 /* ------------------------- TOAST NOTIFICATION ------------------------- */
 function showToast(message) {
     const toast = document.createElement('div');
@@ -1576,6 +1637,15 @@ async function restoreSession() {
         currentUser = session.user;
         currentProfile = await buildCurrentProfile(currentUser);
         currentUserRole = currentProfile?.role || 'recruit';
+        if (!hasMinRole(currentUserRole)) {
+            await sb.auth.signOut();
+            currentUser = null;
+            currentProfile = null;
+            currentUserRole = 'public';
+            hideGlobalLoader();
+            showAccessDenied('Access denied. You need at least ' + APP_MIN_ROLE + ' role to use this tool.');
+            return;
+        }
         document.getElementById('app-container').classList.remove('app-hidden');
         closeModal(document.getElementById('auth-overlay'));
         syncSidebarComponent();
@@ -1641,6 +1711,16 @@ function setupAuthListeners() {
                 currentUser = data.user;
                 currentProfile = await buildCurrentProfile(data.user);
                 currentUserRole = currentProfile?.role || 'recruit';
+
+                if (!hasMinRole(currentUserRole)) {
+                    await sb.auth.signOut();
+                    currentUser = null;
+                    currentProfile = null;
+                    currentUserRole = 'public';
+                    closeModal(document.getElementById('auth-overlay'));
+                    showAccessDenied('Access denied. You need at least ' + APP_MIN_ROLE + ' role to use this tool.');
+                    return;
+                }
 
                 closeModal(document.getElementById('auth-overlay'));
                 document.getElementById('app-container').classList.remove('app-hidden');
