@@ -1261,6 +1261,7 @@ async function acceptSharedPrompt() {
             user_id: notification.sender_id,
             sender_id: currentUser.id,
             type: 'share_accepted',
+            title: 'Prompt Accepted: ' + (promptData.prompt_title || 'Untitled'),
             data: { prompt_id: promptData.prompt_id },
             is_read: false
         });
@@ -1280,6 +1281,7 @@ async function rejectSharedPrompt() {
         user_id: currentUser.id,
         sender_id: currentUser.id,
         type: 'share_rejected',
+        title: 'Prompt Rejected: ' + (promptData.prompt_title || 'Untitled'),
         data: { prompt_id: JSON.parse(modal.dataset.promptData || '{}').prompt_id },
         is_read: false
     });
