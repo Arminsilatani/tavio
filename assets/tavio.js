@@ -1335,15 +1335,13 @@ async function acceptSharedPrompt() {
 }
 
 async function rejectSharedPrompt() {
-    const modal = document.getElementById('prompt-preview-modal');
-    const notifId = modal.dataset.notificationId;
-    await sb.from('notifications').update({ is_read: true }).eq('id', notifId);
+    const promptData = JSON.parse(modal.dataset.promptData || '{}');
     await sb.from('notifications').insert({
         user_id: currentUser.id,
         sender_id: currentUser.id,
         type: 'share_rejected',
         title: 'Prompt Rejected: ' + (promptData.prompt_title || 'Untitled'),
-        data: { prompt_id: JSON.parse(modal.dataset.promptData || '{}').prompt_id },
+        data: { prompt_id: promptData.prompt_id },
         is_read: false
     });
     modal.classList.add('hidden');
@@ -1364,6 +1362,7 @@ async function rejectSharedPromptViaNotif(notifId) {
             user_id: notif.sender_id,
             sender_id: currentUser.id,
             type: 'share_rejected',
+            title: 'Prompt Rejected: ' + (notif.data?.prompt_title || 'Untitled'),
             data: notif.data,
             is_read: false
         });
@@ -2177,31 +2176,6 @@ function fallbackCopy(text, btn) {
         showToast('Copy failed. Please copy manually.');
     }
     document.body.removeChild(textarea);
-}
-
-async function confirmDeletePrompt() {
-    if (!deletingPromptId) return;
-
-    try {
-        const { error } = await sb
-            .from('tavio_prompts')
-            .delete()
-            .eq('id', deletingPromptId);
-
-        if (error) {
-            alert('Failed to delete prompt.');
-            console.error(error);
-        } else {
-            prompts = prompts.filter(p => p.id !== deletingPromptId);
-            applyCategoryFilters();
-        }
-    } catch (e) {
-        console.error(e);
-    } finally {
-        closeModal(document.getElementById('delete-confirm-modal'));
-        backToLibrary();
-        deletingPromptId = null;
-    }
 }
 
 function resetAll() {
