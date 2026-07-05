@@ -1364,16 +1364,6 @@ textarea::-webkit-scrollbar-thumb,
 }
 .auth-forgot-link { font-size: 13px; color: var(--accent); text-decoration: none; }
 .auth-forgot-link:hover { text-decoration: underline; }
-.auth-back-link {
-    background: none;
-    border: none;
-    color: #aaa;
-    font-size: 14px;
-    cursor: pointer;
-    padding: 0;
-    margin-top: 8px;
-}
-.auth-back-link:hover { color: var(--accent); }
 .auth-switch { text-align: right; margin-top: 8px; }
 .forgot-description { font-size: 13px; color: #888; margin-bottom: 12px; }
 
