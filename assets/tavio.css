@@ -2669,6 +2669,23 @@ textarea::-webkit-scrollbar-thumb,
     pointer-events: none;
 }
 
+/* :::::::::::::::::::::::::: NEW PROMPT MODAL ACTIONS :::::::::::::::::::::::::: */
+#new-prompt-modal .modal-actions {
+    display: flex;
+    gap: 12px;
+    justify-content: flex-end;
+    margin-top: 16px;
+}
+
+#new-prompt-modal .modal-actions #clear-fields-btn,
+#new-prompt-modal .modal-actions #cancel-modal-btn {
+    flex: 0 0 auto;
+}
+
+#new-prompt-modal .modal-actions #add-prompt-btn {
+    flex: 1 1 auto;
+}
+
 /* :::::::::::::::::::::::::: MEDIA QUERIES :::::::::::::::::::::::::: */
 @media (max-width: 768px) {
     .branding {
@@ -2807,5 +2824,15 @@ textarea::-webkit-scrollbar-thumb,
 
     .edit-btn .btn-label {
         display: inline;
+    }
+
+    #new-prompt-modal .modal-actions {
+        flex-wrap: wrap;
+    }
+
+    #new-prompt-modal .modal-actions #clear-fields-btn,
+    #new-prompt-modal .modal-actions #cancel-modal-btn,
+    #new-prompt-modal .modal-actions #add-prompt-btn {
+        flex: 1 1 100%;
     }
 }

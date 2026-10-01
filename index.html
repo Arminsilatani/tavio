@@ -1,5 +1,5 @@
-<!doctype html>
 <!-- :::::::::::::::::::::::::: DOCTYPE / ROOT :::::::::::::::::::::::::: -->
+<!doctype html>
 <html lang="en">
     <!-- :::::::::::::::::::::::::: HEAD :::::::::::::::::::::::::: -->
     <head>
@@ -358,6 +358,7 @@
                         </button>
                     </div>
 
+                    <!-- :::::::::::::::::::::::::: CATEGORY FILTERS :::::::::::::::::::::::::: -->
                     <div class="category-scroll-wrapper">
                         <button
                             type="button"
@@ -842,7 +843,7 @@
             <!-- :::::::::::::::::::::::::: MODALS :::::::::::::::::::::::::: -->
             <div id="share-modal" class="modal">
                 <div class="modal-content">
-                    <span class="close-modal" onclick="closeShareModal()">&times;</span>
+                    <span class="close-modal" id="share-close-btn">&times;</span>
                     <h3 class="modal-title">Share Prompt</h3>
                     <p class="share-modal-desc">
                         Select a connected user to share this prompt with:
@@ -850,11 +851,7 @@
 
                     <div id="share-user-list" class="share-user-list"></div>
                     <div class="modal-actions">
-                        <button
-                            id="share-cancel-btn"
-                            class="btn-secondary"
-                            onclick="closeShareModal()"
-                        >
+                        <button id="share-cancel-btn" class="btn-secondary">
                             Cancel
                         </button>
                         <button id="share-send-btn" class="btn-primary" disabled>
@@ -866,7 +863,7 @@
 
             <div id="prompt-preview-modal" class="modal">
                 <div class="modal-content modal-content-wide">
-                    <span class="close-modal" onclick="rejectSharedPrompt()"
+                    <span class="close-modal" id="preview-close-btn"
                         >&times;</span
                     >
                     <h3 class="modal-title" id="preview-prompt-title">Prompt Preview</h3>
@@ -876,7 +873,6 @@
                         <button
                             id="preview-reject-btn"
                             class="btn-secondary"
-                            onclick="rejectSharedPrompt()"
                         >
                             Reject
                         </button>
@@ -887,9 +883,7 @@
 
             <div id="new-prompt-modal" class="modal">
                 <div class="modal-content">
-                    <span class="close-modal" onclick="hideNewPromptModal()"
-                        >&times;</span
-                    >
+                    <span class="close-modal" id="new-prompt-close-btn">&times;</span>
                     <h3 class="modal-title">New Prompt Template</h3>
                     <input
                         type="text"
@@ -1100,11 +1094,10 @@
                     </div>
 
                     <div class="modal-actions">
-                        <button
-                            id="cancel-modal-btn"
-                            class="btn-secondary"
-                            onclick="hideNewPromptModal()"
-                        >
+                        <button id="clear-fields-btn" class="btn-secondary">
+                            Clear Fields
+                        </button>
+                        <button id="cancel-modal-btn" class="btn-secondary">
                             Cancel
                         </button>
                         <button id="add-prompt-btn" class="btn-primary">
@@ -1118,9 +1111,7 @@
                 <div class="modal-content">
                     <span
                         class="close-modal"
-                        onclick="
-                            closeModal(document.getElementById('delete-confirm-modal'))
-                        "
+                        id="delete-confirm-close-btn"
                         >&times;</span
                     >
                     <p class="confirm-message">
@@ -1130,14 +1121,51 @@
                         <button
                             id="confirm-no-btn"
                             class="btn-secondary confirm-no-btn"
-                            onclick="
-                                closeModal(document.getElementById('delete-confirm-modal'))
-                            "
                         >
                             No
                         </button>
                         <button id="confirm-yes-btn" class="confirm-yes-btn">
                             Yes, I'm sure
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <div id="clear-confirm-modal" class="modal">
+                <div class="modal-content">
+                    <span class="close-modal" id="clear-confirm-close-btn">&times;</span>
+                    <p class="confirm-message">
+                        Are you sure you want to clear all fields?
+                    </p>
+                    <div class="confirm-actions">
+                        <button
+                            id="clear-confirm-no-btn"
+                            class="btn-secondary confirm-no-btn"
+                        >
+                            No
+                        </button>
+                        <button id="clear-confirm-yes-btn" class="confirm-yes-btn">
+                            Yes, clear
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <div id="discard-changes-modal" class="modal">
+                <div class="modal-content">
+                    <span class="close-modal" id="discard-changes-close-btn">&times;</span>
+                    <p class="confirm-message">
+                        You have unsaved changes. Close without saving?
+                    </p>
+                    <div class="confirm-actions">
+                        <button
+                            id="discard-changes-no-btn"
+                            class="btn-secondary confirm-no-btn"
+                        >
+                            No
+                        </button>
+                        <button id="discard-changes-yes-btn" class="confirm-yes-btn">
+                            Yes, close
                         </button>
                     </div>
                 </div>

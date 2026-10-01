@@ -115,6 +115,48 @@ let lastMaxParts = 1;
 let tokenPreviewDebounce = null;
 let userTouchedPartsSlider = false;
 
+/* :::::::::::::::::::::::::: NEW PROMPT MODAL SNAPSHOT :::::::::::::::::::::::::: */
+let newPromptModalSnapshot = null;
+
+function captureNewPromptModalSnapshot() {
+    newPromptModalSnapshot = {
+        title: document.getElementById("modal-title")?.value || "",
+        description: document.getElementById("modal-description")?.value || "",
+        template: document.getElementById("modal-template")?.value || "",
+        categories: [...modalSelectedCategories].sort().join("|"),
+        aiModels: [...modalSelectedAIModels].sort().join("|"),
+        isGlobal: !!document.getElementById("modal-is-global")?.checked,
+    };
+}
+
+function hasNewPromptModalChanges() {
+    if (!newPromptModalSnapshot) return false;
+    const current = {
+        title: document.getElementById("modal-title")?.value || "",
+        description: document.getElementById("modal-description")?.value || "",
+        template: document.getElementById("modal-template")?.value || "",
+        categories: [...modalSelectedCategories].sort().join("|"),
+        aiModels: [...modalSelectedAIModels].sort().join("|"),
+        isGlobal: !!document.getElementById("modal-is-global")?.checked,
+    };
+    return (
+        current.title !== newPromptModalSnapshot.title ||
+        current.description !== newPromptModalSnapshot.description ||
+        current.template !== newPromptModalSnapshot.template ||
+        current.categories !== newPromptModalSnapshot.categories ||
+        current.aiModels !== newPromptModalSnapshot.aiModels ||
+        current.isGlobal !== newPromptModalSnapshot.isGlobal
+    );
+}
+
+function requestCloseNewPromptModal() {
+    if (hasNewPromptModalChanges()) {
+        openModal(document.getElementById("discard-changes-modal"));
+    } else {
+        hideNewPromptModal();
+    }
+}
+
 /* :::::::::::::::::::::::::: ACCESS CONTROL :::::::::::::::::::::::::: */
 const ROLE_HIERARCHY = ["recruit", "sergeant", "commander", "general"];
 const APP_MIN_ROLE = "commander";
@@ -469,6 +511,20 @@ function buildFullPromptFromFields() {
     });
 
     return fullOutput;
+}
+
+function getTemplateSkeleton() {
+    const template = document.getElementById("template-textarea")?.value || "";
+    if (!template.trim()) return "";
+
+    let skeleton = template.replace(/\{\{[^}]+\}\}/g, "[...content of this part...]");
+
+    const MAX = 1200;
+    if (skeleton.length > MAX) {
+        skeleton = skeleton.substring(0, MAX).trim() + "\n[...]";
+    }
+
+    return skeleton.trim();
 }
 
 function computePartsRange(totalTokens) {
@@ -1379,7 +1435,7 @@ async function sendConnectionRequest(targetUserId) {
 }
 
 function closeShareModal() {
-    document.getElementById("share-modal").classList.add("hidden");
+    closeModal(document.getElementById("share-modal"));
     selectedShareUsers = [];
     shareTargetPromptId = null;
 }
@@ -1496,8 +1552,7 @@ function handleShareNotification(notification) {
 
     modal.dataset.notificationId = notification.id;
     modal.dataset.promptData = JSON.stringify(data);
-    modal.classList.remove("hidden");
-    modal.style.display = "flex";
+    openModal(modal);
 }
 
 async function acceptSharedPrompt() {
@@ -1580,8 +1635,7 @@ async function acceptSharedPrompt() {
         });
     }
 
-    modal.classList.add("hidden");
-    modal.style.display = "none";
+    closeModal(modal);
     loadTavioSidebarNotifications();
     updateNotificationDot();
 }
@@ -1597,8 +1651,7 @@ async function rejectSharedPrompt() {
         data: { prompt_id: promptData.prompt_id },
         is_read: false,
     });
-    modal.classList.add("hidden");
-    modal.style.display = "none";
+    closeModal(modal);
     loadTavioSidebarNotifications();
     updateNotificationDot();
 }
@@ -1813,15 +1866,58 @@ function hideGlobalLoader() {
     if (loader) loader.classList.add("hidden");
 }
 
+/* :::::::::::::::::::::::::: BODY SCROLL LOCK :::::::::::::::::::::::::: */
+let openModalCount = 0;
+
+function lockBodyScroll() {
+    openModalCount++;
+    if (openModalCount === 1) {
+        const scrollY = window.scrollY || window.pageYOffset || 0;
+        document.body.dataset.scrollY = String(scrollY);
+
+        document.body.style.position = "fixed";
+        document.body.style.top = `-${scrollY}px`;
+        document.body.style.left = "0";
+        document.body.style.right = "0";
+        document.body.style.width = "100%";
+        document.body.style.overflow = "hidden";
+    }
+}
+
+function unlockBodyScroll() {
+    openModalCount = Math.max(0, openModalCount - 1);
+    if (openModalCount === 0) {
+        const scrollY = parseInt(document.body.dataset.scrollY || "0", 10);
+
+        document.body.style.position = "";
+        document.body.style.top = "";
+        document.body.style.left = "";
+        document.body.style.right = "";
+        document.body.style.width = "";
+        document.body.style.overflow = "";
+
+        window.scrollTo(0, scrollY);
+        delete document.body.dataset.scrollY;
+    }
+}
+
 function openModal(modal) {
     if (!modal) return;
+    if (modal.style.display === "flex" && !modal.classList.contains("hidden")) {
+        return;
+    }
     modal.classList.remove("hidden");
     modal.style.display = "flex";
+    lockBodyScroll();
 }
 
 function closeModal(modal) {
     if (!modal) return;
+    if (modal.style.display === "none") {
+        return;
+    }
     modal.style.display = "none";
+    unlockBodyScroll();
 }
 
 function showStep(stepId) {
@@ -2569,9 +2665,6 @@ function generatePrompt() {
         generateInterval = null;
     }
 
-    const display = document.getElementById("result-display");
-    const copyBtn = document.getElementById("copy-prompt-btn");
-
     const tokenCount = countTokens(fullOutput);
     const TOKEN_LIMIT = 10000;
 
@@ -2584,64 +2677,47 @@ function generatePrompt() {
         numParts = maxParts;
     }
 
-    if (numParts <= 1 && tokenCount <= TOKEN_LIMIT) {
-        const STREAM_CHAR_LIMIT = 4000;
-
-        if (fullOutput.length > STREAM_CHAR_LIMIT) {
-            display.classList.remove("multipart-active");
-            display.textContent = fullOutput;
-            display.scrollTop = 0;
-            if (copyBtn) {
-                copyBtn.disabled = false;
-                copyBtn.classList.add("blink");
-            }
-            return;
-        }
-
-        display.classList.remove("multipart-active");
-        display.textContent = "";
-        if (copyBtn) {
-            copyBtn.disabled = true;
-            copyBtn.classList.remove("blink");
-        }
-
-        let i = 0;
-        generateInterval = setInterval(() => {
-            if (i < fullOutput.length) {
-                display.textContent += fullOutput.charAt(i);
-                i++;
-                display.scrollTop = display.scrollHeight;
-            } else {
-                clearInterval(generateInterval);
-                generateInterval = null;
-                if (copyBtn) {
-                    copyBtn.disabled = false;
-                    copyBtn.classList.add("blink");
-                }
-            }
-        }, 12);
+    /* :::::::::::::::::::::::::: SINGLE PART :::::::::::::::::::::::::: */
+    if (numParts <= 1) {
+        renderMultipartMessages([fullOutput]);
         return;
     }
 
+    /* :::::::::::::::::::::::::: MULTIPART :::::::::::::::::::::::::: */
     const parts = splitIntoExactParts(fullOutput, numParts);
     const totalParts = parts.length;
+
+    const taskSkeleton = getTemplateSkeleton();
 
     const messages = parts.map((part, idx) => {
         const header = `[MULTI-PART PROMPT — PART ${idx + 1} of ${totalParts}]
 
-⚠️ PART ${idx + 1} of ${totalParts} — total ${tokenCount.toLocaleString()} tokens split into ${totalParts} parts.
-
-STRICT RULES:
-1. Process ONLY the content in this message.
-2. Do NOT ask for or reference other parts.
-3. Do NOT add introductions, summaries, or closing remarks.
-4. Output ONLY the transformed content — nothing before or after.
-5. Preserve exact paragraph boundaries.
+═══════════════════════════════════════
+ORIGINAL TASK (applies to ALL parts):
+═══════════════════════════════════════
+${taskSkeleton || "(no explicit task description provided)"}
 
 ═══════════════════════════════════════
 
-`;
-        return header + part;
+You are now receiving PART ${idx + 1} of ${totalParts} of the actual content.
+The TASK above defines what you must do to this content.
+
+STRICT RULES:
+1. Apply the TASK above to THIS part's content only.
+2. Output ONLY the transformed content — nothing before or after.
+3. Preserve the EXACT format of the source content:
+   - If it's code, output code with the same syntax and indentation.
+   - If it's markdown, keep the same markdown structure.
+   - If it's plain text, keep the same paragraph boundaries.
+   NEVER convert between formats (do not strip code, do not add code).
+4. Do NOT mention that this is part ${idx + 1} of ${totalParts}.
+5. Do NOT ask for the other parts.
+6. Do NOT add introductions, summaries, or closing remarks.
+
+═══════════════════════════════════════
+
+${part}`;
+        return header;
     });
 
     renderMultipartMessages(messages);
@@ -2807,6 +2883,7 @@ function showNewPromptModal() {
     if (toggleBtn) toggleBtn.classList.remove("active");
 
     renderModalCategories();
+    captureNewPromptModalSnapshot();
     openModal(document.getElementById("new-prompt-modal"));
 }
 
@@ -2863,19 +2940,91 @@ function openEditPromptModal() {
 
     renderModalCategories();
     loadSharesForPrompt(editingPromptId).then(renderShareManagement);
+    captureNewPromptModalSnapshot();
     openModal(document.getElementById("new-prompt-modal"));
 }
 
 function hideNewPromptModal() {
     const modal = document.getElementById("new-prompt-modal");
-    if (modal) {
-        modal.style.removeProperty("display");
-        modal.classList.add("hidden");
+    if (modal && modal.style.display !== "none") {
+        modal.style.display = "none";
+        unlockBodyScroll();
     }
     editingPromptId = null;
+    newPromptModalSnapshot = null;
     document.getElementById("add-prompt-btn").textContent = "Add to Library";
     const globalCheckbox = document.getElementById("modal-is-global");
     if (globalCheckbox) globalCheckbox.checked = false;
+}
+
+/* :::::::::::::::::::::::::: CLEAR MODAL FIELDS — CONFIRM FLOW :::::::::::::::::::::::::: */
+function requestClearPromptModalFields() {
+    const hasContent =
+        document.getElementById("modal-title")?.value.trim() ||
+        document.getElementById("modal-description")?.value.trim() ||
+        document.getElementById("modal-template")?.value.trim() ||
+        (modalSelectedCategories && modalSelectedCategories.length > 0) ||
+        (modalSelectedAIModels && modalSelectedAIModels.length > 0);
+
+    if (!hasContent) {
+        clearPromptModalFields();
+        return;
+    }
+
+    openModal(document.getElementById("clear-confirm-modal"));
+}
+
+/* :::::::::::::::::::::::::: CLEAR MODAL FIELDS — ACTUAL RESET :::::::::::::::::::::::::: */
+function clearPromptModalFields() {
+    const titleInput = document.getElementById("modal-title");
+    const descInput = document.getElementById("modal-description");
+    const templateInput = document.getElementById("modal-template");
+
+    if (titleInput) titleInput.value = "";
+    if (descInput) descInput.value = "";
+    if (templateInput) templateInput.value = "";
+
+    const globalCheckbox = document.getElementById("modal-is-global");
+    if (globalCheckbox) globalCheckbox.checked = false;
+
+    modalSelectedAIModels = [];
+    modalSelectedCategories = [];
+    modalAIModalityFilters = [];
+    aiCompanyExpanded = {};
+
+    renderModalCategories();
+    updateSelectedCountDisplay();
+
+    const dropdown = document.getElementById("ai-select-dropdown");
+    const button = document.getElementById("ai-select-button");
+
+    if (dropdown) {
+        dropdown.classList.remove("open");
+        dropdown.classList.add("hidden");
+    }
+    if (button) {
+        button.classList.remove("invisible");
+        button.classList.remove("open");
+    }
+
+    aiDropdownOpen = false;
+    aiFilterAreaVisible = false;
+
+    const filterArea = document.getElementById("ai-filter-area");
+    if (filterArea) filterArea.classList.add("hidden");
+
+    const toggleBtn = document.getElementById("ai-filter-toggle-btn");
+    if (toggleBtn) toggleBtn.classList.remove("active");
+
+    const searchInput = document.getElementById("ai-search-input");
+    if (searchInput) searchInput.value = "";
+
+    if (dropdown) {
+        dropdown.style.removeProperty("max-height");
+    }
+
+    if (titleInput) titleInput.focus();
+    captureNewPromptModalSnapshot();
 }
 
 async function savePromptFromModal() {
@@ -2967,7 +3116,10 @@ async function savePromptFromModal() {
                       "Unknown"
                     : "Unknown",
                 categories: modalSelectedCategories,
+                template: template,
             };
+            prompts.unshift(newPrompt);
+            showToast("Prompt added to library!");
             prompts.unshift(newPrompt);
             showToast("Prompt added to library!");
         }
@@ -3073,10 +3225,12 @@ function setupFilterScrollArrows() {
 }
 
 function setupUIListeners() {
+    /* :::::::::::::::::::::::::: SEARCH :::::::::::::::::::::::::: */
     document
         .getElementById("search-input")
         .addEventListener("input", filterPrompts);
 
+    /* :::::::::::::::::::::::::: CATEGORY FILTERS :::::::::::::::::::::::::: */
     document
         .querySelectorAll("#category-filters .category-chip")
         .forEach((chip) => {
@@ -3090,55 +3244,83 @@ function setupUIListeners() {
             .getElementById("category-filters")
             .scrollBy({ left: -200, behavior: "smooth" });
     });
+
     document.getElementById("cat-scroll-right").addEventListener("click", () => {
         document
             .getElementById("category-filters")
             .scrollBy({ left: 200, behavior: "smooth" });
     });
 
+    /* :::::::::::::::::::::::::: MODAL CATEGORIES SCROLL :::::::::::::::::::::::::: */
     const modalCatLeft = document.getElementById("modal-categories-arrow-left");
-    if (modalCatLeft)
+    if (modalCatLeft) {
         modalCatLeft.addEventListener("click", () => {
             document
                 .getElementById("modal-categories-scroll-inner")
                 .scrollBy({ left: -200, behavior: "smooth" });
         });
+    }
+
     const modalCatRight = document.getElementById("modal-categories-arrow-right");
-    if (modalCatRight)
+    if (modalCatRight) {
         modalCatRight.addEventListener("click", () => {
             document
                 .getElementById("modal-categories-scroll-inner")
                 .scrollBy({ left: 200, behavior: "smooth" });
         });
+    }
 
-    document
-        .getElementById("new-prompt-btn")
-        .addEventListener("click", showNewPromptModal);
+    /* :::::::::::::::::::::::::: NEW PROMPT — OPEN BUTTONS :::::::::::::::::::::::::: */
+    const newPromptBtn = document.getElementById("new-prompt-btn");
+    if (newPromptBtn) {
+        newPromptBtn.addEventListener("click", showNewPromptModal);
+    }
 
+    const sidebarNewPrompt = document.getElementById("tavio-new-prompt-item");
+    if (sidebarNewPrompt) {
+        sidebarNewPrompt.addEventListener("click", showNewPromptModal);
+    }
+
+    /* :::::::::::::::::::::::::: NEW PROMPT MODAL — ACTIONS & CLOSE :::::::::::::::::::::::::: */
     const cancelBtn = document.getElementById("cancel-modal-btn");
-    if (cancelBtn) cancelBtn.addEventListener("click", hideNewPromptModal);
-    const addBtn = document.getElementById("add-prompt-btn");
-    if (addBtn) addBtn.addEventListener("click", savePromptFromModal);
-    const newPromptModal = document.getElementById("new-prompt-modal");
-    if (newPromptModal)
-        newPromptModal.addEventListener("click", (e) => {
-            if (e.target === e.currentTarget) hideNewPromptModal();
-        });
+    if (cancelBtn) {
+        cancelBtn.addEventListener("click", requestCloseNewPromptModal);
+    }
 
+    const addBtn = document.getElementById("add-prompt-btn");
+    if (addBtn) {
+        addBtn.addEventListener("click", savePromptFromModal);
+    }
+
+    const newPromptClose = document.getElementById("new-prompt-close-btn");
+    if (newPromptClose) {
+        newPromptClose.addEventListener("click", requestCloseNewPromptModal);
+    }
+
+    const newPromptModal = document.getElementById("new-prompt-modal");
+    if (newPromptModal) {
+        newPromptModal.addEventListener("click", (e) => {
+            if (e.target === e.currentTarget) {
+                requestCloseNewPromptModal();
+            }
+        });
+    }
+
+    /* :::::::::::::::::::::::::: AI MODEL DROPDOWN :::::::::::::::::::::::::: */
     const aiSelectBtn = document.getElementById("ai-select-button");
-    if (aiSelectBtn) aiSelectBtn.addEventListener("click", toggleAIDropdown);
+    if (aiSelectBtn) {
+        aiSelectBtn.addEventListener("click", toggleAIDropdown);
+    }
+
     const aiSearchInput = document.getElementById("ai-search-input");
-    if (aiSearchInput)
+    if (aiSearchInput) {
         aiSearchInput.addEventListener("input", renderModalAIDropdown);
-    document.addEventListener("click", (e) => {
-        if (!e.target.closest(".ai-select-wrapper") && aiDropdownOpen) {
-            toggleAIDropdown();
-        }
-    });
+    }
 
     const closeDropdownBtn = document.getElementById("ai-close-dropdown-btn");
-    if (closeDropdownBtn)
+    if (closeDropdownBtn) {
         closeDropdownBtn.addEventListener("click", toggleAIDropdown);
+    }
 
     const filterToggleBtn = document.getElementById("ai-filter-toggle-btn");
     if (filterToggleBtn) {
@@ -3148,14 +3330,33 @@ function setupUIListeners() {
         });
     }
 
+    document.addEventListener("click", (e) => {
+        if (!e.target.closest(".ai-select-wrapper") && aiDropdownOpen) {
+            toggleAIDropdown();
+        }
+    });
+
+    /* :::::::::::::::::::::::::: EDITOR VIEW — TOP ACTIONS :::::::::::::::::::::::::: */
     const backBtn = document.getElementById("back-to-library-btn");
-    if (backBtn) backBtn.addEventListener("click", backToLibrary);
+    if (backBtn) {
+        backBtn.addEventListener("click", backToLibrary);
+    }
+
     const genBtn = document.getElementById("generate-prompt-btn");
-    if (genBtn) genBtn.addEventListener("click", generatePrompt);
+    if (genBtn) {
+        genBtn.addEventListener("click", generatePrompt);
+    }
+
     const copyBtn = document.getElementById("copy-prompt-btn");
-    if (copyBtn) copyBtn.addEventListener("click", copyPrompt);
+    if (copyBtn) {
+        copyBtn.addEventListener("click", copyPrompt);
+    }
+
     const resetBtn = document.getElementById("reset-btn");
-    if (resetBtn) resetBtn.addEventListener("click", resetAll);
+    if (resetBtn) {
+        resetBtn.addEventListener("click", resetAll);
+    }
+
     const saveBtn = document.getElementById("save-prompt-btn");
     if (saveBtn) {
         saveBtn.addEventListener("click", () => {
@@ -3192,8 +3393,48 @@ function setupUIListeners() {
         });
     }
 
+    /* :::::::::::::::::::::::::: CLEAR FIELDS — BUTTON & CONFIRM MODAL :::::::::::::::::::::::::: */
+    const clearFieldsBtn = document.getElementById("clear-fields-btn");
+    if (clearFieldsBtn) {
+        clearFieldsBtn.addEventListener("click", requestClearPromptModalFields);
+    }
+
+    const clearConfirmYes = document.getElementById("clear-confirm-yes-btn");
+    if (clearConfirmYes) {
+        clearConfirmYes.addEventListener("click", () => {
+            closeModal(document.getElementById("clear-confirm-modal"));
+            clearPromptModalFields();
+        });
+    }
+
+    const clearConfirmNo = document.getElementById("clear-confirm-no-btn");
+    if (clearConfirmNo) {
+        clearConfirmNo.addEventListener("click", (e) => {
+            e.stopPropagation();
+            closeModal(document.getElementById("clear-confirm-modal"));
+        });
+    }
+
+    const clearConfirmClose = document.getElementById("clear-confirm-close-btn");
+    if (clearConfirmClose) {
+        clearConfirmClose.addEventListener("click", () => {
+            closeModal(document.getElementById("clear-confirm-modal"));
+        });
+    }
+
+    const clearConfirmModal = document.getElementById("clear-confirm-modal");
+    if (clearConfirmModal) {
+        clearConfirmModal.addEventListener("click", (e) => {
+            if (e.target === e.currentTarget) {
+                closeModal(clearConfirmModal);
+            }
+        });
+    }
+
+    /* :::::::::::::::::::::::::: DELETE CONFIRM MODAL :::::::::::::::::::::::::: */
     const confirmYesBtn = document.getElementById("confirm-yes-btn");
     const confirmNoBtn = document.getElementById("confirm-no-btn");
+    const deleteConfirmClose = document.getElementById("delete-confirm-close-btn");
     const deleteConfirmModal = document.getElementById("delete-confirm-modal");
 
     if (confirmYesBtn) {
@@ -3202,6 +3443,7 @@ function setupUIListeners() {
             confirmDeletePrompt();
         });
     }
+
     if (confirmNoBtn) {
         confirmNoBtn.addEventListener("click", (e) => {
             e.stopPropagation();
@@ -3209,6 +3451,14 @@ function setupUIListeners() {
             deletingPromptId = null;
         });
     }
+
+    if (deleteConfirmClose) {
+        deleteConfirmClose.addEventListener("click", () => {
+            closeModal(deleteConfirmModal);
+            deletingPromptId = null;
+        });
+    }
+
     if (deleteConfirmModal) {
         deleteConfirmModal.addEventListener("click", (e) => {
             if (e.target === e.currentTarget) {
@@ -3218,38 +3468,101 @@ function setupUIListeners() {
         });
     }
 
-    const sidebarNewPrompt = document.getElementById("tavio-new-prompt-item");
-    if (sidebarNewPrompt)
-        sidebarNewPrompt.addEventListener("click", showNewPromptModal);
-
+    /* :::::::::::::::::::::::::: SHARE MODAL :::::::::::::::::::::::::: */
     const shareCancel = document.getElementById("share-cancel-btn");
-    if (shareCancel) shareCancel.addEventListener("click", closeShareModal);
-    const shareSend = document.getElementById("share-send-btn");
-    if (shareSend) shareSend.addEventListener("click", sendShareRequest);
-    const shareModal = document.getElementById("share-modal");
-    if (shareModal)
-        shareModal.addEventListener("click", (e) => {
-            if (e.target === e.currentTarget) closeShareModal();
-        });
+    if (shareCancel) {
+        shareCancel.addEventListener("click", closeShareModal);
+    }
 
-    const previewAccept = document.getElementById("preview-accept-btn");
-    if (previewAccept)
-        previewAccept.addEventListener("click", acceptSharedPrompt);
-    const previewReject = document.getElementById("preview-reject-btn");
-    if (previewReject)
-        previewReject.addEventListener("click", rejectSharedPrompt);
-    const previewModal = document.getElementById("prompt-preview-modal");
-    if (previewModal)
-        previewModal.addEventListener("click", (e) => {
+    const shareSend = document.getElementById("share-send-btn");
+    if (shareSend) {
+        shareSend.addEventListener("click", sendShareRequest);
+    }
+
+    const shareClose = document.getElementById("share-close-btn");
+    if (shareClose) {
+        shareClose.addEventListener("click", closeShareModal);
+    }
+
+    const shareModal = document.getElementById("share-modal");
+    if (shareModal) {
+        shareModal.addEventListener("click", (e) => {
             if (e.target === e.currentTarget) {
-                document.getElementById("prompt-preview-modal").classList.add("hidden");
+                closeShareModal();
             }
         });
+    }
 
+    /* :::::::::::::::::::::::::: PREVIEW MODAL :::::::::::::::::::::::::: */
+    const previewAccept = document.getElementById("preview-accept-btn");
+    if (previewAccept) {
+        previewAccept.addEventListener("click", acceptSharedPrompt);
+    }
+
+    const previewReject = document.getElementById("preview-reject-btn");
+    if (previewReject) {
+        previewReject.addEventListener("click", rejectSharedPrompt);
+    }
+
+    const previewClose = document.getElementById("preview-close-btn");
+    if (previewClose) {
+        previewClose.addEventListener("click", () => {
+            closeModal(document.getElementById("prompt-preview-modal"));
+        });
+    }
+
+    const previewModal = document.getElementById("prompt-preview-modal");
+    if (previewModal) {
+        previewModal.addEventListener("click", (e) => {
+            if (e.target === e.currentTarget) {
+                closeModal(document.getElementById("prompt-preview-modal"));
+            }
+        });
+    }
+
+    /* :::::::::::::::::::::::::: DISCARD CHANGES MODAL :::::::::::::::::::::::::: */
+    const discardClose = document.getElementById("discard-changes-close-btn");
+    if (discardClose) {
+        discardClose.addEventListener("click", () => {
+            closeModal(document.getElementById("discard-changes-modal"));
+        });
+    }
+
+    const discardNo = document.getElementById("discard-changes-no-btn");
+    if (discardNo) {
+        discardNo.addEventListener("click", (e) => {
+            e.stopPropagation();
+            closeModal(document.getElementById("discard-changes-modal"));
+        });
+    }
+
+    const discardYes = document.getElementById("discard-changes-yes-btn");
+    if (discardYes) {
+        discardYes.addEventListener("click", (e) => {
+            e.stopPropagation();
+            closeModal(document.getElementById("discard-changes-modal"));
+            hideNewPromptModal();
+        });
+    }
+
+    const discardModal = document.getElementById("discard-changes-modal");
+    if (discardModal) {
+        discardModal.addEventListener("click", (e) => {
+            if (e.target === e.currentTarget) {
+                closeModal(discardModal);
+            }
+        });
+    }
+
+    /* :::::::::::::::::::::::::: FILTER SCROLL ARROWS :::::::::::::::::::::::::: */
     setupFilterScrollArrows();
 
+    /* :::::::::::::::::::::::::: TOKEN PREVIEW ON FIELD INPUT :::::::::::::::::::::::::: */
     const promptInputsContainer = document.getElementById("prompt-input-fields");
-    if (promptInputsContainer && !promptInputsContainer.dataset.tokenPreviewAttached) {
+    if (
+        promptInputsContainer &&
+        !promptInputsContainer.dataset.tokenPreviewAttached
+    ) {
         promptInputsContainer.dataset.tokenPreviewAttached = "true";
         promptInputsContainer.addEventListener(
             "input",
@@ -3261,6 +3574,7 @@ function setupUIListeners() {
         );
     }
 
+    /* :::::::::::::::::::::::::: TOKEN SPLIT SLIDER :::::::::::::::::::::::::: */
     const tokenSlider = document.getElementById("token-split-slider");
     if (tokenSlider) {
         tokenSlider.addEventListener("input", (e) => {
@@ -3279,13 +3593,15 @@ function setupUIListeners() {
             const sliderValue = document.getElementById(
                 "token-split-slider-value",
             );
-            if (sliderValue)
+            if (sliderValue) {
                 sliderValue.textContent = `${selectedPartsCount} ${partsWord}`;
+            }
 
             updateTokenSplitPreview();
         });
     }
 
+    /* :::::::::::::::::::::::::: TOKEN SPLIT TRACK ARROWS :::::::::::::::::::::::::: */
     const tokenTrack = document.getElementById("token-split-track");
     const tokenLeft = document.getElementById("token-split-arrow-left");
     const tokenRight = document.getElementById("token-split-arrow-right");
@@ -3334,14 +3650,52 @@ function renderMultipartMessages(messages) {
 
     const display = document.getElementById("result-display");
     const copyBtn = document.getElementById("copy-prompt-btn");
+
+    const total = messages.length;
+
+    /* :::::::::::::::::::::::::: SINGLE PART SHORTCUT :::::::::::::::::::::::::: */
+    if (total <= 1) {
+        const single = String(messages[0] ?? "");
+
+        display.classList.remove("multipart-active");
+        display.innerHTML = "";
+        display.textContent = "";
+
+        if (copyBtn) {
+            copyBtn.disabled = true;
+            copyBtn.classList.remove("blink", "success");
+        }
+
+        const batchSize =
+            single.length > 8000 ? 14 : single.length > 4000 ? 9 : 4;
+
+        let i = 0;
+        generateInterval = setInterval(() => {
+            if (i < single.length) {
+                display.textContent += single.slice(i, i + batchSize);
+                i += batchSize;
+                display.scrollTop = display.scrollHeight;
+            } else {
+                clearInterval(generateInterval);
+                generateInterval = null;
+                if (copyBtn) {
+                    copyBtn.disabled = false;
+                    copyBtn.classList.add("blink");
+                }
+            }
+        }, 16);
+
+        return;
+    }
+
+    /* :::::::::::::::::::::::::: MULTIPART MODE :::::::::::::::::::::::::: */
+
     if (copyBtn) {
         copyBtn.disabled = true;
         copyBtn.classList.remove("blink");
     }
 
     display.classList.add("multipart-active");
-
-    const total = messages.length;
 
     display.innerHTML = `
     <div class="multipart-banner">
